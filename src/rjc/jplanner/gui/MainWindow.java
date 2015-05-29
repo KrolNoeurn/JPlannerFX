@@ -18,6 +18,12 @@
 
 package rjc.jplanner.gui;
 
+import java.io.IOException;
+import java.net.URL;
+
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /*************************************************************************************************/
@@ -27,9 +33,16 @@ import javafx.stage.Stage;
 public class MainWindow
 {
 
-  public MainWindow( Stage stage )
+  public MainWindow( Stage stage ) throws IOException
   {
-    // create main window
+    // load the MainWindow FXML
+    URL location = getClass().getResource( "MainWindow.fxml" );
+    FXMLLoader fxmlLoader = new FXMLLoader( location );
+    Parent root = fxmlLoader.load();
+
+    // create the scene and setup the stage
+    Scene scene = new Scene( root, 400, 400 );
+    stage.setScene( scene );
     stage.setTitle( "JPlanner" );
     stage.show();
   }
