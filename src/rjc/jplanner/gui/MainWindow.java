@@ -24,15 +24,14 @@ import javafx.stage.Stage;
 /******************************* Main JPlanner application window ********************************/
 /*************************************************************************************************/
 
-public class MainWindow {
+public class MainWindow
+{
 
-	public MainWindow(Stage stage) {
+  public MainWindow( Stage stage )
+  {
+    // create main window
+    stage.setTitle( "JPlanner" );
+    stage.show();
+  }
 
-
-		stage.setTitle("xxxxxxxxxx");
-		stage.show();
-	
-	}
-
-	
 }

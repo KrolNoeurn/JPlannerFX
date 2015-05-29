@@ -23,46 +23,49 @@ import javafx.stage.Stage;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.DateTime;
 
-public class JPlanner extends Application {
-	
-	public static MainWindow gui; // globally accessible main-window
+/*************************************************************************************************/
+// JPlanner by Richard Crook
+// Aims to be a project planner similar to M$Project with table entry of tasks & Gantt chart
+// Also aims to have automatic resource levelling and scheduling based on task priority
+// Also aims to have resource levels variable within single task
+// Also aims to have Gantt chart task bar thickness showing this variable resource usage
+// Based on work I started as early as 2005
+/*************************************************************************************************/
 
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		// TODO Auto-generated method stub
-	    gui = new MainWindow(primaryStage);
-		
-	}
+public class JPlanner extends Application
+{
+  public static MainWindow gui; // globally accessible main-window
 
-	  /******************************************** main *********************************************/
-	  public static void main( String[] args )
-	  {
-	    // main entry point for application startup
-	    trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-	    //trace( "" + plan );
-	    //plan = new Plan();
-	    //trace( "" + plan );
-	    //plan.initialise();
-	    //trace( "" + plan );
+  /******************************************** main *********************************************/
+  public static void main( String[] args )
+  {
+    // main entry point for application startup
+    trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
+    // trace( "" + plan );
+    // plan = new Plan();
+    // trace( "" + plan );
+    // plan.initialise();
+    // trace( "" + plan );
 
-	    // create main application display
-	    launch(args);
-	    
-	    
-	    //Display display = new Display();
-	    //gui = new MainWindow( display );
-	    //gui.initialise();
-	    //gui.open();
+    // launch main application display
+    launch( args );
 
+    trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner ended ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
+  }
 
-	    trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner ended ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-	  }
+  /******************************************* trace *********************************************/
+  public static void trace( String txt )
+  {
+    // prints txt prefixed by date-time
+    System.out.println( DateTime.fromNow() + " " + txt );
+  }
 
-	  /******************************************* trace *********************************************/
-	  public static void trace( String txt )
-	  {
-	    // prints txt prefixed by date-time
-	    System.out.println( DateTime.now() + " " + txt );
-	  }
+  /******************************************** start ********************************************/
+  @Override
+  public void start( Stage primaryStage ) throws Exception
+  {
+    // create main window
+    gui = new MainWindow( primaryStage );
+  }
 
 }

@@ -28,13 +28,29 @@ import java.time.format.DateTimeFormatter;
 
 public class DateTime
 {
-  private long             m_milliseconds;                        // milliseconds from 00:00:00.000 start of epoch-day
-
-  public static final long MILLISECONDS_IN_DAY = 24 * 3600 * 1000; // milliseconds in day
-
   public enum Interval
   {
     YEAR, HALFYEAR, QUARTERYEAR, MONTH, WEEK, DAY
+  }
+
+  public static final long MILLISECONDS_IN_DAY = 24 * 3600 * 1000; // milliseconds in day
+
+  private long             m_milliseconds;                        // milliseconds from 00:00:00.000 start of epoch-day
+
+  /***************************************** constructor *****************************************/
+  public DateTime( Date date, Time time )
+  {
+    // constructor
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
+  }
+
+  /***************************************** constructor *****************************************/
+  public DateTime( LocalDateTime dt )
+  {
+    // constructor
+    Date date = Date.fromLocalDate( dt.toLocalDate() );
+    Time time = Time.fromLocalTime( dt.toLocalTime() );
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
   }
 
   /***************************************** constructor *****************************************/
@@ -51,166 +67,14 @@ public class DateTime
     int split = str.indexOf( ' ' );
     Date date = Date.fromString( str.substring( 0, split ) );
     Time time = Time.fromString( str.substring( split + 1, str.length() ) );
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
-  }
-
-  /***************************************** constructor *****************************************/
-  public DateTime( Date date, Time time )
-  {
-    // constructor
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
-  }
-
-  /***************************************** constructor *****************************************/
-  public DateTime( LocalDateTime dt )
-  {
-    // constructor
-    Date date = Date.fromLocalDate( dt.toLocalDate() );
-    Time time = Time.fromLocalTime( dt.toLocalTime() );
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
-  }
-
-  /****************************************** toString *******************************************/
-  @Override
-  public String toString()
-  {
-    // convert to string to "YYYY-MM-DD hh:mm:ss.mmm" format
-    return date().toString() + " " + time().toString();
-  }
-
-  /****************************************** toString *******************************************/
-  public String toString( String format )
-  {
-    // convert to string in specified format
-    LocalDateTime ldt = LocalDateTime.ofEpochSecond( m_milliseconds / 1000L, (int) ( m_milliseconds % 1000 * 1000000 ),
-        ZoneOffset.UTC );
-
-    return ldt.format( DateTimeFormatter.ofPattern( format ) );
-  }
-
-  /******************************************** date *********************************************/
-  public Date date()
-  {
-    if ( m_milliseconds < 0 )
-      return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) - 1 );
-
-    return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) );
-  }
-
-  /******************************************** time *********************************************/
-  public Time time()
-  {
-    int ms = (int) ( m_milliseconds % MILLISECONDS_IN_DAY );
-    if ( ms < 0 )
-      ms += MILLISECONDS_IN_DAY;
-
-    return Time.fromMilliseconds( ms );
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
   }
 
   /********************************************* now *********************************************/
-  public static DateTime now()
+  public static DateTime fromNow()
   {
     // return a new DateTime from current system clock
     return new DateTime( LocalDateTime.now() );
-  }
-
-  /******************************************** year *********************************************/
-  public int year()
-  {
-    return date().year();
-  }
-
-  /******************************************** month ********************************************/
-  public int month()
-  {
-    return date().month();
-  }
-
-  /********************************************* day *********************************************/
-  public int day()
-  {
-    return date().day();
-  }
-
-  /******************************************** hours ********************************************/
-  public int hours()
-  {
-    return time().hours();
-  }
-
-  /******************************************* minutes *******************************************/
-  public int minutes()
-  {
-    return time().minutes();
-  }
-
-  /******************************************* seconds *******************************************/
-  public int seconds()
-  {
-    return time().seconds();
-  }
-
-  /*************************************** addMilliseconds ***************************************/
-  public DateTime addMilliseconds( long ms )
-  {
-    return new DateTime( m_milliseconds + ms );
-  }
-
-  /***************************************** milliseconds ****************************************/
-  public long milliseconds()
-  {
-    return m_milliseconds;
-  }
-
-  /******************************************** trunc ********************************************/
-  public DateTime trunc( Interval interval )
-  {
-    // return new date-time truncated down to specified interval
-    if ( interval == Interval.YEAR )
-    {
-      Date date = new Date( date().year(), 1, 1 );
-      return new DateTime( date.epochday() * MILLISECONDS_IN_DAY );
-    }
-
-    if ( interval == Interval.HALFYEAR )
-    {
-      Date date = date();
-      int month = ( ( date.month() - 1 ) / 6 ) * 6 + 1;
-
-      Date hy = new Date( date.year(), month, 1 );
-      return new DateTime( hy.epochday() * MILLISECONDS_IN_DAY );
-    }
-
-    if ( interval == Interval.QUARTERYEAR )
-    {
-      Date date = date();
-      int month = ( ( date.month() - 1 ) / 3 ) * 3 + 1;
-
-      Date qy = new Date( date.year(), month, 1 );
-      return new DateTime( qy.epochday() * MILLISECONDS_IN_DAY );
-    }
-
-    if ( interval == Interval.MONTH )
-    {
-      Date date = date();
-      Date md = new Date( date.year(), date.month(), 1 );
-      return new DateTime( md.epochday() * MILLISECONDS_IN_DAY );
-    }
-
-    if ( interval == Interval.WEEK )
-    {
-      int day = (int) ( m_milliseconds / MILLISECONDS_IN_DAY );
-      int dayOfWeek = ( day + 3 ) % 7;
-      return new DateTime( ( day - dayOfWeek ) * MILLISECONDS_IN_DAY );
-    }
-
-    if ( interval == Interval.DAY )
-    {
-      long ms = ( m_milliseconds / MILLISECONDS_IN_DAY ) * MILLISECONDS_IN_DAY;
-      return new DateTime( ms );
-    }
-
-    throw new IllegalArgumentException( "interval=" + interval );
   }
 
   /******************************************* addDays *******************************************/
@@ -220,25 +84,15 @@ public class DateTime
     return new DateTime( m_milliseconds + days * MILLISECONDS_IN_DAY );
   }
 
-  /****************************************** addMonths ******************************************/
-  public DateTime addMonths( int months )
-  {
-    // return new date-time specified months added or subtracted
-    LocalDateTime ldt = LocalDateTime.ofEpochSecond( m_milliseconds / 1000L, (int) ( m_milliseconds % 1000 * 1000000 ),
-        ZoneOffset.UTC );
-    ldt = ldt.plusMonths( months );
-    return new DateTime( ldt );
-  }
-
   /***************************************** addInterval *****************************************/
   public DateTime addInterval( Interval interval )
   {
     // add one specified interval to date-time
     if ( interval == Interval.YEAR )
     {
-      Time time = time();
-      Date date = date();
-      Date year = new Date( date.year() + 1, date.month(), date.day() );
+      Time time = getTime();
+      Date date = getDate();
+      Date year = new Date( date.getYear() + 1, date.getMonth(), date.getDay() );
       return new DateTime( year, time );
     }
 
@@ -256,6 +110,152 @@ public class DateTime
 
     if ( interval == Interval.DAY )
       return addDays( 1 );
+
+    throw new IllegalArgumentException( "interval=" + interval );
+  }
+
+  /*************************************** addMilliseconds ***************************************/
+  public DateTime addMilliseconds( long ms )
+  {
+    return new DateTime( m_milliseconds + ms );
+  }
+
+  /****************************************** addMonths ******************************************/
+  public DateTime addMonths( int months )
+  {
+    // return new date-time specified months added or subtracted
+    LocalDateTime ldt = LocalDateTime.ofEpochSecond( m_milliseconds / 1000L, (int) ( m_milliseconds % 1000 * 1000000 ),
+        ZoneOffset.UTC );
+    ldt = ldt.plusMonths( months );
+    return new DateTime( ldt );
+  }
+
+  /******************************************** date *********************************************/
+  public Date getDate()
+  {
+    if ( m_milliseconds < 0 )
+      return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) - 1 );
+
+    return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) );
+  }
+
+  /********************************************* day *********************************************/
+  public int getDay()
+  {
+    return getDate().getDay();
+  }
+
+  /******************************************** hours ********************************************/
+  public int getHours()
+  {
+    return getTime().getHours();
+  }
+
+  /***************************************** milliseconds ****************************************/
+  public long getMilliseconds()
+  {
+    return m_milliseconds;
+  }
+
+  /******************************************* minutes *******************************************/
+  public int getMinutes()
+  {
+    return getTime().getMinutes();
+  }
+
+  /******************************************** month ********************************************/
+  public int getMonth()
+  {
+    return getDate().getMonth();
+  }
+
+  /******************************************* seconds *******************************************/
+  public int getSeconds()
+  {
+    return getTime().getSeconds();
+  }
+
+  /******************************************** time *********************************************/
+  public Time getTime()
+  {
+    int ms = (int) ( m_milliseconds % MILLISECONDS_IN_DAY );
+    if ( ms < 0 )
+      ms += MILLISECONDS_IN_DAY;
+
+    return Time.fromMilliseconds( ms );
+  }
+
+  /******************************************** year *********************************************/
+  public int getYear()
+  {
+    return getDate().getYear();
+  }
+
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    // convert to string to "YYYY-MM-DD hh:mm:ss.mmm" format
+    return getDate().toString() + " " + getTime().toString();
+  }
+
+  /****************************************** toString *******************************************/
+  public String toString( String format )
+  {
+    // convert to string in specified format
+    LocalDateTime ldt = LocalDateTime.ofEpochSecond( m_milliseconds / 1000L, (int) ( m_milliseconds % 1000 * 1000000 ),
+        ZoneOffset.UTC );
+
+    return ldt.format( DateTimeFormatter.ofPattern( format ) );
+  }
+
+  /******************************************** trunc ********************************************/
+  public DateTime trunc( Interval interval )
+  {
+    // return new date-time truncated down to specified interval
+    if ( interval == Interval.YEAR )
+    {
+      Date date = new Date( getDate().getYear(), 1, 1 );
+      return new DateTime( date.getEpochday() * MILLISECONDS_IN_DAY );
+    }
+
+    if ( interval == Interval.HALFYEAR )
+    {
+      Date date = getDate();
+      int month = ( ( date.getMonth() - 1 ) / 6 ) * 6 + 1;
+
+      Date hy = new Date( date.getYear(), month, 1 );
+      return new DateTime( hy.getEpochday() * MILLISECONDS_IN_DAY );
+    }
+
+    if ( interval == Interval.QUARTERYEAR )
+    {
+      Date date = getDate();
+      int month = ( ( date.getMonth() - 1 ) / 3 ) * 3 + 1;
+
+      Date qy = new Date( date.getYear(), month, 1 );
+      return new DateTime( qy.getEpochday() * MILLISECONDS_IN_DAY );
+    }
+
+    if ( interval == Interval.MONTH )
+    {
+      Date date = getDate();
+      Date md = new Date( date.getYear(), date.getMonth(), 1 );
+      return new DateTime( md.getEpochday() * MILLISECONDS_IN_DAY );
+    }
+
+    if ( interval == Interval.WEEK )
+    {
+      int day = (int) ( m_milliseconds / MILLISECONDS_IN_DAY );
+      int dayOfWeek = ( day + 3 ) % 7;
+      return new DateTime( ( day - dayOfWeek ) * MILLISECONDS_IN_DAY );
+    }
+
+    if ( interval == Interval.DAY )
+    {
+      long ms = ( m_milliseconds / MILLISECONDS_IN_DAY ) * MILLISECONDS_IN_DAY;
+      return new DateTime( ms );
+    }
 
     throw new IllegalArgumentException( "interval=" + interval );
   }

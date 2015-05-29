@@ -26,13 +26,13 @@ import java.time.LocalTime;
 
 public class Time
 {
-  private int             m_milliseconds;        // milliseconds from 00:00:00.000 start of day
-
   public static final int MAX = 24 * 3600 * 1000; // milliseconds in day
+
+  private int             m_milliseconds;        // milliseconds from 00:00:00.000 start of day
 
   // anything between Zero and MAX inclusive is valid, anything else invalid
 
-  /* ======================================= constructor ======================================= */
+  /**************************************** constructor ******************************************/
   private Time( int milliseconds )
   {
     // constructor (from pre-validated milliseconds)
@@ -61,11 +61,38 @@ public class Time
     m_milliseconds = hours * 3600_000 + mins * 60_000 + secs * 1000 + ms;
   }
 
-  /**************************************** milliseconds *****************************************/
-  public int milliseconds()
+  /****************************************** fromHours ******************************************/
+  public static Time fromHours( double hours )
   {
-    // return int number of milliseconds from start of day
-    return m_milliseconds;
+    // return a Time from double hours
+    if ( hours < 0.0 || hours > 24.0 )
+      throw new IllegalArgumentException( "hours=" + hours );
+
+    return new Time( (int) Math.round( hours * 3600_000.0 ) );
+  }
+
+  /**************************************** fromLocalTime ****************************************/
+  public static Time fromLocalTime( LocalTime localTime )
+  {
+    // return a new Time from a java.time.LocalTime
+    return new Time( (int) ( localTime.toNanoOfDay() / 1_000_000L ) );
+  }
+
+  /************************************** fromMilliseconds ***************************************/
+  public static Time fromMilliseconds( int milliseconds )
+  {
+    // return a Time from int milliseconds
+    if ( milliseconds < 0 || milliseconds > MAX )
+      throw new IllegalArgumentException( "milliseconds=" + milliseconds );
+
+    return new Time( milliseconds );
+  }
+
+  /********************************************* now *********************************************/
+  public static Time fromNow()
+  {
+    // return a new Time from current system clock
+    return new Time( (int) ( LocalTime.now().toNanoOfDay() / 1_000_000L ) );
   }
 
   /***************************************** fromString ******************************************/
@@ -101,31 +128,29 @@ public class Time
     throw new IllegalArgumentException( "String=" + str );
   }
 
-  /****************************************** fromHours ******************************************/
-  public static Time fromHours( double hours )
+  /******************************************** hours ********************************************/
+  public int getHours()
   {
-    // return a Time from double hours
-    if ( hours < 0.0 || hours > 24.0 )
-      throw new IllegalArgumentException( "hours=" + hours );
-
-    return new Time( (int) Math.round( hours * 3600_000.0 ) );
+    return m_milliseconds / 3600_000;
   }
 
-  /************************************** fromMilliseconds ***************************************/
-  public static Time fromMilliseconds( int milliseconds )
+  /**************************************** milliseconds *****************************************/
+  public int getMilliseconds()
   {
-    // return a Time from int milliseconds
-    if ( milliseconds < 0 || milliseconds > MAX )
-      throw new IllegalArgumentException( "milliseconds=" + milliseconds );
-
-    return new Time( milliseconds );
+    // return int number of milliseconds from start of day
+    return m_milliseconds;
   }
 
-  /**************************************** fromLocalTime ****************************************/
-  public static Time fromLocalTime( LocalTime localTime )
+  /******************************************* minutes *******************************************/
+  public int getMinutes()
   {
-    // return a new Time from a java.time.LocalTime
-    return new Time( (int) ( localTime.toNanoOfDay() / 1_000_000L ) );
+    return m_milliseconds / 60_000 % 60;
+  }
+
+  /******************************************* seconds *******************************************/
+  public int getSeconds()
+  {
+    return m_milliseconds / 1000 % 60;
   }
 
   /****************************************** toString *******************************************/
@@ -134,9 +159,9 @@ public class Time
   {
     // convert to string to "hh:mm:ss.mmm" format
     StringBuilder buf = new StringBuilder( 16 );
-    int hour = hours();
-    int minute = minutes();
-    int second = seconds();
+    int hour = getHours();
+    int minute = getMinutes();
+    int second = getSeconds();
     int milli = m_milliseconds % 1000;
 
     buf.append( hour < 10 ? "0" : "" ).append( hour );
@@ -145,30 +170,5 @@ public class Time
     buf.append( milli < 10 ? ".0" : "." ).append( milli < 100 ? "0" : "" ).append( milli );
 
     return buf.toString();
-  }
-
-  /********************************************* now *********************************************/
-  public static Time now()
-  {
-    // return a new Time from current system clock
-    return new Time( (int) ( LocalTime.now().toNanoOfDay() / 1_000_000L ) );
-  }
-
-  /******************************************** hours ********************************************/
-  public int hours()
-  {
-    return m_milliseconds / 3600_000;
-  }
-
-  /******************************************* minutes *******************************************/
-  public int minutes()
-  {
-    return m_milliseconds / 60_000 % 60;
-  }
-
-  /******************************************* seconds *******************************************/
-  public int seconds()
-  {
-    return m_milliseconds / 1000 % 60;
   }
 }
