@@ -22,6 +22,7 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.DateTime;
+import rjc.jplanner.model.Plan;
 
 /*************************************************************************************************/
 // JPlanner by Richard Crook
@@ -34,6 +35,7 @@ import rjc.jplanner.model.DateTime;
 
 public class JPlanner extends Application
 {
+  public static Plan       plan; // globally accessible plan
   public static MainWindow gui; // globally accessible main-window
 
   /******************************************** main *********************************************/
@@ -41,11 +43,11 @@ public class JPlanner extends Application
   {
     // main entry point for application startup
     trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-    // trace( "" + plan );
-    // plan = new Plan();
-    // trace( "" + plan );
-    // plan.initialise();
-    // trace( "" + plan );
+    trace( "" + plan );
+    plan = new Plan();
+    trace( "" + plan );
+    plan.initialise();
+    trace( "" + plan );
 
     // launch main application display
     launch( args );
