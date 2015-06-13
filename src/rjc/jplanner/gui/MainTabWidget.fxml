@@ -1,72 +1,121 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.canvas.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<TabPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+<TabPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
   <tabs>
-    <Tab text="Plan">
+    <Tab closable="false" text="Plan">
       <content>
         <SplitPane dividerPositions="0.5">
           <items>
-            <ScrollPane>
+            <ScrollPane fitToHeight="true" fitToWidth="true" minWidth="0.0" pannable="true">
               <content>
-                <GridPane>
-                  <columnConstraints>
-                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  </columnConstraints>
-                  <rowConstraints>
-                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  </rowConstraints>
+                <GridPane hgap="4.0" vgap="1.0">
                   <children>
-                    <Label text="Label" />
-                    <Label text="Label" GridPane.rowIndex="1" />
-                    <Label text="Label" GridPane.rowIndex="2" />
-                    <TextField GridPane.columnIndex="1" />
-                    <TextField GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label fx:id="titleLabel" minWidth="-Infinity" text="Title" />
+                    <Label minWidth="-Infinity" text="Default Start" GridPane.rowIndex="1" />
+                    <Label minWidth="-Infinity" text="Earliest" GridPane.rowIndex="2" />
+                    <Label minWidth="-Infinity" text="End" GridPane.rowIndex="3" />
+                    <Label minWidth="-Infinity" text="Default Calendar" GridPane.rowIndex="4" />
+                    <Label minWidth="-Infinity" text="Date-time format" GridPane.rowIndex="5" />
+                    <Label minWidth="-Infinity" text="Date format" GridPane.rowIndex="6" />
+                    <Label minWidth="-Infinity" text="File name" GridPane.rowIndex="7" />
+                    <Label minWidth="-Infinity" text="File location" GridPane.rowIndex="8" />
+                    <Label minWidth="-Infinity" text="Saved by" GridPane.rowIndex="9" />
+                    <Label minWidth="-Infinity" text="Saved when" GridPane.rowIndex="10" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                    <TextField minWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
                   </children>
+                           <padding>
+                              <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                           </padding>
+                           <columnConstraints>
+                              <ColumnConstraints />
+                              <ColumnConstraints />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                              <RowConstraints />
+                           </rowConstraints>
                 </GridPane>
               </content>
             </ScrollPane>
-            <VBox>
+            <VBox minWidth="0.0" spacing="4.0">
               <children>
                 <Label text="Notes" />
-                <TextArea />
+                <TextArea wrapText="true" VBox.vgrow="SOMETIMES" />
               </children>
+                     <padding>
+                        <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
+                     </padding>
             </VBox>
           </items>
         </SplitPane>
       </content>
     </Tab>
-    <Tab text="Tasks &amp; Gantt">
+    <Tab closable="false" text="Tasks &amp; Gantt">
       <content>
         <SplitPane dividerPositions="0.5">
           <items>
-            <AnchorPane />
-            <AnchorPane />
+                       <TableView minWidth="0.0">
+                          <columns>
+                            <TableColumn prefWidth="75.0" text="T1" />
+                            <TableColumn prefWidth="75.0" text="T2" />
+                            <TableColumn prefWidth="75.0" text="T3" />
+                            <TableColumn prefWidth="75.0" text="T4" />
+                            <TableColumn prefWidth="75.0" text="T5" />
+                            <TableColumn prefWidth="75.0" text="T6" />
+                          </columns>
+                        </TableView>
+                        <ScrollPane minWidth="0.0">
+                     <content>
+                        <Canvas height="200.0" width="200.0" />
+                     </content></ScrollPane>
           </items>
         </SplitPane>
       </content>
     </Tab>
-    <Tab text="Resources">
+    <Tab closable="false" text="Resources">
       <content>
-        <TableView prefHeight="-1" prefWidth="-1">
+        <TableView editable="true">
           <columns>
             <TableColumn prefWidth="75.0" text="R1" />
             <TableColumn prefWidth="75.0" text="R2" />
+            <TableColumn prefWidth="75.0" text="R3" />
+            <TableColumn prefWidth="75.0" text="R4" />
+            <TableColumn prefWidth="75.0" text="R5" />
+            <TableColumn prefWidth="75.0" text="R6" />
           </columns>
         </TableView>
       </content>
     </Tab>
-    <Tab text="Calendars">
+    <Tab closable="false" text="Calendars">
       <content>
-        <TableView prefHeight="-1" prefWidth="-1">
+        <TableView>
           <columns>
             <TableColumn prefWidth="75.0" text="C1" />
             <TableColumn prefWidth="75.0" text="C2" />
@@ -74,9 +123,9 @@
         </TableView>
       </content>
     </Tab>
-    <Tab text="Days">
+    <Tab closable="false" text="Days">
       <content>
-        <TableView prefHeight="-1" prefWidth="-1">
+        <TableView>
           <columns>
             <TableColumn prefWidth="75.0" text="D1" />
             <TableColumn prefWidth="75.0" text="D2" />

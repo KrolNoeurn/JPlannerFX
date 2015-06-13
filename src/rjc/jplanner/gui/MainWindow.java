@@ -41,10 +41,11 @@ public class MainWindow
     Parent root = fxmlLoader.load();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( root, 400, 400 );
+    Scene scene = new Scene( root, 800, 500 );
     stage.setScene( scene );
-    stage.setTitle( "JPlanner" );
+    stage.setTitle( "JPlannerFX" );
     stage.show();
+
   }
 
 }
