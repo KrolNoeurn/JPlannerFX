@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -34,10 +34,10 @@ import rjc.jplanner.model.Day.DefaultDayTypes;
 
 public class Calendar
 {
-  private String             m_name;       // name of calendar
+  private String             m_name;        // name of calendar
   private Date               m_cycleAnchor; // anchor date of calendar cycle
-  private ArrayList<Day>     m_normal;     // normal basic cycle days
-  private HashMap<Date, Day> m_exceptions; // exceptions override normal days
+  private ArrayList<Day>     m_normal;      // normal basic cycle days
+  private HashMap<Date, Day> m_exceptions;  // exceptions override normal days
 
   enum DefaultCalendarTypes
   {

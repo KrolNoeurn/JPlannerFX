@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -30,7 +30,7 @@ import rjc.jplanner.model.Day;
 
 public class CommandSetCalendarCycleLength implements IUndoCommand
 {
-  private int            m_calID;     // calendar number in plan
+  private int            m_calID;      // calendar number in plan
   private ArrayList<Day> m_newNormals; // new list of normal-cycle-days after command
   private ArrayList<Day> m_oldNormals; // old list of normal-cycle-days before command
 

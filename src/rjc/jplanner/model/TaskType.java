@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -24,11 +24,11 @@ package rjc.jplanner.model;
 
 public class TaskType
 {
-  public static final String ASAP_FDUR    = "ASAP - duration";    // Early as possible - fixed duration
-  public static final String ASAP_FWORK   = "ASAP - work";        // Early as possible - fixed work
+  public static final String ASAP_FDUR    = "ASAP - duration";     // Early as possible - fixed duration
+  public static final String ASAP_FWORK   = "ASAP - work";         // Early as possible - fixed work
   public static final String SON_FDUR     = "Start on - duration"; // Start on - fixed duration
-  public static final String SON_FWORK    = "Start on - work";    // Start on - fixed work
-  public static final String FIXED_PERIOD = "Fixed period";       // Fixed period
+  public static final String SON_FWORK    = "Start on - work";     // Start on - fixed work
+  public static final String FIXED_PERIOD = "Fixed period";        // Fixed period
 
   private String             m_type;
 

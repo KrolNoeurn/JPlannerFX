@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -27,8 +27,8 @@ import rjc.jplanner.model.Task;
 
 public class CommandSetTaskValue implements IUndoCommand
 {
-  private int    m_taskID;  // task number in plan
-  private int    m_section; // section number
+  private int    m_taskID;   // task number in plan
+  private int    m_section;  // section number
   private Object m_newValue; // new value after command
   private Object m_oldValue; // old value before command
 

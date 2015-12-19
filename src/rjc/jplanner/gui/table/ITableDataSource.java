@@ -16,55 +16,13 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.command;
-
-import rjc.jplanner.JPlanner;
+package rjc.jplanner.gui.table;
 
 /*************************************************************************************************/
-/****************************** UndoCommand for updating plan notes ******************************/
+/******************************** Interface for table data source ********************************/
 /*************************************************************************************************/
 
-public class CommandSetPlanNotes implements IUndoCommand
+public interface ITableDataSource
 {
-  private String m_oldNotes;
-  private String m_newNotes;
-
-  /**************************************** constructor ******************************************/
-  public CommandSetPlanNotes( String newNotes )
-  {
-    // initialise private variables
-    m_oldNotes = JPlanner.plan.notes();
-    m_newNotes = newNotes;
-  }
-
-  /******************************************* redo **********************************************/
-  @Override
-  public void redo()
-  {
-    // action command
-    JPlanner.plan.setNotes( m_newNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
-
-  /******************************************* undo **********************************************/
-  @Override
-  public void undo()
-  {
-    // revert command
-    JPlanner.plan.setNotes( m_oldNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
-
-  /******************************************* text **********************************************/
-  @Override
-  public String text()
-  {
-    // command description
-    return "Plan notes";
-  }
 
 }

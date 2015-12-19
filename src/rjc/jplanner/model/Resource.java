@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -85,7 +85,8 @@ public class Resource
     this();
     // read XML resource attributes
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
-      switch (xsr.getAttributeLocalName( i )) {
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
         case XML_INITIALS:
           m_initials = xsr.getAttributeValue( i );
           break;

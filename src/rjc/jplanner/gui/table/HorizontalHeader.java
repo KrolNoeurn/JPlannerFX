@@ -16,55 +16,34 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.command;
+package rjc.jplanner.gui.table;
 
-import rjc.jplanner.JPlanner;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
-/****************************** UndoCommand for updating plan notes ******************************/
+/************************* Horizontal header that shows column titles ****************************/
 /*************************************************************************************************/
 
-public class CommandSetPlanNotes implements IUndoCommand
+public class HorizontalHeader extends Canvas
 {
-  private String m_oldNotes;
-  private String m_newNotes;
 
   /**************************************** constructor ******************************************/
-  public CommandSetPlanNotes( String newNotes )
+  public HorizontalHeader()
   {
-    // initialise private variables
-    m_oldNotes = JPlanner.plan.notes();
-    m_newNotes = newNotes;
-  }
+    // construct default table header-corner
+    super();
 
-  /******************************************* redo **********************************************/
-  @Override
-  public void redo()
-  {
-    // action command
-    JPlanner.plan.setNotes( m_newNotes );
+    setWidth( 400.0 );
+    setHeight( Table.DEFAULT_HORIZONTAL_HEADER_HEIGHT );
 
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
+    setLayoutX( Table.DEFAULT_VERTICAL_HEADER_WIDTH );
+    setLayoutY( 0.0 );
 
-  /******************************************* undo **********************************************/
-  @Override
-  public void undo()
-  {
-    // revert command
-    JPlanner.plan.setNotes( m_oldNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
-
-  /******************************************* text **********************************************/
-  @Override
-  public String text()
-  {
-    // command description
-    return "Plan notes";
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Color.LIGHTGRAY );
+    gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
   }
 
 }

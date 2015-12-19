@@ -16,55 +16,28 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.command;
+package rjc.jplanner.gui.table;
 
-import rjc.jplanner.JPlanner;
+import javafx.scene.Group;
 
 /*************************************************************************************************/
-/****************************** UndoCommand for updating plan notes ******************************/
+/***************************** Displays data in gui scrollable table *****************************/
 /*************************************************************************************************/
 
-public class CommandSetPlanNotes implements IUndoCommand
+public class Table extends Group
 {
-  private String m_oldNotes;
-  private String m_newNotes;
+  public static final double DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
+  public static final double DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
 
   /**************************************** constructor ******************************************/
-  public CommandSetPlanNotes( String newNotes )
+  public Table( ITableDataSource source )
   {
-    // initialise private variables
-    m_oldNotes = JPlanner.plan.notes();
-    m_newNotes = newNotes;
-  }
-
-  /******************************************* redo **********************************************/
-  @Override
-  public void redo()
-  {
-    // action command
-    JPlanner.plan.setNotes( m_newNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
-
-  /******************************************* undo **********************************************/
-  @Override
-  public void undo()
-  {
-    // revert command
-    JPlanner.plan.setNotes( m_oldNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
-  }
-
-  /******************************************* text **********************************************/
-  @Override
-  public String text()
-  {
-    // command description
-    return "Plan notes";
+    // construct table elements
+    super();
+    getChildren().add( new HeaderCorner() );
+    getChildren().add( new HorizontalHeader() );
+    getChildren().add( new VerticalHeader() );
+    getChildren().add( new TableCells() );
   }
 
 }

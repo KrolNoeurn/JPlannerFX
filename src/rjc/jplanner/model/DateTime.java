@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -35,7 +35,7 @@ public class DateTime
 
   public static final long MILLISECONDS_IN_DAY = 24 * 3600 * 1000; // milliseconds in day
 
-  private long             m_milliseconds;                        // milliseconds from 00:00:00.000 start of epoch-day
+  private long             m_milliseconds;                         // milliseconds from 00:00:00.000 start of epoch-day
 
   /***************************************** constructor *****************************************/
   public DateTime( Date date, Time time )

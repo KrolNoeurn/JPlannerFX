@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -18,13 +18,9 @@
 
 package rjc.jplanner.gui;
 
-import java.io.IOException;
-import java.net.URL;
-
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
 /******************************* Main JPlanner application window ********************************/
@@ -33,19 +29,15 @@ import javafx.stage.Stage;
 public class MainWindow
 {
 
-  public MainWindow( Stage stage ) throws IOException
+  public MainWindow( Stage stage )
   {
-    // load the MainWindow FXML
-    URL location = getClass().getResource( "MainWindow.fxml" );
-    FXMLLoader fxmlLoader = new FXMLLoader( location );
-    Parent root = fxmlLoader.load();
+    TasksTable tasks = new TasksTable();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( root, 800, 500 );
+    Scene scene = new Scene( new Table( tasks ), 400, 400 );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();
-
   }
 
 }

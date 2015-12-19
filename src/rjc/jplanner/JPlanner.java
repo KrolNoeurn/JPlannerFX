@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -36,7 +36,7 @@ import rjc.jplanner.model.Plan;
 public class JPlanner extends Application
 {
   public static Plan       plan; // globally accessible plan
-  public static MainWindow gui; // globally accessible main-window
+  public static MainWindow gui;  // globally accessible main-window
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
@@ -64,10 +64,10 @@ public class JPlanner extends Application
 
   /******************************************** start ********************************************/
   @Override
-  public void start( Stage primaryStage ) throws Exception
+  public void start( Stage stage ) throws Exception
   {
     // create main window
-    gui = new MainWindow( primaryStage );
+    gui = new MainWindow( stage );
   }
 
 }

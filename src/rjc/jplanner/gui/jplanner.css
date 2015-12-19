@@ -16,35 +16,17 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.model;
-
-/*************************************************************************************************/
-/**************************** Single working period within a day type ****************************/
-/*************************************************************************************************/
-
-public class DayWorkPeriod
+/* make scroll bars wider than default */
+.increment-button,
+.decrement-button
 {
-  public Time m_start; // work period start time
-  public Time m_end;   // work period end time
-
-  /**************************************** constructor ******************************************/
-  public DayWorkPeriod( double startHour, double endHour )
-  {
-    // construct work period from from start and end hour points
-    if ( startHour >= endHour )
-      throw new IllegalArgumentException( "startHour >= endHour" );
-
-    m_start = Time.fromHours( startHour );
-    m_end = Time.fromHours( endHour );
-  }
-
-  /***************************************** toString ********************************************/
-  @Override
-  public String toString()
-  {
-    // convert to string
-    String hash = super.toString();
-    String id = hash.substring( hash.lastIndexOf( '.' ) + 1 );
-    return id + "[" + m_start + ", " + m_end + "]";
-  }
+  -fx-padding:3px;
 }
+
+/*
+.scroll-bar:horizontal.thumb,
+.scroll-bar:vertical.thumb
+{
+  -fx-background-color:derive(black,80%);
+}
+*/

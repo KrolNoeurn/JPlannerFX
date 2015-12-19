@@ -1,6 +1,6 @@
 /**************************************************************************
  *  Copyright (C) 2015 by Richard Crook                                   *
- *  https://github.com/dazzle50/JPlanner                                  *
+ *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
  *  it under the terms of the GNU General Public License as published by  *
@@ -31,7 +31,7 @@ import rjc.jplanner.model.Time;
 
 public class CommandSetDayNumPeriods implements IUndoCommand
 {
-  private int                      m_dayID;     // day number in plan
+  private int                      m_dayID;      // day number in plan
   private ArrayList<DayWorkPeriod> m_newPeriods; // new list of work-periods after command
   private ArrayList<DayWorkPeriod> m_oldPeriods; // old list of work-periods before command
 
