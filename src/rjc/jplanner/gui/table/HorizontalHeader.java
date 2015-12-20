@@ -30,15 +30,15 @@ public class HorizontalHeader extends Canvas
 {
 
   /**************************************** constructor ******************************************/
-  public HorizontalHeader()
+  public HorizontalHeader( Table table )
   {
     // construct default table header-corner
     super();
 
-    setWidth( 400.0 );
-    setHeight( Table.DEFAULT_HORIZONTAL_HEADER_HEIGHT );
+    setWidth( table.getCellsWidth() );
+    setHeight( table.getCornerHeader().getHeight() );
 
-    setLayoutX( Table.DEFAULT_VERTICAL_HEADER_WIDTH );
+    setLayoutX( table.getCornerHeader().getWidth() );
     setLayoutY( 0.0 );
 
     GraphicsContext gc = getGraphicsContext2D();

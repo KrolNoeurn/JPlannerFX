@@ -16,15 +16,29 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui;
+package rjc.jplanner.gui.tasks;
 
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
 /****************************** Table data source for showing tasks ******************************/
 /*************************************************************************************************/
 
-public class TasksTable implements ITableDataSource
+public class TasksData implements ITableDataSource
 {
+
+  @Override
+  public int getColumnCount()
+  {
+    return Task.SECTION_MAX + 1;
+  }
+
+  @Override
+  public int getRowCount()
+  {
+    return JPlanner.plan.tasksCount();
+  }
 
 }

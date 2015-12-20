@@ -24,5 +24,9 @@ package rjc.jplanner.gui.table;
 
 public interface ITableDataSource
 {
+  // return number of columns to be displayed
+  int getColumnCount();
 
+  // return number of rows to be displayed
+  int getRowCount();
 }

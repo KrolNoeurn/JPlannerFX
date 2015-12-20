@@ -30,7 +30,7 @@ public class HeaderCorner extends Canvas
 {
 
   /**************************************** constructor ******************************************/
-  public HeaderCorner()
+  public HeaderCorner( Table table )
   {
     // construct default table header-corner
     super();

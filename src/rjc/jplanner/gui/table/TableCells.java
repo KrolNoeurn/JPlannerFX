@@ -29,7 +29,7 @@ public class TableCells extends Canvas
 {
 
   /**************************************** constructor ******************************************/
-  public TableCells()
+  public TableCells( Table table )
   {
     // construct default table header-corner
     super();

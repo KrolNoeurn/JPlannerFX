@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui.table;
 
+import java.util.HashMap;
+
 import javafx.scene.Group;
 
 /*************************************************************************************************/
@@ -26,18 +28,148 @@ import javafx.scene.Group;
 
 public class Table extends Group
 {
-  public static final double DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
-  public static final double DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
+  public static final double       DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
+  public static final double       DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
+  public static final double       DEFAULT_ROW_HEIGHT               = 20;
+  public static final double       DEFAULT_COLUMN_WIDTH             = 50;
+
+  private ITableDataSource         m_data;
+  private HeaderCorner             m_cHeader;
+  private VerticalHeader           m_vHeader;
+  private HorizontalHeader         m_hHeader;
+  private TableCells               m_cells;
+
+  // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
+  private HashMap<Integer, Double> m_columnWidths                   = new HashMap<Integer, Double>();
+  private HashMap<Integer, Double> m_rowHeights                     = new HashMap<Integer, Double>();
 
   /**************************************** constructor ******************************************/
-  public Table( ITableDataSource source )
+  public Table( ITableDataSource data )
   {
-    // construct table elements
     super();
-    getChildren().add( new HeaderCorner() );
-    getChildren().add( new HorizontalHeader() );
-    getChildren().add( new VerticalHeader() );
-    getChildren().add( new TableCells() );
+
+    // initial private variables
+    m_data = data;
+    m_cHeader = new HeaderCorner( this );
+    m_vHeader = new VerticalHeader( this );
+    m_hHeader = new HorizontalHeader( this );
+    m_cells = new TableCells( this );
+
+    // add table elements to JavaFX group
+    getChildren().add( m_cHeader );
+    getChildren().add( m_vHeader );
+    getChildren().add( m_hHeader );
+    getChildren().add( m_cells );
+  }
+
+  /*************************************** getDataSource *****************************************/
+  public ITableDataSource getDataSource()
+  {
+    return m_data;
+  }
+
+  /************************************** getCornerHeader ****************************************/
+  public HeaderCorner getCornerHeader()
+  {
+    return m_cHeader;
+  }
+
+  /************************************* getVerticalHeader ***************************************/
+  public VerticalHeader getVerticalHeader()
+  {
+    return m_vHeader;
+  }
+
+  /************************************ getHorizontalHeader **************************************/
+  public HorizontalHeader getHorizontalHeader()
+  {
+    return m_hHeader;
+  }
+
+  /****************************************** getCells *******************************************/
+  public TableCells getCells()
+  {
+    return m_cells;
+  }
+
+  /*************************************** getColumnStartX ***************************************/
+  public double getColumnStartX( int column )
+  {
+    // return start-x of specified column, ignoring any headers (i.e. starting at zero)
+    if ( column < 0 )
+      throw new IllegalArgumentException( "column=" + column );
+    if ( column >= m_data.getColumnCount() )
+      return -1.0;
+
+    double start = 0.0;
+    for ( int c = 0; c < column; c++ )
+      start += getColumnWidth( c );
+
+    return start;
+  }
+
+  /*************************************** getColumnWidth ****************************************/
+  public double getColumnWidth( int column )
+  {
+    // return width of column
+    double width = DEFAULT_COLUMN_WIDTH;
+
+    if ( m_columnWidths.containsKey( column ) )
+    {
+      width = m_columnWidths.get( column );
+      if ( width < 0.0 )
+        return 0.0; // -ve means column hidden, so return zero
+    }
+
+    return width;
+  }
+
+  /**************************************** getRowStartY *****************************************/
+  public double getRowStartY( int row )
+  {
+    // return start-y of specified row, ignoring any headers (i.e. starting at zero)
+    if ( row < 0 )
+      throw new IllegalArgumentException( "row=" + row );
+    if ( row >= m_data.getRowCount() )
+      return -1.0;
+
+    double start = 0.0;
+    for ( int r = 0; r < row; r++ )
+      start += getRowHeight( r );
+
+    return start;
+  }
+
+  /**************************************** getRowHeight *****************************************/
+  public double getRowHeight( int row )
+  {
+    // return height of row
+    double height = DEFAULT_ROW_HEIGHT;
+
+    if ( m_rowHeights.containsKey( row ) )
+    {
+      height = m_rowHeights.get( row );
+      if ( height < 0.0 )
+        return 0.0; // -ve means row hidden, so return zero
+    }
+
+    return height;
+  }
+
+  /**************************************** getCellsWidth ****************************************/
+  public double getCellsWidth()
+  {
+    // return width of all the table cells
+    int max = m_data.getColumnCount() - 1;
+    return getColumnStartX( max ) + getColumnWidth( max );
+  }
+
+  /*************************************** getCellsHeight ****************************************/
+  public double getCellsHeight()
+  {
+    // return height of all the table cells
+    int max = m_data.getRowCount() - 1;
+    return getRowStartY( max ) + getRowHeight( max );
   }
 
 }

@@ -21,6 +21,7 @@ package rjc.jplanner.gui;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.table.Table;
+import rjc.jplanner.gui.tasks.TasksData;
 
 /*************************************************************************************************/
 /******************************* Main JPlanner application window ********************************/
@@ -31,10 +32,10 @@ public class MainWindow
 
   public MainWindow( Stage stage )
   {
-    TasksTable tasks = new TasksTable();
+    TasksData tasks = new TasksData();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( new Table( tasks ), 400, 400 );
+    Scene scene = new Scene( new Table( tasks ), 700, 300 );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();

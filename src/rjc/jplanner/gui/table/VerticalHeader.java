@@ -30,16 +30,16 @@ public class VerticalHeader extends Canvas
 {
 
   /**************************************** constructor ******************************************/
-  public VerticalHeader()
+  public VerticalHeader( Table table )
   {
     // construct default table header-corner
     super();
 
-    setWidth( Table.DEFAULT_VERTICAL_HEADER_WIDTH );
-    setHeight( 200.0 );
+    setWidth( table.getCornerHeader().getWidth() );
+    setHeight( table.getCellsHeight() );
 
     setLayoutX( 0.0 );
-    setLayoutY( Table.DEFAULT_HORIZONTAL_HEADER_HEIGHT );
+    setLayoutY( table.getCornerHeader().getHeight() );
 
     GraphicsContext gc = getGraphicsContext2D();
     gc.setFill( Color.LIGHTGRAY );
