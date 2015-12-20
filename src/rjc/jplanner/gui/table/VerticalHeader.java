@@ -19,8 +19,6 @@
 package rjc.jplanner.gui.table;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
 /************************* Horizontal header that shows column titles ****************************/
@@ -40,10 +38,6 @@ public class VerticalHeader extends Canvas
 
     setLayoutX( 0.0 );
     setLayoutY( table.getCornerHeader().getHeight() );
-
-    GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( Color.LIGHTGRAY );
-    gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
   }
 
 }

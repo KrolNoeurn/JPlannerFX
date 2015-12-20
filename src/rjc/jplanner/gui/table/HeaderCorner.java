@@ -19,8 +19,6 @@
 package rjc.jplanner.gui.table;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
 /************************** Header corner that sits top-left of table ****************************/
@@ -37,10 +35,6 @@ public class HeaderCorner extends Canvas
 
     setHeight( Table.DEFAULT_HORIZONTAL_HEADER_HEIGHT );
     setWidth( Table.DEFAULT_VERTICAL_HEADER_WIDTH );
-
-    GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( Color.GRAY );
-    gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
   }
 
 }

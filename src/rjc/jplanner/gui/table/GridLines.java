@@ -20,18 +20,19 @@ package rjc.jplanner.gui.table;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/***************************** Draws the table cell grid lines *****************************/
 /*************************************************************************************************/
 
-public class TableCells extends Canvas
+public class GridLines extends Canvas
 {
 
   /**************************************** constructor ******************************************/
-  public TableCells( Table table )
+  public GridLines( Table table )
   {
-    // construct default table header-corner
+    // construct default grid lines
     super();
 
     ITableDataSource data = table.getDataSource();
@@ -41,6 +42,22 @@ public class TableCells extends Canvas
     setHeight( h );
 
     GraphicsContext gc = getGraphicsContext2D();
+    gc.setStroke( Color.SILVER );
+
+    double x = table.getCornerHeader().getWidth() - 0.5;
+    for ( int col = 0; col <= data.getColumnCount(); col++ )
+    {
+      gc.strokeLine( x, 0.0, x, h );
+      x += table.getColumnWidth( col );
+    }
+
+    double y = table.getCornerHeader().getHeight() - 0.5;
+    for ( int row = 0; row <= data.getRowCount(); row++ )
+    {
+      gc.strokeLine( 0.0, y, w, y );
+      y += table.getRowHeight( row );
+    }
+
   }
 
 }

@@ -28,20 +28,21 @@ import javafx.scene.Group;
 
 public class Table extends Group
 {
-  public static final double       DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
-  public static final double       DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
-  public static final double       DEFAULT_ROW_HEIGHT               = 20;
-  public static final double       DEFAULT_COLUMN_WIDTH             = 50;
+  public static final int           DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
+  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
+  public static final int           DEFAULT_ROW_HEIGHT               = 20;
+  public static final int           DEFAULT_COLUMN_WIDTH             = 50;
 
-  private ITableDataSource         m_data;
-  private HeaderCorner             m_cHeader;
-  private VerticalHeader           m_vHeader;
-  private HorizontalHeader         m_hHeader;
-  private TableCells               m_cells;
+  private ITableDataSource          m_data;
+  private HeaderCorner              m_cHeader;
+  private VerticalHeader            m_vHeader;
+  private HorizontalHeader          m_hHeader;
+  private TableCells                m_cells;
+  private GridLines                 m_gridLines;
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private HashMap<Integer, Double> m_columnWidths                   = new HashMap<Integer, Double>();
-  private HashMap<Integer, Double> m_rowHeights                     = new HashMap<Integer, Double>();
+  private HashMap<Integer, Integer> m_columnWidths                   = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_rowHeights                     = new HashMap<Integer, Integer>();
 
   /**************************************** constructor ******************************************/
   public Table( ITableDataSource data )
@@ -54,12 +55,14 @@ public class Table extends Group
     m_vHeader = new VerticalHeader( this );
     m_hHeader = new HorizontalHeader( this );
     m_cells = new TableCells( this );
+    m_gridLines = new GridLines( this );
 
     // add table elements to JavaFX group
     getChildren().add( m_cHeader );
     getChildren().add( m_vHeader );
     getChildren().add( m_hHeader );
     getChildren().add( m_cells );
+    getChildren().add( m_gridLines );
   }
 
   /*************************************** getDataSource *****************************************/
@@ -93,15 +96,15 @@ public class Table extends Group
   }
 
   /*************************************** getColumnStartX ***************************************/
-  public double getColumnStartX( int column )
+  public int getColumnStartX( int column )
   {
     // return start-x of specified column, ignoring any headers (i.e. starting at zero)
     if ( column < 0 )
       throw new IllegalArgumentException( "column=" + column );
     if ( column >= m_data.getColumnCount() )
-      return -1.0;
+      return -1;
 
-    double start = 0.0;
+    int start = 0;
     for ( int c = 0; c < column; c++ )
       start += getColumnWidth( c );
 
@@ -109,31 +112,31 @@ public class Table extends Group
   }
 
   /*************************************** getColumnWidth ****************************************/
-  public double getColumnWidth( int column )
+  public int getColumnWidth( int column )
   {
     // return width of column
-    double width = DEFAULT_COLUMN_WIDTH;
+    int width = DEFAULT_COLUMN_WIDTH;
 
     if ( m_columnWidths.containsKey( column ) )
     {
       width = m_columnWidths.get( column );
       if ( width < 0.0 )
-        return 0.0; // -ve means column hidden, so return zero
+        return 0; // -ve means column hidden, so return zero
     }
 
     return width;
   }
 
   /**************************************** getRowStartY *****************************************/
-  public double getRowStartY( int row )
+  public int getRowStartY( int row )
   {
     // return start-y of specified row, ignoring any headers (i.e. starting at zero)
     if ( row < 0 )
       throw new IllegalArgumentException( "row=" + row );
     if ( row >= m_data.getRowCount() )
-      return -1.0;
+      return -1;
 
-    double start = 0.0;
+    int start = 0;
     for ( int r = 0; r < row; r++ )
       start += getRowHeight( r );
 
@@ -141,23 +144,23 @@ public class Table extends Group
   }
 
   /**************************************** getRowHeight *****************************************/
-  public double getRowHeight( int row )
+  public int getRowHeight( int row )
   {
     // return height of row
-    double height = DEFAULT_ROW_HEIGHT;
+    int height = DEFAULT_ROW_HEIGHT;
 
     if ( m_rowHeights.containsKey( row ) )
     {
       height = m_rowHeights.get( row );
       if ( height < 0.0 )
-        return 0.0; // -ve means row hidden, so return zero
+        return 0; // -ve means row hidden, so return zero
     }
 
     return height;
   }
 
   /**************************************** getCellsWidth ****************************************/
-  public double getCellsWidth()
+  public int getCellsWidth()
   {
     // return width of all the table cells
     int max = m_data.getColumnCount() - 1;
@@ -165,7 +168,7 @@ public class Table extends Group
   }
 
   /*************************************** getCellsHeight ****************************************/
-  public double getCellsHeight()
+  public int getCellsHeight()
   {
     // return height of all the table cells
     int max = m_data.getRowCount() - 1;

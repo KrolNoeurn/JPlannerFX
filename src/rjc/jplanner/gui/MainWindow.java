@@ -19,6 +19,7 @@
 package rjc.jplanner.gui;
 
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.tasks.TasksData;
@@ -35,7 +36,7 @@ public class MainWindow
     TasksData tasks = new TasksData();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( new Table( tasks ), 700, 300 );
+    Scene scene = new Scene( new Table( tasks ), 700, 300, Color.rgb( 240, 240, 240 ) );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();
