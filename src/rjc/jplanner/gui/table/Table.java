@@ -20,14 +20,11 @@ package rjc.jplanner.gui.table;
 
 import java.util.HashMap;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /***************************** Displays data in gui scrollable table *****************************/
@@ -36,14 +33,17 @@ import rjc.jplanner.JPlanner;
 public class Table extends GridPane
 {
   public static final int           DEFAULT_ROW_HEIGHT               = 20;
-  public static final int           DEFAULT_COLUMN_WIDTH             = 50;
+  public static final int           DEFAULT_COLUMN_WIDTH             = 100;
   public static final int           DEFAULT_HORIZONTAL_HEADER_HEIGHT = DEFAULT_ROW_HEIGHT;
-  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = DEFAULT_COLUMN_WIDTH;
+  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = 30;
 
   public static final Color         COLOR_GRID                       = Color.SILVER;
   public static final Color         COLOR_HEADER_FILL                = Color.rgb( 240, 240, 240 );
 
   private ITableDataSource          m_data;
+  private int                       m_offsetX;
+  private int                       m_offsetY;
+
   private ScrollBar                 m_vScrollBar;
   private ScrollBar                 m_hScrollBar;
 
@@ -64,6 +64,8 @@ public class Table extends GridPane
 
     // initial private variables and table components
     m_data = data;
+    m_offsetX = 0;
+    m_offsetY = 0;
 
     m_cHeader = new HeaderCorner( this );
     m_hHeader = new HorizontalHeader( this );
@@ -89,17 +91,6 @@ public class Table extends GridPane
     // cells area should grow to fill all available space
     setHgrow( m_cells, Priority.ALWAYS );
     setVgrow( m_cells, Priority.ALWAYS );
-
-    m_cells.widthProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        // TODO Auto-generated method stub
-        JPlanner.trace( "old=" + oldValue + "   new=" + newValue );
-      }
-    } );
-
   }
 
   /*************************************** getDataSource *****************************************/
@@ -132,20 +123,50 @@ public class Table extends GridPane
     return m_cells;
   }
 
+  /***************************************** getOffsetX ******************************************/
+  public double getOffsetX()
+  {
+    return m_offsetX;
+  }
+
+  /***************************************** getOffsetY ******************************************/
+  public double getOffsetY()
+  {
+    return m_offsetY;
+  }
+
+  /***************************************** getColumnAtX ****************************************/
+  public int getColumnAtX( double xx )
+  {
+    // return column index at specified x-coordinate, or -1 if before, MAX if after
+    int x = (int) ( xx ) + m_offsetX;
+    if ( x < 0 )
+      return -1;
+
+    for ( int column = 0; column < m_data.getColumnCount(); column++ )
+    {
+      x -= getColumnWidth( column );
+      if ( x < 0 )
+        return column;
+    }
+
+    return Integer.MAX_VALUE;
+  }
+
   /*************************************** getColumnStartX ***************************************/
   public int getColumnStartX( int column )
   {
-    // return start-x of specified column, ignoring any headers (i.e. starting at zero)
+    // return start-x of specified column
     if ( column < 0 )
       throw new IllegalArgumentException( "column=" + column );
     if ( column >= m_data.getColumnCount() )
       return -1;
 
-    int start = 0;
+    int startX = 0;
     for ( int c = 0; c < column; c++ )
-      start += getColumnWidth( c );
+      startX += getColumnWidth( c );
 
-    return start;
+    return startX - m_offsetX;
   }
 
   /*************************************** getColumnWidth ****************************************/
@@ -157,27 +178,45 @@ public class Table extends GridPane
     if ( m_columnWidths.containsKey( column ) )
     {
       width = m_columnWidths.get( column );
-      if ( width < 0.0 )
+      if ( width < 0 )
         return 0; // -ve means column hidden, so return zero
     }
 
     return width;
   }
 
+  /****************************************** getRowAtY ******************************************/
+  public int getRowAtY( double yy )
+  {
+    // return row index at specified x-coordinate, or -1 if before, MAX if after
+    int y = (int) ( yy ) + m_offsetY;
+    if ( y < 0 )
+      return -1;
+
+    for ( int row = 0; row < m_data.getRowCount(); row++ )
+    {
+      y -= getRowHeight( row );
+      if ( y < 0 )
+        return row;
+    }
+
+    return Integer.MAX_VALUE;
+  }
+
   /**************************************** getRowStartY *****************************************/
   public int getRowStartY( int row )
   {
-    // return start-y of specified row, ignoring any headers (i.e. starting at zero)
+    // return start-y of specified row
     if ( row < 0 )
       throw new IllegalArgumentException( "row=" + row );
     if ( row >= m_data.getRowCount() )
       return -1;
 
-    int start = 0;
+    int startY = 0;
     for ( int r = 0; r < row; r++ )
-      start += getRowHeight( r );
+      startY += getRowHeight( r );
 
-    return start;
+    return startY - m_offsetY;
   }
 
   /**************************************** getRowHeight *****************************************/
@@ -189,7 +228,7 @@ public class Table extends GridPane
     if ( m_rowHeights.containsKey( row ) )
     {
       height = m_rowHeights.get( row );
-      if ( height < 0.0 )
+      if ( height < 0 )
         return 0; // -ve means row hidden, so return zero
     }
 
@@ -208,7 +247,7 @@ public class Table extends GridPane
   public int getCellsHeight()
   {
     // return height of all the table cells
-    int max = m_data.getRowCount() - 1;
+    int max = m_data.getRowCount();
     return getRowStartY( max ) + getRowHeight( max );
   }
 

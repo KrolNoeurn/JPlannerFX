@@ -21,8 +21,8 @@ package rjc.jplanner.gui;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import rjc.jplanner.gui.days.DayTypesData;
 import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.gui.tasks.TasksData;
 
 /*************************************************************************************************/
 /******************************* Main JPlanner application window ********************************/
@@ -33,10 +33,11 @@ public class MainWindow
 
   public MainWindow( Stage stage )
   {
-    TasksData tasks = new TasksData();
+    //TasksData tasks = new TasksData();
+    DayTypesData days = new DayTypesData();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( new Table( tasks ), 700, 300, Color.rgb( 240, 240, 240 ) );
+    Scene scene = new Scene( new Table( days ), 700, 300, Color.rgb( 240, 240, 240 ) );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();

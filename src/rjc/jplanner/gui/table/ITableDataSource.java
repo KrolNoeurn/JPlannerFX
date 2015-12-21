@@ -29,4 +29,13 @@ public interface ITableDataSource
 
   // return number of rows to be displayed
   int getRowCount();
+
+  // return column titles to be displayed
+  String getColumnTitle( int column );
+
+  // return row titles to be displayed
+  String getRowTitle( int row );
+
+  // return cell text to be displayed
+  String getCellText( int column, int row );
 }

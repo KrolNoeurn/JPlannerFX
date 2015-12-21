@@ -16,52 +16,24 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
-
-import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.table.ITableDataSource;
-import rjc.jplanner.model.Task;
+package rjc.jplanner.gui.table;
 
 /*************************************************************************************************/
-/****************************** Table data source for showing tasks ******************************/
+/************ Header corner that sits in corner between vertical & horizontal headers ************/
 /*************************************************************************************************/
 
-public class TasksData implements ITableDataSource
+public class HeaderCell extends Cell
 {
 
-  /************************************** getColumnCount *****************************************/
-  @Override
-  public int getColumnCount()
+  /**************************************** constructor ******************************************/
+  public HeaderCell( String str, int x, int y, int w, int h )
   {
-    return Task.SECTION_MAX + 1;
-  }
-
-  /**************************************** getRowCount ******************************************/
-  @Override
-  public int getRowCount()
-  {
-    return JPlanner.plan.tasksCount();
-  }
-
-  /************************************** getColumnTitle *****************************************/
-  @Override
-  public String getColumnTitle( int column )
-  {
-    return Task.sectionName( column );
-  }
-
-  /**************************************** getRowTitle ******************************************/
-  @Override
-  public String getRowTitle( int row )
-  {
-    return Integer.toString( row );
-  }
-
-  /**************************************** getCellText ******************************************/
-  @Override
-  public String getCellText( int column, int row )
-  {
-    return "TBD";
+    // construct default table header corner
+    super( w, h, Table.COLOR_HEADER_FILL );
+    setLayoutX( x );
+    setLayoutY( y );
+    drawText( str );
+    drawGrid();
   }
 
 }

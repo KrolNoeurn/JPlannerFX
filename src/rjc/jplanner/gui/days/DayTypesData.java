@@ -16,17 +16,18 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui.days;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.model.Day;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
 /****************************** Table data source for showing tasks ******************************/
 /*************************************************************************************************/
 
-public class TasksData implements ITableDataSource
+public class DayTypesData implements ITableDataSource
 {
 
   /************************************** getColumnCount *****************************************/
@@ -40,21 +41,21 @@ public class TasksData implements ITableDataSource
   @Override
   public int getRowCount()
   {
-    return JPlanner.plan.tasksCount();
+    return JPlanner.plan.daysCount();
   }
 
   /************************************** getColumnTitle *****************************************/
   @Override
   public String getColumnTitle( int column )
   {
-    return Task.sectionName( column );
+    return Day.sectionName( column );
   }
 
   /**************************************** getRowTitle ******************************************/
   @Override
   public String getRowTitle( int row )
   {
-    return Integer.toString( row );
+    return Integer.toString( row + 1 );
   }
 
   /**************************************** getCellText ******************************************/

@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
 
 /*************************************************************************************************/
@@ -26,17 +28,52 @@ import javafx.scene.layout.Pane;
 
 public class VerticalHeader extends Pane
 {
+  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public VerticalHeader( Table table )
   {
     // construct default table header-corner
     super();
-    setStyle( "-fx-background-color: blue;" );
+    m_table = table;
 
-    //setWidth( table.getCornerHeader().getWidth() );
-    //setHeight( table.getCellsHeight() );
+    // listener for header size changes
+    heightProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        updateHeader();
+      }
+    } );
+  }
 
+  /*************************************** updateHeader ******************************************/
+  private void updateHeader()
+  {
+    // determine which rows are visible
+    int startRow = m_table.getRowAtY( 0.0 );
+    int endRow = m_table.getRowAtY( getHeight() );
+
+    // if height higher than table, limit to last row
+    int last = m_table.getDataSource().getRowCount() - 1;
+    if ( endRow > last )
+      endRow = last;
+
+    // clear any old header cells and re-generate new ones (TODO something more efficient)
+    getChildren().clear();
+    int y = m_table.getRowStartY( startRow );
+    int width = (int) m_table.getCornerHeader().getWidth();
+
+    for ( int row = startRow; row <= endRow; row++ )
+    {
+      int height = m_table.getRowHeight( row );
+      String txt = m_table.getDataSource().getRowTitle( row );
+      HeaderCell hc = new HeaderCell( txt, 0, y, width, height );
+
+      getChildren().add( hc );
+      y += height;
+    }
   }
 
 }
