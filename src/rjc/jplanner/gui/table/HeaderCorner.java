@@ -19,9 +19,10 @@
 package rjc.jplanner.gui.table;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 
 /*************************************************************************************************/
-/************************** Header corner that sits top-left of table ****************************/
+/************ Header corner that sits in corner between vertical & horizontal headers ************/
 /*************************************************************************************************/
 
 public class HeaderCorner extends Canvas
@@ -30,11 +31,22 @@ public class HeaderCorner extends Canvas
   /**************************************** constructor ******************************************/
   public HeaderCorner( Table table )
   {
-    // construct default table header-corner
+    // construct default table header corner
     super();
 
+    // default size
     setHeight( Table.DEFAULT_HORIZONTAL_HEADER_HEIGHT );
     setWidth( Table.DEFAULT_VERTICAL_HEADER_WIDTH );
+
+    // background colour
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Table.COLOR_HEADER_FILL );
+    gc.fillRect( 0, 0, getWidth() - 1.0, getHeight() - 1.0 );
+
+    // grid lines
+    gc.setStroke( Table.COLOR_GRID );
+    gc.strokeLine( getWidth() - 0.5, 0, getWidth() - 0.5, getHeight() );
+    gc.strokeLine( 0, getHeight() - 0.5, getWidth(), getHeight() - 0.5 );
   }
 
 }

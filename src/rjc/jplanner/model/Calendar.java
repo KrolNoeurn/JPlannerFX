@@ -343,7 +343,7 @@ public class Calendar
     Time newTime = day.workDown( time );
     while ( newTime == null )
     {
-      date = date.addDays( -1 );
+      date.decrement();
       day = day( date );
 
       if ( day.isWorking() )
@@ -364,7 +364,7 @@ public class Calendar
     Time newTime = day.workUp( time );
     while ( newTime == null )
     {
-      date = date.addDays( 1 );
+      date.increment();
       day = day( date );
 
       if ( day.isWorking() )

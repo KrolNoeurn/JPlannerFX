@@ -18,29 +18,29 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Pane;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/************************** Display area that shows table cell contents **************************/
 /*************************************************************************************************/
 
-public class TableCells extends Canvas
+public class TableCells extends Pane
 {
 
   /**************************************** constructor ******************************************/
   public TableCells( Table table )
   {
-    // construct default table header-corner
+    // construct default table cells display
     super();
+    setStyle( "-fx-background-color: yellow;" );
 
-    ITableDataSource data = table.getDataSource();
-    double h = table.getCornerHeader().getHeight() + table.getCellsHeight();
-    double w = table.getCornerHeader().getWidth() + table.getCellsWidth();
-    setWidth( w );
-    setHeight( h );
+    //setWidth( table.getCellsWidth() );
+    //setHeight( table.getCellsHeight() );
 
-    GraphicsContext gc = getGraphicsContext2D();
+    //GraphicsContext gc = getGraphicsContext2D();
+    //gc.setFill( Color.YELLOW );
+    //gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
+
   }
 
 }

@@ -118,7 +118,7 @@ public class Plan
 
     m_title = "";
     m_calendar = calendar( 0 );
-    m_start = m_calendar.workUp( new DateTime( Date.fromNow(), Time.fromMilliseconds( 0 ) ) );
+    m_start = m_calendar.workUp( new DateTime( Date.now(), Time.fromMilliseconds( 0 ) ) );
     m_datetimeFormat = "EEE dd/MM/yyyy hh:mm";
     m_dateFormat = "dd/MM/yyyy";
     m_filename = "";
@@ -361,7 +361,7 @@ public class Plan
       xsw.writeAttribute( XML_VERSION, "2015-04" );
       String saveUser = System.getProperty( "user.name" );
       xsw.writeAttribute( XML_USER, saveUser );
-      DateTime saveWhen = DateTime.fromNow();
+      DateTime saveWhen = DateTime.now();
       xsw.writeAttribute( XML_WHEN, saveWhen.toString() );
 
       // write day-types data to XML stream

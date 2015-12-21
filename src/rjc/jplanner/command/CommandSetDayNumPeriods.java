@@ -51,7 +51,7 @@ public class CommandSetDayNumPeriods implements IUndoCommand
       // need to add new work-periods
       double remainingHours = 24.0;
       if ( !m_newPeriods.isEmpty() )
-        remainingHours -= 24.0 * m_newPeriods.get( oldNum - 1 ).m_end.getMilliseconds() / Time.MAX;
+        remainingHours -= 24.0 * m_newPeriods.get( oldNum - 1 ).m_end.getMilliseconds() / Time.MILLISECONDS_IN_DAY;
 
       double increment = remainingHours / ( 1 + 2 * ( newNum - oldNum ) );
       if ( increment >= 8.0 )

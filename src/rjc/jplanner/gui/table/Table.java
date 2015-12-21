@@ -20,25 +20,37 @@ package rjc.jplanner.gui.table;
 
 import java.util.HashMap;
 
-import javafx.scene.Group;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Orientation;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.paint.Color;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /***************************** Displays data in gui scrollable table *****************************/
 /*************************************************************************************************/
 
-public class Table extends Group
+public class Table extends GridPane
 {
-  public static final int           DEFAULT_HORIZONTAL_HEADER_HEIGHT = 30;
-  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = 40;
   public static final int           DEFAULT_ROW_HEIGHT               = 20;
   public static final int           DEFAULT_COLUMN_WIDTH             = 50;
+  public static final int           DEFAULT_HORIZONTAL_HEADER_HEIGHT = DEFAULT_ROW_HEIGHT;
+  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = DEFAULT_COLUMN_WIDTH;
+
+  public static final Color         COLOR_GRID                       = Color.SILVER;
+  public static final Color         COLOR_HEADER_FILL                = Color.rgb( 240, 240, 240 );
 
   private ITableDataSource          m_data;
+  private ScrollBar                 m_vScrollBar;
+  private ScrollBar                 m_hScrollBar;
+
   private HeaderCorner              m_cHeader;
   private VerticalHeader            m_vHeader;
   private HorizontalHeader          m_hHeader;
   private TableCells                m_cells;
-  private GridLines                 m_gridLines;
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
   private HashMap<Integer, Integer> m_columnWidths                   = new HashMap<Integer, Integer>();
@@ -47,22 +59,47 @@ public class Table extends Group
   /**************************************** constructor ******************************************/
   public Table( ITableDataSource data )
   {
+    // setup grid pane
     super();
 
-    // initial private variables
+    // initial private variables and table components
     m_data = data;
-    m_cHeader = new HeaderCorner( this );
-    m_vHeader = new VerticalHeader( this );
-    m_hHeader = new HorizontalHeader( this );
-    m_cells = new TableCells( this );
-    m_gridLines = new GridLines( this );
 
-    // add table elements to JavaFX group
-    getChildren().add( m_cHeader );
-    getChildren().add( m_vHeader );
-    getChildren().add( m_hHeader );
-    getChildren().add( m_cells );
-    getChildren().add( m_gridLines );
+    m_cHeader = new HeaderCorner( this );
+    m_hHeader = new HorizontalHeader( this );
+    m_vHeader = new VerticalHeader( this );
+    m_cells = new TableCells( this );
+
+    m_vScrollBar = new ScrollBar();
+    m_vScrollBar.setOrientation( Orientation.VERTICAL );
+    m_vScrollBar.setMinWidth( 16 );
+
+    m_hScrollBar = new ScrollBar();
+    m_hScrollBar.setOrientation( Orientation.HORIZONTAL );
+    m_hScrollBar.setMinHeight( 16 );
+
+    // place table components onto grid
+    add( m_cHeader, 0, 0 );
+    add( m_hHeader, 1, 0 );
+    add( m_vHeader, 0, 1 );
+    add( m_cells, 1, 1 );
+    add( m_vScrollBar, 2, 0, 1, 2 );
+    add( m_hScrollBar, 0, 2, 2, 1 );
+
+    // cells area should grow to fill all available space
+    setHgrow( m_cells, Priority.ALWAYS );
+    setVgrow( m_cells, Priority.ALWAYS );
+
+    m_cells.widthProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        // TODO Auto-generated method stub
+        JPlanner.trace( "old=" + oldValue + "   new=" + newValue );
+      }
+    } );
+
   }
 
   /*************************************** getDataSource *****************************************/

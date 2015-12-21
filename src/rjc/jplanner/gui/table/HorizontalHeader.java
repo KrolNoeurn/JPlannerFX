@@ -18,26 +18,34 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.canvas.Canvas;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.Pane;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /************************* Horizontal header that shows column titles ****************************/
 /*************************************************************************************************/
 
-public class HorizontalHeader extends Canvas
+public class HorizontalHeader extends Pane
 {
 
   /**************************************** constructor ******************************************/
   public HorizontalHeader( Table table )
   {
-    // construct default table header-corner
+    // construct default table horizontal header for column titles
     super();
 
-    setWidth( table.getCellsWidth() );
-    setHeight( table.getCornerHeader().getHeight() );
-
-    setLayoutX( table.getCornerHeader().getWidth() );
-    setLayoutY( 0.0 );
+    // listener for size changes
+    widthProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        // TODO Auto-generated method stub
+        JPlanner.trace( "old=" + oldValue + "   new=" + newValue );
+      }
+    } );
   }
 
 }

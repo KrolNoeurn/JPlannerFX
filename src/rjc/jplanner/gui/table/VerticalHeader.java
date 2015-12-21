@@ -18,13 +18,13 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.Pane;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/*************************** Vertical header that shows row titles *******************************/
 /*************************************************************************************************/
 
-public class VerticalHeader extends Canvas
+public class VerticalHeader extends Pane
 {
 
   /**************************************** constructor ******************************************/
@@ -32,12 +32,11 @@ public class VerticalHeader extends Canvas
   {
     // construct default table header-corner
     super();
+    setStyle( "-fx-background-color: blue;" );
 
-    setWidth( table.getCornerHeader().getWidth() );
-    setHeight( table.getCellsHeight() );
+    //setWidth( table.getCornerHeader().getWidth() );
+    //setHeight( table.getCellsHeight() );
 
-    setLayoutX( 0.0 );
-    setLayoutY( table.getCornerHeader().getHeight() );
   }
 
 }

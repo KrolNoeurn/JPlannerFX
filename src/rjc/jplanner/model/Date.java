@@ -19,6 +19,7 @@
 package rjc.jplanner.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 /*************************************************************************************************/
 /************************************ Date (with no timezone) ************************************/
@@ -26,10 +27,13 @@ import java.time.LocalDate;
 
 public class Date
 {
-  private int m_epochday; // simple count of days where day 0 is 01-Jan-1970
+  private int              m_epochday;                               // simple count of days where day 0 is 01-Jan-1970
 
   // min int=-2^31 gives minimum date of approx 5,800,000 BC
+  public static final Date MIN_VALUE = new Date( Integer.MIN_VALUE );
+
   // max int=2^31-1 gives maximum date of approx 5,800,000 AD
+  public static final Date MAX_VALUE = new Date( Integer.MAX_VALUE );
 
   /**************************************** constructor ******************************************/
   public Date( int epochday )
@@ -45,15 +49,39 @@ public class Date
     m_epochday = (int) LocalDate.of( year, month, day ).toEpochDay();
   }
 
-  /**************************************** fromLocalDate ****************************************/
-  public static Date fromLocalDate( LocalDate localDate )
+  /**************************************** constructor ******************************************/
+  public Date( LocalDate localDate )
   {
     // return a new Date from LocalDate
-    return new Date( (int) localDate.toEpochDay() );
+    m_epochday = (int) localDate.toEpochDay();
+  }
+
+  /***************************************** getEpochday *****************************************/
+  public int getEpochday()
+  {
+    // return int count of days from day 0 is 01-Jan-1970
+    return m_epochday;
+  }
+
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    // convert to string in ISO-8601 format "uuuu-MM-dd"
+    LocalDate ld = LocalDate.ofEpochDay( m_epochday );
+    return ld.toString();
+  }
+
+  /****************************************** toString *******************************************/
+  public String toString( String format )
+  {
+    // convert to string in specified format
+    LocalDate ld = LocalDate.ofEpochDay( m_epochday );
+    return ld.format( DateTimeFormatter.ofPattern( format ) );
   }
 
   /********************************************* now *********************************************/
-  public static Date fromNow()
+  public static Date now()
   {
     // return a new Date from current system clock
     return new Date( (int) LocalDate.now().toEpochDay() );
@@ -63,38 +91,33 @@ public class Date
   public static Date fromString( String str )
   {
     // if string of type YYYY-MM-DD or YYYY/MM/DD
-    if ( str.matches( "\\d\\d\\d\\d-\\d\\d-\\d\\d" ) || str.matches( "\\d\\d\\d\\d/\\d\\d/\\d\\d" ) )
+    try
     {
-      int year = Integer.parseInt( str.substring( 0, 4 ) );
-      int mon = Integer.parseInt( str.substring( 5, 7 ) );
-      int day = Integer.parseInt( str.substring( 8, 10 ) );
+      String[] parts = str.split( "/" );
+      if ( parts.length != 3 )
+        parts = str.split( "-" );
+
+      int year = Integer.parseInt( parts[0] );
+      int mon = Integer.parseInt( parts[1] );
+      int day = Integer.parseInt( parts[2] );
       return new Date( year, mon, day );
     }
-
-    throw new IllegalArgumentException( "String=" + str );
+    catch ( Exception exception )
+    {
+      // some sort of exception thrown
+      exception.printStackTrace();
+      throw new IllegalArgumentException( "String=" + str );
+    }
   }
 
-  /******************************************* addDays *******************************************/
-  public Date addDays( int days )
-  {
-    return new Date( m_epochday + days );
-  }
-
-  /********************************************* day *********************************************/
-  public int getDay()
+  /****************************************** getYear ********************************************/
+  public int getYear()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
-    return ld.getDayOfMonth();
+    return ld.getYear();
   }
 
-  /****************************************** epochday *******************************************/
-  public int getEpochday()
-  {
-    // return int count of days from day 0 is 01-Jan-1970
-    return m_epochday;
-  }
-
-  /******************************************** month ********************************************/
+  /****************************************** getMonth *******************************************/
   public int getMonth()
   {
     // return month of year as number 1 to 12
@@ -102,19 +125,53 @@ public class Date
     return ld.getMonthValue();
   }
 
-  /******************************************** year *********************************************/
-  public int getYear()
+  /*************************************** getDayOfMonth *****************************************/
+  public int getDayOfMonth()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
-    return ld.getYear();
+    return ld.getDayOfMonth();
   }
 
-  /****************************************** toString *******************************************/
-  @Override
-  public String toString()
+  /***************************************** increment *******************************************/
+  public void increment()
   {
-    // convert to string in "YYYY-MM-DD" format
-    LocalDate ld = LocalDate.ofEpochDay( m_epochday );
-    return ld.toString();
+    m_epochday++;
   }
+
+  /***************************************** decrement *******************************************/
+  public void decrement()
+  {
+    m_epochday--;
+  }
+
+  /****************************************** plusDays *******************************************/
+  public Date plusDays( int days )
+  {
+    return new Date( m_epochday + days );
+  }
+
+  /***************************************** plusWeeks *******************************************/
+  public Date plusWeeks( int weeks )
+  {
+    return new Date( m_epochday + 7 * weeks );
+  }
+
+  /***************************************** plusMonths ******************************************/
+  public Date plusMonths( int months )
+  {
+    return new Date( LocalDate.ofEpochDay( m_epochday ).plusMonths( months ) );
+  }
+
+  /***************************************** plusYears *******************************************/
+  public Date plusYears( int years )
+  {
+    return new Date( LocalDate.ofEpochDay( m_epochday ).plusYears( years ) );
+  }
+
+  /******************************************* equals ********************************************/
+  public boolean equals( Date other )
+  {
+    return m_epochday == other.m_epochday;
+  }
+
 }
