@@ -18,41 +18,70 @@
 
 package rjc.jplanner.command;
 
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.model.Day;
+
 /*************************************************************************************************/
-/************************* UndoCommand for updating calendar exceptions **************************/
+/****************** UndoCommand for updating day-types (except num of periods) *******************/
 /*************************************************************************************************/
 
-public class CommandSetCalendarExceptions implements IUndoCommand
+public class CommandDaySetValue implements IUndoCommand
 {
+  private int    m_dayID;    // day number in plan
+  private int    m_section;  // section number
+  private Object m_newValue; // new value after command
+  private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandSetCalendarExceptions( int calID, Object newValue, Object oldValue )
+  public CommandDaySetValue( int dayID, int section, Object newValue, Object oldValue )
   {
-    // TODO Auto-generated constructor stub
+    // check not being used for updating number of work periods
+    if ( section == Day.SECTION_PERIODS )
+      throw new UnsupportedOperationException( "Number of work-periods" );
+
+    // initialise private variables
+    m_dayID = dayID;
+    m_section = section;
+    m_newValue = newValue;
+    m_oldValue = oldValue;
   }
 
   /******************************************* redo **********************************************/
   @Override
   public void redo()
   {
-    // TODO Auto-generated method stub
-
+    // action command
+    JPlanner.plan.day( m_dayID ).setData( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
   @Override
   public void undo()
   {
-    // TODO Auto-generated method stub
+    // revert command
+    JPlanner.plan.day( m_dayID ).setData( m_section, m_oldValue );
+  }
 
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
+    // update day-types tables
+    //JPlanner.gui.redrawDayTypeTables();
+
+    // if name changed, update calendars tables, otherwise re-schedule
+    //if ( m_section == Day.SECTION_NAME )
+    //JPlanner.gui.redrawCalendarTables();
+    //else
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
   @Override
   public String text()
   {
-    // TODO Auto-generated method stub
-    return "Exceptions TBD";
+    // command description
+    return "Day " + ( m_dayID + 1 ) + " " + Day.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

@@ -26,7 +26,7 @@ import rjc.jplanner.model.DateTime;
 /*************************** UndoCommand for updating plan properties ****************************/
 /*************************************************************************************************/
 
-public class CommandSetPlanProperties implements IUndoCommand
+public class CommandPlanSetProperties implements IUndoCommand
 {
   private String   m_oldTitle;
   private DateTime m_oldStart;
@@ -41,7 +41,7 @@ public class CommandSetPlanProperties implements IUndoCommand
   private String   m_newDformat;
 
   /**************************************** constructor ******************************************/
-  public CommandSetPlanProperties( String title, DateTime start, Calendar cal, String DTformat, String Dformat )
+  public CommandPlanSetProperties( String title, DateTime start, Calendar cal, String DTformat, String Dformat )
   {
     // initialise private variables
     m_oldTitle = JPlanner.plan.title();
@@ -67,9 +67,6 @@ public class CommandSetPlanProperties implements IUndoCommand
     JPlanner.plan.setCalendar( m_newCal );
     JPlanner.plan.setDatetimeFormat( m_newDTformat );
     JPlanner.plan.setDateFormat( m_newDformat );
-
-    // update plan properties on gui
-    // --JPlanner.gui.properties().updateFromPlan();
   }
 
   /******************************************* undo **********************************************/
@@ -82,9 +79,21 @@ public class CommandSetPlanProperties implements IUndoCommand
     JPlanner.plan.setCalendar( m_oldCal );
     JPlanner.plan.setDatetimeFormat( m_oldDTformat );
     JPlanner.plan.setDateFormat( m_oldDformat );
+  }
 
-    // update plan properties on gui
-    // --JPlanner.gui.properties().updateFromPlan();
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
+    // update plan properties & tables on gui, mostly just for possible format changes
+    //JPlanner.gui.properties().updateFromPlan();
+    //JPlanner.gui.redrawTaskTables();
+    //JPlanner.gui.redrawResourceTables();
+    //JPlanner.gui.redrawCalendarTables();
+
+    // if start or calendar changed, re-schedule plan (which in turn will also update gui)
+    //if ( !m_oldStart.equals( m_newStart ) || !m_oldCal.equals( m_newCal ) )
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
@@ -97,7 +106,7 @@ public class CommandSetPlanProperties implements IUndoCommand
 
     if ( !m_newTitle.equals( m_oldTitle ) )
       txt.append( "title/" );
-    if ( m_newStart.getMilliseconds() != m_oldStart.getMilliseconds() )
+    if ( m_newStart.milliseconds() != m_oldStart.milliseconds() )
       txt.append( "default start/" );
     if ( m_newCal != m_oldCal )
       txt.append( "default calendar/" );

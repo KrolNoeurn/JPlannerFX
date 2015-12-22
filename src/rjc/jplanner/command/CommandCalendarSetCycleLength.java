@@ -18,28 +18,46 @@
 
 package rjc.jplanner.command;
 
+import java.util.ArrayList;
+
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
-/************* UndoCommand for updating calendars (except cycle-length & exceptions) *************/
+/************************ UndoCommand for updating calendar cycle length *************************/
 /*************************************************************************************************/
 
-public class CommandSetCalendarValue implements IUndoCommand
+public class CommandCalendarSetCycleLength implements IUndoCommand
 {
-  private int    m_calID;    // calendar number in plan
-  private int    m_section;  // section number
-  private Object m_newValue; // new value after command
-  private Object m_oldValue; // old value before command
+  private int            m_calID;      // calendar number in plan
+  private ArrayList<Day> m_newNormals; // new list of normal-cycle-days after command
+  private ArrayList<Day> m_oldNormals; // old list of normal-cycle-days before command
 
   /**************************************** constructor ******************************************/
-  public CommandSetCalendarValue( int calID, int section, Object newValue, Object oldValue )
+  public CommandCalendarSetCycleLength( int calID, Object newValue, Object oldValue )
   {
     // initialise private variables
     m_calID = calID;
-    m_section = section;
-    m_newValue = newValue;
-    m_oldValue = oldValue;
+    m_oldNormals = new ArrayList<Day>( JPlanner.plan.calendar( calID ).normals() );
+    m_newNormals = new ArrayList<Day>( JPlanner.plan.calendar( calID ).normals() );
+
+    int newNum = Integer.parseInt( (String) newValue );
+    int oldNum = Integer.parseInt( (String) oldValue );
+
+    if ( newNum > oldNum )
+    {
+      // need to add new normal-cycle-days
+      Day day = JPlanner.plan.day( 0 );
+      for ( int count = oldNum; count < newNum; count++ )
+        m_newNormals.add( day );
+    }
+    else
+    {
+      // need to reduce number of normal-cycle-days
+      for ( int count = oldNum - 1; count >= newNum; count-- )
+        m_newNormals.remove( count );
+    }
   }
 
   /******************************************* redo **********************************************/
@@ -47,17 +65,7 @@ public class CommandSetCalendarValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.calendar( m_calID ).setData( m_section, m_newValue );
-
-    // update calendars tables
-    // --JPlanner.gui.calendarTables().refresh();
-
-    // if name being changed, update resources table and properties in case name displayed there
-    if ( m_section == Calendar.SECTION_NAME )
-    {
-      // --JPlanner.gui.resourceTables().refresh();
-      // --JPlanner.gui.properties().updateFromPlan();
-    }
+    JPlanner.plan.calendar( m_calID ).setData( Calendar.SECTION_CYCLE, m_newNormals );
   }
 
   /******************************************* undo **********************************************/
@@ -65,25 +73,26 @@ public class CommandSetCalendarValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.calendar( m_calID ).setData( m_section, m_oldValue );
+    JPlanner.plan.calendar( m_calID ).setData( Calendar.SECTION_CYCLE, m_oldNormals );
+  }
 
-    // update calendars tables
-    // --JPlanner.gui.calendarTables().refresh();
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
+    // reset calendar tables because number of row might have changed
+    //JPlanner.gui.resetCalendarTables();
 
-    // if name being changed, update resources table and properties in case name displayed there
-    if ( m_section == Calendar.SECTION_NAME )
-    {
-      // --JPlanner.gui.resourceTables().refresh();
-      // --JPlanner.gui.properties().updateFromPlan();
-    }
+    // re-schedule plan (which in turn will also update gui)
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
   @Override
   public String text()
   {
-    // command description
-    return "Day " + ( m_calID + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + m_newValue;
+    // text description of command
+    return "Calendar " + m_calID + " Cycle = " + m_newNormals.size();
   }
 
 }

@@ -19,6 +19,7 @@
 package rjc.jplanner.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import javax.xml.stream.XMLStreamException;
@@ -26,6 +27,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.XmlLabels;
 import rjc.jplanner.model.Day.DefaultDayTypes;
 
 /*************************************************************************************************/
@@ -39,25 +41,16 @@ public class Calendar
   private ArrayList<Day>     m_normal;      // normal basic cycle days
   private HashMap<Date, Day> m_exceptions;  // exceptions override normal days
 
-  enum DefaultCalendarTypes
+  public enum DefaultCalendarTypes
   {
     STANDARD, FULLTIME, FANCY
   };
 
-  public static final int     SECTION_NAME       = 0;
-  public static final int     SECTION_ANCHOR     = 1;
-  public static final int     SECTION_EXCEPTIONS = 2;
-  public static final int     SECTION_CYCLE      = 3;
-  public static final int     SECTION_NORMAL1    = 4;
-
-  public static final String  XML_CALENDAR       = "calendar";
-  private static final String XML_ID             = "id";
-  private static final String XML_NAME           = "name";
-  private static final String XML_ANCHOR         = "anchor";
-  private static final String XML_NORMAL         = "normal";
-  private static final String XML_DAY            = "day";
-  private static final String XML_EXCEPTION      = "exception";
-  private static final String XML_DATE           = "date";
+  public static final int SECTION_NAME       = 0;
+  public static final int SECTION_ANCHOR     = 1;
+  public static final int SECTION_EXCEPTIONS = 2;
+  public static final int SECTION_CYCLE      = 3;
+  public static final int SECTION_NORMAL1    = 4;
 
   /**************************************** constructor ******************************************/
   public Calendar()
@@ -148,11 +141,16 @@ public class Calendar
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
-        case XML_NAME:
+        case XmlLabels.XML_ID:
+          break;
+        case XmlLabels.XML_NAME:
           m_name = xsr.getAttributeValue( i );
           break;
-        case XML_ANCHOR:
+        case XmlLabels.XML_ANCHOR:
           m_cycleAnchor = Date.fromString( xsr.getAttributeValue( i ) );
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
           break;
       }
 
@@ -160,22 +158,27 @@ public class Calendar
     while ( xsr.hasNext() )
     {
       // if reached end of calendar, return
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XML_CALENDAR ) )
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_CALENDAR ) )
         return;
 
       // if a normal element, add it to list
-      if ( xsr.isStartElement() && xsr.getLocalName().equals( XML_NORMAL ) )
+      if ( xsr.isStartElement() && xsr.getLocalName().equals( XmlLabels.XML_NORMAL ) )
         for ( int i = 0; i < xsr.getAttributeCount(); i++ )
           switch ( xsr.getAttributeLocalName( i ) )
           {
-            case XML_DAY:
+            case XmlLabels.XML_ID:
+              break;
+            case XmlLabels.XML_DAY:
               int dayIndex = Integer.parseInt( xsr.getAttributeValue( i ) );
               m_normal.add( JPlanner.plan.day( dayIndex ) );
+              break;
+            default:
+              JPlanner.trace( "Normal - unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
               break;
           }
 
       // if an exception element, add it to list
-      if ( xsr.isStartElement() && xsr.getLocalName().equals( XML_EXCEPTION ) )
+      if ( xsr.isStartElement() && xsr.getLocalName().equals( XmlLabels.XML_EXCEPTION ) )
       {
         Date date = null;
         int dayIndex = -1;
@@ -183,11 +186,14 @@ public class Calendar
         for ( int i = 0; i < xsr.getAttributeCount(); i++ )
           switch ( xsr.getAttributeLocalName( i ) )
           {
-            case XML_DATE:
+            case XmlLabels.XML_DATE:
               date = Date.fromString( xsr.getAttributeValue( i ) );
               break;
-            case XML_DAY:
+            case XmlLabels.XML_DAY:
               dayIndex = Integer.parseInt( xsr.getAttributeValue( i ) );
+              break;
+            default:
+              JPlanner.trace( "Exception - unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
               break;
           }
 
@@ -286,7 +292,7 @@ public class Calendar
       m_exceptions = (HashMap<Date, Day>) newValue;
 
     else if ( section >= SECTION_NORMAL1 )
-      m_normal.set( section - SECTION_NORMAL1, (Day) newValue );
+      m_normal.set( section - SECTION_NORMAL1, JPlanner.plan.daytypes.fromName( (String) newValue ) );
 
     else
       throw new IllegalArgumentException( "Section=" + section );
@@ -300,13 +306,13 @@ public class Calendar
   }
 
   /********************************************* day *********************************************/
-  private Day day( Date date )
+  public Day day( Date date )
   {
     // if exception exists return it, otherwise return normal cycle day
     if ( m_exceptions.containsKey( date ) )
       return m_exceptions.get( date );
 
-    int normal = ( date.getEpochday() - m_cycleAnchor.getEpochday() ) % m_normal.size();
+    int normal = ( date.epochday() - m_cycleAnchor.epochday() ) % m_normal.size();
     if ( normal < 0 )
       normal += m_normal.size();
 
@@ -332,12 +338,12 @@ public class Calendar
     return "Normal " + ( num + 1 - SECTION_NORMAL1 );
   }
 
-  /****************************************** workDown *******************************************/
-  public DateTime workDown( DateTime dt )
+  /***************************************** roundDown *******************************************/
+  public DateTime roundDown( DateTime dt )
   {
     // return date-time if working, otherwise next future working date-time
-    Date date = dt.getDate();
-    Time time = dt.getTime();
+    Date date = dt.date();
+    Time time = dt.time();
     Day day = day( date );
 
     Time newTime = day.workDown( time );
@@ -353,12 +359,12 @@ public class Calendar
     return new DateTime( date, newTime );
   }
 
-  /******************************************** workUp *********************************************/
-  public DateTime workUp( DateTime dt )
+  /******************************************* roundUp *******************************************/
+  public DateTime roundUp( DateTime dt )
   {
     // return date-time if working, otherwise last past working date-time
-    Date date = dt.getDate();
-    Time time = dt.getTime();
+    Date date = dt.date();
+    Time time = dt.time();
     Day day = day( date );
 
     Time newTime = day.workUp( time );
@@ -378,25 +384,268 @@ public class Calendar
   public void saveToXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write calendar data to XML stream
-    xsw.writeStartElement( XML_CALENDAR );
-    xsw.writeAttribute( XML_ID, Integer.toString( JPlanner.plan.index( this ) ) );
-    xsw.writeAttribute( XML_NAME, m_name );
-    xsw.writeAttribute( XML_ANCHOR, m_cycleAnchor.toString() );
+    xsw.writeStartElement( XmlLabels.XML_CALENDAR );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
+    xsw.writeAttribute( XmlLabels.XML_NAME, m_name );
+    xsw.writeAttribute( XmlLabels.XML_ANCHOR, m_cycleAnchor.toString() );
 
     for ( int p = 0; p < m_normal.size(); p++ )
     {
-      xsw.writeEmptyElement( XML_NORMAL );
-      xsw.writeAttribute( XML_ID, Integer.toString( p ) );
-      xsw.writeAttribute( XML_DAY, Integer.toString( JPlanner.plan.index( m_normal.get( p ) ) ) );
+      xsw.writeEmptyElement( XmlLabels.XML_NORMAL );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( p ) );
+      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_normal.get( p ).index() ) );
     }
 
-    for ( HashMap.Entry<Date, Day> except : m_exceptions.entrySet() )
+    // generate sorted list of exception keys so order always same in XML file
+    ArrayList<Date> keys = new ArrayList<Date>( m_exceptions.keySet() );
+    keys.sort( new Comparator<Date>()
     {
-      xsw.writeEmptyElement( XML_EXCEPTION );
-      xsw.writeAttribute( XML_DATE, except.getKey().toString() );
-      xsw.writeAttribute( XML_DAY, Integer.toString( JPlanner.plan.index( except.getValue() ) ) );
+      @Override
+      public int compare( Date date1, Date date2 )
+      {
+        return Integer.compare( date1.epochday(), date2.epochday() );
+      }
+    } );
+
+    for ( Date date : keys )
+    {
+      xsw.writeEmptyElement( XmlLabels.XML_EXCEPTION );
+      xsw.writeAttribute( XmlLabels.XML_DATE, date.toString() );
+      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_exceptions.get( date ).index() ) );
     }
 
     xsw.writeEndElement(); // XML_CALENDAR
   }
+
+  /**************************************** workTimeSpan *****************************************/
+  public DateTime workTimeSpan( DateTime start, TimeSpan ts )
+  {
+    // if time-span is zero length return original start
+    if ( ts.number() == 0.0 )
+      return start;
+
+    // return date-time moved by TimeSpan
+    if ( ts.units() == TimeSpan.UNIT_SECONDS )
+      return workSeconds( start, ts.number() );
+
+    if ( ts.units() == TimeSpan.UNIT_MINUTES )
+      return workSeconds( start, ts.number() * 60.0 );
+
+    if ( ts.units() == TimeSpan.UNIT_HOURS )
+      return workSeconds( start, ts.number() * 3600.0 );
+
+    if ( ts.units() == TimeSpan.UNIT_DAYS )
+      return workDays( start, ts.number() );
+
+    if ( ts.units() == TimeSpan.UNIT_WEEKS )
+      return workWeeks( start, ts.number() );
+
+    if ( ts.units() == TimeSpan.UNIT_MONTHS )
+      return workMonths( start, ts.number() );
+
+    if ( ts.units() == TimeSpan.UNIT_YEARS )
+      return workYears( start, ts.number() );
+
+    // unknown time-span units - should never happen!
+    throw new IllegalArgumentException( ts.toString() );
+  }
+
+  /**************************************** workSeconds ******************************************/
+  private DateTime workSeconds( DateTime start, double secs )
+  {
+    // return date-time from start by specified number for worked seconds
+    Date date = start.date();
+    Time fromTime = start.time();
+    Day day = day( date );
+    int ms = (int) Math.round( secs * 1000.0 );
+
+    if ( ms > 0 )
+    {
+      // milliseconds is positive, so go forwards in time
+      Time time = day.millisecondsForward( fromTime, ms );
+
+      // if valid time then finished in day
+      if ( time != null )
+        return new DateTime( date, time );
+
+      // if not valid time, move to next date
+      ms -= day.millisecondsToGo( fromTime );
+      date.increment();
+      day = day( date );
+      while ( ms >= day.milliseconds() )
+      {
+        ms -= day.milliseconds();
+        date.increment();
+        day = day( date );
+      }
+
+      if ( ms == 0 )
+        return new DateTime( date, day.start() );
+      else
+        return new DateTime( date, day.millisecondsForward( ms ) );
+    }
+    else
+    {
+      // milliseconds is negative, so go backwards in time
+      ms = -ms;
+      Time time = day.millisecondsBackward( fromTime, ms );
+
+      // if valid time then finished in day
+      if ( time != null )
+        return new DateTime( date, time );
+
+      // if not valid time, move to previous date
+      ms -= day.millisecondsDone( fromTime );
+      date.decrement();
+      day = day( date );
+      while ( ms >= day.milliseconds() )
+      {
+        ms -= day.milliseconds();
+        date.decrement();
+        day = day( date );
+      }
+
+      if ( ms == 0 )
+        return new DateTime( date, day.end() );
+      else
+        return new DateTime( date, day.millisecondsBackward( ms ) );
+    }
+  }
+
+  /****************************************** workDays *******************************************/
+  private DateTime workDays( DateTime start, double work )
+  {
+    // return date-time from start by specified number for work equivalent days
+    Date date = start.date();
+    Time fromTime = start.time();
+    Day day = day( date );
+
+    if ( work > 0 )
+    {
+      // work is positive, so go forwards in time
+      Time time = day.workForward( fromTime, work );
+
+      // if valid time then finished in day
+      if ( time != null )
+        return new DateTime( date, time );
+
+      // if not valid time, move to next date
+      work -= day.workToGo( fromTime );
+      date.increment();
+      day = day( date );
+      while ( work >= day.work() )
+      {
+        work -= day.work();
+        date.increment();
+        day = day( date );
+      }
+
+      if ( work == 0 )
+        return new DateTime( date, day.start() );
+      else
+        return new DateTime( date, day.workForward( work ) );
+    }
+    else
+    {
+      // work is negative, so go backwards in time
+      work = -work;
+      Time time = day.workBackward( fromTime, work );
+
+      // if valid time then finished in day
+      if ( time != null )
+        return new DateTime( date, time );
+
+      // if not valid time, move to previous date
+      work -= day.workDone( fromTime );
+      date.decrement();
+      day = day( date );
+      while ( work >= day.work() )
+      {
+        work -= day.work();
+        date.decrement();
+        day = day( date );
+      }
+
+      if ( work == 0 )
+        return new DateTime( date, day.end() );
+      else
+        return new DateTime( date, day.workBackward( work ) );
+    }
+  }
+
+  /****************************************** workWeeks ******************************************/
+  private DateTime workWeeks( DateTime start, double weeks )
+  {
+    // return date-time moved by weeks (ignoring non-working days)
+    return start.plusDays( (int) ( 7.0 * weeks ) );
+  }
+
+  /***************************************** workMonths ******************************************/
+  private DateTime workMonths( DateTime start, double months )
+  {
+    // return date-time moved by months
+    double whole = Math.floor( months );
+    double fraction = months - whole;
+
+    // if no fraction, just add months
+    if ( fraction == 0.0 )
+      return start.plusMonths( (int) whole );
+
+    // if fraction, add months and days
+    start = start.plusMonths( (int) months );
+    int days1 = start.date().epochday();
+    int days2 = start.plusMonths( 1 ).date().epochday();
+    int daysInMonth = days2 - days1;
+    return start.plusDays( (int) ( daysInMonth * fraction ) );
+  }
+
+  /****************************************** workYears ******************************************/
+  private DateTime workYears( DateTime start, double years )
+  {
+    // return date-time moved by years
+    double whole = Math.floor( years );
+    double fraction = years - whole;
+
+    // if no fraction, just add years
+    if ( fraction == 0.0 )
+      return start.plusYears( (int) whole );
+
+    // if fraction, add years and months
+    return workMonths( start.plusYears( (int) whole ), 12.0 * fraction );
+  }
+
+  /***************************************** workBetween *****************************************/
+  public TimeSpan workBetween( DateTime start, DateTime end )
+  {
+    // return number of work equivalent days between the two date-times
+    Date sd = start.date();
+    Time st = start.time();
+    Day day = day( sd );
+
+    Date ed = end.date();
+    Time et = end.time();
+
+    // if start date same as end date, just work in day
+    if ( sd.equals( ed ) )
+      return new TimeSpan( day.workDone( et ) - day.workDone( st ), TimeSpan.UNIT_DAYS );
+
+    // add together work across the days
+    double work = day.workToGo( st );
+    sd.increment();
+    while ( !sd.equals( ed ) )
+    {
+      work += day( sd ).work();
+      sd.increment();
+    }
+    work += day( ed ).workDone( et );
+
+    return new TimeSpan( work, TimeSpan.UNIT_DAYS );
+  }
+
+  /******************************************** index ********************************************/
+  public int index()
+  {
+    return JPlanner.plan.index( this );
+  }
+
 }

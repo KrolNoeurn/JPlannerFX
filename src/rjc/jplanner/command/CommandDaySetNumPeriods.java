@@ -21,42 +21,69 @@ package rjc.jplanner.command;
 import java.util.ArrayList;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Day;
+import rjc.jplanner.model.DayWorkPeriod;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
-/************************ UndoCommand for updating calendar cycle length *************************/
+/****************** UndoCommand for updating day-types number of work periods ********************/
 /*************************************************************************************************/
 
-public class CommandSetCalendarCycleLength implements IUndoCommand
+public class CommandDaySetNumPeriods implements IUndoCommand
 {
-  private int            m_calID;      // calendar number in plan
-  private ArrayList<Day> m_newNormals; // new list of normal-cycle-days after command
-  private ArrayList<Day> m_oldNormals; // old list of normal-cycle-days before command
+  private int                      m_dayID;      // day number in plan
+  private ArrayList<DayWorkPeriod> m_newPeriods; // new list of work-periods after command
+  private ArrayList<DayWorkPeriod> m_oldPeriods; // old list of work-periods before command
 
   /**************************************** constructor ******************************************/
-  public CommandSetCalendarCycleLength( int calID, Object newValue, Object oldValue )
+  public CommandDaySetNumPeriods( int dayID, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_calID = calID;
-    m_oldNormals = new ArrayList<Day>( JPlanner.plan.calendar( calID ).normals() );
-    m_newNormals = new ArrayList<Day>( JPlanner.plan.calendar( calID ).normals() );
+    m_dayID = dayID;
+    m_oldPeriods = new ArrayList<DayWorkPeriod>( JPlanner.plan.day( dayID ).workPeriods() );
+    m_newPeriods = new ArrayList<DayWorkPeriod>( JPlanner.plan.day( dayID ).workPeriods() );
 
     int newNum = Integer.parseInt( (String) newValue );
     int oldNum = Integer.parseInt( (String) oldValue );
 
     if ( newNum > oldNum )
     {
-      // need to add new normal-cycle-days
-      Day day = JPlanner.plan.day( 0 );
+      // need to add new work-periods
+      double remainingHours = 24.0;
+      if ( !m_newPeriods.isEmpty() )
+        remainingHours -= 24.0 * m_newPeriods.get( oldNum - 1 ).m_end.milliseconds() / Time.MILLISECONDS_IN_DAY;
+
+      double increment = remainingHours / ( 1 + 2 * ( newNum - oldNum ) );
+      if ( increment >= 8.0 )
+        increment = 8.0;
+      else if ( increment >= 4.0 )
+        increment = 4.0;
+      else if ( increment >= 2.0 )
+        increment = 2.0;
+      else if ( increment >= 1.0 )
+        increment = 1.0;
+      else if ( increment >= 0.5 )
+        increment = 0.5;
+      else if ( increment >= 10.0 / 60.0 )
+        increment = 10.0 / 60.0;
+      else if ( increment >= 5.0 / 60.0 )
+        increment = 5.0 / 60.0;
+      else if ( increment >= 1.0 / 60.0 )
+        increment = 1.0 / 60.0;
+
+      double start = 24.0 - remainingHours + increment;
+
       for ( int count = oldNum; count < newNum; count++ )
-        m_newNormals.add( day );
+      {
+        m_newPeriods.add( new DayWorkPeriod( start, start + increment ) );
+        start += 2 * increment;
+      }
     }
     else
     {
-      // need to reduce number of normal-cycle-days
+      // need to reduce number of work-periods
       for ( int count = oldNum - 1; count >= newNum; count-- )
-        m_newNormals.remove( count );
+        m_newPeriods.remove( count );
     }
   }
 
@@ -65,10 +92,7 @@ public class CommandSetCalendarCycleLength implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.calendar( m_calID ).setData( Calendar.SECTION_CYCLE, m_newNormals );
-
-    // update calendar table
-    // --JPlanner.gui.calendarTables().refresh();
+    JPlanner.plan.day( m_dayID ).setData( Day.SECTION_PERIODS, m_newPeriods );
   }
 
   /******************************************* undo **********************************************/
@@ -76,10 +100,18 @@ public class CommandSetCalendarCycleLength implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.calendar( m_calID ).setData( Calendar.SECTION_CYCLE, m_oldNormals );
+    JPlanner.plan.day( m_dayID ).setData( Day.SECTION_PERIODS, m_oldPeriods );
+  }
 
-    // update calendar table
-    // --JPlanner.gui.calendarTables().refresh();
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
+    // reset day-types table because number of columns might have changed
+    //JPlanner.gui.resetDayTypeTables();
+
+    // re-schedule plan (which in turn will also update gui)
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
@@ -87,7 +119,7 @@ public class CommandSetCalendarCycleLength implements IUndoCommand
   public String text()
   {
     // text description of command
-    return "Calendar " + m_calID + " Cycle = " + m_newNormals.size();
+    return "Day " + m_dayID + " Periods = " + m_newPeriods.size();
   }
 
 }

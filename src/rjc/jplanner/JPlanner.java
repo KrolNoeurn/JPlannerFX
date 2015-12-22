@@ -55,6 +55,14 @@ public class JPlanner extends Application
     trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner ended ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
   }
 
+  /******************************************** start ********************************************/
+  @Override
+  public void start( Stage stage ) throws Exception
+  {
+    // create main window
+    gui = new MainWindow( stage );
+  }
+
   /******************************************* trace *********************************************/
   public static void trace( String txt )
   {
@@ -76,12 +84,11 @@ public class JPlanner extends Application
     System.out.println( DateTime.now() + "===================== STACK END =====================" );
   }
 
-  /******************************************** start ********************************************/
-  @Override
-  public void start( Stage stage ) throws Exception
+  /******************************************* clean *********************************************/
+  public static String clean( String txt )
   {
-    // create main window
-    gui = new MainWindow( stage );
+    // returns a clean string
+    return txt.trim().replaceAll( "\\s", " " ).replaceAll( "(\\s{2,})", " " );
   }
 
 }

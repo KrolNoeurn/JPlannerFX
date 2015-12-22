@@ -25,7 +25,7 @@ import rjc.jplanner.model.Task;
 /******************************** UndoCommand for updating tasks *********************************/
 /*************************************************************************************************/
 
-public class CommandSetTaskValue implements IUndoCommand
+public class CommandTaskSetValue implements IUndoCommand
 {
   private int    m_taskID;   // task number in plan
   private int    m_section;  // section number
@@ -33,7 +33,7 @@ public class CommandSetTaskValue implements IUndoCommand
   private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandSetTaskValue( int taskID, int section, Object newValue, Object oldValue )
+  public CommandTaskSetValue( int taskID, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
     m_taskID = taskID;
@@ -48,13 +48,6 @@ public class CommandSetTaskValue implements IUndoCommand
   {
     // action command
     JPlanner.plan.task( m_taskID ).setData( m_section, m_newValue );
-
-    // update tasks tables
-    // --JPlanner.gui.taskTables().refresh();
-
-    // if title and old value was null, update properties so it shows new count of tasks
-    // --if ( m_section == Task.SECTION_TITLE && m_oldValue == null )
-    // --JPlanner.gui.properties().updateFromPlan();
   }
 
   /******************************************* undo **********************************************/
@@ -63,13 +56,25 @@ public class CommandSetTaskValue implements IUndoCommand
   {
     // revert command
     JPlanner.plan.task( m_taskID ).setData( m_section, m_oldValue );
+  }
 
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
     // update tasks tables
-    // --JPlanner.gui.taskTables().refresh();
+    //JPlanner.gui.redrawTaskTables();
 
     // if title and old value was null, update properties so it shows new count of tasks
-    // --if ( m_section == Task.SECTION_TITLE && m_oldValue == null )
-    // --JPlanner.gui.properties().updateFromPlan();
+    if ( m_section == Task.SECTION_TITLE && m_oldValue == null )
+    {
+      //JPlanner.gui.properties().updateFromPlan();
+      //JPlanner.gui.schedule();
+    }
+
+    // update schedule for other changes
+    //if ( m_section != Task.SECTION_TITLE && m_section != Task.SECTION_COMMENT && m_section != Task.SECTION_COST )
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
@@ -77,7 +82,7 @@ public class CommandSetTaskValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Task " + ( m_taskID + 1 ) + " " + Task.sectionName( m_section ) + " = " + m_newValue;
+    return "Task " + m_taskID + " " + Task.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

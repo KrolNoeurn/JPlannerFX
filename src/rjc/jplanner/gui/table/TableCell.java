@@ -16,53 +16,26 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.days;
+package rjc.jplanner.gui.table;
 
-import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.table.ITableDataSource;
-import rjc.jplanner.model.Day;
-import rjc.jplanner.model.Task;
+import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
-/****************************** Table data source for showing tasks ******************************/
+/************************* Table cell that displays data source contents *************************/
 /*************************************************************************************************/
 
-public class DayTypesData implements ITableDataSource
+public class TableCell extends Cell
 {
 
-  /************************************** getColumnCount *****************************************/
-  @Override
-  public int getColumnCount()
+  /**************************************** constructor ******************************************/
+  public TableCell( String str, int x, int y, int w, int h )
   {
-    return Task.SECTION_MAX + 1;
-  }
-
-  /**************************************** getRowCount ******************************************/
-  @Override
-  public int getRowCount()
-  {
-    return JPlanner.plan.daysCount();
-  }
-
-  /************************************** getColumnTitle *****************************************/
-  @Override
-  public String getColumnTitle( int column )
-  {
-    return Day.sectionName( column );
-  }
-
-  /**************************************** getRowTitle ******************************************/
-  @Override
-  public String getRowTitle( int row )
-  {
-    return Integer.toString( row + 1 );
-  }
-
-  /**************************************** getCellText ******************************************/
-  @Override
-  public String getCellText( int column, int row )
-  {
-    return Integer.toString( column + 1 ) + "," + Integer.toString( row + 1 );
+    // construct table display cell
+    super( w, h, Color.WHITE );
+    setLayoutX( x );
+    setLayoutY( y );
+    drawText( str );
+    drawGrid();
   }
 
 }

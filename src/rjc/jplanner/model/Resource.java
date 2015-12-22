@@ -23,6 +23,7 @@ import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.XmlLabels;
 
 /*************************************************************************************************/
 /************************************* Single plan resource **************************************/
@@ -30,53 +31,41 @@ import rjc.jplanner.JPlanner;
 
 public class Resource
 {
-  private String              m_initials;                       // must be unique across all resources in model
-  private String              m_name;                           // free text
-  private String              m_org;                            // free text
-  private String              m_group;                          // free text
-  private String              m_role;                           // free text
-  private String              m_alias;                          // free text
-  private Date                m_start;                          // date availability starts inclusive
-  private Date                m_end;                            // date availability end inclusive
-  private double              m_availability;                   // number available
-  private double              m_cost;                           // cost TODO
-  private Calendar            m_calendar;                       // calendar for resource
-  private String              m_comment;                        // free text
+  private String          m_initials;           // must be unique across all resources in model
+  private String          m_name;               // free text
+  private String          m_org;                // free text
+  private String          m_group;              // free text
+  private String          m_role;               // free text
+  private String          m_alias;              // free text
+  private Date            m_start;              // date availability starts inclusive
+  private Date            m_end;                // date availability end inclusive
+  private double          m_availability;       // number available
+  private double          m_cost;               // cost TODO
+  private Calendar        m_calendar;           // calendar for resource
+  private String          m_comment;            // free text
 
-  public static final int     SECTION_INITIALS = 0;
-  public static final int     SECTION_NAME     = 1;
-  public static final int     SECTION_ORG      = 2;
-  public static final int     SECTION_GROUP    = 3;
-  public static final int     SECTION_ROLE     = 4;
-  public static final int     SECTION_ALIAS    = 5;
-  public static final int     SECTION_START    = 6;
-  public static final int     SECTION_END      = 7;
-  public static final int     SECTION_AVAIL    = 8;
-  public static final int     SECTION_COST     = 9;
-  public static final int     SECTION_CALENDAR = 10;
-  public static final int     SECTION_COMMENT  = 11;
-  public static final int     SECTION_MAX      = 11;
+  public ResourceWork     m_work;               // resource work on specified tasks
 
-  public static final String  XML_RESOURCE     = "resource";
-  private static final String XML_ID           = "id";
-  private static final String XML_INITIALS     = "initials";
-  private static final String XML_NAME         = "name";
-  private static final String XML_ORG          = "org";
-  private static final String XML_GROUP        = "group";
-  private static final String XML_ROLE         = "role";
-  private static final String XML_ALIAS        = "alias";
-  private static final String XML_START        = "start";
-  private static final String XML_END          = "end";
-  private static final String XML_AVAIL        = "availability";
-  private static final String XML_COST         = "cost";
-  private static final String XML_CALENDAR     = "calendar";
-  private static final String XML_COMMENT      = "comment";
+  public static final int SECTION_INITIALS = 0;
+  public static final int SECTION_NAME     = 1;
+  public static final int SECTION_ORG      = 2;
+  public static final int SECTION_GROUP    = 3;
+  public static final int SECTION_ROLE     = 4;
+  public static final int SECTION_ALIAS    = 5;
+  public static final int SECTION_START    = 6;
+  public static final int SECTION_END      = 7;
+  public static final int SECTION_AVAIL    = 8;
+  public static final int SECTION_COST     = 9;
+  public static final int SECTION_CALENDAR = 10;
+  public static final int SECTION_COMMENT  = 11;
+  public static final int SECTION_MAX      = 11;
 
   /**************************************** constructor ******************************************/
   public Resource()
   {
     // initialise private variables
     m_availability = 1.0;
+    m_work = new ResourceWork( this );
   }
 
   /**************************************** constructor ******************************************/
@@ -87,43 +76,64 @@ public class Resource
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
-        case XML_INITIALS:
+        case XmlLabels.XML_ID:
+          break;
+        case XmlLabels.XML_INITIALS:
           m_initials = xsr.getAttributeValue( i );
           break;
-        case XML_NAME:
+        case XmlLabels.XML_NAME:
           m_name = xsr.getAttributeValue( i );
           break;
-        case XML_ORG:
+        case XmlLabels.XML_ORG:
           m_org = xsr.getAttributeValue( i );
           break;
-        case XML_GROUP:
+        case XmlLabels.XML_GROUP:
           m_group = xsr.getAttributeValue( i );
           break;
-        case XML_ROLE:
+        case XmlLabels.XML_ROLE:
           m_role = xsr.getAttributeValue( i );
           break;
-        case XML_ALIAS:
+        case XmlLabels.XML_ALIAS:
           m_alias = xsr.getAttributeValue( i );
           break;
-        case XML_START:
+        case XmlLabels.XML_START:
           m_start = Date.fromString( xsr.getAttributeValue( i ) );
           break;
-        case XML_END:
+        case XmlLabels.XML_END:
           m_end = Date.fromString( xsr.getAttributeValue( i ) );
           break;
-        case XML_AVAIL:
+        case XmlLabels.XML_AVAIL:
           m_availability = Double.parseDouble( xsr.getAttributeValue( i ) );
           break;
-        case XML_COST:
+        case XmlLabels.XML_COST:
           m_cost = Double.parseDouble( xsr.getAttributeValue( i ) );
           break;
-        case XML_CALENDAR:
+        case XmlLabels.XML_CALENDAR:
           m_calendar = JPlanner.plan.calendar( Integer.parseInt( xsr.getAttributeValue( i ) ) );
           break;
-        case XML_COMMENT:
+        case XmlLabels.XML_COMMENT:
           m_comment = xsr.getAttributeValue( i );
           break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
       }
+  }
+
+  /**************************************** toStringShort ****************************************/
+  public String toStringShort()
+  {
+    // short string summary
+    return "Resource@" + Integer.toHexString( hashCode() ) + " [" + m_initials + "]";
+  }
+
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    // string summary
+    return "Resource@" + Integer.toHexString( hashCode() ) + " [" + m_initials + ", " + m_name + ", " + m_org + ", "
+        + m_group + ", " + m_role + ", " + m_alias + ", " + m_start + ", " + m_end + ", " + m_availability + "]";
   }
 
   /****************************************** toString *******************************************/
@@ -157,7 +167,7 @@ public class Resource
       if ( m_start == null )
         return "NA";
       else
-        return m_start.toString();
+        return m_start.toString( JPlanner.plan.dateFormat() );
     }
 
     if ( section == SECTION_END )
@@ -165,7 +175,7 @@ public class Resource
       if ( m_end == null )
         return "NA";
       else
-        return m_end.toString();
+        return m_end.toString( JPlanner.plan.dateFormat() );
     }
 
     if ( section == SECTION_AVAIL )
@@ -186,7 +196,7 @@ public class Resource
   /****************************************** setData ********************************************/
   public void setData( int section, Object newValue )
   {
-    // set resource data for given section 
+    // set resource data for given section
     if ( section == SECTION_INITIALS )
     {
       if ( isNull() )
@@ -212,6 +222,9 @@ public class Resource
 
     else if ( section == SECTION_COMMENT )
       m_comment = (String) newValue;
+
+    else if ( section == SECTION_CALENDAR )
+      m_calendar = JPlanner.plan.calendars.fromName( (String) newValue );
 
     // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -273,34 +286,73 @@ public class Resource
   public void saveToXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write resource data to xml stream
-    xsw.writeStartElement( XML_RESOURCE );
-    xsw.writeAttribute( XML_ID, Integer.toString( JPlanner.plan.index( this ) ) );
+    xsw.writeStartElement( XmlLabels.XML_RESOURCE );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
 
     if ( !isNull() )
     {
-      xsw.writeAttribute( XML_INITIALS, m_initials );
+      xsw.writeAttribute( XmlLabels.XML_INITIALS, m_initials );
       if ( m_name != null )
-        xsw.writeAttribute( XML_NAME, m_name );
+        xsw.writeAttribute( XmlLabels.XML_NAME, m_name );
       if ( m_org != null )
-        xsw.writeAttribute( XML_ORG, m_org );
+        xsw.writeAttribute( XmlLabels.XML_ORG, m_org );
       if ( m_group != null )
-        xsw.writeAttribute( XML_GROUP, m_group );
+        xsw.writeAttribute( XmlLabels.XML_GROUP, m_group );
       if ( m_role != null )
-        xsw.writeAttribute( XML_ROLE, m_role );
+        xsw.writeAttribute( XmlLabels.XML_ROLE, m_role );
       if ( m_alias != null )
-        xsw.writeAttribute( XML_ALIAS, m_alias );
+        xsw.writeAttribute( XmlLabels.XML_ALIAS, m_alias );
       if ( m_start != null )
-        xsw.writeAttribute( XML_START, m_start.toString() );
+        xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
       if ( m_end != null )
-        xsw.writeAttribute( XML_END, m_end.toString() );
-      xsw.writeAttribute( XML_AVAIL, Double.toString( m_availability ) );
-      xsw.writeAttribute( XML_COST, Double.toString( m_cost ) );
-      xsw.writeAttribute( XML_CALENDAR, Integer.toString( JPlanner.plan.index( m_calendar ) ) );
+        xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
+      xsw.writeAttribute( XmlLabels.XML_AVAIL, Double.toString( m_availability ) );
+      xsw.writeAttribute( XmlLabels.XML_COST, Double.toString( m_cost ) );
+      xsw.writeAttribute( XmlLabels.XML_CALENDAR, Integer.toString( m_calendar.index() ) );
       if ( m_comment != null )
-        xsw.writeAttribute( XML_COMMENT, m_comment );
+        xsw.writeAttribute( XmlLabels.XML_COMMENT, m_comment );
     }
 
     xsw.writeEndElement(); // XML_RESOURCE
+  }
+
+  /******************************************** index ********************************************/
+  public int index()
+  {
+    return JPlanner.plan.index( this );
+  }
+
+  /***************************************** isAssignable ****************************************/
+  public boolean isAssignable( String tag )
+  {
+    // return true only if any tag is recognised as a resource reference
+    if ( tag.equals( m_initials ) || tag.equals( m_name ) || tag.equals( m_org ) || tag.equals( m_group )
+        || tag.equals( m_role ) || tag.equals( m_alias ) )
+      return true;
+
+    return false;
+  }
+
+  /******************************************** start ********************************************/
+  public DateTime start()
+  {
+    if ( m_start == null )
+      return DateTime.MIN_VALUE;
+    return new DateTime( m_start, Time.MIN_VALUE );
+  }
+
+  /********************************************* end *********************************************/
+  public DateTime end()
+  {
+    if ( m_end == null )
+      return DateTime.MAX_VALUE;
+    return new DateTime( m_end, Time.MAX_VALUE );
+  }
+
+  /****************************************** available ******************************************/
+  public double available()
+  {
+    return m_availability;
   }
 
 }

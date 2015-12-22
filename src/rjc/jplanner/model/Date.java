@@ -56,8 +56,8 @@ public class Date
     m_epochday = (int) localDate.toEpochDay();
   }
 
-  /***************************************** getEpochday *****************************************/
-  public int getEpochday()
+  /****************************************** epochday *******************************************/
+  public int epochday()
   {
     // return int count of days from day 0 is 01-Jan-1970
     return m_epochday;
@@ -110,23 +110,23 @@ public class Date
     }
   }
 
-  /****************************************** getYear ********************************************/
-  public int getYear()
+  /******************************************** year *********************************************/
+  public int year()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getYear();
   }
 
-  /****************************************** getMonth *******************************************/
-  public int getMonth()
+  /******************************************** month ********************************************/
+  public int month()
   {
     // return month of year as number 1 to 12
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getMonthValue();
   }
 
-  /*************************************** getDayOfMonth *****************************************/
-  public int getDayOfMonth()
+  /***************************************** dayOfMonth ******************************************/
+  public int dayOfMonth()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getDayOfMonth();

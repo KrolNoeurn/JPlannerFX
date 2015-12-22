@@ -70,8 +70,8 @@ public class Time
     m_milliseconds = hours * 3600_000 + mins * 60_000 + secs * 1000 + ms;
   }
 
-  /************************************** getMilliseconds ****************************************/
-  public int getMilliseconds()
+  /**************************************** milliseconds *****************************************/
+  public int milliseconds()
   {
     // return int number of milliseconds from start of day
     return m_milliseconds;
@@ -129,9 +129,9 @@ public class Time
   {
     // convert to string to "hh:mm:ss.mmm" format
     StringBuilder buf = new StringBuilder( 16 );
-    int hour = getHours();
-    int minute = getMinutes();
-    int second = getSeconds();
+    int hour = hours();
+    int minute = minutes();
+    int second = seconds();
     int milli = m_milliseconds % 1000;
 
     buf.append( hour < 10 ? "0" : "" ).append( hour );
@@ -147,8 +147,8 @@ public class Time
   {
     // convert to string to "hh:mm" format
     StringBuilder buf = new StringBuilder( 6 );
-    int hour = getHours();
-    int minute = getMinutes();
+    int hour = hours();
+    int minute = minutes();
 
     buf.append( hour < 10 ? "0" : "" ).append( hour );
     buf.append( minute < 10 ? ":0" : ":" ).append( minute );
@@ -163,20 +163,20 @@ public class Time
     return new Time( (int) ( LocalTime.now().toNanoOfDay() / 1_000_000L ) );
   }
 
-  /****************************************** getHours *******************************************/
-  public int getHours()
+  /******************************************** hours ********************************************/
+  public int hours()
   {
     return m_milliseconds / 3600_000;
   }
 
-  /***************************************** getMinutes ******************************************/
-  public int getMinutes()
+  /******************************************* minutes *******************************************/
+  public int minutes()
   {
     return m_milliseconds / 60_000 % 60;
   }
 
-  /***************************************** getSeconds ******************************************/
-  public int getSeconds()
+  /******************************************* seconds *******************************************/
+  public int seconds()
   {
     return m_milliseconds / 1000 % 60;
   }

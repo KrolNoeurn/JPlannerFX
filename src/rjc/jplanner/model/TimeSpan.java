@@ -18,6 +18,8 @@
 
 package rjc.jplanner.model;
 
+import java.text.DecimalFormat;
+
 /*************************************************************************************************/
 /********************************** Quantity of time with units **********************************/
 /*************************************************************************************************/
@@ -34,20 +36,35 @@ public class TimeSpan
   public static final char   UNIT_WEEKS   = 'w';
   public static final char   UNIT_MONTHS  = 'm';
   public static final char   UNIT_YEARS   = 'y';
+  private static final char  UNIT_DEFAULT = UNIT_DAYS;
 
   public static final String NUMPOINT     = "01234567890.";
   public static final String UNITS        = "SMHdwmy";
 
   /**************************************** constructor ******************************************/
+  public TimeSpan()
+  {
+    // construct default time-span
+    m_num = 0.0;
+    m_units = UNIT_DEFAULT;
+  }
+
+  /**************************************** constructor ******************************************/
   public TimeSpan( String str )
   {
     // construct time-span from string
+    this();
+
+    // is string is of zero length, don't do anything more
+    if ( str.length() == 0 )
+      return;
+
+    // remove any spaces and determine last character
     str = str.replaceAll( "\\s+", "" );
     char lastchr = str.charAt( str.length() - 1 );
 
-    if ( NUMPOINT.indexOf( lastchr ) >= 0 )
-      m_units = UNIT_DAYS; // no units specified so assume 'days'
-    else
+    // if last char is not a number digit, check if it is a valid units 
+    if ( NUMPOINT.indexOf( lastchr ) < 0 )
     {
       if ( UNITS.indexOf( lastchr ) >= 0 ) // check if valid units
       {
@@ -63,16 +80,21 @@ public class TimeSpan
     m_num = Double.parseDouble( str );
   }
 
+  /**************************************** constructor ******************************************/
+  public TimeSpan( double num, char units )
+  {
+    // construct time-span from parameters
+    m_num = num;
+    m_units = units;
+  }
+
   /***************************************** toString ********************************************/
   @Override
   public String toString()
   {
-    // returns string representation, suppressing any ".0" on number
-    String str = Double.toString( m_num );
-    if ( str.substring( str.length() - 2 ).equals( ".0" ) )
-      str = str.substring( 0, str.length() - 2 );
-
-    return str + " " + m_units;
+    DecimalFormat df = new DecimalFormat( "0" );
+    df.setMaximumFractionDigits( 3 );
+    return df.format( m_num ) + " " + m_units;
   }
 
   /******************************************** units ********************************************/
@@ -85,6 +107,12 @@ public class TimeSpan
   public double number()
   {
     return m_num;
+  }
+
+  /******************************************** minus ********************************************/
+  public TimeSpan minus()
+  {
+    return new TimeSpan( -m_num, m_units );
   }
 
 }

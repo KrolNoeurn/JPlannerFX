@@ -30,6 +30,9 @@ public interface IUndoCommand
   // reverts the command
   void undo();
 
-  //short text string describing what this command, e.g. "insert text"
+  // updates needs after command, typically gui and schedule
+  void update();
+
+  // short text string describing what this command, e.g. "insert text"
   String text();
 }

@@ -66,12 +66,13 @@ public class UndoStack
     // add new command to stack, do it, and increment stack index
     m_stack.add( command );
     command.redo();
+    command.update();
     m_index++;
     updateUndoRedoMenuItems();
 
     // update undo-stack window if exists
-    // --if ( JPlanner.gui.undoWindow != null )
-    // --JPlanner.gui.undoWindow.updateList( command, m_index );
+    //if ( JPlanner.gui.undoWindow != null )
+    //JPlanner.gui.undoWindow.updateList( command, m_index );
   }
 
   /******************************************** undo *********************************************/
@@ -80,6 +81,7 @@ public class UndoStack
     // decrement index and revert command
     m_index--;
     m_stack.get( m_index ).undo();
+    m_stack.get( m_index ).update();
     updateUndoRedoMenuItems();
   }
 
@@ -88,6 +90,7 @@ public class UndoStack
   {
     // action command and increment index
     m_stack.get( m_index ).redo();
+    m_stack.get( m_index ).update();
     m_index++;
     updateUndoRedoMenuItems();
   }
@@ -95,21 +98,42 @@ public class UndoStack
   /*********************************** updateUndoRedoMenuItems ***********************************/
   private void updateUndoRedoMenuItems()
   {
-    /***
-     * // update undo menu-item MenuItem undo = JPlanner.gui.actionUndo; if ( m_index > 0 ) { undo.setText( "Undo " +
-     * undoText() + "\tCtrl+Z" ); undo.setEnabled( true ); } else { undo.setText( "Undo\tCtrl+Z" ); undo.setEnabled(
-     * false ); }
-     * 
-     * // update redo menu-item MenuItem redo = JPlanner.gui.actionRedo; if ( m_index < size() ) { redo.setText( "Redo "
-     * + redoText() + "\tCtrl+Y" ); redo.setEnabled( true ); } else { redo.setText( "Redo\tCtrl+Y" ); redo.setEnabled(
-     * false ); }
-     * 
-     * // also update undo-stack window selected item if exists if ( JPlanner.gui.undoWindow != null )
-     * JPlanner.gui.undoWindow.updateSelection();
-     * 
-     * // if clean state changed, update window titles if ( m_previousCleanState != isClean() )
-     * JPlanner.gui.updateTitles(); m_previousCleanState = isClean();
-     ***/
+    // update undo menu-item
+    /*
+    MenuItem undo = JPlanner.gui.actionUndo;
+    if ( m_index > 0 )
+    {
+      undo.setText( "Undo " + undoText() + "\tCtrl+Z" );
+      undo.setEnabled( true );
+    }
+    else
+    {
+      undo.setText( "Undo\tCtrl+Z" );
+      undo.setEnabled( false );
+    }
+    
+    // update redo menu-item
+    MenuItem redo = JPlanner.gui.actionRedo;
+    if ( m_index < size() )
+    {
+      redo.setText( "Redo " + redoText() + "\tCtrl+Y" );
+      redo.setEnabled( true );
+    }
+    else
+    {
+      redo.setText( "Redo\tCtrl+Y" );
+      redo.setEnabled( false );
+    }
+    
+    // also update undo-stack window selected item if exists
+    if ( JPlanner.gui.undoWindow != null )
+      JPlanner.gui.undoWindow.updateSelection();
+    
+    // if clean state changed, update window titles
+    if ( m_previousCleanState != isClean() )
+      JPlanner.gui.updateWindowTitles();
+    m_previousCleanState = isClean();
+    */
   }
 
   /****************************************** undoText *******************************************/

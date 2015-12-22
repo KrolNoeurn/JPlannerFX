@@ -24,13 +24,13 @@ import rjc.jplanner.JPlanner;
 /****************************** UndoCommand for updating plan notes ******************************/
 /*************************************************************************************************/
 
-public class CommandSetPlanNotes implements IUndoCommand
+public class CommandPlanSetNotes implements IUndoCommand
 {
   private String m_oldNotes;
   private String m_newNotes;
 
   /**************************************** constructor ******************************************/
-  public CommandSetPlanNotes( String newNotes )
+  public CommandPlanSetNotes( String newNotes )
   {
     // initialise private variables
     m_oldNotes = JPlanner.plan.notes();
@@ -43,9 +43,6 @@ public class CommandSetPlanNotes implements IUndoCommand
   {
     // action command
     JPlanner.plan.setNotes( m_newNotes );
-
-    // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
   }
 
   /******************************************* undo **********************************************/
@@ -54,9 +51,14 @@ public class CommandSetPlanNotes implements IUndoCommand
   {
     // revert command
     JPlanner.plan.setNotes( m_oldNotes );
+  }
 
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
     // update plan notes on gui
-    // --JPlanner.gui.notes().updateFromPlan();
+    //JPlanner.gui.notes().updateFromPlan();
   }
 
   /******************************************* text **********************************************/

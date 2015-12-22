@@ -35,7 +35,7 @@ public class TaskType
   /***************************************** constructor *****************************************/
   public TaskType( String str )
   {
-    // create type type, don't assume string-pointer is correct even if string is valid 
+    // create type type, don't assume string-pointer is correct even if string is valid
     if ( str.equals( ASAP_FDUR ) )
       m_type = ASAP_FDUR;
 
@@ -84,5 +84,19 @@ public class TaskType
         return false;
 
     return true;
+  }
+
+  /******************************************** list *********************************************/
+  public static String[] list()
+  {
+    // return String array of task types
+    String[] items = new String[5];
+    items[0] = ASAP_FDUR;
+    items[1] = ASAP_FWORK;
+    items[2] = SON_FDUR;
+    items[3] = SON_FWORK;
+    items[4] = FIXED_PERIOD;
+
+    return items;
   }
 }

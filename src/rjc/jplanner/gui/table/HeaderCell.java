@@ -19,7 +19,7 @@
 package rjc.jplanner.gui.table;
 
 /*************************************************************************************************/
-/************ Header corner that sits in corner between vertical & horizontal headers ************/
+/********************* Header cell that displays either column or row title **********************/
 /*************************************************************************************************/
 
 public class HeaderCell extends Cell
@@ -28,7 +28,7 @@ public class HeaderCell extends Cell
   /**************************************** constructor ******************************************/
   public HeaderCell( String str, int x, int y, int w, int h )
   {
-    // construct default table header corner
+    // construct table header cell
     super( w, h, Table.COLOR_HEADER_FILL );
     setLayoutX( x );
     setLayoutY( y );

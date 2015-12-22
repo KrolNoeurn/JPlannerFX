@@ -19,24 +19,24 @@
 package rjc.jplanner.command;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.model.Resource;
+import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
-/****************************** UndoCommand for updating resources *******************************/
+/************* UndoCommand for updating calendars (except cycle-length & exceptions) *************/
 /*************************************************************************************************/
 
-public class CommandSetResourceValue implements IUndoCommand
+public class CommandCalendarSetValue implements IUndoCommand
 {
-  private int    m_resID;    // resource number in plan
+  private int    m_calID;    // calendar number in plan
   private int    m_section;  // section number
   private Object m_newValue; // new value after command
   private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandSetResourceValue( int resID, int section, Object newValue, Object oldValue )
+  public CommandCalendarSetValue( int calID, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_resID = resID;
+    m_calID = calID;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
@@ -47,14 +47,7 @@ public class CommandSetResourceValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.resource( m_resID ).setData( m_section, m_newValue );
-
-    // update resources tables
-    // --JPlanner.gui.resourceTables().refresh();
-
-    // if initials and old value was null, update properties so it shows new count of resources
-    // --if ( m_section == Resource.SECTION_INITIALS && m_oldValue == null )
-    // --JPlanner.gui.properties().updateFromPlan();
+    JPlanner.plan.calendar( m_calID ).setData( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
@@ -62,14 +55,24 @@ public class CommandSetResourceValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.resource( m_resID ).setData( m_section, m_oldValue );
+    JPlanner.plan.calendar( m_calID ).setData( m_section, m_oldValue );
+  }
 
-    // update resources tables
-    // --JPlanner.gui.resourceTables().refresh();
+  /****************************************** update *********************************************/
+  @Override
+  public void update()
+  {
+    // update calendars tables
+    //JPlanner.gui.redrawCalendarTables();
 
-    // if initials and old value was null, update properties so it shows new count of resources
-    // --if ( m_section == Resource.SECTION_INITIALS && m_oldValue == null )
-    // --JPlanner.gui.properties().updateFromPlan();
+    // if name changed, update resources tables and properties, otherwise re-schedule
+    if ( m_section == Calendar.SECTION_NAME )
+    {
+      //JPlanner.gui.redrawResourceTables();
+      //JPlanner.gui.properties().updateFromPlan();
+    }
+    //else
+    //JPlanner.gui.schedule();
   }
 
   /******************************************* text **********************************************/
@@ -77,7 +80,7 @@ public class CommandSetResourceValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Resource " + ( m_resID + 1 ) + " " + Resource.sectionName( m_section ) + " = " + m_newValue;
+    return "Day " + ( m_calID + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }
