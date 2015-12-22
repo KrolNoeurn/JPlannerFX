@@ -18,10 +18,12 @@
 
 package rjc.jplanner.gui.days;
 
+import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Day;
-import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
 /****************************** Table data source for showing tasks ******************************/
@@ -34,7 +36,13 @@ public class DayTypesData implements ITableDataSource
   @Override
   public int getColumnCount()
   {
-    return Task.SECTION_MAX + 1;
+    // table column count is max number of periods * 2 + SECTION_START1
+    int max = 0;
+    for ( int i = 0; i < getRowCount(); i++ )
+      if ( JPlanner.plan.day( i ).numPeriods() > max )
+        max = JPlanner.plan.day( i ).numPeriods();
+
+    return max * 2 + Day.SECTION_START1;
   }
 
   /**************************************** getRowCount ******************************************/
@@ -62,7 +70,30 @@ public class DayTypesData implements ITableDataSource
   @Override
   public String getCellText( int column, int row )
   {
-    return Integer.toString( column + 1 ) + "," + Integer.toString( row + 1 );
+    return JPlanner.plan.day( row ).toString( column );
+  }
+
+  /************************************* getCellAlignment ****************************************/
+  @Override
+  public Alignment getCellAlignment( int column, int row )
+  {
+    // all cells are middle aligned except name which is left aligned
+    if ( column == Day.SECTION_NAME )
+      return Alignment.LEFT;
+
+    return Alignment.MIDDLE;
+  }
+
+  /************************************* getCellBackground ***************************************/
+  @Override
+  public Paint getCellBackground( int column, int row )
+  {
+    // all cells are white except unused start/end
+    Day day = JPlanner.plan.day( row );
+    if ( column >= day.numPeriods() * 2 + Day.SECTION_START1 )
+      return Table.COLOR_DISABLED_CELL;
+
+    return Table.COLOR_NORMAL_CELL;
   }
 
 }

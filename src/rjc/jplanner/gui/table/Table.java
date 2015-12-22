@@ -21,7 +21,6 @@ package rjc.jplanner.gui.table;
 import java.util.HashMap;
 
 import javafx.geometry.Orientation;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
@@ -32,29 +31,31 @@ import javafx.scene.paint.Color;
 
 public class Table extends GridPane
 {
-  public static final int           DEFAULT_ROW_HEIGHT               = 20;
-  public static final int           DEFAULT_COLUMN_WIDTH             = 100;
-  public static final int           DEFAULT_HORIZONTAL_HEADER_HEIGHT = DEFAULT_ROW_HEIGHT;
-  public static final int           DEFAULT_VERTICAL_HEADER_WIDTH    = 30;
+  public static final Color         COLOR_GRID           = Color.SILVER;
+  public static final Color         COLOR_HEADER_FILL    = Color.rgb( 240, 240, 240 );     // light grey
+  public static final Color         COLOR_NORMAL_CELL    = Color.WHITE;
+  public static final Color         COLOR_DISABLED_CELL  = Color.rgb( 227, 227, 227 );     // medium grey
 
-  public static final Color         COLOR_GRID                       = Color.SILVER;
-  public static final Color         COLOR_HEADER_FILL                = Color.rgb( 240, 240, 240 );
+  private ITableDataSource          m_data;                                                // data source for the table
+  private int                       m_offsetX            = 0;
+  private int                       m_offsetY            = 0;
 
-  private ITableDataSource          m_data;
-  private int                       m_offsetX;
-  private int                       m_offsetY;
+  private int                       m_defaultRowHeight   = 20;
+  private int                       m_defaultColumnWidth = 100;
+  private int                       m_hHeaderHeight      = 20;
+  private int                       m_vHeaderWidth       = 30;
 
-  private ScrollBar                 m_vScrollBar;
-  private ScrollBar                 m_hScrollBar;
+  private TableScrollBar            m_vScrollBar;
+  private TableScrollBar            m_hScrollBar;
 
-  private HeaderCorner              m_cHeader;
-  private VerticalHeader            m_vHeader;
-  private HorizontalHeader          m_hHeader;
-  private TableCells                m_cells;
+  private HeaderCorner              m_headerCorner;
+  private HeaderVertical            m_vHeader;
+  private HeaderHorizontal          m_hHeader;
+  private Body                      m_body;
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private HashMap<Integer, Integer> m_columnWidths                   = new HashMap<Integer, Integer>();
-  private HashMap<Integer, Integer> m_rowHeights                     = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_rowHeights         = new HashMap<Integer, Integer>();
 
   /**************************************** constructor ******************************************/
   public Table( ITableDataSource data )
@@ -64,33 +65,26 @@ public class Table extends GridPane
 
     // initial private variables and table components
     m_data = data;
-    m_offsetX = 0;
-    m_offsetY = 0;
 
-    m_cHeader = new HeaderCorner( this );
-    m_hHeader = new HorizontalHeader( this );
-    m_vHeader = new VerticalHeader( this );
-    m_cells = new TableCells( this );
+    m_headerCorner = new HeaderCorner( this );
+    m_hHeader = new HeaderHorizontal( this );
+    m_vHeader = new HeaderVertical( this );
+    m_body = new Body( this );
 
-    m_vScrollBar = new ScrollBar();
-    m_vScrollBar.setOrientation( Orientation.VERTICAL );
-    m_vScrollBar.setMinWidth( 16 );
-
-    m_hScrollBar = new ScrollBar();
-    m_hScrollBar.setOrientation( Orientation.HORIZONTAL );
-    m_hScrollBar.setMinHeight( 16 );
+    m_vScrollBar = new TableScrollBar( this, Orientation.VERTICAL );
+    m_hScrollBar = new TableScrollBar( this, Orientation.HORIZONTAL );
 
     // place table components onto grid
-    add( m_cHeader, 0, 0 );
+    add( m_headerCorner, 0, 0 );
     add( m_hHeader, 1, 0 );
     add( m_vHeader, 0, 1 );
-    add( m_cells, 1, 1 );
+    add( m_body, 1, 1 );
     add( m_vScrollBar, 2, 0, 1, 2 );
     add( m_hScrollBar, 0, 2, 2, 1 );
 
     // cells area should grow to fill all available space
-    setHgrow( m_cells, Priority.ALWAYS );
-    setVgrow( m_cells, Priority.ALWAYS );
+    setHgrow( m_body, Priority.ALWAYS );
+    setVgrow( m_body, Priority.ALWAYS );
   }
 
   /*************************************** getDataSource *****************************************/
@@ -102,25 +96,25 @@ public class Table extends GridPane
   /************************************** getCornerHeader ****************************************/
   public HeaderCorner getCornerHeader()
   {
-    return m_cHeader;
+    return m_headerCorner;
   }
 
   /************************************* getVerticalHeader ***************************************/
-  public VerticalHeader getVerticalHeader()
+  public HeaderVertical getVerticalHeader()
   {
     return m_vHeader;
   }
 
   /************************************ getHorizontalHeader **************************************/
-  public HorizontalHeader getHorizontalHeader()
+  public HeaderHorizontal getHorizontalHeader()
   {
     return m_hHeader;
   }
 
   /****************************************** getCells *******************************************/
-  public TableCells getCells()
+  public Body getCells()
   {
-    return m_cells;
+    return m_body;
   }
 
   /***************************************** getOffsetX ******************************************/
@@ -173,7 +167,7 @@ public class Table extends GridPane
   public int getColumnWidth( int column )
   {
     // return width of column
-    int width = DEFAULT_COLUMN_WIDTH;
+    int width = m_defaultColumnWidth;
 
     if ( m_columnWidths.containsKey( column ) )
     {
@@ -223,7 +217,7 @@ public class Table extends GridPane
   public int getRowHeight( int row )
   {
     // return height of row
-    int height = DEFAULT_ROW_HEIGHT;
+    int height = m_defaultRowHeight;
 
     if ( m_rowHeights.containsKey( row ) )
     {
@@ -249,6 +243,54 @@ public class Table extends GridPane
     // return height of all the table cells
     int max = m_data.getRowCount();
     return getRowStartY( max ) + getRowHeight( max );
+  }
+
+  /************************************ setDefaultColumnWidth ************************************/
+  public void setDefaultColumnWidth( int width )
+  {
+    m_defaultColumnWidth = width;
+  }
+
+  /************************************* setDefaultRowHeight *************************************/
+  public void setDefaultRowHeight( int height )
+  {
+    m_defaultRowHeight = height;
+  }
+
+  /*********************************** getVerticalHeaderWidth ************************************/
+  public int getVerticalHeaderWidth()
+  {
+    return m_vHeaderWidth;
+  }
+
+  /*********************************** setVerticalHeaderWidth ************************************/
+  public void setVerticalHeaderWidth( int width )
+  {
+    m_vHeaderWidth = width;
+  }
+
+  /********************************** getHorizontalHeaderHeight **********************************/
+  public int getHorizontalHeaderHeight()
+  {
+    return m_hHeaderHeight;
+  }
+
+  /********************************** setHorizontalHeaderHeight **********************************/
+  public void setHorizontalHeaderHeight( int height )
+  {
+    m_hHeaderHeight = height;
+  }
+
+  /*************************************** setColumnWidth ****************************************/
+  public void setColumnWidth( int column, int width )
+  {
+    m_columnWidths.put( column, width );
+  }
+
+  /**************************************** setRowHeight *****************************************/
+  public void setRowHeight( int row, int height )
+  {
+    m_rowHeights.put( row, height );
   }
 
 }

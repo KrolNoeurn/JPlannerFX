@@ -32,7 +32,7 @@ public class HeaderCell extends Cell
     super( w, h, Table.COLOR_HEADER_FILL );
     setLayoutX( x );
     setLayoutY( y );
-    drawText( str );
+    drawText( str, Alignment.MIDDLE );
     drawGrid();
   }
 

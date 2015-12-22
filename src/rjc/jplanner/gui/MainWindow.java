@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.days.DayTypesData;
 import rjc.jplanner.gui.table.Table;
+import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /******************************* Main JPlanner application window ********************************/
@@ -37,7 +38,11 @@ public class MainWindow
     DayTypesData days = new DayTypesData();
 
     // create the scene and setup the stage
-    Scene scene = new Scene( new Table( days ), 700, 300, Color.rgb( 240, 240, 240 ) );
+    Table dayTypes = new Table( days );
+    dayTypes.setDefaultColumnWidth( 60 );
+    dayTypes.setColumnWidth( Day.SECTION_NAME, 150 );
+
+    Scene scene = new Scene( dayTypes, 700, 300, Color.rgb( 240, 240, 240 ) );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();

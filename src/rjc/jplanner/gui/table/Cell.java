@@ -28,7 +28,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 
 /*************************************************************************************************/
-/************************** Abstract gui cell for main table or header ***************************/
+/****************** Abstract gui node for displaying table body or header cell *******************/
 /*************************************************************************************************/
 
 public abstract class Cell extends Canvas
@@ -51,7 +51,7 @@ public abstract class Cell extends Canvas
   private static String ELLIPSIS     = "..."; // ellipsis to show text has been truncated
   private static int    CELL_PADDING = 4;     // cell padding for text left & right edges
 
-  public enum Alignment
+  public static enum Alignment// alignment of text to be drawn in cell
   {
     LEFT, MIDDLE, RIGHT
   }
@@ -59,7 +59,7 @@ public abstract class Cell extends Canvas
   /**************************************** constructor ******************************************/
   public Cell( int w, int h, Paint fill )
   {
-    // construct cell
+    // construct cell drawing area
     super( w, h );
 
     // fill cell background with specified paint
@@ -79,23 +79,16 @@ public abstract class Cell extends Canvas
   }
 
   /***************************************** drawText ********************************************/
-  public void drawText( String text )
+  public void drawText( String text, Alignment alignment )
   {
     // break text down into individual lines
-    ArrayList<TextLine> lines = getTextLines( text, getAlignment() );
+    ArrayList<TextLine> lines = getTextLines( text, alignment );
 
     // draw individual lines
     GraphicsContext gc = getGraphicsContext2D();
     gc.setFill( Color.BLACK );
     for ( TextLine line : lines )
       gc.fillText( line.txt, line.x, line.y );
-  }
-
-  /*************************************** getAlignment ******************************************/
-  protected Alignment getAlignment()
-  {
-    // overload this method if you want different alignment
-    return Alignment.MIDDLE;
   }
 
   /**************************************** getTextLines *****************************************/

@@ -18,6 +18,9 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.scene.paint.Paint;
+import rjc.jplanner.gui.table.Cell.Alignment;
+
 /*************************************************************************************************/
 /******************************** Interface for table data source ********************************/
 /*************************************************************************************************/
@@ -38,4 +41,10 @@ public interface ITableDataSource
 
   // return cell text to be displayed
   String getCellText( int column, int row );
+
+  // return cell text alignment
+  Alignment getCellAlignment( int column, int row );
+
+  // return cell background colour
+  Paint getCellBackground( int column, int row );
 }

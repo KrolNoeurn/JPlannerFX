@@ -23,22 +23,22 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/*************************** Vertical header that shows row titles *******************************/
 /*************************************************************************************************/
 
-public class HorizontalHeader extends Pane
+public class HeaderVertical extends Pane
 {
   private Table m_table;
 
   /**************************************** constructor ******************************************/
-  public HorizontalHeader( Table table )
+  public HeaderVertical( Table table )
   {
-    // construct default table horizontal header for column titles
+    // construct default table header-corner
     super();
     m_table = table;
 
     // listener for header size changes
-    widthProperty().addListener( new ChangeListener<Number>()
+    heightProperty().addListener( new ChangeListener<Number>()
     {
       @Override
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
@@ -51,28 +51,28 @@ public class HorizontalHeader extends Pane
   /*************************************** updateHeader ******************************************/
   private void updateHeader()
   {
-    // determine which columns are visible
-    int startColumn = m_table.getColumnAtX( 0.0 );
-    int endColumn = m_table.getColumnAtX( getWidth() );
+    // determine which rows are visible
+    int startRow = m_table.getRowAtY( 0.0 );
+    int endRow = m_table.getRowAtY( getHeight() );
 
-    // if width wider than table, limit to last column
-    int last = m_table.getDataSource().getColumnCount() - 1;
-    if ( endColumn > last )
-      endColumn = last;
+    // if height higher than table, limit to last row
+    int last = m_table.getDataSource().getRowCount() - 1;
+    if ( endRow > last )
+      endRow = last;
 
     // clear any old header cells and re-generate new ones (TODO something more efficient)
     getChildren().clear();
-    int x = m_table.getColumnStartX( startColumn );
-    int height = (int) m_table.getCornerHeader().getHeight();
+    int y = m_table.getRowStartY( startRow );
+    int width = (int) m_table.getCornerHeader().getWidth();
 
-    for ( int column = startColumn; column <= endColumn; column++ )
+    for ( int row = startRow; row <= endRow; row++ )
     {
-      int width = m_table.getColumnWidth( column );
-      String txt = m_table.getDataSource().getColumnTitle( column );
-      HeaderCell hc = new HeaderCell( txt, x, 0, width, height );
+      int height = m_table.getRowHeight( row );
+      String txt = m_table.getDataSource().getRowTitle( row );
+      HeaderCell hc = new HeaderCell( txt, 0, y, width, height );
 
       getChildren().add( hc );
-      x += width;
+      y += height;
     }
   }
 

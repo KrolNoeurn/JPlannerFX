@@ -18,23 +18,23 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /*************************************************************************************************/
 /************************* Table cell that displays data source contents *************************/
 /*************************************************************************************************/
 
-public class TableCell extends Cell
+public class BodyCell extends Cell
 {
 
   /**************************************** constructor ******************************************/
-  public TableCell( String str, int x, int y, int w, int h )
+  public BodyCell( String str, Alignment alignment, int x, int y, int w, int h, Paint color )
   {
     // construct table display cell
-    super( w, h, Color.WHITE );
+    super( w, h, color );
     setLayoutX( x );
     setLayoutY( y );
-    drawText( str );
+    drawText( str, alignment );
     drawGrid();
   }
 

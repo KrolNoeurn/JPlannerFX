@@ -21,17 +21,19 @@ package rjc.jplanner.gui.table;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Paint;
+import rjc.jplanner.gui.table.Cell.Alignment;
 
 /*************************************************************************************************/
 /************************** Display area that shows table cell contents **************************/
 /*************************************************************************************************/
 
-public class TableCells extends Pane
+public class Body extends Pane
 {
   private Table m_table;
 
   /**************************************** constructor ******************************************/
-  public TableCells( Table table )
+  public Body( Table table )
   {
     // construct default table cells display
     super();
@@ -82,9 +84,11 @@ public class TableCells extends Pane
       for ( int column = startColumn; column <= endColumn; column++ )
       {
         int width = m_table.getColumnWidth( column );
-
         String txt = m_table.getDataSource().getCellText( column, row );
-        TableCell hc = new TableCell( txt, x, y, width, height );
+        Alignment align = m_table.getDataSource().getCellAlignment( column, row );
+        Paint color = m_table.getDataSource().getCellBackground( column, row );
+
+        BodyCell hc = new BodyCell( txt, align, x, y, width, height, color );
 
         getChildren().add( hc );
         x += width;
