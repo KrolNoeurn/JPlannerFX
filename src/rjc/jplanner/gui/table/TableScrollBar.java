@@ -18,10 +18,14 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollBar;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /*************************** Scroll bar for tables that self-manage ******************************/
@@ -29,8 +33,11 @@ import javafx.scene.control.ScrollBar;
 
 public class TableScrollBar extends ScrollBar
 {
-  private Table          m_table;
-  private TableScrollBar m_other;
+  public static final double SIZE = 18.0;
+  public static Canvas       corner;
+
+  private Table              m_table;
+  private TableScrollBar     m_other;
 
   /**************************************** constructor ******************************************/
   public TableScrollBar( Table table, Orientation orientation )
@@ -39,13 +46,51 @@ public class TableScrollBar extends ScrollBar
     super();
     m_table = table;
     setOrientation( orientation );
-    setMinWidth( 18.0 );
-    setMinHeight( 18.0 );
+    setMinWidth( SIZE );
+    setMinHeight( SIZE );
 
+    // create corner that sits between the two scroll bars
+    if ( corner == null )
+    {
+      corner = new Canvas( SIZE, SIZE );
+      GraphicsContext gc = corner.getGraphicsContext2D();
+      gc.setFill( Table.COLOR_HEADER_FILL );
+      gc.fillRect( 0, 0, getWidth(), getHeight() );
+    }
+
+    // add listener to ensure scroll bar appropriate for table body size
+    ReadOnlyDoubleProperty property = m_table.getBody().heightProperty();
     if ( orientation == Orientation.HORIZONTAL )
-      addHorizontalListeners();
-    else
-      addVerticalListeners();
+      property = m_table.getBody().widthProperty();
+    property.addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        check();
+        m_other.check();
+      }
+    } );
+
+    // ******************************************** TODO ................
+    valueProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        // TODO .............
+        JPlanner.trace( TableScrollBar.this.toString() );
+      }
+    } );
+
+  }
+
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    return "TableScrollBar " + getOrientation().toString().charAt( 0 ) + " value=" + getValue() + " thumb="
+        + getVisibleAmount() + " min=" + getMin() + " max=" + getMax();
   }
 
   /****************************************** setOther *******************************************/
@@ -81,9 +126,15 @@ public class TableScrollBar extends ScrollBar
       // both visible so both need length of 2
       setLength( 2 );
       m_other.setLength( 2 );
+
+      // show scroll bar corner
+      corner.setVisible( true );
     }
     else
     {
+      // hide scroll bar corner
+      corner.setVisible( false );
+
       // if visible set length to 3
       if ( isVisible() )
         setLength( 3 );
@@ -93,54 +144,40 @@ public class TableScrollBar extends ScrollBar
   }
 
   /******************************************** check ********************************************/
-  private void check( int index )
+  private void check()
   {
-    // if change needed, hide/show scroll bar and reset scroll bar lengths 
+    // check ensure scroll bar appropriate for table body size
+    double size = 0.0;
+    int index, max;
+    if ( !m_other.isVisible() )
+      size += SIZE;
+    if ( getOrientation() == Orientation.VERTICAL )
+    {
+      size += m_table.getBody().getHeight();
+      index = m_table.getRowExactAtY( size );
+      max = m_table.getRowStartY( Integer.MAX_VALUE );
+    }
+    else
+    {
+      size += m_table.getBody().getWidth();
+      index = m_table.getColumnExactAtX( size );
+      max = m_table.getColumnStartX( Integer.MAX_VALUE );
+    }
+
+    // scroll bar needed if normal column/row index at edge
     boolean needed = index != Integer.MAX_VALUE;
     if ( isVisible() != needed )
     {
       setVisible( needed );
       setLengths();
     }
-  }
 
-  /************************************ addVerticalListeners *************************************/
-  private void addVerticalListeners()
-  {
-    // add listener for height change
-    m_table.getBody().heightProperty().addListener( new ChangeListener<Number>()
+    // if visible, check thumb size
+    if ( isVisible() )
     {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        // check if vertical scroll bar needed
-        int y = newValue.intValue();
-        if ( !m_other.isVisible() )
-          y += TableScrollBar.this.getWidth();
-        int row = m_table.getRowExactAtY( y );
-        check( row );
-      }
-    } );
-
-  }
-
-  /*********************************** addHorizontalListeners ************************************/
-  private void addHorizontalListeners()
-  {
-    // add listener for width change
-    m_table.getBody().widthProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        // check if horizontal scroll bar needed
-        int x = newValue.intValue();
-        if ( !m_other.isVisible() )
-          x += TableScrollBar.this.getHeight();
-        int column = m_table.getColumnExactAtX( x );
-        check( column );
-      }
-    } );
+      setMax( max );
+      setVisibleAmount( size );
+    }
 
   }
 

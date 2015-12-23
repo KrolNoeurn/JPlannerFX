@@ -59,7 +59,7 @@ public abstract class CellGrid extends Pane
           return;
 
         // width has increased, so add any extra new columns needed
-        int newMax = m_table.getColumnAtX( newWidth );
+        int newMax = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE );
         for ( int column = m_maxShownColumn + 1; column <= newMax; column++ )
         {
           addColumn( column );
@@ -82,7 +82,7 @@ public abstract class CellGrid extends Pane
           return;
 
         // height has increased, so add any extra new rows needed
-        int newMax = m_table.getRowAtY( newHeight );
+        int newMax = m_table.getRowAtY( newHeight + TableScrollBar.SIZE );
         for ( int row = m_maxShownRow + 1; row <= newMax; row++ )
         {
           addRow( row );

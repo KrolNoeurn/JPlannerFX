@@ -37,21 +37,19 @@ public class Table extends GridPane
   public static final Color         COLOR_DISABLED_CELL  = Color.rgb( 227, 227, 227 );     // medium grey
 
   private ITableDataSource          m_data;                                                // data source for the table
-  private int                       m_offsetX            = 0;
-  private int                       m_offsetY            = 0;
 
   private int                       m_defaultRowHeight   = 20;
   private int                       m_defaultColumnWidth = 100;
   private int                       m_hHeaderHeight      = 20;
   private int                       m_vHeaderWidth       = 30;
 
-  private TableScrollBar            m_vScrollBar;
-  private TableScrollBar            m_hScrollBar;
-
   private HeaderCorner              m_headerCorner;
   private HeaderVertical            m_vHeader;
   private HeaderHorizontal          m_hHeader;
   private Body                      m_body;
+
+  private TableScrollBar            m_vScrollBar;
+  private TableScrollBar            m_hScrollBar;
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
   private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
@@ -83,6 +81,7 @@ public class Table extends GridPane
     add( m_body, 1, 1 );
     add( m_vScrollBar, 2, 0, 1, 2 );
     add( m_hScrollBar, 0, 2, 2, 1 );
+    add( TableScrollBar.corner, 2, 2 );
 
     // cells area should grow to fill all available space
     setHgrow( m_body, Priority.ALWAYS );
@@ -119,30 +118,18 @@ public class Table extends GridPane
     return m_body;
   }
 
-  /***************************************** getOffsetX ******************************************/
-  public double getOffsetX()
-  {
-    return m_offsetX;
-  }
-
-  /***************************************** getOffsetY ******************************************/
-  public double getOffsetY()
-  {
-    return m_offsetY;
-  }
-
   /************************************** getColumnExactAtX **************************************/
-  public int getColumnExactAtX( double xx )
+  public int getColumnExactAtX( double x )
   {
     // return column index at specified x-coordinate, or -1 if before, MAX if after
-    int x = (int) ( xx ) + m_offsetX;
-    if ( x < 0 )
+    if ( x < 0.0 )
       return -1;
 
-    for ( int column = 0; column < m_data.getColumnCount(); column++ )
+    int last = m_data.getColumnCount() - 1;
+    for ( int column = 0; column <= last; column++ )
     {
       x -= getColumnWidth( column );
-      if ( x < 0 )
+      if ( x < 0.0 )
         return column;
     }
 
@@ -150,16 +137,14 @@ public class Table extends GridPane
   }
 
   /***************************************** getColumnAtX ****************************************/
-  public int getColumnAtX( double xx )
+  public int getColumnAtX( double x )
   {
     // return column index at specified x-coordinate, or nearest
-    int x = (int) ( xx ) + m_offsetX;
     int last = m_data.getColumnCount() - 1;
-
     for ( int column = 0; column <= last; column++ )
     {
       x -= getColumnWidth( column );
-      if ( x < 0 )
+      if ( x < 0.0 )
         return column;
     }
 
@@ -170,16 +155,14 @@ public class Table extends GridPane
   public int getColumnStartX( int column )
   {
     // return start-x of specified column
-    if ( column < 0 )
-      throw new IllegalArgumentException( "column=" + column );
-    if ( column >= m_data.getColumnCount() )
-      return -1;
+    if ( column > m_data.getColumnCount() )
+      column = m_data.getColumnCount();
 
     int startX = 0;
     for ( int c = 0; c < column; c++ )
       startX += getColumnWidth( c );
 
-    return startX - m_offsetX;
+    return startX;
   }
 
   /*************************************** getColumnWidth ****************************************/
@@ -199,17 +182,17 @@ public class Table extends GridPane
   }
 
   /*************************************** getRowExactAtY ****************************************/
-  public int getRowExactAtY( double yy )
+  public int getRowExactAtY( double y )
   {
     // return row index at specified x-coordinate, or -1 if before, MAX if after
-    int y = (int) ( yy ) + m_offsetY;
-    if ( y < 0 )
+    if ( y < 0.0 )
       return -1;
 
-    for ( int row = 0; row < m_data.getRowCount(); row++ )
+    int last = m_data.getRowCount() - 1;
+    for ( int row = 0; row <= last; row++ )
     {
       y -= getRowHeight( row );
-      if ( y < 0 )
+      if ( y < 0.0 )
         return row;
     }
 
@@ -217,16 +200,14 @@ public class Table extends GridPane
   }
 
   /****************************************** getRowAtY ******************************************/
-  public int getRowAtY( double yy )
+  public int getRowAtY( double y )
   {
     // return row index at specified x-coordinate, or nearest
-    int y = (int) ( yy ) + m_offsetY;
     int last = m_data.getRowCount() - 1;
-
     for ( int row = 0; row <= last; row++ )
     {
       y -= getRowHeight( row );
-      if ( y < 0 )
+      if ( y < 0.0 )
         return row;
     }
 
@@ -237,16 +218,14 @@ public class Table extends GridPane
   public int getRowStartY( int row )
   {
     // return start-y of specified row
-    if ( row < 0 )
-      throw new IllegalArgumentException( "row=" + row );
-    if ( row >= m_data.getRowCount() )
-      return -1;
+    if ( row > m_data.getRowCount() )
+      row = m_data.getRowCount();
 
     int startY = 0;
     for ( int r = 0; r < row; r++ )
       startY += getRowHeight( r );
 
-    return startY - m_offsetY;
+    return startY;
   }
 
   /**************************************** getRowHeight *****************************************/
