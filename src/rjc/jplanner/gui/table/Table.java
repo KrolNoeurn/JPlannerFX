@@ -73,6 +73,8 @@ public class Table extends GridPane
 
     m_vScrollBar = new TableScrollBar( this, Orientation.VERTICAL );
     m_hScrollBar = new TableScrollBar( this, Orientation.HORIZONTAL );
+    m_vScrollBar.setOther( m_hScrollBar );
+    m_hScrollBar.setOther( m_vScrollBar );
 
     // place table components onto grid
     add( m_headerCorner, 0, 0 );
@@ -111,8 +113,8 @@ public class Table extends GridPane
     return m_hHeader;
   }
 
-  /****************************************** getCells *******************************************/
-  public Body getCells()
+  /****************************************** getBody ********************************************/
+  public Body getBody()
   {
     return m_body;
   }
@@ -129,8 +131,8 @@ public class Table extends GridPane
     return m_offsetY;
   }
 
-  /***************************************** getColumnAtX ****************************************/
-  public int getColumnAtX( double xx )
+  /************************************** getColumnExactAtX **************************************/
+  public int getColumnExactAtX( double xx )
   {
     // return column index at specified x-coordinate, or -1 if before, MAX if after
     int x = (int) ( xx ) + m_offsetX;
@@ -145,6 +147,23 @@ public class Table extends GridPane
     }
 
     return Integer.MAX_VALUE;
+  }
+
+  /***************************************** getColumnAtX ****************************************/
+  public int getColumnAtX( double xx )
+  {
+    // return column index at specified x-coordinate, or nearest
+    int x = (int) ( xx ) + m_offsetX;
+    int last = m_data.getColumnCount() - 1;
+
+    for ( int column = 0; column <= last; column++ )
+    {
+      x -= getColumnWidth( column );
+      if ( x < 0 )
+        return column;
+    }
+
+    return last;
   }
 
   /*************************************** getColumnStartX ***************************************/
@@ -179,8 +198,8 @@ public class Table extends GridPane
     return width;
   }
 
-  /****************************************** getRowAtY ******************************************/
-  public int getRowAtY( double yy )
+  /*************************************** getRowExactAtY ****************************************/
+  public int getRowExactAtY( double yy )
   {
     // return row index at specified x-coordinate, or -1 if before, MAX if after
     int y = (int) ( yy ) + m_offsetY;
@@ -195,6 +214,23 @@ public class Table extends GridPane
     }
 
     return Integer.MAX_VALUE;
+  }
+
+  /****************************************** getRowAtY ******************************************/
+  public int getRowAtY( double yy )
+  {
+    // return row index at specified x-coordinate, or nearest
+    int y = (int) ( yy ) + m_offsetY;
+    int last = m_data.getRowCount() - 1;
+
+    for ( int row = 0; row <= last; row++ )
+    {
+      y -= getRowHeight( row );
+      if ( y < 0 )
+        return row;
+    }
+
+    return last;
   }
 
   /**************************************** getRowStartY *****************************************/
@@ -227,22 +263,6 @@ public class Table extends GridPane
     }
 
     return height;
-  }
-
-  /**************************************** getCellsWidth ****************************************/
-  public int getCellsWidth()
-  {
-    // return width of all the table cells
-    int max = m_data.getColumnCount() - 1;
-    return getColumnStartX( max ) + getColumnWidth( max );
-  }
-
-  /*************************************** getCellsHeight ****************************************/
-  public int getCellsHeight()
-  {
-    // return height of all the table cells
-    int max = m_data.getRowCount();
-    return getRowStartY( max ) + getRowHeight( max );
   }
 
   /************************************ setDefaultColumnWidth ************************************/

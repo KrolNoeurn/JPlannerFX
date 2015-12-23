@@ -231,7 +231,7 @@ public abstract class Cell extends Canvas
 
     // move all lines down to vertically centre within cell
     for ( TextLine line : lines )
-      line.y += alignY - 1;
+      line.y += alignY - 2;
 
     return lines;
   }

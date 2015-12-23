@@ -18,62 +18,32 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.Pane;
-
 /*************************************************************************************************/
 /************************* Horizontal header that shows column titles ****************************/
 /*************************************************************************************************/
 
-public class HeaderHorizontal extends Pane
+public class HeaderHorizontal extends CellGrid
 {
-  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public HeaderHorizontal( Table table )
   {
-    // construct default table horizontal header for column titles
-    super();
-    m_table = table;
-
-    // listener for header size changes
-    widthProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        updateHeader();
-      }
-    } );
+    // construct table horizontal header for column titles
+    super( table );
   }
 
-  /*************************************** updateHeader ******************************************/
-  private void updateHeader()
+  /***************************************** createCell ******************************************/
+  @Override
+  Cell createCell( int column, int row, int x, int y, int w, int h )
   {
-    // determine which columns are visible
-    int startColumn = m_table.getColumnAtX( 0.0 );
-    int endColumn = m_table.getColumnAtX( getWidth() );
+    // horizontal header only has one row, so if row index not zero don't create cell
+    if ( row != 0 )
+      return null;
 
-    // if width wider than table, limit to last column
-    int last = m_table.getDataSource().getColumnCount() - 1;
-    if ( endColumn > last )
-      endColumn = last;
-
-    // clear any old header cells and re-generate new ones (TODO something more efficient)
-    getChildren().clear();
-    int x = m_table.getColumnStartX( startColumn );
-    int height = (int) m_table.getCornerHeader().getHeight();
-
-    for ( int column = startColumn; column <= endColumn; column++ )
-    {
-      int width = m_table.getColumnWidth( column );
-      String txt = m_table.getDataSource().getColumnTitle( column );
-      HeaderCell hc = new HeaderCell( txt, x, 0, width, height );
-
-      getChildren().add( hc );
-      x += width;
-    }
+    // create horizontal header cell 
+    String txt = m_table.getDataSource().getColumnTitle( column );
+    h = (int) m_table.getCornerHeader().getHeight();
+    return new HeaderCell( txt, x, 0, w, h );
   }
 
 }

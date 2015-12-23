@@ -18,62 +18,32 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.scene.layout.Pane;
-
 /*************************************************************************************************/
 /*************************** Vertical header that shows row titles *******************************/
 /*************************************************************************************************/
 
-public class HeaderVertical extends Pane
+public class HeaderVertical extends CellGrid
 {
-  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public HeaderVertical( Table table )
   {
-    // construct default table header-corner
-    super();
-    m_table = table;
-
-    // listener for header size changes
-    heightProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        updateHeader();
-      }
-    } );
+    // construct table vertical header for row titles
+    super( table );
   }
 
-  /*************************************** updateHeader ******************************************/
-  private void updateHeader()
+  /***************************************** createCell ******************************************/
+  @Override
+  Cell createCell( int column, int row, int x, int y, int w, int h )
   {
-    // determine which rows are visible
-    int startRow = m_table.getRowAtY( 0.0 );
-    int endRow = m_table.getRowAtY( getHeight() );
+    // vertical header only has one column, so if column index not zero don't create cell
+    if ( column != 0 )
+      return null;
 
-    // if height higher than table, limit to last row
-    int last = m_table.getDataSource().getRowCount() - 1;
-    if ( endRow > last )
-      endRow = last;
-
-    // clear any old header cells and re-generate new ones (TODO something more efficient)
-    getChildren().clear();
-    int y = m_table.getRowStartY( startRow );
-    int width = (int) m_table.getCornerHeader().getWidth();
-
-    for ( int row = startRow; row <= endRow; row++ )
-    {
-      int height = m_table.getRowHeight( row );
-      String txt = m_table.getDataSource().getRowTitle( row );
-      HeaderCell hc = new HeaderCell( txt, 0, y, width, height );
-
-      getChildren().add( hc );
-      y += height;
-    }
+    // create vertical header cell
+    String txt = m_table.getDataSource().getRowTitle( row );
+    w = (int) m_table.getCornerHeader().getWidth();
+    return new HeaderCell( txt, 0, y, w, h );
   }
 
 }
