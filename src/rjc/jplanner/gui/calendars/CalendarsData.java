@@ -16,81 +16,78 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.days;
+package rjc.jplanner.gui.calendars;
 
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.model.Day;
+import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
 /****************************** Table data source for showing tasks ******************************/
 /*************************************************************************************************/
 
-public class DayTypesData implements ITableDataSource
+public class CalendarsData implements ITableDataSource
 {
 
   /************************************** getColumnCount *****************************************/
   @Override
   public int getColumnCount()
   {
-    // table column count is max number of periods * 2 + SECTION_START1
-    int max = 0;
-    for ( int i = 0; i < getRowCount(); i++ )
-      if ( JPlanner.plan.day( i ).numPeriods() > max )
-        max = JPlanner.plan.day( i ).numPeriods();
-
-    return max * 2 + Day.SECTION_START1;
+    // return number of calendars in plan
+    return JPlanner.plan.calendarsCount();
   }
 
   /**************************************** getRowCount ******************************************/
   @Override
   public int getRowCount()
   {
-    return JPlanner.plan.daysCount();
+    // table row count is max number of normals + SECTION_NORMAL1
+    int max = 0;
+    for ( int i = 0; i < getColumnCount(); i++ )
+      if ( JPlanner.plan.calendar( i ).numNormals() > max )
+        max = JPlanner.plan.calendar( i ).numNormals();
+
+    return max + Calendar.SECTION_NORMAL1;
   }
 
   /************************************** getColumnTitle *****************************************/
   @Override
   public String getColumnTitle( int column )
   {
-    return Day.sectionName( column );
+    return "Calendar " + ( column + 1 );
   }
 
   /**************************************** getRowTitle ******************************************/
   @Override
   public String getRowTitle( int row )
   {
-    return Integer.toString( row + 1 );
+    return Calendar.sectionName( row );
   }
 
   /**************************************** getCellText ******************************************/
   @Override
   public String getCellText( int column, int row )
   {
-    return JPlanner.plan.day( row ).toString( column );
+    return JPlanner.plan.calendar( column ).toString( row );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
   public Alignment getCellAlignment( int column, int row )
   {
-    // all cells are middle aligned except name which is left aligned
-    if ( column == Day.SECTION_NAME )
-      return Alignment.LEFT;
-
-    return Alignment.MIDDLE;
+    return Alignment.LEFT;
   }
 
   /************************************* getCellBackground ***************************************/
   @Override
   public Paint getCellBackground( int column, int row )
   {
-    // all cells are white except unused start/end
-    Day day = JPlanner.plan.day( row );
-    if ( column >= day.numPeriods() * 2 + Day.SECTION_START1 )
+    // all cells are white except unused normal cells
+    Calendar cal = JPlanner.plan.calendar( column );
+    if ( row >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
       return Table.COLOR_DISABLED_CELL;
 
     return Table.COLOR_NORMAL_CELL;

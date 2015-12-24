@@ -43,17 +43,6 @@ public class Days extends ArrayList<Day>
     clear();
     for ( DefaultDayTypes type : DefaultDayTypes.values() )
       add( new Day( type ) );
-
-    // TEMPORARY TO MAKE TABLE BIGGER !!! (TO BE REMOVED)
-    for ( DefaultDayTypes type : DefaultDayTypes.values() )
-      add( new Day( type ) );
-    for ( DefaultDayTypes type : DefaultDayTypes.values() )
-      add( new Day( type ) );
-    for ( DefaultDayTypes type : DefaultDayTypes.values() )
-      add( new Day( type ) );
-    for ( DefaultDayTypes type : DefaultDayTypes.values() )
-      add( new Day( type ) );
-
   }
 
   /************************************* isDuplicateDayName **************************************/

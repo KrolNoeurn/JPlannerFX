@@ -19,14 +19,12 @@
 package rjc.jplanner.gui;
 
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import rjc.jplanner.gui.days.DayTypesData;
-import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /******************************* Main JPlanner application window ********************************/
@@ -34,24 +32,21 @@ import rjc.jplanner.model.Day;
 
 public class MainWindow
 {
+  private MainTabWidget m_mainTabWidget = new MainTabWidget();
+  private MenuBar       m_menus         = new Menus();
+  private TextField     m_statusBar     = new TextField();
 
+  /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
   {
-    //TasksData tasks = new TasksData();
-    DayTypesData days = new DayTypesData();
-
-    // create the scene and setup the stage
-    Table daysTable = new Table( days );
-    daysTable.setDefaultColumnWidth( 60 );
-    daysTable.setColumnWidth( Day.SECTION_NAME, 150 );
-
+    // construct main application window
     GridPane grid = new GridPane();
-    grid.setGridLinesVisible( true );
-    grid.add( new Canvas( 50, 50 ), 0, 0 );
-    grid.add( daysTable, 1, 1 );
-    grid.add( new Canvas( 50, 50 ), 2, 2 );
-    GridPane.setHgrow( daysTable, Priority.ALWAYS );
-    GridPane.setVgrow( daysTable, Priority.ALWAYS );
+    grid.add( m_menus, 0, 0 );
+    grid.add( m_mainTabWidget, 0, 1 );
+    grid.add( m_statusBar, 0, 2 );
+
+    GridPane.setHgrow( m_mainTabWidget, Priority.ALWAYS );
+    GridPane.setVgrow( m_mainTabWidget, Priority.ALWAYS );
 
     Scene scene = new Scene( grid, 700, 400, Color.rgb( 240, 240, 240 ) );
     stage.setScene( scene );
