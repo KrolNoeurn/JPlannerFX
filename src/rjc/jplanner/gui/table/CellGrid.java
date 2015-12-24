@@ -33,9 +33,7 @@ public abstract class CellGrid extends Pane
 {
   protected Table                m_table;
 
-  private int                    m_maxShownColumn = -1;
-  private int                    m_maxShownRow    = -1;
-  private HashMap<Integer, Cell> m_cells          = new HashMap<Integer, Cell>();
+  private HashMap<Integer, Cell> m_cells = new HashMap<Integer, Cell>();
 
   /**************************************** constructor ******************************************/
   public CellGrid( Table table )
@@ -51,6 +49,7 @@ public abstract class CellGrid extends Pane
       @Override
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
       {
+        setClip();
         int oldWidth = oldValue.intValue();
         int newWidth = newValue.intValue();
 
@@ -59,12 +58,9 @@ public abstract class CellGrid extends Pane
           return;
 
         // width has increased, so add any extra new columns needed
-        int newMax = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE );
-        for ( int column = m_maxShownColumn + 1; column <= newMax; column++ )
-        {
-          addColumn( column );
-          m_maxShownColumn = column;
-        }
+        int min = m_table.getColumnAtX( oldWidth - getTranslateX() );
+        int max = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE - getTranslateX() );
+        addColumns( min, max );
       }
     } );
 
@@ -74,6 +70,7 @@ public abstract class CellGrid extends Pane
       @Override
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
       {
+        setClip();
         int oldHeight = oldValue.intValue();
         int newHeight = newValue.intValue();
 
@@ -82,19 +79,77 @@ public abstract class CellGrid extends Pane
           return;
 
         // height has increased, so add any extra new rows needed
-        int newMax = m_table.getRowAtY( newHeight + TableScrollBar.SIZE );
-        for ( int row = m_maxShownRow + 1; row <= newMax; row++ )
+        int min = m_table.getRowAtY( oldHeight - getTranslateY() );
+        int max = m_table.getRowAtY( newHeight + TableScrollBar.SIZE - getTranslateY() );
+        addRows( min, max );
+      }
+    } );
+
+    // add listener for horizontal scrolling
+    translateXProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        setClip();
+        int oldX = oldValue.intValue();
+        int newX = newValue.intValue();
+
+        if ( oldX > newX )
         {
-          addRow( row );
-          m_maxShownRow = row;
+          int min = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - oldX );
+          int max = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - newX );
+          addColumns( min, max );
+        }
+        else
+        {
+          int min = m_table.getColumnAtX( 0.0 - newX );
+          int max = m_table.getColumnAtX( 0.0 - oldX );
+          addColumns( min, max );
+        }
+      }
+    } );
+
+    // add listener for vertical scrolling
+    translateYProperty().addListener( new ChangeListener<Number>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      {
+        setClip();
+        int oldY = oldValue.intValue();
+        int newY = newValue.intValue();
+
+        if ( oldY > newY )
+        {
+          int min = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - oldY );
+          int max = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - newY );
+          addRows( min, max );
+        }
+        else
+        {
+          int min = m_table.getRowAtY( 0.0 - newY );
+          int max = m_table.getRowAtY( 0.0 - oldY );
+          addRows( min, max );
         }
       }
     } );
 
   }
 
+  /****************************************** setClip ********************************************/
+  private void setClip()
+  {
+    // set clipping rectangle dimensions
+    Rectangle rect = (Rectangle) getClip();
+    rect.setLayoutX( -getTranslateX() );
+    rect.setLayoutY( -getTranslateY() );
+    rect.setWidth( getWidth() + TableScrollBar.SIZE );
+    rect.setHeight( getHeight() + TableScrollBar.SIZE );
+  }
+
   /****************************************** getCell ********************************************/
-  public Cell getCell( int column, int row )
+  private Cell getCell( int column, int row )
   {
     // return cell for specified column & row, or null if does not exist
     int hash = column * 9999 + row;
@@ -117,58 +172,68 @@ public abstract class CellGrid extends Pane
     m_cells.put( hash, cell );
   }
 
-  /***************************************** addColumn *******************************************/
-  private void addColumn( int column )
+  /***************************************** addColumns ******************************************/
+  private void addColumns( int min, int max )
   {
-    // create column of visible body cells
-    int startRow = m_table.getRowAtY( 0.0 );
-    int endRow = m_table.getRowAtY( getHeight() );
-    int x = m_table.getColumnStartX( column );
-    int y = m_table.getRowStartY( startRow );
-    int width = m_table.getColumnWidth( column );
+    // create columns of visible body cells
+    int startRow = m_table.getRowAtY( 0.0 - getTranslateY() );
+    int endRow = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - getTranslateY() );
+    int startY = m_table.getRowStartY( startRow );
+    int x = m_table.getColumnStartX( min );
 
-    for ( int row = startRow; row <= endRow; row++ )
+    for ( int column = min; column <= max; column++ )
     {
-      int height = m_table.getRowHeight( row );
+      int width = m_table.getColumnWidth( column );
+      int y = startY;
 
-      if ( !cellExists( column, row ) )
+      for ( int row = startRow; row <= endRow; row++ )
       {
-        Cell cell = createCell( column, row, x, y, width, height );
-        if ( cell == null )
-          continue;
-        cellRegister( column, row, cell );
-        getChildren().add( cell );
-      }
+        int height = m_table.getRowHeight( row );
 
-      y += height;
+        if ( !cellExists( column, row ) )
+        {
+          Cell cell = createCell( column, row, x, y, width, height );
+          if ( cell == null )
+            continue;
+          cellRegister( column, row, cell );
+          getChildren().add( cell );
+        }
+        y += height;
+      }
+      x += width;
     }
 
   }
 
-  /******************************************* addRow ********************************************/
-  private void addRow( int row )
+  /******************************************* addRows *******************************************/
+  private void addRows( int min, int max )
   {
-    // create row of visible body cells 
-    int startColumn = m_table.getColumnAtX( 0.0 );
-    int endColumn = m_table.getColumnAtX( getWidth() );
-    int height = m_table.getRowHeight( row );
-    int x = m_table.getColumnStartX( startColumn );
-    int y = m_table.getRowStartY( row );
+    // create row of visible body cells
+    int startColumn = m_table.getColumnAtX( 0.0 - getTranslateX() );
+    int endColumn = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - getTranslateX() );
+    int startX = m_table.getColumnStartX( startColumn );
+    int y = m_table.getRowStartY( min );
 
-    for ( int column = startColumn; column <= endColumn; column++ )
+    for ( int row = min; row <= max; row++ )
     {
-      int width = m_table.getColumnWidth( column );
+      int height = m_table.getRowHeight( row );
+      int x = startX;
 
-      if ( !cellExists( column, row ) )
+      for ( int column = startColumn; column <= endColumn; column++ )
       {
-        Cell cell = createCell( column, row, x, y, width, height );
-        if ( cell == null )
-          continue;
-        cellRegister( column, row, cell );
-        getChildren().add( cell );
-      }
+        int width = m_table.getColumnWidth( column );
 
-      x += width;
+        if ( !cellExists( column, row ) )
+        {
+          Cell cell = createCell( column, row, x, y, width, height );
+          if ( cell == null )
+            continue;
+          cellRegister( column, row, cell );
+          getChildren().add( cell );
+        }
+        x += width;
+      }
+      y += height;
     }
 
   }

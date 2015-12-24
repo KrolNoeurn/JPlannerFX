@@ -25,6 +25,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 
 /*************************************************************************************************/
@@ -86,6 +87,7 @@ public abstract class Cell extends Canvas
 
     // draw individual lines
     GraphicsContext gc = getGraphicsContext2D();
+    gc.setFontSmoothingType( FontSmoothingType.LCD );
     gc.setFill( Color.BLACK );
     for ( TextLine line : lines )
       gc.fillText( line.txt, line.x, line.y );

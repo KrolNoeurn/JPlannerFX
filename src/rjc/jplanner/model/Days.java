@@ -49,6 +49,10 @@ public class Days extends ArrayList<Day>
       add( new Day( type ) );
     for ( DefaultDayTypes type : DefaultDayTypes.values() )
       add( new Day( type ) );
+    for ( DefaultDayTypes type : DefaultDayTypes.values() )
+      add( new Day( type ) );
+    for ( DefaultDayTypes type : DefaultDayTypes.values() )
+      add( new Day( type ) );
 
   }
 

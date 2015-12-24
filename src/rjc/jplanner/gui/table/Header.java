@@ -18,32 +18,51 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.geometry.Orientation;
+
 /*************************************************************************************************/
 /************************* Horizontal header that shows column titles ****************************/
 /*************************************************************************************************/
 
-public class HeaderHorizontal extends CellGrid
+public class Header extends CellGrid
 {
+  Orientation m_orientation;
 
   /**************************************** constructor ******************************************/
-  public HeaderHorizontal( Table table )
+  public Header( Table table, Orientation orientation )
   {
     // construct table horizontal header for column titles
     super( table );
+    m_orientation = orientation;
   }
 
   /***************************************** createCell ******************************************/
   @Override
   Cell createCell( int column, int row, int x, int y, int w, int h )
   {
-    // horizontal header only has one row, so if row index not zero don't create cell
-    if ( row != 0 )
-      return null;
+    if ( m_orientation == Orientation.HORIZONTAL )
+    {
+      // horizontal header only has one row, so if row index not zero don't create cell
+      if ( row != 0 )
+        return null;
 
-    // create horizontal header cell 
-    String txt = m_table.getDataSource().getColumnTitle( column );
-    h = (int) m_table.getCornerHeader().getHeight();
-    return new HeaderCell( txt, x, 0, w, h );
+      // create horizontal header cell 
+      String txt = m_table.getDataSource().getColumnTitle( column );
+      h = (int) m_table.getCornerHeader().getHeight();
+      return new HeaderCell( txt, x, 0, w, h );
+    }
+    else
+    {
+      // vertical header only has one column, so if column index not zero don't create cell
+      if ( column != 0 )
+        return null;
+
+      // create vertical header cell
+      String txt = m_table.getDataSource().getRowTitle( row );
+      w = (int) m_table.getCornerHeader().getWidth();
+      return new HeaderCell( txt, 0, y, w, h );
+    }
+
   }
 
 }

@@ -25,7 +25,6 @@ import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollBar;
-import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /*************************** Scroll bar for tables that self-manage ******************************/
@@ -67,21 +66,40 @@ public class TableScrollBar extends ScrollBar
       @Override
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
       {
-        check();
-        m_other.check();
+        checkSettings();
+        m_other.checkSettings();
+        scrollTable( (int) getValue() );
       }
     } );
 
-    // ******************************************** TODO ................
+    // add listener to scroll table when scroll bar thumb moved
     valueProperty().addListener( new ChangeListener<Number>()
     {
       @Override
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
       {
-        // TODO .............
-        JPlanner.trace( TableScrollBar.this.toString() );
+        scrollTable( newValue.intValue() );
       }
     } );
+
+  }
+
+  /****************************************** toString *******************************************/
+  private void scrollTable( int value )
+  {
+    // scroll table body and header
+    if ( getOrientation() == Orientation.HORIZONTAL )
+    {
+      // horizontal scroll bar
+      m_table.getBody().setTranslateX( -value );
+      m_table.getHorizontalHeader().setTranslateX( -value );
+    }
+    else
+    {
+      // vertical scroll bar
+      m_table.getBody().setTranslateY( -value );
+      m_table.getVerticalHeader().setTranslateY( -value );
+    }
 
   }
 
@@ -99,10 +117,10 @@ public class TableScrollBar extends ScrollBar
     m_other = other;
   }
 
-  /***************************************** setLength *******************************************/
-  private void setLength( int size )
+  /****************************************** setSpan ********************************************/
+  private void setSpan( int size )
   {
-    // set scroll-bar length
+    // set scroll-bar span across table grid cells
     if ( getOrientation() == Orientation.HORIZONTAL )
     {
       // horizontal scroll bar
@@ -117,15 +135,15 @@ public class TableScrollBar extends ScrollBar
     }
   }
 
-  /***************************************** setLengths ******************************************/
-  private void setLengths()
+  /****************************************** setSpans *******************************************/
+  private void setSpans()
   {
-    // ensure scroll bar lengths are correct for those visible
+    // ensure scroll bar spans are correct for those visible
     if ( isVisible() && m_other.isVisible() )
     {
       // both visible so both need length of 2
-      setLength( 2 );
-      m_other.setLength( 2 );
+      setSpan( 2 );
+      m_other.setSpan( 2 );
 
       // show scroll bar corner
       corner.setVisible( true );
@@ -137,46 +155,48 @@ public class TableScrollBar extends ScrollBar
 
       // if visible set length to 3
       if ( isVisible() )
-        setLength( 3 );
+        setSpan( 3 );
       if ( m_other.isVisible() )
-        m_other.setLength( 3 );
+        m_other.setSpan( 3 );
     }
   }
 
-  /******************************************** check ********************************************/
-  private void check()
+  /**************************************** checkSettings ****************************************/
+  private void checkSettings()
   {
     // check ensure scroll bar appropriate for table body size
     double size = 0.0;
     int index, max;
     if ( !m_other.isVisible() )
       size += SIZE;
-    if ( getOrientation() == Orientation.VERTICAL )
-    {
-      size += m_table.getBody().getHeight();
-      index = m_table.getRowExactAtY( size );
-      max = m_table.getRowStartY( Integer.MAX_VALUE );
-    }
-    else
+    if ( getOrientation() == Orientation.HORIZONTAL )
     {
       size += m_table.getBody().getWidth();
       index = m_table.getColumnExactAtX( size );
       max = m_table.getColumnStartX( Integer.MAX_VALUE );
     }
+    else
+    {
+      size += m_table.getBody().getHeight();
+      index = m_table.getRowExactAtY( size );
+      max = m_table.getRowStartY( Integer.MAX_VALUE );
+    }
 
-    // scroll bar needed if normal column/row index at edge
+    // scroll bar needed if not beyond normal column/row index at edge
     boolean needed = index != Integer.MAX_VALUE;
     if ( isVisible() != needed )
     {
       setVisible( needed );
-      setLengths();
+      setSpans();
     }
 
     // if visible, check thumb size
     if ( isVisible() )
     {
-      setMax( max );
-      setVisibleAmount( size );
+      if ( getValue() > max - size )
+        setValue( max - size );
+      setMax( max - size );
+      setVisibleAmount( size / max * ( max - size ) );
     }
 
   }

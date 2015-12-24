@@ -44,8 +44,8 @@ public class Table extends GridPane
   private int                       m_vHeaderWidth       = 30;
 
   private HeaderCorner              m_headerCorner;
-  private HeaderVertical            m_vHeader;
-  private HeaderHorizontal          m_hHeader;
+  private Header                    m_vHeader;
+  private Header                    m_hHeader;
   private Body                      m_body;
 
   private TableScrollBar            m_vScrollBar;
@@ -65,8 +65,8 @@ public class Table extends GridPane
     m_data = data;
 
     m_headerCorner = new HeaderCorner( this );
-    m_hHeader = new HeaderHorizontal( this );
-    m_vHeader = new HeaderVertical( this );
+    m_hHeader = new Header( this, Orientation.HORIZONTAL );
+    m_vHeader = new Header( this, Orientation.VERTICAL );
     m_body = new Body( this );
 
     m_vScrollBar = new TableScrollBar( this, Orientation.VERTICAL );
@@ -101,13 +101,13 @@ public class Table extends GridPane
   }
 
   /************************************* getVerticalHeader ***************************************/
-  public HeaderVertical getVerticalHeader()
+  public Header getVerticalHeader()
   {
     return m_vHeader;
   }
 
   /************************************ getHorizontalHeader **************************************/
-  public HeaderHorizontal getHorizontalHeader()
+  public Header getHorizontalHeader()
   {
     return m_hHeader;
   }
@@ -129,7 +129,7 @@ public class Table extends GridPane
     for ( int column = 0; column <= last; column++ )
     {
       x -= getColumnWidth( column );
-      if ( x < 0.0 )
+      if ( x <= 0.0 )
         return column;
     }
 
@@ -144,7 +144,7 @@ public class Table extends GridPane
     for ( int column = 0; column <= last; column++ )
     {
       x -= getColumnWidth( column );
-      if ( x < 0.0 )
+      if ( x <= 0.0 )
         return column;
     }
 
@@ -192,7 +192,7 @@ public class Table extends GridPane
     for ( int row = 0; row <= last; row++ )
     {
       y -= getRowHeight( row );
-      if ( y < 0.0 )
+      if ( y <= 0.0 )
         return row;
     }
 
@@ -207,7 +207,7 @@ public class Table extends GridPane
     for ( int row = 0; row <= last; row++ )
     {
       y -= getRowHeight( row );
-      if ( y < 0.0 )
+      if ( y <= 0.0 )
         return row;
     }
 

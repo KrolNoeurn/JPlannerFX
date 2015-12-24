@@ -19,6 +19,9 @@
 package rjc.jplanner.gui;
 
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.days.DayTypesData;
@@ -38,11 +41,19 @@ public class MainWindow
     DayTypesData days = new DayTypesData();
 
     // create the scene and setup the stage
-    Table dayTypes = new Table( days );
-    dayTypes.setDefaultColumnWidth( 60 );
-    dayTypes.setColumnWidth( Day.SECTION_NAME, 150 );
+    Table daysTable = new Table( days );
+    daysTable.setDefaultColumnWidth( 60 );
+    daysTable.setColumnWidth( Day.SECTION_NAME, 150 );
 
-    Scene scene = new Scene( dayTypes, 700, 300, Color.rgb( 240, 240, 240 ) );
+    GridPane grid = new GridPane();
+    grid.setGridLinesVisible( true );
+    grid.add( new Canvas( 50, 50 ), 0, 0 );
+    grid.add( daysTable, 1, 1 );
+    grid.add( new Canvas( 50, 50 ), 2, 2 );
+    GridPane.setHgrow( daysTable, Priority.ALWAYS );
+    GridPane.setVgrow( daysTable, Priority.ALWAYS );
+
+    Scene scene = new Scene( grid, 700, 400, Color.rgb( 240, 240, 240 ) );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();
