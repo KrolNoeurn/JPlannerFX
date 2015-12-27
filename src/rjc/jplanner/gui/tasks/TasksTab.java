@@ -18,7 +18,9 @@
 
 package rjc.jplanner.gui.tasks;
 
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
 
@@ -43,7 +45,10 @@ public class TasksTab extends Tab
     table.setColumnWidth( Task.SECTION_START, 140 );
     table.setColumnWidth( Task.SECTION_END, 140 );
 
-    setContent( table );
+    Gantt gantt = new Gantt();
+
+    SplitPane split = new SplitPane( table, gantt );
+    setContent( split );
   }
 
 }

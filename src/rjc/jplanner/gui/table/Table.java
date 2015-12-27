@@ -81,7 +81,6 @@ public class Table extends GridPane
     add( m_body, 1, 1 );
     add( m_vScrollBar, 2, 0, 1, 2 );
     add( m_hScrollBar, 0, 2, 2, 1 );
-    add( TableScrollBar.corner, 2, 2 );
 
     // cells area should grow to fill all available space
     setHgrow( m_body, Priority.ALWAYS );
@@ -92,12 +91,6 @@ public class Table extends GridPane
   public ITableDataSource getDataSource()
   {
     return m_data;
-  }
-
-  /************************************** getCornerHeader ****************************************/
-  public HeaderCorner getCornerHeader()
-  {
-    return m_headerCorner;
   }
 
   /************************************* getVerticalHeader ***************************************/
@@ -116,6 +109,18 @@ public class Table extends GridPane
   public Body getBody()
   {
     return m_body;
+  }
+
+  /************************************ getVerticalScrollBar *************************************/
+  public TableScrollBar getVerticalScrollBar()
+  {
+    return m_vScrollBar;
+  }
+
+  /*********************************** getHorizontalScrollBar ************************************/
+  public TableScrollBar getHorizontalScrollBar()
+  {
+    return m_hScrollBar;
   }
 
   /************************************** getColumnExactAtX **************************************/

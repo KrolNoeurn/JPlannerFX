@@ -140,12 +140,21 @@ public abstract class CellGrid extends Pane
   /****************************************** setClip ********************************************/
   private void setClip()
   {
-    // set clipping rectangle dimensions
+    // set clipping rectangle position & dimensions
     Rectangle rect = (Rectangle) getClip();
     rect.setLayoutX( -getTranslateX() );
     rect.setLayoutY( -getTranslateY() );
-    rect.setWidth( getWidth() + TableScrollBar.SIZE );
-    rect.setHeight( getHeight() + TableScrollBar.SIZE );
+
+    double w = getWidth();
+    if ( !m_table.getVerticalScrollBar().isVisible() )
+      w += TableScrollBar.SIZE;
+
+    double h = getHeight();
+    if ( !m_table.getHorizontalScrollBar().isVisible() )
+      h += TableScrollBar.SIZE;
+
+    rect.setWidth( w );
+    rect.setHeight( h );
   }
 
   /****************************************** getCell ********************************************/

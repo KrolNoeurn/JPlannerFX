@@ -16,53 +16,15 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui.gantt;
 
-import javafx.geometry.Orientation;
+import javafx.scene.layout.Pane;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/*************** Gantt shows tasks in a gantt plot with upper & lower gantt scales ***************/
 /*************************************************************************************************/
 
-public class Header extends CellGrid
+public class Gantt extends Pane
 {
-  Orientation m_orientation;
-
-  /**************************************** constructor ******************************************/
-  public Header( Table table, Orientation orientation )
-  {
-    // construct table horizontal header for column titles
-    super( table );
-    m_orientation = orientation;
-  }
-
-  /***************************************** createCell ******************************************/
-  @Override
-  Cell createCell( int column, int row, int x, int y, int w, int h )
-  {
-    if ( m_orientation == Orientation.HORIZONTAL )
-    {
-      // horizontal header only has one row, so if row index not zero don't create cell
-      if ( row != 0 )
-        return null;
-
-      // create horizontal header cell 
-      String txt = m_table.getDataSource().getColumnTitle( column );
-      h = (int) m_table.getHorizontalHeaderHeight();
-      return new HeaderCell( txt, x, 0, w, h );
-    }
-    else
-    {
-      // vertical header only has one column, so if column index not zero don't create cell
-      if ( column != 0 )
-        return null;
-
-      // create vertical header cell
-      String txt = m_table.getDataSource().getRowTitle( row );
-      w = (int) m_table.getVerticalHeaderWidth();
-      return new HeaderCell( txt, 0, y, w, h );
-    }
-
-  }
 
 }

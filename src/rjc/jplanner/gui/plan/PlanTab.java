@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.plan;
 
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 
 /*************************************************************************************************/
@@ -26,14 +27,18 @@ import javafx.scene.control.Tab;
 
 public class PlanTab extends Tab
 {
+  PlanNotes      m_notes      = new PlanNotes();
+  PlanProperties m_properties = new PlanProperties();
 
   /**************************************** constructor ******************************************/
   public PlanTab( String text )
   {
-    // construct tab showing table of available plan day-types
+    // construct tab showing plan properties & notes
     super( text );
     setClosable( false );
 
+    SplitPane split = new SplitPane( m_properties, m_notes );
+    setContent( split );
   }
 
 }

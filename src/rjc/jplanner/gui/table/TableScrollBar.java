@@ -22,8 +22,6 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollBar;
 
 /*************************************************************************************************/
@@ -33,7 +31,6 @@ import javafx.scene.control.ScrollBar;
 public class TableScrollBar extends ScrollBar
 {
   public static final double SIZE = 18.0;
-  public static Canvas       corner;
 
   private Table              m_table;
   private TableScrollBar     m_other;
@@ -47,15 +44,6 @@ public class TableScrollBar extends ScrollBar
     setOrientation( orientation );
     setMinWidth( SIZE );
     setMinHeight( SIZE );
-
-    // create corner that sits between the two scroll bars
-    if ( corner == null )
-    {
-      corner = new Canvas( SIZE, SIZE );
-      GraphicsContext gc = corner.getGraphicsContext2D();
-      gc.setFill( Table.COLOR_HEADER_FILL );
-      gc.fillRect( 0, 0, getWidth(), getHeight() );
-    }
 
     // add listener to ensure scroll bar appropriate for table body size
     ReadOnlyDoubleProperty property = m_table.getBody().heightProperty();
@@ -144,15 +132,9 @@ public class TableScrollBar extends ScrollBar
       // both visible so both need length of 2
       setSpan( 2 );
       m_other.setSpan( 2 );
-
-      // show scroll bar corner
-      corner.setVisible( true );
     }
     else
     {
-      // hide scroll bar corner
-      corner.setVisible( false );
-
       // if visible set length to 3
       if ( isVisible() )
         setSpan( 3 );

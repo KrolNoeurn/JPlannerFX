@@ -16,53 +16,52 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui.plan;
 
-import javafx.geometry.Orientation;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 
 /*************************************************************************************************/
-/************************* Horizontal header that shows column titles ****************************/
+/**************************** Widget display & editing of plan notes *****************************/
 /*************************************************************************************************/
 
-public class Header extends CellGrid
+public class PlanNotes extends GridPane
 {
-  Orientation m_orientation;
+  private TextArea m_notes = new TextArea();
 
   /**************************************** constructor ******************************************/
-  public Header( Table table, Orientation orientation )
+  public PlanNotes()
   {
-    // construct table horizontal header for column titles
-    super( table );
-    m_orientation = orientation;
+    // setup notes panel
+    super();
+    setVgap( 5.0 );
+    setPadding( new Insets( 5.0 ) );
+
+    // notes label
+    add( new Label( "Notes" ), 0, 0 );
+
+    // notes area
+    m_notes.setWrapText( true );
+    add( m_notes, 0, 1 );
+
+    // notes area should grow to fill all available space
+    setHgrow( m_notes, Priority.ALWAYS );
+    setVgrow( m_notes, Priority.ALWAYS );
   }
 
-  /***************************************** createCell ******************************************/
-  @Override
-  Cell createCell( int column, int row, int x, int y, int w, int h )
+  /****************************************** getText ********************************************/
+  public String getText()
   {
-    if ( m_orientation == Orientation.HORIZONTAL )
-    {
-      // horizontal header only has one row, so if row index not zero don't create cell
-      if ( row != 0 )
-        return null;
+    return m_notes.getText();
+  }
 
-      // create horizontal header cell 
-      String txt = m_table.getDataSource().getColumnTitle( column );
-      h = (int) m_table.getHorizontalHeaderHeight();
-      return new HeaderCell( txt, x, 0, w, h );
-    }
-    else
-    {
-      // vertical header only has one column, so if column index not zero don't create cell
-      if ( column != 0 )
-        return null;
-
-      // create vertical header cell
-      String txt = m_table.getDataSource().getRowTitle( row );
-      w = (int) m_table.getVerticalHeaderWidth();
-      return new HeaderCell( txt, 0, y, w, h );
-    }
-
+  /****************************************** setText ********************************************/
+  public void setText( String txt )
+  {
+    m_notes.setText( txt );
   }
 
 }
