@@ -85,7 +85,7 @@ public class CalendarsData implements ITableDataSource
   @Override
   public Paint getCellBackground( int column, int row )
   {
-    // all cells are white except unused normal cells
+    // all cells are normal coloured except unused normal section cells
     Calendar cal = JPlanner.plan.calendar( column );
     if ( row >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
       return Table.COLOR_DISABLED_CELL;

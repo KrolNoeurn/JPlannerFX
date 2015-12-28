@@ -26,7 +26,18 @@ import javafx.geometry.Orientation;
 
 public class Header extends CellGrid
 {
-  Orientation m_orientation;
+  private Orientation m_orientation; // header orientation
+
+  public static enum State
+  {
+    NORMAL, RESIZE, REORDER
+  }
+
+  State  state = State.NORMAL; // header state
+  double pos;                  // location of mouse along header
+  int    section;
+  double sectionStart;
+  double sectionEnd;
 
   /**************************************** constructor ******************************************/
   public Header( Table table, Orientation orientation )
@@ -34,6 +45,11 @@ public class Header extends CellGrid
     // construct table horizontal header for column titles
     super( table );
     m_orientation = orientation;
+
+    // add listeners to support resizing and reordering
+    setOnMouseMoved( new HeaderMouseMoved( this ) );
+    setOnMouseDragged( new HeaderDragDetected( this ) );
+    setOnMouseReleased( new HeaderDragDone( this ) );
   }
 
   /***************************************** createCell ******************************************/
@@ -63,6 +79,18 @@ public class Header extends CellGrid
       return new HeaderCell( txt, 0, y, w, h );
     }
 
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
+  }
+
+  /*************************************** getOrientation ****************************************/
+  public Orientation getOrientation()
+  {
+    return m_orientation;
   }
 
 }

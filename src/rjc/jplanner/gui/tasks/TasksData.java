@@ -18,11 +18,11 @@
 
 package rjc.jplanner.gui.tasks;
 
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
@@ -64,7 +64,7 @@ public class TasksData implements ITableDataSource
   @Override
   public String getCellText( int column, int row )
   {
-    return "TBD";
+    return JPlanner.plan.task( row ).toString( column );
   }
 
   /************************************* getCellAlignment ****************************************/
@@ -78,7 +78,12 @@ public class TasksData implements ITableDataSource
   @Override
   public Paint getCellBackground( int column, int row )
   {
-    return Color.WHITE;
+    // cell colour determined by if editable
+    if ( JPlanner.plan.task( row ).isSectionEditable( column ) )
+      return Table.COLOR_NORMAL_CELL;
+
+    return Table.COLOR_DISABLED_CELL;
+
   }
 
 }

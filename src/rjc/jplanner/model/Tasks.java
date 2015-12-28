@@ -83,8 +83,10 @@ public class Tasks extends ArrayList<Task>
     // setup special task 0
     Task task = get( 0 );
     task.setData( Task.SECTION_TITLE, "PROJECT" );
+    task.setData( Task.SECTION_START, DateTime.now() );
+    task.setData( Task.SECTION_END, DateTime.now() );
     task.setIndent( -1 );
-    task.setSummaryEnd( Integer.MAX_VALUE );
+    updateSummaryMarkers();
   }
 
   /******************************************* loadXML *******************************************/
@@ -283,7 +285,7 @@ public class Tasks extends ArrayList<Task>
   public void updateSummaryMarkers()
   {
     // for each task ensure summaryEnd and SummaryStart set correctly
-    for ( int row = 1; row < size(); row++ )
+    for ( int row = 0; row < size(); row++ )
     {
       Task task = get( row );
       if ( task.isNull() )

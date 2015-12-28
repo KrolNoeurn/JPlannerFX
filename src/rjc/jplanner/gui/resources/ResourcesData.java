@@ -78,7 +78,7 @@ public class ResourcesData implements ITableDataSource
   @Override
   public Paint getCellBackground( int column, int row )
   {
-    // all cells are white except unused start/end
+    // all cells are normal coloured except if null resource
     Resource res = JPlanner.plan.resource( row );
     if ( column != Resource.SECTION_INITIALS && res.isNull() )
       return Table.COLOR_DISABLED_CELL;

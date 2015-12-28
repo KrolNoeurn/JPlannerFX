@@ -88,7 +88,7 @@ public class DaysData implements ITableDataSource
   @Override
   public Paint getCellBackground( int column, int row )
   {
-    // all cells are white except unused start/end
+    // all cells are normal coloured except unused start/end
     Day day = JPlanner.plan.day( row );
     if ( column >= day.numPeriods() * 2 + Day.SECTION_START1 )
       return Table.COLOR_DISABLED_CELL;

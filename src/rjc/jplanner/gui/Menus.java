@@ -22,6 +22,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 /*************************************************************************************************/
 /****************************** Main JPlanner application menu bar *******************************/
@@ -37,35 +40,136 @@ public class Menus extends MenuBar
     super();
 
     // top level menus
-    Menu menuFile = new Menu( "File" );
-    Menu menuEdit = new Menu( "Edit" );
-    Menu menuReport = new Menu( "Report" );
-    Menu menuView = new Menu( "View" );
-    Menu menuHelp = new Menu( "Help" );
-    getMenus().addAll( menuFile, menuEdit, menuReport, menuView, menuHelp );
+    Menu menuFile = fileMenu();
+    Menu menuEdit = editMenu();
+    Menu menuReport = reportMenu();
+    Menu menuView = viewMenu();
+    Menu menuHelp = helpMenu();
 
+    getMenus().addAll( menuFile, menuEdit, menuReport, menuView, menuHelp );
+  }
+
+  /****************************************** fileMenu *******************************************/
+  private Menu fileMenu()
+  {
     // file menu
+    Menu menu = new Menu( "File" );
+
     MenuItem fileNew = new MenuItem( "New" );
+    fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, KeyCombination.CONTROL_DOWN ) );
+
     MenuItem fileOpen = new MenuItem( "Open..." );
+    fileOpen.setAccelerator( new KeyCodeCombination( KeyCode.O, KeyCombination.CONTROL_DOWN ) );
+
     MenuItem fileSave = new MenuItem( "Save" );
+    fileSave.setAccelerator( new KeyCodeCombination( KeyCode.S, KeyCombination.CONTROL_DOWN ) );
+
     MenuItem fileSaveAs = new MenuItem( "Save As..." );
+
     MenuItem filePrintPreview = new MenuItem( "Print preview..." );
     filePrintPreview.setDisable( true );
+
     MenuItem filePrint = new MenuItem( "Print..." );
     filePrint.setDisable( true );
+
     MenuItem fileExit = new MenuItem( "Exit" );
+    fileExit.setAccelerator( new KeyCodeCombination( KeyCode.Q, KeyCombination.CONTROL_DOWN ) );
 
-    menuFile.getItems().addAll( fileNew, fileOpen, fileSave, fileSaveAs );
-    menuFile.getItems().addAll( new SeparatorMenuItem(), filePrintPreview, filePrint );
-    menuFile.getItems().addAll( new SeparatorMenuItem(), fileExit );
+    menu.getItems().addAll( fileNew, fileOpen, fileSave, fileSaveAs );
+    menu.getItems().addAll( new SeparatorMenuItem(), filePrintPreview, filePrint );
+    menu.getItems().addAll( new SeparatorMenuItem(), fileExit );
+    return menu;
+  }
 
+  /****************************************** editMenu *******************************************/
+  private Menu editMenu()
+  {
     // edit menu
-    MenuItem editUndo = new MenuItem( "Undo" );
-    MenuItem editRedo = new MenuItem( "Redo" );
-    MenuItem editInsert = new MenuItem( "Insert" );
-    MenuItem editDelete = new MenuItem( "Delete" );
-    menuEdit.getItems().addAll( editUndo, editRedo, new SeparatorMenuItem(), editInsert, editDelete );
+    Menu menu = new Menu( "Edit" );
 
+    MenuItem editUndo = new MenuItem( "Undo" );
+    editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, KeyCombination.CONTROL_DOWN ) );
+    editUndo.setDisable( true );
+
+    MenuItem editRedo = new MenuItem( "Redo" );
+    editRedo.setAccelerator( new KeyCodeCombination( KeyCode.Y, KeyCombination.CONTROL_DOWN ) );
+    editRedo.setDisable( true );
+
+    MenuItem editInsert = new MenuItem( "Insert" );
+    editInsert.setAccelerator( new KeyCodeCombination( KeyCode.INSERT, KeyCombination.CONTROL_ANY ) );
+    editInsert.setDisable( true );
+
+    MenuItem editDelete = new MenuItem( "Delete" );
+    editDelete.setAccelerator( new KeyCodeCombination( KeyCode.DELETE, KeyCombination.CONTROL_ANY ) );
+    editDelete.setDisable( true );
+
+    MenuItem editCut = new MenuItem( "Cut" );
+    editCut.setAccelerator( new KeyCodeCombination( KeyCode.X, KeyCombination.CONTROL_DOWN ) );
+    editCut.setDisable( true );
+
+    MenuItem editCopy = new MenuItem( "Copy" );
+    editCopy.setAccelerator( new KeyCodeCombination( KeyCode.C, KeyCombination.CONTROL_DOWN ) );
+    editCopy.setDisable( true );
+
+    MenuItem editPaste = new MenuItem( "Paste" );
+    editPaste.setAccelerator( new KeyCodeCombination( KeyCode.V, KeyCombination.CONTROL_DOWN ) );
+    editPaste.setDisable( true );
+
+    MenuItem editFind = new MenuItem( "Find/Replace..." );
+    editFind.setAccelerator( new KeyCodeCombination( KeyCode.F, KeyCombination.CONTROL_DOWN ) );
+    editFind.setDisable( true );
+
+    MenuItem editSchedule = new MenuItem( "Schedule" );
+
+    menu.getItems().addAll( editUndo, editRedo, new SeparatorMenuItem(), editInsert, editDelete );
+    menu.getItems().addAll( new SeparatorMenuItem(), editCut, editCopy, editPaste );
+    menu.getItems().addAll( new SeparatorMenuItem(), editFind, editSchedule );
+    return menu;
+  }
+
+  /***************************************** reportMenu ******************************************/
+  private Menu reportMenu()
+  {
+    // report menu
+    Menu menu = new Menu( "Report" );
+
+    MenuItem reportTBD = new MenuItem( "TBD" );
+    reportTBD.setDisable( true );
+
+    menu.getItems().addAll( reportTBD );
+    return menu;
+  }
+
+  /****************************************** viewMenu *******************************************/
+  private Menu viewMenu()
+  {
+    // view menu
+    Menu menu = new Menu( "View" );
+
+    MenuItem viewUndoStack = new MenuItem( "Undo Stack..." );
+    viewUndoStack.setDisable( true );
+
+    MenuItem viewNewWindow = new MenuItem( "New Window..." );
+    viewNewWindow.setDisable( true );
+
+    MenuItem viewStretch = new MenuItem( "Stretch tasks" );
+    viewStretch.setDisable( true );
+
+    menu.getItems().addAll( viewUndoStack, viewNewWindow, new SeparatorMenuItem(), viewStretch );
+    return menu;
+  }
+
+  /****************************************** helpMenu *******************************************/
+  private Menu helpMenu()
+  {
+    // help menu
+    Menu menu = new Menu( "Help" );
+
+    MenuItem helpAbout = new MenuItem( "About JPlanner" );
+    helpAbout.setDisable( true );
+
+    menu.getItems().addAll( helpAbout );
+    return menu;
   }
 
 }
