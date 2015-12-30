@@ -30,6 +30,13 @@ public class HeaderCorner extends Cell
   {
     // construct default table header corner
     super( table.getVerticalHeaderWidth(), table.getHorizontalHeaderHeight(), Table.COLOR_HEADER_FILL );
+  }
+
+  /****************************************** redraw *********************************************/
+  public void redraw()
+  {
+    // redraw corner
+    fill( Table.COLOR_HEADER_FILL );
     drawGrid();
   }
 

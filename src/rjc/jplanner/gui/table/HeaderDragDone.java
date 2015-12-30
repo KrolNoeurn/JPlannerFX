@@ -19,11 +19,12 @@
 package rjc.jplanner.gui.table;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.input.MouseEvent;
 import rjc.jplanner.gui.table.Header.State;
 
 /*************************************************************************************************/
-/************************* ??????????????????????????????? ****************************/
+/************************* Mouse drag done handler for table headers *****************************/
 /*************************************************************************************************/
 
 public class HeaderDragDone implements EventHandler<MouseEvent>
@@ -41,11 +42,14 @@ public class HeaderDragDone implements EventHandler<MouseEvent>
   @Override
   public void handle( MouseEvent event )
   {
-    // TODO Auto-generated method stub
-    //JPlanner.trace( "DRAG DONE " + event.toString() );
-
     // mouse button released, so set header state back to normal
     m_header.state = State.NORMAL;
+    m_header.sectionEnd = 0.0;
+
+    if ( m_header.getOrientation() == Orientation.HORIZONTAL )
+      m_header.pos = event.getX();
+    else
+      m_header.pos = event.getY();
   }
 
 }

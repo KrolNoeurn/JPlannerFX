@@ -72,6 +72,8 @@ public class HeaderMouseMoved implements EventHandler<MouseEvent>
         m_header.sectionEnd = m_header.sectionStart + table.getColumnWidth( m_header.section );
       else
         m_header.sectionEnd = m_header.sectionStart + table.getRowHeight( m_header.section );
+
+      m_header.setCursor( Cursor.DEFAULT );
     }
 
     // change mouse cursor for resize if near edge of section

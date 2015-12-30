@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -137,6 +138,29 @@ public abstract class CellGrid extends Pane
 
   }
 
+  /*********************************** setScrollBarListeners *************************************/
+  public void setScrollBarListeners()
+  {
+    // sets listeners for scroll bar visibility (can only be setup after scroll bars initialised)
+    m_table.getHorizontalScrollBar().visibleProperty().addListener( new ChangeListener<Boolean>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
+      {
+        setClip();
+      }
+    } );
+
+    m_table.getVerticalScrollBar().visibleProperty().addListener( new ChangeListener<Boolean>()
+    {
+      @Override
+      public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
+      {
+        setClip();
+      }
+    } );
+  }
+
   /****************************************** setClip ********************************************/
   private void setClip()
   {
@@ -249,5 +273,71 @@ public abstract class CellGrid extends Pane
 
   /***************************************** createCell ******************************************/
   abstract Cell createCell( int column, int row, int x, int y, int w, int h );
+
+  /************************************** updateCellWidths ***************************************/
+  public void updateCellWidths( int section, int oldWidth, int newWidth )
+  {
+    // update cells in specified column to new width, and adjust cells to the right positions
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+    {
+      int column = entry.getKey() / 9999;
+      Cell cell = entry.getValue();
+
+      if ( column < section )
+        continue;
+
+      if ( column == section )
+      {
+        // needs width adjustment
+        cell.setWidth( newWidth );
+        cell.redraw();
+        continue;
+      }
+
+      // cell is to right of column so needs layout adjustment
+      cell.setLayoutX( cell.getLayoutX() - oldWidth + newWidth );
+    }
+
+    // add columns that might now be visible to the right
+    if ( newWidth < oldWidth )
+    {
+      int min = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - getTranslateX() - oldWidth + newWidth );
+      int max = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - getTranslateX() );
+      addColumns( min, max );
+    }
+  }
+
+  /************************************** updateCellHeights **************************************/
+  public void updateCellHeights( int section, int oldHeight, int newHeight )
+  {
+    // update cells in specified row to new height, and adjust cells below positions
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+    {
+      int row = entry.getKey() % 9999;
+      Cell cell = entry.getValue();
+
+      if ( row < section )
+        continue;
+
+      if ( row == section )
+      {
+        // needs height adjustment
+        cell.setHeight( newHeight );
+        cell.redraw();
+        continue;
+      }
+
+      // cell is below row so needs layout adjustment
+      cell.setLayoutY( cell.getLayoutY() - oldHeight + newHeight );
+    }
+
+    // add rows that might now be visible below
+    if ( newHeight < oldHeight )
+    {
+      int min = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - getTranslateY() - oldHeight + newHeight );
+      int max = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - getTranslateY() );
+      addRows( min, max );
+    }
+  }
 
 }

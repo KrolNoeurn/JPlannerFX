@@ -58,14 +58,20 @@ public abstract class Cell extends Canvas
   }
 
   /**************************************** constructor ******************************************/
-  public Cell( int w, int h, Paint fill )
+  public Cell( int w, int h, Paint color )
   {
     // construct cell drawing area
     super( w, h );
+    fill( color );
+    drawGrid();
+  }
 
+  /******************************************* fill **********************************************/
+  public void fill( Paint color )
+  {
     // fill cell background with specified paint
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( fill );
+    gc.setFill( color );
     gc.fillRect( 0, 0, getWidth() - 1.0, getHeight() - 1.0 );
   }
 
@@ -237,4 +243,8 @@ public abstract class Cell extends Canvas
 
     return lines;
   }
+
+  /******************************************* redraw ********************************************/
+  abstract void redraw();
+
 }

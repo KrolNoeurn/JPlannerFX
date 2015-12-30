@@ -32,7 +32,7 @@ import rjc.jplanner.gui.table.Header.State;
 public class HeaderDragDetected implements EventHandler<MouseEvent>
 {
   private Header m_header;
-  private int    m_oldSize;
+  private int    m_originalSize;
 
   /**************************************** constructor ******************************************/
   public HeaderDragDetected( Header header )
@@ -55,43 +55,43 @@ public class HeaderDragDetected implements EventHandler<MouseEvent>
     }
     else if ( m_header.state == State.NORMAL )
     {
-      // resize
+      // start resize
       m_header.state = State.RESIZE;
 
       // ensure correct section is to be resized
       if ( m_header.section == Integer.MAX_VALUE )
       {
-        m_header.section = m_header.getTable().getDataSource().getRowCount() - 1;
         if ( m_header.getOrientation() == Orientation.HORIZONTAL )
           m_header.section = m_header.getTable().getDataSource().getColumnCount() - 1;
+        else
+          m_header.section = m_header.getTable().getDataSource().getRowCount() - 1;
       }
+      else if ( m_header.section != 0 && m_header.pos - m_header.sectionStart < HeaderMouseMoved.PROXIMITY )
+        m_header.section--;
+
+      // get original size before resize
+      if ( m_header.getOrientation() == Orientation.HORIZONTAL )
+        m_originalSize = m_header.m_table.getColumnWidth( m_header.section );
       else
-      {
-        if ( m_header.section != 0 && m_header.pos - m_header.sectionStart < HeaderMouseMoved.PROXIMITY )
-          m_header.section--;
-      }
-
-      m_oldSize = 100;
-
-      JPlanner.trace( "RESIZE starting on section=" + m_header.section );
+        m_originalSize = m_header.m_table.getRowHeight( m_header.section );
     }
 
-    // action re-size
+    // action resize
     if ( m_header.state == State.RESIZE )
     {
       if ( m_header.getOrientation() == Orientation.HORIZONTAL )
       {
-        int width = (int) ( m_oldSize - m_header.pos + event.getX() );
+        int width = (int) ( m_originalSize - m_header.pos + event.getX() );
         m_header.getTable().setColumnWidth( m_header.section, width );
       }
       else
       {
-        int height = (int) ( m_oldSize - m_header.pos + event.getY() );
+        int height = (int) ( m_originalSize - m_header.pos + event.getY() );
         m_header.getTable().setRowHeight( m_header.section, height );
       }
     }
 
-    // action re-order
+    // action reorder
     if ( m_header.state == State.REORDER )
     {
       // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

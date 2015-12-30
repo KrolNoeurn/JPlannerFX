@@ -24,6 +24,7 @@ package rjc.jplanner.gui.table;
 
 public class HeaderCell extends Cell
 {
+  private String m_str;
 
   /**************************************** constructor ******************************************/
   public HeaderCell( String str, int x, int y, int w, int h )
@@ -33,6 +34,17 @@ public class HeaderCell extends Cell
     setLayoutX( x );
     setLayoutY( y );
     drawText( str, Alignment.MIDDLE );
+
+    m_str = str;
+  }
+
+  /****************************************** redraw *********************************************/
+  @Override
+  void redraw()
+  {
+    // redraw header cell
+    fill( Table.COLOR_HEADER_FILL );
+    drawText( m_str, Alignment.MIDDLE );
     drawGrid();
   }
 

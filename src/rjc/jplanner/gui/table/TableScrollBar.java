@@ -55,7 +55,6 @@ public class TableScrollBar extends ScrollBar
       public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
       {
         checkSettings();
-        m_other.checkSettings();
         scrollTable( (int) getValue() );
       }
     } );
@@ -144,7 +143,7 @@ public class TableScrollBar extends ScrollBar
   }
 
   /**************************************** checkSettings ****************************************/
-  private void checkSettings()
+  void checkSettings()
   {
     // check ensure scroll bar appropriate for table body size
     double size = 0.0;
@@ -170,6 +169,7 @@ public class TableScrollBar extends ScrollBar
     {
       setVisible( needed );
       setSpans();
+      m_other.checkSettings();
     }
 
     // if visible, check thumb size

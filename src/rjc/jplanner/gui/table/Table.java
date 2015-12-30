@@ -40,6 +40,8 @@ public class Table extends GridPane
 
   private int                       m_defaultRowHeight   = 20;
   private int                       m_defaultColumnWidth = 100;
+  private int                       m_minimumRowHeight   = 15;
+  private int                       m_minimumColumnWidth = 40;
   private int                       m_hHeaderHeight      = 20;
   private int                       m_vHeaderWidth       = 30;
 
@@ -85,6 +87,11 @@ public class Table extends GridPane
     // cells area should grow to fill all available space
     setHgrow( m_body, Priority.ALWAYS );
     setVgrow( m_body, Priority.ALWAYS );
+
+    // set listeners for scroll bar visibility (can only be setup after scroll bars initialised)
+    m_hHeader.setScrollBarListeners();
+    m_vHeader.setScrollBarListeners();
+    m_body.setScrollBarListeners();
   }
 
   /*************************************** getDataSource *****************************************/
@@ -271,6 +278,8 @@ public class Table extends GridPane
   public void setVerticalHeaderWidth( int width )
   {
     m_vHeaderWidth = width;
+    m_headerCorner.setWidth( width );
+    m_headerCorner.redraw();
   }
 
   /********************************** getHorizontalHeaderHeight **********************************/
@@ -283,18 +292,48 @@ public class Table extends GridPane
   public void setHorizontalHeaderHeight( int height )
   {
     m_hHeaderHeight = height;
+    m_headerCorner.setHeight( height );
+    m_headerCorner.redraw();
   }
 
   /*************************************** setColumnWidth ****************************************/
-  public void setColumnWidth( int column, int width )
+  public void setColumnWidth( int column, int newWidth )
   {
-    m_columnWidths.put( column, width );
+    // width should not be below minimum
+    if ( newWidth < m_minimumColumnWidth )
+      newWidth = m_minimumColumnWidth;
+
+    // record width so overrides default
+    int oldWidth = getColumnWidth( column );
+    m_columnWidths.put( column, newWidth );
+
+    // if width different to old width, update horizontal header and body cells
+    if ( newWidth != oldWidth )
+    {
+      m_hHeader.updateCellWidths( column, oldWidth, newWidth );
+      m_body.updateCellWidths( column, oldWidth, newWidth );
+      m_hScrollBar.checkSettings();
+    }
   }
 
   /**************************************** setRowHeight *****************************************/
-  public void setRowHeight( int row, int height )
+  public void setRowHeight( int row, int newHeight )
   {
-    m_rowHeights.put( row, height );
+    // height should not be below minimum
+    if ( newHeight < m_minimumRowHeight )
+      newHeight = m_minimumRowHeight;
+
+    // record height so overrides default
+    int oldHeight = getRowHeight( row );
+    m_rowHeights.put( row, newHeight );
+
+    // if height different to old height, update vertical header and body cells
+    if ( newHeight != oldHeight )
+    {
+      m_vHeader.updateCellHeights( row, oldHeight, newHeight );
+      m_body.updateCellHeights( row, oldHeight, newHeight );
+      m_vScrollBar.checkSettings();
+    }
   }
 
 }

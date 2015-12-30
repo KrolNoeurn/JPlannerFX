@@ -26,6 +26,9 @@ import javafx.scene.paint.Paint;
 
 public class BodyCell extends Cell
 {
+  private String    m_str;
+  private Paint     m_color;
+  private Alignment m_alignment;
 
   /**************************************** constructor ******************************************/
   public BodyCell( String str, Alignment alignment, int x, int y, int w, int h, Paint color )
@@ -35,6 +38,19 @@ public class BodyCell extends Cell
     setLayoutX( x );
     setLayoutY( y );
     drawText( str, alignment );
+
+    m_str = str;
+    m_color = color;
+    m_alignment = alignment;
+  }
+
+  /****************************************** redraw *********************************************/
+  @Override
+  void redraw()
+  {
+    // redraw body cell
+    fill( m_color );
+    drawText( m_str, m_alignment );
     drawGrid();
   }
 
