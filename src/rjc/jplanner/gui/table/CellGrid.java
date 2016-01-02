@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
@@ -44,7 +45,7 @@ public abstract class CellGrid extends Pane
     setClip( new Rectangle( 9999999, 9999999 ) );
     m_table = table;
 
-    // add listener for width change
+    // add listener for grid width change
     widthProperty().addListener( new ChangeListener<Number>()
     {
       @Override
@@ -54,18 +55,18 @@ public abstract class CellGrid extends Pane
         int oldWidth = oldValue.intValue();
         int newWidth = newValue.intValue();
 
-        // if new width not greater, can ignore
-        if ( oldWidth >= newWidth )
+        // if grid width less, no need to do anything more
+        if ( newWidth <= oldWidth )
           return;
 
-        // width has increased, so add any extra new columns needed
+        // grid width has increased, so add any extra new columns now visible
         int min = m_table.getColumnAtX( oldWidth - getTranslateX() );
         int max = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE - getTranslateX() );
         addColumns( min, max );
       }
     } );
 
-    // add listener for height change
+    // add listener for grid height change
     heightProperty().addListener( new ChangeListener<Number>()
     {
       @Override
@@ -75,11 +76,11 @@ public abstract class CellGrid extends Pane
         int oldHeight = oldValue.intValue();
         int newHeight = newValue.intValue();
 
-        // if new height not greater, can ignore
-        if ( oldHeight >= newHeight )
+        // if grid height less, no need to do anything more
+        if ( newHeight <= oldHeight )
           return;
 
-        // height has increased, so add any extra new rows needed
+        // grid height has increased, so add any extra new rows now visible
         int min = m_table.getRowAtY( oldHeight - getTranslateY() );
         int max = m_table.getRowAtY( newHeight + TableScrollBar.SIZE - getTranslateY() );
         addRows( min, max );
@@ -141,13 +142,13 @@ public abstract class CellGrid extends Pane
   /*********************************** setScrollBarListeners *************************************/
   public void setScrollBarListeners()
   {
-    // sets listeners for scroll bar visibility (can only be setup after scroll bars initialised)
+    // set listeners for scroll bar visibility (can only be setup after both scroll bars created)
     m_table.getHorizontalScrollBar().visibleProperty().addListener( new ChangeListener<Boolean>()
     {
       @Override
       public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
       {
-        setClip();
+        setClip(); // adjust clip area to take into account scroll bar visibility
       }
     } );
 
@@ -156,7 +157,7 @@ public abstract class CellGrid extends Pane
       @Override
       public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
       {
-        setClip();
+        setClip(); // adjust clip area to take into account scroll bar visibility
       }
     } );
   }
@@ -182,7 +183,7 @@ public abstract class CellGrid extends Pane
   }
 
   /****************************************** getCell ********************************************/
-  private Cell getCell( int column, int row )
+  public Cell getCell( int column, int row )
   {
     // return cell for specified column & row, or null if does not exist
     int hash = column * 9999 + row;
@@ -274,8 +275,8 @@ public abstract class CellGrid extends Pane
   /***************************************** createCell ******************************************/
   abstract Cell createCell( int column, int row, int x, int y, int w, int h );
 
-  /************************************** updateCellWidths ***************************************/
-  public void updateCellWidths( int section, int oldWidth, int newWidth )
+  /************************************* updateColumnWidth ***************************************/
+  public void updateColumnWidth( int section, int oldWidth, int newWidth )
   {
     // update cells in specified column to new width, and adjust cells to the right positions
     for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
@@ -307,8 +308,8 @@ public abstract class CellGrid extends Pane
     }
   }
 
-  /************************************** updateCellHeights **************************************/
-  public void updateCellHeights( int section, int oldHeight, int newHeight )
+  /*************************************** updateRowHeight ***************************************/
+  public void updateRowHeight( int section, int oldHeight, int newHeight )
   {
     // update cells in specified row to new height, and adjust cells below positions
     for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
@@ -337,6 +338,62 @@ public abstract class CellGrid extends Pane
       int min = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - getTranslateY() - oldHeight + newHeight );
       int max = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - getTranslateY() );
       addRows( min, max );
+    }
+  }
+
+  /************************************* removeAllSelections *************************************/
+  public void removeAllSelections()
+  {
+    // remove selected from all cells
+    for ( Cell cell : m_cells.values() )
+      cell.setSelected( false );
+  }
+
+  /************************************* getSelectedColumns **************************************/
+  public HashSet<Integer> getSelectedColumns()
+  {
+    // return set of column numbers which have selected cells
+    HashSet<Integer> selected = new HashSet<Integer>();
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+      if ( entry.getValue().isSelected() )
+        selected.add( entry.getKey() / 9999 );
+
+    return selected;
+  }
+
+  /*************************************** getSelectedRows ***************************************/
+  public HashSet<Integer> getSelectedRows()
+  {
+    // return set of row numbers which have selected cells
+    HashSet<Integer> selected = new HashSet<Integer>();
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+      if ( entry.getValue().isSelected() )
+        selected.add( entry.getKey() % 9999 );
+
+    return selected;
+  }
+
+  /************************************* setSelectedColumns **************************************/
+  public void setSelectedColumns( HashSet<Integer> set, boolean selected )
+  {
+    // ensure only columns specified in set are selected
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+    {
+      int column = entry.getKey() / 9999;
+      if ( set.contains( column ) )
+        entry.getValue().setSelected( selected );
+    }
+  }
+
+  /*************************************** setSelectedRows ***************************************/
+  public void setSelectedRows( HashSet<Integer> set, boolean selected )
+  {
+    // ensure only columns specified in set are selected
+    for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
+    {
+      int row = entry.getKey() % 9999;
+      if ( set.contains( row ) )
+        entry.getValue().setSelected( selected );
     }
   }
 

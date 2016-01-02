@@ -27,11 +27,18 @@ import rjc.jplanner.gui.table.Cell.Alignment;
 
 public class Body extends CellGrid
 {
+  private int m_focusColumn = -1;
+  private int m_focusRow    = -1;
+
   /**************************************** constructor ******************************************/
   public Body( Table table )
   {
     // construct default table cells display
     super( table );
+
+    // add listeners to support cell selecting
+    setOnMousePressed( new BodyMousePressed( this ) );
+    setOnMouseDragged( new BodyDragDetected( this ) );
   }
 
   /***************************************** createCell ******************************************/
@@ -44,6 +51,25 @@ public class Body extends CellGrid
     Paint color = m_table.getDataSource().getCellBackground( column, row );
 
     return new BodyCell( txt, align, x, y, w, h, color );
+  }
+
+  /****************************************** setFocus *******************************************/
+  public void setFocus( int column, int row )
+  {
+    m_focusColumn = column;
+    m_focusRow = row;
+  }
+
+  /*************************************** getFocusColumn ****************************************/
+  public int getFocusColumn()
+  {
+    return m_focusColumn;
+  }
+
+  /**************************************** getFocusRow ******************************************/
+  public int getFocusRow()
+  {
+    return m_focusRow;
   }
 
 }

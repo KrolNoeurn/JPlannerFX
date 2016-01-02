@@ -31,31 +31,34 @@ import javafx.scene.paint.Color;
 
 public class Table extends GridPane
 {
-  public static final Color         COLOR_GRID           = Color.SILVER;
-  public static final Color         COLOR_HEADER_FILL    = Color.rgb( 240, 240, 240 );     // light grey
-  public static final Color         COLOR_NORMAL_CELL    = Color.WHITE;
-  public static final Color         COLOR_DISABLED_CELL  = Color.rgb( 227, 227, 227 );     // medium grey
+  public static final Color         COLOR_GRID            = Color.SILVER;
+  public static final Color         COLOR_DISABLED_CELL   = Color.rgb( 227, 227, 227 );     // medium grey
+  public static final Color         COLOR_NORMAL_CELL     = Color.WHITE;
+  public static final Color         COLOR_NORMAL_HEADER   = Color.rgb( 240, 240, 240 );     // light grey
+  public static final Color         COLOR_NORMAL_TEXT     = Color.BLACK;
+  public static final Color         COLOR_SELECTED_CELL   = Color.rgb( 51, 153, 255 );      // light blue;
+  public static final Color         COLOR_SELECTED_HEADER = Color.rgb( 192, 192, 192 );     // medium dark grey
+  public static final Color         COLOR_SELECTED_TEXT   = Color.WHITE;
 
-  private ITableDataSource          m_data;                                                // data source for the table
+  private ITableDataSource          m_data;                                                 // data source for the table
 
-  private int                       m_defaultRowHeight   = 20;
-  private int                       m_defaultColumnWidth = 100;
-  private int                       m_minimumRowHeight   = 15;
-  private int                       m_minimumColumnWidth = 40;
-  private int                       m_hHeaderHeight      = 20;
-  private int                       m_vHeaderWidth       = 30;
+  private int                       m_defaultRowHeight    = 20;
+  private int                       m_defaultColumnWidth  = 100;
+  private int                       m_minimumRowHeight    = 15;
+  private int                       m_minimumColumnWidth  = 40;
+  private int                       m_hHeaderHeight       = 20;
+  private int                       m_vHeaderWidth        = 30;
 
   private HeaderCorner              m_headerCorner;
   private Header                    m_vHeader;
   private Header                    m_hHeader;
   private Body                      m_body;
-
   private TableScrollBar            m_vScrollBar;
   private TableScrollBar            m_hScrollBar;
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
-  private HashMap<Integer, Integer> m_rowHeights         = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_columnWidths        = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_rowHeights          = new HashMap<Integer, Integer>();
 
   /**************************************** constructor ******************************************/
   public Table( ITableDataSource data )
@@ -84,11 +87,11 @@ public class Table extends GridPane
     add( m_vScrollBar, 2, 0, 1, 2 );
     add( m_hScrollBar, 0, 2, 2, 1 );
 
-    // cells area should grow to fill all available space
+    // table body should grow to fill all available space
     setHgrow( m_body, Priority.ALWAYS );
     setVgrow( m_body, Priority.ALWAYS );
 
-    // set listeners for scroll bar visibility (can only be setup after scroll bars initialised)
+    // set listeners for scroll bar visibility (can only be setup after both scroll bars created)
     m_hHeader.setScrollBarListeners();
     m_vHeader.setScrollBarListeners();
     m_body.setScrollBarListeners();
@@ -133,7 +136,7 @@ public class Table extends GridPane
   /************************************** getColumnExactAtX **************************************/
   public int getColumnExactAtX( double x )
   {
-    // return column index at specified x-coordinate, or -1 if before, MAX if after
+    // return column index at specified x-coordinate, or -1 if before, MAX_INT if after
     if ( x < 0.0 )
       return -1;
 
@@ -196,7 +199,7 @@ public class Table extends GridPane
   /*************************************** getRowExactAtY ****************************************/
   public int getRowExactAtY( double y )
   {
-    // return row index at specified x-coordinate, or -1 if before, MAX if after
+    // return row index at specified x-coordinate, or -1 if before, MAX_INT if after
     if ( y < 0.0 )
       return -1;
 
@@ -307,11 +310,11 @@ public class Table extends GridPane
     int oldWidth = getColumnWidth( column );
     m_columnWidths.put( column, newWidth );
 
-    // if width different to old width, update horizontal header and body cells
+    // if new width different to old width, update horizontal header and body cells
     if ( newWidth != oldWidth )
     {
-      m_hHeader.updateCellWidths( column, oldWidth, newWidth );
-      m_body.updateCellWidths( column, oldWidth, newWidth );
+      m_hHeader.updateColumnWidth( column, oldWidth, newWidth );
+      m_body.updateColumnWidth( column, oldWidth, newWidth );
       m_hScrollBar.checkSettings();
     }
   }
@@ -327,11 +330,11 @@ public class Table extends GridPane
     int oldHeight = getRowHeight( row );
     m_rowHeights.put( row, newHeight );
 
-    // if height different to old height, update vertical header and body cells
+    // if new height different to old height, update vertical header and body cells
     if ( newHeight != oldHeight )
     {
-      m_vHeader.updateCellHeights( row, oldHeight, newHeight );
-      m_body.updateCellHeights( row, oldHeight, newHeight );
+      m_vHeader.updateRowHeight( row, oldHeight, newHeight );
+      m_body.updateRowHeight( row, oldHeight, newHeight );
       m_vScrollBar.checkSettings();
     }
   }

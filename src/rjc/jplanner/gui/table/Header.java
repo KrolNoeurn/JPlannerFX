@@ -49,7 +49,7 @@ public class Header extends CellGrid
     // add listeners to support resizing and reordering
     setOnMouseMoved( new HeaderMouseMoved( this ) );
     setOnMouseDragged( new HeaderDragDetected( this ) );
-    setOnMouseReleased( new HeaderDragDone( this ) );
+    setOnMouseReleased( new HeaderMouseReleased( this ) );
   }
 
   /***************************************** createCell ******************************************/
@@ -91,6 +91,17 @@ public class Header extends CellGrid
   public Orientation getOrientation()
   {
     return m_orientation;
+  }
+
+  /***************************************** setSelected *****************************************/
+  public void setSelected()
+  {
+    // ensure header selected sections are consistent with table body
+    removeAllSelections();
+    if ( m_orientation == Orientation.HORIZONTAL )
+      setSelectedColumns( m_table.getBody().getSelectedColumns(), true );
+    else
+      setSelectedRows( m_table.getBody().getSelectedRows(), true );
   }
 
 }

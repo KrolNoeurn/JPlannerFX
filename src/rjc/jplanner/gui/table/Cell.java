@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
@@ -57,6 +56,8 @@ public abstract class Cell extends Canvas
     LEFT, MIDDLE, RIGHT
   }
 
+  private boolean m_selected; // is cell currently selected and coloured accordingly 
+
   /**************************************** constructor ******************************************/
   public Cell( int w, int h, Paint color )
   {
@@ -71,7 +72,14 @@ public abstract class Cell extends Canvas
   {
     // fill cell background with specified paint
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( color );
+
+    if ( m_selected && color == Table.COLOR_NORMAL_HEADER )
+      gc.setFill( Table.COLOR_SELECTED_HEADER );
+    else if ( m_selected )
+      gc.setFill( Table.COLOR_SELECTED_CELL );
+    else
+      gc.setFill( color );
+
     gc.fillRect( 0, 0, getWidth() - 1.0, getHeight() - 1.0 );
   }
 
@@ -94,7 +102,12 @@ public abstract class Cell extends Canvas
     // draw individual lines
     GraphicsContext gc = getGraphicsContext2D();
     gc.setFontSmoothingType( FontSmoothingType.LCD );
-    gc.setFill( Color.BLACK );
+
+    if ( m_selected )
+      gc.setFill( Table.COLOR_SELECTED_TEXT );
+    else
+      gc.setFill( Table.COLOR_NORMAL_TEXT );
+
     for ( TextLine line : lines )
       gc.fillText( line.txt, line.x, line.y );
   }
@@ -246,5 +259,21 @@ public abstract class Cell extends Canvas
 
   /******************************************* redraw ********************************************/
   abstract void redraw();
+
+  /***************************************** isSelected ******************************************/
+  public boolean isSelected()
+  {
+    return m_selected;
+  }
+
+  /***************************************** setSelected *****************************************/
+  public void setSelected( boolean selected )
+  {
+    if ( m_selected != selected )
+    {
+      m_selected = selected;
+      redraw();
+    }
+  }
 
 }

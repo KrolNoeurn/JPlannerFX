@@ -30,7 +30,7 @@ public class HeaderCell extends Cell
   public HeaderCell( String str, int x, int y, int w, int h )
   {
     // construct table header cell
-    super( w, h, Table.COLOR_HEADER_FILL );
+    super( w, h, Table.COLOR_NORMAL_HEADER );
     setLayoutX( x );
     setLayoutY( y );
     drawText( str, Alignment.MIDDLE );
@@ -43,7 +43,7 @@ public class HeaderCell extends Cell
   void redraw()
   {
     // redraw header cell
-    fill( Table.COLOR_HEADER_FILL );
+    fill( Table.COLOR_NORMAL_HEADER );
     drawText( m_str, Alignment.MIDDLE );
     drawGrid();
   }

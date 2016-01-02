@@ -181,9 +181,7 @@ public class TableScrollBar extends ScrollBar
       setVisibleAmount( size / max * ( max - size ) );
     }
     else
-    {
       setValue( 0.0 );
-    }
 
   }
 

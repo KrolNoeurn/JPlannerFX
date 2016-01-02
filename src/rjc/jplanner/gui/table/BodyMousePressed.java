@@ -19,37 +19,83 @@
 package rjc.jplanner.gui.table;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Orientation;
 import javafx.scene.input.MouseEvent;
-import rjc.jplanner.gui.table.Header.State;
 
 /*************************************************************************************************/
-/************************* Mouse drag done handler for table headers *****************************/
+/*********************** Mouse button pressed event handler for table body ***********************/
 /*************************************************************************************************/
 
-public class HeaderDragDone implements EventHandler<MouseEvent>
+public class BodyMousePressed implements EventHandler<MouseEvent>
 {
-  private Header m_header;
+  private Body m_body;
 
   /**************************************** constructor ******************************************/
-  public HeaderDragDone( Header header )
+  public BodyMousePressed( Body body )
   {
     // initialise private variables
-    m_header = header;
+    m_body = body;
   }
 
   /******************************************* handle ********************************************/
   @Override
   public void handle( MouseEvent event )
   {
-    // mouse button released, so set header state back to normal
-    m_header.state = State.NORMAL;
-    m_header.sectionEnd = 0.0;
+    // handle user clicking on a body cell, do nothing if Alt down
+    if ( event.isAltDown() )
+      return;
 
-    if ( m_header.getOrientation() == Orientation.HORIZONTAL )
-      m_header.pos = event.getX();
+    Table table = m_body.m_table;
+    int column = table.getColumnExactAtX( event.getX() );
+    if ( column < 0 || column == Integer.MAX_VALUE )
+      return;
+
+    int row = table.getRowExactAtY( event.getY() );
+    if ( row < 0 || row == Integer.MAX_VALUE )
+      return;
+
+    // if control & shift not down, remove all previous selections
+    if ( !event.isControlDown() && !event.isShiftDown() )
+      m_body.removeAllSelections();
+
+    // if shift down, select area, else select just individual cell
+    if ( event.isShiftDown() && m_body.getFocusColumn() >= 0 )
+    {
+      // ensure column <= column2, swap if necessary
+      int column2 = m_body.getFocusColumn();
+      if ( column2 < column )
+      {
+        int temp = column;
+        column = column2;
+        column2 = temp;
+      }
+
+      // ensure row <= row2, swap if necessary
+      int row2 = m_body.getFocusRow();
+      if ( row2 < row )
+      {
+        int temp = row;
+        row = row2;
+        row2 = temp;
+      }
+
+      // select area
+      for ( int c = column; c <= column2; c++ )
+        for ( int r = row; r <= row2; r++ )
+          m_body.getCell( c, r ).setSelected( true );
+    }
     else
-      m_header.pos = event.getY();
+    {
+      // toggle cell selection
+      Cell cell = m_body.getCell( column, row );
+      cell.setSelected( !cell.isSelected() );
+
+      if ( cell.isSelected() )
+        m_body.setFocus( column, row );
+    }
+
+    // ensure headers selected sections are consistent with table body
+    table.getVerticalHeader().setSelected();
+    table.getHorizontalHeader().setSelected();
   }
 
 }
