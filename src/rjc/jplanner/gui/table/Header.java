@@ -19,6 +19,8 @@
 package rjc.jplanner.gui.table;
 
 import javafx.geometry.Orientation;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.input.MouseEvent;
 
 /*************************************************************************************************/
 /************************* Horizontal header that shows column titles ****************************/
@@ -34,10 +36,10 @@ public class Header extends CellGrid
   }
 
   State  state = State.NORMAL; // header state
-  double pos;                  // location of mouse along header
-  int    section;
-  double sectionStart;
-  double sectionEnd;
+  int    pos;                  // location of mouse along header
+  int    section;              // section to be reordered or resized
+  Canvas slider;               // sliding cell used during reordering
+  Canvas pointer;              // pointer used during reordering
 
   /**************************************** constructor ******************************************/
   public Header( Table table, Orientation orientation )
@@ -79,6 +81,66 @@ public class Header extends CellGrid
       return new HeaderCell( txt, 0, y, w, h );
     }
 
+  }
+
+  /*************************************** getSectionStart ***************************************/
+  public int getSectionStart( int section )
+  {
+    // return start of specified section (x or y depending on orientation)
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return m_table.getColumnStartX( section );
+
+    return m_table.getRowStartY( section );
+  }
+
+  /*************************************** getSectionSize ****************************************/
+  public int getSectionSize( int section )
+  {
+    // return size of specified section (width or height depending on orientation)
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return m_table.getColumnWidth( section );
+
+    return m_table.getRowHeight( section );
+  }
+
+  /*************************************** getSectionCount ***************************************/
+  public int getSectionCount()
+  {
+    // return count of sections (column or row depending on orientation)
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return m_table.getDataSource().getColumnCount();
+
+    return m_table.getDataSource().getRowCount();
+  }
+
+  /***************************************** getSection ******************************************/
+  public int getSection( int pos )
+  {
+    // return section number at specified coordinate
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return m_table.getColumnAtX( pos );
+
+    return m_table.getRowAtY( pos );
+  }
+
+  /*************************************** getSectionExact ***************************************/
+  public int getSectionExact( int pos )
+  {
+    // return section number at specified coordinate
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return m_table.getColumnExactAtX( pos );
+
+    return m_table.getRowExactAtY( pos );
+  }
+
+  /******************************************* getPos ********************************************/
+  public int getPos( MouseEvent event )
+  {
+    // return relevant position depending on orientation
+    if ( m_orientation == Orientation.HORIZONTAL )
+      return (int) event.getX();
+
+    return (int) event.getY();
   }
 
   /****************************************** getTable *******************************************/

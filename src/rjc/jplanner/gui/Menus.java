@@ -25,6 +25,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /****************************** Main JPlanner application menu bar *******************************/
@@ -54,17 +55,22 @@ public class Menus extends MenuBar
   {
     // file menu
     Menu menu = new Menu( "File" );
+    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
 
     MenuItem fileNew = new MenuItem( "New" );
     fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, KeyCombination.CONTROL_DOWN ) );
+    fileNew.setDisable( true );
 
     MenuItem fileOpen = new MenuItem( "Open..." );
     fileOpen.setAccelerator( new KeyCodeCombination( KeyCode.O, KeyCombination.CONTROL_DOWN ) );
+    fileOpen.setOnAction( event -> JPlanner.gui.load() );
 
     MenuItem fileSave = new MenuItem( "Save" );
     fileSave.setAccelerator( new KeyCodeCombination( KeyCode.S, KeyCombination.CONTROL_DOWN ) );
+    fileSave.setOnAction( event -> JPlanner.gui.save() );
 
     MenuItem fileSaveAs = new MenuItem( "Save As..." );
+    fileSaveAs.setOnAction( event -> JPlanner.gui.saveAs() );
 
     MenuItem filePrintPreview = new MenuItem( "Print preview..." );
     filePrintPreview.setDisable( true );
@@ -74,6 +80,7 @@ public class Menus extends MenuBar
 
     MenuItem fileExit = new MenuItem( "Exit" );
     fileExit.setAccelerator( new KeyCodeCombination( KeyCode.Q, KeyCombination.CONTROL_DOWN ) );
+    fileExit.setDisable( true );
 
     menu.getItems().addAll( fileNew, fileOpen, fileSave, fileSaveAs );
     menu.getItems().addAll( new SeparatorMenuItem(), filePrintPreview, filePrint );
@@ -86,6 +93,7 @@ public class Menus extends MenuBar
   {
     // edit menu
     Menu menu = new Menu( "Edit" );
+    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
 
     MenuItem editUndo = new MenuItem( "Undo" );
     editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, KeyCombination.CONTROL_DOWN ) );
@@ -120,6 +128,7 @@ public class Menus extends MenuBar
     editFind.setDisable( true );
 
     MenuItem editSchedule = new MenuItem( "Schedule" );
+    editSchedule.setDisable( true );
 
     menu.getItems().addAll( editUndo, editRedo, new SeparatorMenuItem(), editInsert, editDelete );
     menu.getItems().addAll( new SeparatorMenuItem(), editCut, editCopy, editPaste );
@@ -132,6 +141,7 @@ public class Menus extends MenuBar
   {
     // report menu
     Menu menu = new Menu( "Report" );
+    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
 
     MenuItem reportTBD = new MenuItem( "TBD" );
     reportTBD.setDisable( true );
@@ -145,6 +155,7 @@ public class Menus extends MenuBar
   {
     // view menu
     Menu menu = new Menu( "View" );
+    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
 
     MenuItem viewUndoStack = new MenuItem( "Undo Stack..." );
     viewUndoStack.setDisable( true );
@@ -164,6 +175,7 @@ public class Menus extends MenuBar
   {
     // help menu
     Menu menu = new Menu( "Help" );
+    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
 
     MenuItem helpAbout = new MenuItem( "About JPlanner" );
     helpAbout.setDisable( true );

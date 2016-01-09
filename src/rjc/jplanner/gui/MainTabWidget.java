@@ -47,6 +47,9 @@ public class MainTabWidget extends TabPane
     Tab tabDays = new DaysTab( "Days" );
 
     getTabs().addAll( tabPlan, tabTasks, tabResources, tabCalendars, tabDays );
+
+    // select day tab by default
+    getSelectionModel().select( 4 );
   }
 
 }

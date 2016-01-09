@@ -44,53 +44,30 @@ public class HeaderMouseMoved implements EventHandler<MouseEvent>
   @Override
   public void handle( MouseEvent event )
   {
-    // depending on orientation interested in x or y
-    Table table = m_header.getTable();
-    Orientation orientation = m_header.getOrientation();
-    if ( orientation == Orientation.HORIZONTAL )
-      m_header.pos = event.getX();
-    else
-      m_header.pos = event.getY();
+    // as mouse moves along header ensure correct cursor is displayed
+    int pos = m_header.getPos( event );
+    int section = m_header.getSectionExact( pos );
+    int start = m_header.getSectionStart( section );
+    int size = m_header.getSectionSize( section );
 
-    // if mouse moved outside previous section, get new section details
-    if ( m_header.pos < m_header.sectionStart || m_header.pos > m_header.sectionEnd )
-    {
-      if ( orientation == Orientation.HORIZONTAL )
-      {
-        m_header.section = table.getColumnExactAtX( m_header.pos );
-        m_header.sectionStart = table.getColumnStartX( m_header.section );
-      }
+    if ( section == Integer.MAX_VALUE )
+      section = m_header.getSectionCount();
+
+    // determine if to display normal cursor or resize cursor
+    m_header.setCursor( Cursor.DEFAULT );
+    if ( ( pos - start < PROXIMITY && section != 0 ) || start + size - pos < PROXIMITY )
+      if ( m_header.getOrientation() == Orientation.HORIZONTAL )
+        m_header.setCursor( Cursor.H_RESIZE );
       else
-      {
-        m_header.section = table.getRowExactAtY( m_header.pos );
-        m_header.sectionStart = table.getRowStartY( m_header.section );
-      }
+        m_header.setCursor( Cursor.V_RESIZE );
 
-      if ( m_header.section == Integer.MAX_VALUE )
-        m_header.sectionEnd = Integer.MAX_VALUE;
-      else if ( orientation == Orientation.HORIZONTAL )
-        m_header.sectionEnd = m_header.sectionStart + table.getColumnWidth( m_header.section );
-      else
-        m_header.sectionEnd = m_header.sectionStart + table.getRowHeight( m_header.section );
+    // if cursor at beginning of section, then resize previous section
+    if ( pos - start < PROXIMITY && section != 0 )
+      section--;
 
-      m_header.setCursor( Cursor.DEFAULT );
-    }
-
-    // change mouse cursor for resize if near edge of section
-    if ( m_header.getCursor() == Cursor.DEFAULT )
-    {
-      if ( ( m_header.section != 0 && m_header.pos - m_header.sectionStart < PROXIMITY )
-          || m_header.sectionEnd - m_header.pos < PROXIMITY )
-        if ( orientation == Orientation.HORIZONTAL )
-          m_header.setCursor( Cursor.H_RESIZE );
-        else
-          m_header.setCursor( Cursor.V_RESIZE );
-    }
-    else
-    {
-      if ( m_header.pos - m_header.sectionStart >= PROXIMITY && m_header.sectionEnd - m_header.pos >= PROXIMITY )
-        m_header.setCursor( Cursor.DEFAULT );
-    }
+    // update header tracking
+    m_header.pos = pos;
+    m_header.section = section;
   }
 
 }

@@ -24,6 +24,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Cursor;
 import javafx.scene.input.MouseEvent;
+import rjc.jplanner.gui.table.Header.State;
 
 /*************************************************************************************************/
 /************************** Mouse released handler for table headers *****************************/
@@ -44,6 +45,16 @@ public class HeaderMouseReleased implements EventHandler<MouseEvent>
   @Override
   public void handle( MouseEvent event )
   {
+    // any resize or reorder now finished, so set header state back to normal
+    m_header.state = State.NORMAL;
+    if ( m_header.slider != null )
+    {
+      // end reorder
+      m_header.getChildren().remove( m_header.slider );
+      m_header.m_table.getChildren().remove( m_header.pointer );
+      return;
+    }
+
     // check if user selecting whole column/row
     if ( m_header.getCursor() == Cursor.DEFAULT )
     {

@@ -184,6 +184,9 @@ public class Table extends GridPane
   public int getColumnWidth( int column )
   {
     // return width of column
+    if ( column < 0 || column >= m_data.getColumnCount() )
+      return Integer.MAX_VALUE;
+
     int width = m_defaultColumnWidth;
 
     if ( m_columnWidths.containsKey( column ) )
@@ -247,6 +250,9 @@ public class Table extends GridPane
   public int getRowHeight( int row )
   {
     // return height of row
+    if ( row < 0 || row >= m_data.getRowCount() )
+      return Integer.MAX_VALUE;
+
     int height = m_defaultRowHeight;
 
     if ( m_rowHeights.containsKey( row ) )
