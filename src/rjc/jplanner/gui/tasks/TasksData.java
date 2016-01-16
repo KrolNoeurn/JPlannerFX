@@ -20,7 +20,11 @@ package rjc.jplanner.gui.tasks;
 
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandTaskSetValue;
+import rjc.jplanner.gui.table.Body;
 import rjc.jplanner.gui.table.Cell.Alignment;
+import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
@@ -84,6 +88,33 @@ public class TasksData implements ITableDataSource
 
     return Table.COLOR_DISABLED_CELL;
 
+  }
+
+  /***************************************** getEditor *******************************************/
+  @Override
+  public CellEditor getEditor( Body body )
+  {
+    // return editor for the table body cell with focus
+    return new EditorText( body );
+  }
+
+  /****************************************** setValue *******************************************/
+  @Override
+  public void setValue( int column, int row, Object newValue )
+  {
+    // if new value equals old value, exit with no command
+    Object oldValue = getValue( column, row );
+    if ( newValue.equals( oldValue ) )
+      return;
+
+    JPlanner.plan.undostack().push( new CommandTaskSetValue( row, column, newValue, oldValue ) );
+  }
+
+  /****************************************** getValue *******************************************/
+  @Override
+  public Object getValue( int column, int row )
+  {
+    return getCellText( column, row );
   }
 
 }

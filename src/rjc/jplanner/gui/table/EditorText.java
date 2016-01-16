@@ -18,59 +18,41 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.paint.Paint;
-import rjc.jplanner.gui.table.Cell.Alignment;
+import javafx.geometry.Insets;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.Border;
 
 /*************************************************************************************************/
-/*********************** Display area that shows table body cell contents ************************/
+/******************************* Table cell editor for simple text *******************************/
 /*************************************************************************************************/
 
-public class Body extends CellGrid
+public class EditorText extends CellEditor
 {
-  private int m_focusColumn = -1;
-  private int m_focusRow    = -1;
 
   /**************************************** constructor ******************************************/
-  public Body( Table table )
+  public EditorText( Body body )
   {
-    // construct default table cells display
-    super( table );
+    // create table cell editor
+    super( body );
+    TextField textfield = new TextField();
 
-    // add listeners to support cell selecting
-    setOnMousePressed( new BodyMousePressed( this ) );
-    setOnMouseDragged( new BodyDragDetected( this ) );
-    setOnMouseClicked( new BodyMouseClicked( this ) );
+    // set appearance
+    textfield.setPadding( new Insets( 0, Cell.CELL_PADDING - 1, 0, Cell.CELL_PADDING - 1 ) );
+    textfield.setBorder( Border.EMPTY );
+
+    // set contents
+    textfield.setText( getData().getCellText( getColumn(), getRow() ) );
+    textfield.selectEnd();
+
+    // display and focus
+    setEditor( textfield );
   }
 
-  /***************************************** createCell ******************************************/
+  /******************************************* getText *******************************************/
   @Override
-  Cell createCell( int column, int row, int x, int y, int w, int h )
+  String getText()
   {
-    // create body cell 
-    String txt = m_table.getDataSource().getCellText( column, row );
-    Alignment align = m_table.getDataSource().getCellAlignment( column, row );
-    Paint color = m_table.getDataSource().getCellBackground( column, row );
-
-    return new BodyCell( txt, align, x, y, w, h, color );
-  }
-
-  /****************************************** setFocus *******************************************/
-  public void setFocus( int column, int row )
-  {
-    m_focusColumn = column;
-    m_focusRow = row;
-  }
-
-  /*************************************** getFocusColumn ****************************************/
-  public int getFocusColumn()
-  {
-    return m_focusColumn;
-  }
-
-  /**************************************** getFocusRow ******************************************/
-  public int getFocusRow()
-  {
-    return m_focusRow;
+    return ( (TextField) getPrime() ).getText();
   }
 
 }

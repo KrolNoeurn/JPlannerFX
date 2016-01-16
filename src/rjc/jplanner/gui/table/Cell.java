@@ -48,8 +48,8 @@ public abstract class Cell extends Canvas
     }
   }
 
-  private static String ELLIPSIS     = "..."; // ellipsis to show text has been truncated
-  private static int    CELL_PADDING = 4;     // cell padding for text left & right edges
+  public static String ELLIPSIS     = "..."; // ellipsis to show text has been truncated
+  public static int    CELL_PADDING = 4;     // cell padding for text left & right edges
 
   public static enum Alignment// alignment of text to be drawn in cell
   {

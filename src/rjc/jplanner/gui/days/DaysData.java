@@ -20,7 +20,12 @@ package rjc.jplanner.gui.days;
 
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandDaySetNumPeriods;
+import rjc.jplanner.command.CommandDaySetValue;
+import rjc.jplanner.gui.table.Body;
 import rjc.jplanner.gui.table.Cell.Alignment;
+import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Day;
@@ -94,6 +99,37 @@ public class DaysData implements ITableDataSource
       return Table.COLOR_DISABLED_CELL;
 
     return Table.COLOR_NORMAL_CELL;
+  }
+
+  /***************************************** getEditor *******************************************/
+  @Override
+  public CellEditor getEditor( Body body )
+  {
+    // return editor for the table body cell with focus
+    return new EditorText( body );
+  }
+
+  /****************************************** setValue *******************************************/
+  @Override
+  public void setValue( int column, int row, Object newValue )
+  {
+    // if new value equals old value, exit with no command
+    Object oldValue = getValue( column, row );
+    if ( newValue.equals( oldValue ) )
+      return;
+
+    // special command for setting number of work periods, otherwise generic
+    if ( column == Day.SECTION_PERIODS )
+      JPlanner.plan.undostack().push( new CommandDaySetNumPeriods( row, newValue, oldValue ) );
+    else
+      JPlanner.plan.undostack().push( new CommandDaySetValue( row, column, newValue, oldValue ) );
+  }
+
+  /****************************************** getValue *******************************************/
+  @Override
+  public Object getValue( int column, int row )
+  {
+    return getCellText( column, row );
   }
 
 }

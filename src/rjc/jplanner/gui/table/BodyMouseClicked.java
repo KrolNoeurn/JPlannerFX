@@ -18,59 +18,33 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.scene.paint.Paint;
-import rjc.jplanner.gui.table.Cell.Alignment;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 
 /*************************************************************************************************/
-/*********************** Display area that shows table body cell contents ************************/
+/********************** Mouse button clicked event handler for cell editing **********************/
 /*************************************************************************************************/
 
-public class Body extends CellGrid
+public class BodyMouseClicked implements EventHandler<MouseEvent>
 {
-  private int m_focusColumn = -1;
-  private int m_focusRow    = -1;
+  private Body m_body;
 
   /**************************************** constructor ******************************************/
-  public Body( Table table )
+  public BodyMouseClicked( Body body )
   {
-    // construct default table cells display
-    super( table );
-
-    // add listeners to support cell selecting
-    setOnMousePressed( new BodyMousePressed( this ) );
-    setOnMouseDragged( new BodyDragDetected( this ) );
-    setOnMouseClicked( new BodyMouseClicked( this ) );
+    // initialise private variables
+    m_body = body;
   }
 
-  /***************************************** createCell ******************************************/
+  /******************************************* handle ********************************************/
   @Override
-  Cell createCell( int column, int row, int x, int y, int w, int h )
+  public void handle( MouseEvent event )
   {
-    // create body cell 
-    String txt = m_table.getDataSource().getCellText( column, row );
-    Alignment align = m_table.getDataSource().getCellAlignment( column, row );
-    Paint color = m_table.getDataSource().getCellBackground( column, row );
+    // only interested in double click to start cell editing
+    if ( event.getClickCount() != 2 )
+      return;
 
-    return new BodyCell( txt, align, x, y, w, h, color );
-  }
-
-  /****************************************** setFocus *******************************************/
-  public void setFocus( int column, int row )
-  {
-    m_focusColumn = column;
-    m_focusRow = row;
-  }
-
-  /*************************************** getFocusColumn ****************************************/
-  public int getFocusColumn()
-  {
-    return m_focusColumn;
-  }
-
-  /**************************************** getFocusRow ******************************************/
-  public int getFocusRow()
-  {
-    return m_focusRow;
+    m_body.m_table.getDataSource().getEditor( m_body );
   }
 
 }

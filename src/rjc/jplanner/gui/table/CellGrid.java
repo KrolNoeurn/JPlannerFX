@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 
@@ -46,94 +44,78 @@ public abstract class CellGrid extends Pane
     m_table = table;
 
     // add listener for grid width change
-    widthProperty().addListener( new ChangeListener<Number>()
+    widthProperty().addListener( ( observable, oldValue, newValue ) ->
     {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      setClip();
+      int oldWidth = oldValue.intValue();
+      int newWidth = newValue.intValue();
+
+      // if grid width less, no need to do anything more
+      if ( newWidth <= oldWidth )
+        return;
+
+      // grid width has increased, so add any extra new columns now visible
+      int min = m_table.getColumnAtX( oldWidth - getTranslateX() );
+      int max = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE - getTranslateX() );
+      addColumns( min, max );
+    } );
+
+    // add listener for grid height change
+    heightProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      setClip();
+      int oldHeight = oldValue.intValue();
+      int newHeight = newValue.intValue();
+
+      // if grid height less, no need to do anything more
+      if ( newHeight <= oldHeight )
+        return;
+
+      // grid height has increased, so add any extra new rows now visible
+      int min = m_table.getRowAtY( oldHeight - getTranslateY() );
+      int max = m_table.getRowAtY( newHeight + TableScrollBar.SIZE - getTranslateY() );
+      addRows( min, max );
+    } );
+
+    // add listener for horizontal scrolling
+    translateXProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      setClip();
+      int oldX = oldValue.intValue();
+      int newX = newValue.intValue();
+
+      if ( oldX > newX )
       {
-        setClip();
-        int oldWidth = oldValue.intValue();
-        int newWidth = newValue.intValue();
-
-        // if grid width less, no need to do anything more
-        if ( newWidth <= oldWidth )
-          return;
-
-        // grid width has increased, so add any extra new columns now visible
-        int min = m_table.getColumnAtX( oldWidth - getTranslateX() );
-        int max = m_table.getColumnAtX( newWidth + TableScrollBar.SIZE - getTranslateX() );
+        int min = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - oldX );
+        int max = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - newX );
+        addColumns( min, max );
+      }
+      else
+      {
+        int min = m_table.getColumnAtX( 0.0 - newX );
+        int max = m_table.getColumnAtX( 0.0 - oldX );
         addColumns( min, max );
       }
     } );
 
-    // add listener for grid height change
-    heightProperty().addListener( new ChangeListener<Number>()
+    // add listener for vertical scrolling
+    translateYProperty().addListener( ( observable, oldValue, newValue ) ->
     {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      setClip();
+      int oldY = oldValue.intValue();
+      int newY = newValue.intValue();
+
+      if ( oldY > newY )
       {
-        setClip();
-        int oldHeight = oldValue.intValue();
-        int newHeight = newValue.intValue();
-
-        // if grid height less, no need to do anything more
-        if ( newHeight <= oldHeight )
-          return;
-
-        // grid height has increased, so add any extra new rows now visible
-        int min = m_table.getRowAtY( oldHeight - getTranslateY() );
-        int max = m_table.getRowAtY( newHeight + TableScrollBar.SIZE - getTranslateY() );
+        int min = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - oldY );
+        int max = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - newY );
         addRows( min, max );
       }
-    } );
-
-    // add listener for horizontal scrolling
-    translateXProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
+      else
       {
-        setClip();
-        int oldX = oldValue.intValue();
-        int newX = newValue.intValue();
-
-        if ( oldX > newX )
-        {
-          int min = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - oldX );
-          int max = m_table.getColumnAtX( getWidth() + TableScrollBar.SIZE - newX );
-          addColumns( min, max );
-        }
-        else
-        {
-          int min = m_table.getColumnAtX( 0.0 - newX );
-          int max = m_table.getColumnAtX( 0.0 - oldX );
-          addColumns( min, max );
-        }
-      }
-    } );
-
-    // add listener for vertical scrolling
-    translateYProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        setClip();
-        int oldY = oldValue.intValue();
-        int newY = newValue.intValue();
-
-        if ( oldY > newY )
-        {
-          int min = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - oldY );
-          int max = m_table.getRowAtY( getHeight() + TableScrollBar.SIZE - newY );
-          addRows( min, max );
-        }
-        else
-        {
-          int min = m_table.getRowAtY( 0.0 - newY );
-          int max = m_table.getRowAtY( 0.0 - oldY );
-          addRows( min, max );
-        }
+        int min = m_table.getRowAtY( 0.0 - newY );
+        int max = m_table.getRowAtY( 0.0 - oldY );
+        addRows( min, max );
       }
     } );
 
@@ -143,23 +125,8 @@ public abstract class CellGrid extends Pane
   public void setScrollBarListeners()
   {
     // set listeners for scroll bar visibility (can only be setup after both scroll bars created)
-    m_table.getHorizontalScrollBar().visibleProperty().addListener( new ChangeListener<Boolean>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
-      {
-        setClip(); // adjust clip area to take into account scroll bar visibility
-      }
-    } );
-
-    m_table.getVerticalScrollBar().visibleProperty().addListener( new ChangeListener<Boolean>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue )
-      {
-        setClip(); // adjust clip area to take into account scroll bar visibility
-      }
-    } );
+    m_table.getHorizontalScrollBar().visibleProperty().addListener( change -> setClip() );
+    m_table.getVerticalScrollBar().visibleProperty().addListener( change -> setClip() );
   }
 
   /****************************************** setClip ********************************************/

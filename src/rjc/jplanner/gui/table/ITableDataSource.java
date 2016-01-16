@@ -39,8 +39,17 @@ public interface ITableDataSource
   // return row titles to be displayed
   String getRowTitle( int row );
 
+  // return editor for the table body cell with focus
+  CellEditor getEditor( Body body );
+
   // return cell text to be displayed
   String getCellText( int column, int row );
+
+  // return cell value
+  Object getValue( int column, int row );
+
+  // set cell value
+  void setValue( int column, int row, Object newValue );
 
   // return cell text alignment
   Alignment getCellAlignment( int column, int row );

@@ -19,8 +19,6 @@
 package rjc.jplanner.gui.table;
 
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
 
@@ -49,26 +47,14 @@ public class TableScrollBar extends ScrollBar
     ReadOnlyDoubleProperty property = m_table.getBody().heightProperty();
     if ( orientation == Orientation.HORIZONTAL )
       property = m_table.getBody().widthProperty();
-    property.addListener( new ChangeListener<Number>()
+    property.addListener( ( observable, oldValue, newValue ) ->
     {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        checkSettings();
-        scrollTable( (int) getValue() );
-      }
+      checkSettings();
+      scrollTable( (int) getValue() );
     } );
 
     // add listener to scroll table when scroll bar thumb moved
-    valueProperty().addListener( new ChangeListener<Number>()
-    {
-      @Override
-      public void changed( ObservableValue<? extends Number> observable, Number oldValue, Number newValue )
-      {
-        scrollTable( newValue.intValue() );
-      }
-    } );
-
+    valueProperty().addListener( ( observable, oldValue, newValue ) -> scrollTable( newValue.intValue() ) );
   }
 
   /****************************************** toString *******************************************/

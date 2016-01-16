@@ -20,13 +20,19 @@ package rjc.jplanner.gui.calendars;
 
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandCalendarSetCycleLength;
+import rjc.jplanner.command.CommandCalendarSetExceptions;
+import rjc.jplanner.command.CommandCalendarSetValue;
+import rjc.jplanner.gui.table.Body;
 import rjc.jplanner.gui.table.Cell.Alignment;
+import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
-/****************************** Table data source for showing tasks ******************************/
+/**************************** Table data source for showing calendars ****************************/
 /*************************************************************************************************/
 
 public class CalendarsData implements ITableDataSource
@@ -91,6 +97,39 @@ public class CalendarsData implements ITableDataSource
       return Table.COLOR_DISABLED_CELL;
 
     return Table.COLOR_NORMAL_CELL;
+  }
+
+  /***************************************** getEditor *******************************************/
+  @Override
+  public CellEditor getEditor( Body body )
+  {
+    // return editor for the table body cell with focus
+    return new EditorText( body );
+  }
+
+  /****************************************** setValue *******************************************/
+  @Override
+  public void setValue( int column, int row, Object newValue )
+  {
+    // if new value equals old value, exit with no command
+    Object oldValue = getValue( column, row );
+    if ( newValue.equals( oldValue ) )
+      return;
+
+    // special command for setting exceptions & cycle-length, otherwise generic
+    if ( row == Calendar.SECTION_EXCEPTIONS )
+      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( column, newValue, oldValue ) );
+    else if ( row == Calendar.SECTION_CYCLE )
+      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( column, newValue, oldValue ) );
+    else
+      JPlanner.plan.undostack().push( new CommandCalendarSetValue( column, row, newValue, oldValue ) );
+  }
+
+  /****************************************** getValue *******************************************/
+  @Override
+  public Object getValue( int column, int row )
+  {
+    return getCellText( column, row );
   }
 
 }
