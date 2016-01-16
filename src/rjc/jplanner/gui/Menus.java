@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui;
 
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -26,6 +27,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.table.CellEditor;
 
 /*************************************************************************************************/
 /****************************** Main JPlanner application menu bar *******************************/
@@ -50,12 +52,23 @@ public class Menus extends MenuBar
     getMenus().addAll( menuFile, menuEdit, menuReport, menuView, menuHelp );
   }
 
+  /***************************************** onMenuShow ******************************************/
+  private void onMenuShow()
+  {
+    // clear status bar message & end any in progress table cell editing
+    JPlanner.gui.message( "" );
+
+    // if any table cell editing in progress, end it
+    if ( CellEditor.cellEditorInProgress != null )
+      CellEditor.cellEditorInProgress.endEditing();
+  }
+
   /****************************************** fileMenu *******************************************/
   private Menu fileMenu()
   {
     // file menu
     Menu menu = new Menu( "File" );
-    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
+    menu.setOnShowing( event -> onMenuShow() );
 
     MenuItem fileNew = new MenuItem( "New" );
     fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, KeyCombination.CONTROL_DOWN ) );
@@ -93,7 +106,7 @@ public class Menus extends MenuBar
   {
     // edit menu
     Menu menu = new Menu( "Edit" );
-    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
+    menu.setOnShowing( event -> onMenuShow() );
 
     MenuItem editUndo = new MenuItem( "Undo" );
     editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, KeyCombination.CONTROL_DOWN ) );
@@ -141,7 +154,7 @@ public class Menus extends MenuBar
   {
     // report menu
     Menu menu = new Menu( "Report" );
-    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
+    menu.setOnShowing( event -> onMenuShow() );
 
     MenuItem reportTBD = new MenuItem( "TBD" );
     reportTBD.setDisable( true );
@@ -155,15 +168,16 @@ public class Menus extends MenuBar
   {
     // view menu
     Menu menu = new Menu( "View" );
-    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
+    menu.setOnShowing( event -> onMenuShow() );
 
-    MenuItem viewUndoStack = new MenuItem( "Undo Stack..." );
-    viewUndoStack.setDisable( true );
+    CheckMenuItem viewUndoStack = new CheckMenuItem( "Undo Stack..." );
+    viewUndoStack.setOnAction( event -> JPlanner.gui.showUndoStackWindow( viewUndoStack.isSelected() ) );
 
     MenuItem viewNewWindow = new MenuItem( "New Window..." );
     viewNewWindow.setDisable( true );
 
-    MenuItem viewStretch = new MenuItem( "Stretch tasks" );
+    CheckMenuItem viewStretch = new CheckMenuItem( "Stretch tasks" );
+    viewStretch.setSelected( true );
     viewStretch.setDisable( true );
 
     menu.getItems().addAll( viewUndoStack, viewNewWindow, new SeparatorMenuItem(), viewStretch );
@@ -175,7 +189,7 @@ public class Menus extends MenuBar
   {
     // help menu
     Menu menu = new Menu( "Help" );
-    menu.setOnShowing( event -> JPlanner.gui.message( "" ) );
+    menu.setOnShowing( event -> onMenuShow() );
 
     MenuItem helpAbout = new MenuItem( "About JPlanner" );
     helpAbout.setDisable( true );

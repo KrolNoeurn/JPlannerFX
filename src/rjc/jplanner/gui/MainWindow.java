@@ -61,6 +61,7 @@ public class MainWindow
   private MainTabWidget     m_mainTabWidget          = new MainTabWidget();
   private MenuBar           m_menus                  = new Menus();
   private TextField         m_statusBar              = new TextField();
+  private UndoStackWindow   m_undoWindow;
 
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
@@ -363,6 +364,29 @@ public class MainWindow
   {
     // TODO Auto-generated method stub
 
+  }
+
+  /************************************* showUndoStackWindow *************************************/
+  public void showUndoStackWindow( boolean show )
+  {
+    JPlanner.trace( "SHOW UNDOSTACK WINDOW " + show );
+
+    // show undo-stack window
+    if ( m_undoWindow == null )
+    {
+      m_undoWindow = new UndoStackWindow();
+      m_undoWindow.initOwner( m_stage );
+    }
+
+    if ( show )
+    {
+      m_undoWindow.show();
+      m_undoWindow.toFront();
+    }
+    else
+    {
+      m_undoWindow.hide();
+    }
   }
 
 }

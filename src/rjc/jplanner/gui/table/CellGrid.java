@@ -31,7 +31,7 @@ import javafx.scene.shape.Rectangle;
 
 public abstract class CellGrid extends Pane
 {
-  protected Table                m_table;
+  private Table                  m_table;
 
   private HashMap<Integer, Cell> m_cells = new HashMap<Integer, Cell>();
 
@@ -343,7 +343,7 @@ public abstract class CellGrid extends Pane
   /************************************* setSelectedColumns **************************************/
   public void setSelectedColumns( HashSet<Integer> set, boolean selected )
   {
-    // ensure only columns specified in set are selected
+    // set selected state on specified set of columns
     for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
     {
       int column = entry.getKey() / 9999;
@@ -355,13 +355,25 @@ public abstract class CellGrid extends Pane
   /*************************************** setSelectedRows ***************************************/
   public void setSelectedRows( HashSet<Integer> set, boolean selected )
   {
-    // ensure only columns specified in set are selected
+    // set selected state on specified set of rows
     for ( Map.Entry<Integer, Cell> entry : m_cells.entrySet() )
     {
       int row = entry.getKey() % 9999;
       if ( set.contains( row ) )
         entry.getValue().setSelected( selected );
     }
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
+  }
+
+  /******************************************* getData *******************************************/
+  public ITableDataSource getData()
+  {
+    return m_table.getDataSource();
   }
 
 }

@@ -48,7 +48,7 @@ public class BodyDragDetected implements EventHandler<MouseEvent>
     if ( m_body.getFocusColumn() < 0 || m_body.getFocusRow() < 0 )
       return;
 
-    Table table = m_body.m_table;
+    Table table = m_body.getTable();
     int column = table.getColumnAtX( event.getX() );
     int row = table.getRowAtY( event.getY() );
 

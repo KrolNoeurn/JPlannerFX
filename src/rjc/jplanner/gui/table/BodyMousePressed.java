@@ -44,7 +44,7 @@ public class BodyMousePressed implements EventHandler<MouseEvent>
     if ( event.isAltDown() )
       return;
 
-    Table table = m_body.m_table;
+    Table table = m_body.getTable();
     int column = table.getColumnExactAtX( event.getX() );
     if ( column < 0 || column == Integer.MAX_VALUE )
       return;

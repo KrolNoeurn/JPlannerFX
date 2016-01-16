@@ -44,7 +44,7 @@ public class BodyMouseClicked implements EventHandler<MouseEvent>
     if ( event.getClickCount() != 2 )
       return;
 
-    m_body.m_table.getDataSource().getEditor( m_body );
+    m_body.getData().getEditor( m_body );
   }
 
 }

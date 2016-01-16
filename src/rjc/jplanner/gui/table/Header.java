@@ -65,8 +65,8 @@ public class Header extends CellGrid
         return null;
 
       // create horizontal header cell 
-      String txt = m_table.getDataSource().getColumnTitle( column );
-      h = (int) m_table.getHorizontalHeaderHeight();
+      String txt = getData().getColumnTitle( column );
+      h = getTable().getHorizontalHeaderHeight();
       return new HeaderCell( txt, x, 0, w, h );
     }
     else
@@ -76,8 +76,8 @@ public class Header extends CellGrid
         return null;
 
       // create vertical header cell
-      String txt = m_table.getDataSource().getRowTitle( row );
-      w = (int) m_table.getVerticalHeaderWidth();
+      String txt = getData().getRowTitle( row );
+      w = getTable().getVerticalHeaderWidth();
       return new HeaderCell( txt, 0, y, w, h );
     }
 
@@ -88,9 +88,9 @@ public class Header extends CellGrid
   {
     // return start of specified section (x or y depending on orientation)
     if ( m_orientation == Orientation.HORIZONTAL )
-      return m_table.getColumnStartX( section );
+      return getTable().getColumnStartX( section );
 
-    return m_table.getRowStartY( section );
+    return getTable().getRowStartY( section );
   }
 
   /*************************************** getSectionSize ****************************************/
@@ -98,9 +98,9 @@ public class Header extends CellGrid
   {
     // return size of specified section (width or height depending on orientation)
     if ( m_orientation == Orientation.HORIZONTAL )
-      return m_table.getColumnWidth( section );
+      return getTable().getColumnWidth( section );
 
-    return m_table.getRowHeight( section );
+    return getTable().getRowHeight( section );
   }
 
   /*************************************** getSectionCount ***************************************/
@@ -108,9 +108,9 @@ public class Header extends CellGrid
   {
     // return count of sections (column or row depending on orientation)
     if ( m_orientation == Orientation.HORIZONTAL )
-      return m_table.getDataSource().getColumnCount();
+      return getTable().getDataSource().getColumnCount();
 
-    return m_table.getDataSource().getRowCount();
+    return getTable().getDataSource().getRowCount();
   }
 
   /***************************************** getSection ******************************************/
@@ -118,9 +118,9 @@ public class Header extends CellGrid
   {
     // return section number at specified coordinate
     if ( m_orientation == Orientation.HORIZONTAL )
-      return m_table.getColumnAtX( pos );
+      return getTable().getColumnAtX( pos );
 
-    return m_table.getRowAtY( pos );
+    return getTable().getRowAtY( pos );
   }
 
   /*************************************** getSectionExact ***************************************/
@@ -128,9 +128,9 @@ public class Header extends CellGrid
   {
     // return section number at specified coordinate
     if ( m_orientation == Orientation.HORIZONTAL )
-      return m_table.getColumnExactAtX( pos );
+      return getTable().getColumnExactAtX( pos );
 
-    return m_table.getRowExactAtY( pos );
+    return getTable().getRowExactAtY( pos );
   }
 
   /******************************************* getPos ********************************************/
@@ -141,12 +141,6 @@ public class Header extends CellGrid
       return (int) event.getX();
 
     return (int) event.getY();
-  }
-
-  /****************************************** getTable *******************************************/
-  public Table getTable()
-  {
-    return m_table;
   }
 
   /*************************************** getOrientation ****************************************/
@@ -161,9 +155,9 @@ public class Header extends CellGrid
     // ensure header selected sections are consistent with table body
     removeAllSelections();
     if ( m_orientation == Orientation.HORIZONTAL )
-      setSelectedColumns( m_table.getBody().getSelectedColumns(), true );
+      setSelectedColumns( getTable().getBody().getSelectedColumns(), true );
     else
-      setSelectedRows( m_table.getBody().getSelectedRows(), true );
+      setSelectedRows( getTable().getBody().getSelectedRows(), true );
   }
 
 }

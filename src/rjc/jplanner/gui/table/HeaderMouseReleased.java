@@ -51,14 +51,14 @@ public class HeaderMouseReleased implements EventHandler<MouseEvent>
     {
       // end reorder
       m_header.getChildren().remove( m_header.slider );
-      m_header.m_table.getChildren().remove( m_header.pointer );
+      m_header.getTable().getChildren().remove( m_header.pointer );
       return;
     }
 
     // check if user selecting whole column/row
     if ( m_header.getCursor() == Cursor.DEFAULT )
     {
-      Body body = m_header.m_table.getBody();
+      Body body = m_header.getTable().getBody();
       if ( !event.isControlDown() )
         body.removeAllSelections();
 
@@ -99,8 +99,8 @@ public class HeaderMouseReleased implements EventHandler<MouseEvent>
     }
 
     // ensure headers selected sections are consistent with table body
-    m_header.m_table.getVerticalHeader().setSelected();
-    m_header.m_table.getHorizontalHeader().setSelected();
+    m_header.getTable().getVerticalHeader().setSelected();
+    m_header.getTable().getHorizontalHeader().setSelected();
   }
 
 }

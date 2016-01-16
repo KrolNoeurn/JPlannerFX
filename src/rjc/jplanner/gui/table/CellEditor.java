@@ -31,15 +31,34 @@ import rjc.jplanner.JPlanner;
 
 public abstract class CellEditor
 {
-  private Body    m_body;
-  private Control m_prime;  // prime control that has focus
-  private Region  m_editor; // overall editor can be different to prime control that takes focus
+  public static CellEditor cellEditorInProgress;
+
+  private boolean          m_error;
+  private Body             m_body;
+  private Control          m_prime;             // prime control that has focus
+  private Region           m_editor;            // overall editor can be different to prime control that takes focus
+
+  public static enum MoveDirection// selection movement after committing an edit
+  {
+    LEFT, RIGHT, UP, DOWN, NONE
+  }
 
   /***************************************** constructor *****************************************/
   public CellEditor( Body body )
   {
     // initialise private variables
     m_body = body;
+    cellEditorInProgress = this;
+  }
+
+  /***************************************** endEditing ******************************************/
+  public void endEditing()
+  {
+    // close or commit editor depending if in error state
+    if ( m_error )
+      close();
+    else
+      commit( MoveDirection.NONE );
   }
 
   /******************************************* getBody *******************************************/
@@ -51,7 +70,7 @@ public abstract class CellEditor
   /******************************************* getData *******************************************/
   public ITableDataSource getData()
   {
-    return m_body.m_table.getDataSource();
+    return m_body.getData();
   }
 
   /****************************************** setEditor ******************************************/
@@ -117,10 +136,19 @@ public abstract class CellEditor
   abstract String getText();
 
   /******************************************* commit ********************************************/
-  public void commit()
+  public void commit( MoveDirection move )
   {
     // update date source with new value
     getData().setValue( getColumn(), getRow(), getText() );
+    close();
+  }
+
+  /******************************************** close ********************************************/
+  public void close()
+  {
+    // close editor by removing from table
+    m_body.getChildren().remove( m_editor );
+    cellEditorInProgress = null;
   }
 
   /***************************************** keyPressed ******************************************/
@@ -146,7 +174,7 @@ public abstract class CellEditor
     // handle loss of focus
     if ( getPrime().focusedProperty().get() == false )
     {
-      m_body.getChildren().remove( this );
+      close();
       JPlanner.trace( "CLOSING EDITOR " + getText() );
     }
   }

@@ -47,9 +47,9 @@ public class Body extends CellGrid
   Cell createCell( int column, int row, int x, int y, int w, int h )
   {
     // create body cell 
-    String txt = m_table.getDataSource().getCellText( column, row );
-    Alignment align = m_table.getDataSource().getCellAlignment( column, row );
-    Paint color = m_table.getDataSource().getCellBackground( column, row );
+    String txt = getData().getCellText( column, row );
+    Alignment align = getData().getCellAlignment( column, row );
+    Paint color = getData().getCellBackground( column, row );
 
     return new BodyCell( txt, align, x, y, w, h, color );
   }

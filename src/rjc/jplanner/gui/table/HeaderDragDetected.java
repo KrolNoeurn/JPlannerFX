@@ -145,7 +145,7 @@ public class HeaderDragDetected implements EventHandler<MouseEvent>
       pointer.setTranslateX( m_header.getTable().getVerticalHeaderWidth() );
     }
 
-    m_header.m_table.getChildren().add( pointer );
+    m_header.getTable().getChildren().add( pointer );
     m_header.pointer = pointer;
   }
 
