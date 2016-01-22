@@ -22,12 +22,11 @@ import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandDaySetNumPeriods;
 import rjc.jplanner.command.CommandDaySetValue;
-import rjc.jplanner.gui.table.Body;
-import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.CellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
-import rjc.jplanner.gui.table.Table;
+import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
@@ -96,17 +95,17 @@ public class DaysData implements ITableDataSource
     // all cells are normal coloured except unused start/end
     Day day = JPlanner.plan.day( row );
     if ( column >= day.numPeriods() * 2 + Day.SECTION_START1 )
-      return Table.COLOR_DISABLED_CELL;
+      return TableCanvas.COLOR_DISABLED_CELL;
 
-    return Table.COLOR_NORMAL_CELL;
+    return TableCanvas.COLOR_NORMAL_CELL;
   }
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( Body body )
+  public CellEditor getEditor()
   {
     // return editor for the table body cell with focus
-    return new EditorText( body );
+    return new EditorText();
   }
 
   /****************************************** setValue *******************************************/

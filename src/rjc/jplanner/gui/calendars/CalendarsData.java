@@ -23,12 +23,11 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandCalendarSetCycleLength;
 import rjc.jplanner.command.CommandCalendarSetExceptions;
 import rjc.jplanner.command.CommandCalendarSetValue;
-import rjc.jplanner.gui.table.Body;
-import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.CellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
-import rjc.jplanner.gui.table.Table;
+import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
@@ -94,17 +93,17 @@ public class CalendarsData implements ITableDataSource
     // all cells are normal coloured except unused normal section cells
     Calendar cal = JPlanner.plan.calendar( column );
     if ( row >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
-      return Table.COLOR_DISABLED_CELL;
+      return TableCanvas.COLOR_DISABLED_CELL;
 
-    return Table.COLOR_NORMAL_CELL;
+    return TableCanvas.COLOR_NORMAL_CELL;
   }
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( Body body )
+  public CellEditor getEditor()
   {
     // return editor for the table body cell with focus
-    return new EditorText( body );
+    return new EditorText();
   }
 
   /****************************************** setValue *******************************************/

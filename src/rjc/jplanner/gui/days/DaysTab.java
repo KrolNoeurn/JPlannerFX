@@ -32,15 +32,23 @@ public class DaysTab extends Tab
   /**************************************** constructor ******************************************/
   public DaysTab( String text )
   {
-    // construct tab showing table of available plan day-types
+    // construct tab
     super( text );
     setClosable( false );
 
-    Table table = new Table( new DaysData() );
+    // showing table of available plan day-types
+    Table table = new Table( text, new DaysData() );
     table.setDefaultColumnWidth( 60 );
     table.setColumnWidth( Day.SECTION_NAME, 150 );
 
-    setContent( table );
+    // only have tab contents set if tab selected
+    selectedProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( newValue )
+        setContent( table );
+      else
+        setContent( null );
+    } );
   }
 
 }

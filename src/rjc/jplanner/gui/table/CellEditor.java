@@ -34,7 +34,6 @@ public abstract class CellEditor
   public static CellEditor cellEditorInProgress;
 
   private boolean          m_error;
-  private Body             m_body;
   private Control          m_prime;             // prime control that has focus
   private Region           m_editor;            // overall editor can be different to prime control that takes focus
 
@@ -44,10 +43,9 @@ public abstract class CellEditor
   }
 
   /***************************************** constructor *****************************************/
-  public CellEditor( Body body )
+  public CellEditor()
   {
     // initialise private variables
-    m_body = body;
     cellEditorInProgress = this;
   }
 
@@ -59,18 +57,6 @@ public abstract class CellEditor
       close();
     else
       commit( MoveDirection.NONE );
-  }
-
-  /******************************************* getBody *******************************************/
-  public Body getBody()
-  {
-    return m_body;
-  }
-
-  /******************************************* getData *******************************************/
-  public ITableDataSource getData()
-  {
-    return m_body.getData();
   }
 
   /****************************************** setEditor ******************************************/
@@ -88,24 +74,6 @@ public abstract class CellEditor
     m_prime = prime;
 
     // set location
-    Cell cell = getCell();
-    editor.setLayoutX( cell.getLayoutX() );
-    editor.setLayoutY( cell.getLayoutY() );
-    editor.setTranslateX( cell.getTranslateX() );
-    editor.setTranslateY( cell.getTranslateY() );
-
-    // set size
-    editor.setPrefHeight( cell.getHeight() - 1 );
-    editor.setMinHeight( cell.getHeight() - 1 );
-    editor.setPrefWidth( cell.getWidth() - 1 );
-
-    // set behaviour
-    prime.setOnKeyPressed( event -> keyPressed( event ) );
-    prime.focusedProperty().addListener( change -> focusChange() );
-
-    // display and focus
-    m_body.getChildren().add( m_editor );
-    prime.requestFocus();
   }
 
   /****************************************** getPrime *******************************************/
@@ -117,19 +85,13 @@ public abstract class CellEditor
   /****************************************** getColumn ******************************************/
   public int getColumn()
   {
-    return m_body.getFocusColumn();
+    return 1;
   }
 
   /******************************************* getRow ********************************************/
   public int getRow()
   {
-    return m_body.getFocusRow();
-  }
-
-  /******************************************* getCell *******************************************/
-  public Cell getCell()
-  {
-    return m_body.getCell( getColumn(), getRow() );
+    return 1;
   }
 
   /******************************************* getText *******************************************/
@@ -139,7 +101,7 @@ public abstract class CellEditor
   public void commit( MoveDirection move )
   {
     // update date source with new value
-    getData().setValue( getColumn(), getRow(), getText() );
+    //getData().setValue( getColumn(), getRow(), getText() );
     close();
   }
 
@@ -147,7 +109,7 @@ public abstract class CellEditor
   public void close()
   {
     // close editor by removing from table
-    m_body.getChildren().remove( m_editor );
+    //m_body.getChildren().remove( m_editor );
     cellEditorInProgress = null;
   }
 

@@ -23,7 +23,7 @@ import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
-/************************* Tab showing table of available plan day-types *************************/
+/************************* Tab showing table of available plan resources *************************/
 /*************************************************************************************************/
 
 public class ResourcesTab extends Tab
@@ -32,15 +32,23 @@ public class ResourcesTab extends Tab
   /**************************************** constructor ******************************************/
   public ResourcesTab( String text )
   {
-    // construct tab showing table of available plan day-types
+    // construct tab
     super( text );
     setClosable( false );
 
-    Table table = new Table( new ResourcesData() );
+    //  showing table of available plan resources
+    Table table = new Table( text, new ResourcesData() );
     table.setDefaultColumnWidth( 100 );
     table.setColumnWidth( Resource.SECTION_INITIALS, 50 );
 
-    setContent( table );
+    // only have tab contents set if tab selected
+    selectedProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( newValue )
+        setContent( table );
+      else
+        setContent( null );
+    } );
   }
 
 }

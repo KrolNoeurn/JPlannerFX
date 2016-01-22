@@ -21,12 +21,11 @@ package rjc.jplanner.gui.tasks;
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
-import rjc.jplanner.gui.table.Body;
-import rjc.jplanner.gui.table.Cell.Alignment;
 import rjc.jplanner.gui.table.CellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
-import rjc.jplanner.gui.table.Table;
+import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
@@ -84,18 +83,18 @@ public class TasksData implements ITableDataSource
   {
     // cell colour determined by if editable
     if ( JPlanner.plan.task( row ).isSectionEditable( column ) )
-      return Table.COLOR_NORMAL_CELL;
+      return TableCanvas.COLOR_NORMAL_CELL;
 
-    return Table.COLOR_DISABLED_CELL;
+    return TableCanvas.COLOR_DISABLED_CELL;
 
   }
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( Body body )
+  public CellEditor getEditor()
   {
     // return editor for the table body cell with focus
-    return new EditorText( body );
+    return new EditorText();
   }
 
   /****************************************** setValue *******************************************/

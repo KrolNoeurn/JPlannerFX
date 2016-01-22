@@ -22,7 +22,7 @@ import javafx.scene.control.Tab;
 import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
-/************************* Tab showing table of available plan day-types *************************/
+/************************* Tab showing table of available plan calendars *************************/
 /*************************************************************************************************/
 
 public class CalendarsTab extends Tab
@@ -31,15 +31,23 @@ public class CalendarsTab extends Tab
   /**************************************** constructor ******************************************/
   public CalendarsTab( String text )
   {
-    // construct tab showing table of available plan day-types
+    // construct tab
     super( text );
     setClosable( false );
 
-    Table table = new Table( new CalendarsData() );
+    // showing table of available plan calendars
+    Table table = new Table( text, new CalendarsData() );
     table.setVerticalHeaderWidth( 80 );
     table.setDefaultColumnWidth( 140 );
 
-    setContent( table );
+    // only have tab contents set if tab selected
+    selectedProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( newValue )
+        setContent( table );
+      else
+        setContent( null );
+    } );
   }
 
 }

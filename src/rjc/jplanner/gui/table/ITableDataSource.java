@@ -19,7 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import javafx.scene.paint.Paint;
-import rjc.jplanner.gui.table.Cell.Alignment;
+import rjc.jplanner.gui.table.Table.Alignment;
 
 /*************************************************************************************************/
 /******************************** Interface for table data source ********************************/
@@ -39,8 +39,8 @@ public interface ITableDataSource
   // return row titles to be displayed
   String getRowTitle( int row );
 
-  // return editor for the table body cell with focus
-  CellEditor getEditor( Body body );
+  // return editor
+  CellEditor getEditor();
 
   // return cell text to be displayed
   String getCellText( int column, int row );

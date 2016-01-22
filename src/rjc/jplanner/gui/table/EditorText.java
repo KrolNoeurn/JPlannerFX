@@ -18,7 +18,6 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.geometry.Insets;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Border;
 
@@ -30,18 +29,18 @@ public class EditorText extends CellEditor
 {
 
   /**************************************** constructor ******************************************/
-  public EditorText( Body body )
+  public EditorText()
   {
     // create table cell editor
-    super( body );
+    super();
     TextField textfield = new TextField();
 
     // set appearance
-    textfield.setPadding( new Insets( 0, Cell.CELL_PADDING - 1, 0, Cell.CELL_PADDING - 1 ) );
+    //textfield.setPadding( new Insets( 0, Cell.CELL_PADDING - 1, 0, Cell.CELL_PADDING - 1 ) );
     textfield.setBorder( Border.EMPTY );
 
     // set contents
-    textfield.setText( getData().getCellText( getColumn(), getRow() ) );
+    //textfield.setText( getData().getCellText( getColumn(), getRow() ) );
     textfield.selectEnd();
 
     // display and focus

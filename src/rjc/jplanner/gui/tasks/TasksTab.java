@@ -25,7 +25,7 @@ import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
-/************************* Tab showing table of available plan day-types *************************/
+/******************** Tab showing table of the plan tasks alongside the gantt ********************/
 /*************************************************************************************************/
 
 public class TasksTab extends Tab
@@ -34,21 +34,30 @@ public class TasksTab extends Tab
   /**************************************** constructor ******************************************/
   public TasksTab( String text )
   {
-    // construct tab showing table of available plan day-types
+    // construct tab
     super( text );
     setClosable( false );
 
-    Table table = new Table( new TasksData() );
+    // showing table of the plan tasks
+    Table table = new Table( "Tasks", new TasksData() );
     table.setDefaultColumnWidth( 110 );
     table.setColumnWidth( Task.SECTION_TITLE, 200 );
     table.setColumnWidth( Task.SECTION_DURATION, 60 );
     table.setColumnWidth( Task.SECTION_START, 140 );
     table.setColumnWidth( Task.SECTION_END, 140 );
 
+    // alongside the gantt
     Gantt gantt = new Gantt();
-
     SplitPane split = new SplitPane( table, gantt );
-    setContent( split );
+
+    // only have tab contents set if tab selected
+    selectedProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( newValue )
+        setContent( split );
+      else
+        setContent( null );
+    } );
   }
 
 }
