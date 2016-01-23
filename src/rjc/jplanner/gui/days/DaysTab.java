@@ -39,7 +39,7 @@ public class DaysTab extends Tab
     // showing table of available plan day-types
     Table table = new Table( text, new DaysData() );
     table.setDefaultColumnWidth( 60 );
-    table.setColumnWidth( Day.SECTION_NAME, 150 );
+    table.setWidthByColumnIndex( Day.SECTION_NAME, 150 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->

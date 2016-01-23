@@ -41,10 +41,10 @@ public class TasksTab extends Tab
     // showing table of the plan tasks
     Table table = new Table( "Tasks", new TasksData() );
     table.setDefaultColumnWidth( 110 );
-    table.setColumnWidth( Task.SECTION_TITLE, 200 );
-    table.setColumnWidth( Task.SECTION_DURATION, 60 );
-    table.setColumnWidth( Task.SECTION_START, 140 );
-    table.setColumnWidth( Task.SECTION_END, 140 );
+    table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );
+    table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
+    table.setWidthByColumnIndex( Task.SECTION_START, 140 );
+    table.setWidthByColumnIndex( Task.SECTION_END, 140 );
 
     // alongside the gantt
     Gantt gantt = new Gantt();

@@ -39,7 +39,7 @@ public class ResourcesTab extends Tab
     //  showing table of available plan resources
     Table table = new Table( text, new ResourcesData() );
     table.setDefaultColumnWidth( 100 );
-    table.setColumnWidth( Resource.SECTION_INITIALS, 50 );
+    table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->

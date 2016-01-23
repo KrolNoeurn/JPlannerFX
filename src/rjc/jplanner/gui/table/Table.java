@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javafx.scene.layout.StackPane;
@@ -37,9 +38,18 @@ public class Table extends StackPane
   private int                       m_hHeaderHeight      = 20;
   private int                       m_vHeaderWidth       = 30;
 
+  private int                       m_offsetX            = 0;
+  private int                       m_offsetY            = 0;
+  private int                       m_width              = 0;                              // total width including header
+  private int                       m_height             = 0;                              // total width including header
+
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
   private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
   private HashMap<Integer, Integer> m_rowHeights         = new HashMap<Integer, Integer>();
+
+  // array with mapping from position to index
+  private ArrayList<Integer>        m_columnIndexes      = new ArrayList<Integer>();
+  private ArrayList<Integer>        m_rowIndexes         = new ArrayList<Integer>();
 
   public static enum Alignment// alignment of text to be drawn in cell
   {
@@ -61,6 +71,50 @@ public class Table extends StackPane
     canvas.widthProperty().bind( widthProperty() );
     canvas.heightProperty().bind( heightProperty() );
     getChildren().add( canvas );
+
+    // initialise position to index mapping
+    int count = data.getColumnCount();
+    for ( int column = 0; column < count; column++ )
+      m_columnIndexes.add( column );
+    count = data.getRowCount();
+    for ( int row = 0; row < count; row++ )
+      m_rowIndexes.add( row );
+
+    // initialise width & height
+    calculateWidth();
+    calculateHeight();
+  }
+
+  /************************************** calculateHeight ****************************************/
+  private void calculateHeight()
+  {
+    // calculate height of table body rows
+    m_height = 0;
+    int count = m_data.getRowCount();
+    for ( int row = 0; row < count; row++ )
+      m_height += getHeightByRowPosition( row );
+  }
+
+  /************************************** calculateWidth *****************************************/
+  private void calculateWidth()
+  {
+    // calculate width of table body columns
+    m_width = 0;
+    int count = m_data.getColumnCount();
+    for ( int column = 0; column < count; column++ )
+      m_width += getWidthByColumnPosition( column );
+  }
+
+  /************************************** getBodyHeight ******************************************/
+  public int getBodyHeight()
+  {
+    return m_height;
+  }
+
+  /*************************************** getBodyWidth ******************************************/
+  public int getBodyWidth()
+  {
+    return m_width;
   }
 
   /*************************************** getDataSource *****************************************/
@@ -69,65 +123,67 @@ public class Table extends StackPane
     return m_data;
   }
 
-  /************************************** getColumnExactAtX **************************************/
-  public int getColumnExactAtX( double x )
+  /********************************** getColumnPositionExactAtX **********************************/
+  public int getColumnPositionExactAtX( int x )
   {
-    // return column index at specified x-coordinate, or -1 if before, MAX_INT if after
-    if ( x < 0.0 )
+    // return column position at specified x-coordinate, or -1 if before, MAX_INT if after
+    x = x - m_offsetX - m_vHeaderWidth;
+    if ( x < 0 )
       return -1;
 
     int last = m_data.getColumnCount() - 1;
-    for ( int column = 0; column <= last; column++ )
+    for ( int columnPos = 0; columnPos <= last; columnPos++ )
     {
-      x -= getColumnWidth( column );
-      if ( x <= 0.0 )
-        return column;
+      x -= getWidthByColumnPosition( columnPos );
+      if ( x <= 0 )
+        return columnPos;
     }
 
     return Integer.MAX_VALUE;
   }
 
-  /***************************************** getColumnAtX ****************************************/
-  public int getColumnAtX( double x )
+  /************************************* getColumnPositionAtX ************************************/
+  public int getColumnPositionAtX( int x )
   {
-    // return column index at specified x-coordinate, or nearest
+    // return column position at specified x-coordinate, or nearest
+    x = x - m_offsetX - m_vHeaderWidth;
     int last = m_data.getColumnCount() - 1;
-    for ( int column = 0; column <= last; column++ )
+    for ( int columnPos = 0; columnPos <= last; columnPos++ )
     {
-      x -= getColumnWidth( column );
-      if ( x <= 0.0 )
-        return column;
+      x -= getWidthByColumnPosition( columnPos );
+      if ( x <= 0 )
+        return columnPos;
     }
 
     return last;
   }
 
-  /*************************************** getColumnStartX ***************************************/
-  public int getColumnStartX( int column )
+  /********************************** getXStartByColumnPosition **********************************/
+  public int getXStartByColumnPosition( int columnPos )
   {
     // return start-x of specified column
-    if ( column > m_data.getColumnCount() )
-      column = m_data.getColumnCount();
+    if ( columnPos > m_data.getColumnCount() )
+      columnPos = m_data.getColumnCount();
 
-    int startX = 0;
-    for ( int c = 0; c < column; c++ )
-      startX += getColumnWidth( c );
+    int startX = m_offsetX + m_vHeaderWidth;
+    for ( int column = 0; column < columnPos; column++ )
+      startX += getWidthByColumnPosition( column );
 
     return startX;
   }
 
-  /*************************************** getColumnWidth ****************************************/
-  public int getColumnWidth( int column )
+  /********************************** getWidthByColumnPosition ***********************************/
+  public int getWidthByColumnPosition( int columnPos )
   {
-    // return width of column
-    if ( column < 0 || column >= m_data.getColumnCount() )
+    // return width from column position
+    if ( columnPos < 0 || columnPos >= m_data.getColumnCount() )
       return Integer.MAX_VALUE;
 
     int width = m_defaultColumnWidth;
-
-    if ( m_columnWidths.containsKey( column ) )
+    int columnIndex = m_columnIndexes.get( columnPos );
+    if ( m_columnWidths.containsKey( columnIndex ) )
     {
-      width = m_columnWidths.get( column );
+      width = m_columnWidths.get( columnIndex );
       if ( width < 0 )
         return 0; // -ve means column hidden, so return zero
     }
@@ -135,65 +191,67 @@ public class Table extends StackPane
     return width;
   }
 
-  /*************************************** getRowExactAtY ****************************************/
-  public int getRowExactAtY( double y )
+  /*********************************** getRowPositionExactAtY ************************************/
+  public int getRowPositionExactAtY( int y )
   {
-    // return row index at specified x-coordinate, or -1 if before, MAX_INT if after
-    if ( y < 0.0 )
+    // return row position at specified y-coordinate, or -1 if before, MAX_INT if after
+    y = y - m_offsetY - m_hHeaderHeight;
+    if ( y < 0 )
       return -1;
 
     int last = m_data.getRowCount() - 1;
-    for ( int row = 0; row <= last; row++ )
+    for ( int rowPos = 0; rowPos <= last; rowPos++ )
     {
-      y -= getRowHeight( row );
-      if ( y <= 0.0 )
-        return row;
+      y -= getHeightByRowPosition( rowPos );
+      if ( y <= 0 )
+        return rowPos;
     }
 
     return Integer.MAX_VALUE;
   }
 
-  /****************************************** getRowAtY ******************************************/
-  public int getRowAtY( double y )
+  /************************************* getRowPositionAtY ***************************************/
+  public int getRowPositionAtY( int y )
   {
-    // return row index at specified x-coordinate, or nearest
+    // return row position at specified y-coordinate, or nearest
+    y = y - m_offsetY - m_hHeaderHeight;
     int last = m_data.getRowCount() - 1;
-    for ( int row = 0; row <= last; row++ )
+    for ( int rowPos = 0; rowPos <= last; rowPos++ )
     {
-      y -= getRowHeight( row );
-      if ( y <= 0.0 )
-        return row;
+      y -= getHeightByRowPosition( rowPos );
+      if ( y <= 0 )
+        return rowPos;
     }
 
     return last;
   }
 
-  /**************************************** getRowStartY *****************************************/
-  public int getRowStartY( int row )
+  /*********************************** getYStartByRowPosition ************************************/
+  public int getYStartByRowPosition( int rowPos )
   {
-    // return start-y of specified row
-    if ( row > m_data.getRowCount() )
-      row = m_data.getRowCount();
+    // return start-y of specified row position
+    if ( rowPos > m_data.getRowCount() )
+      rowPos = m_data.getRowCount();
 
-    int startY = 0;
-    for ( int r = 0; r < row; r++ )
-      startY += getRowHeight( r );
+    int startY = m_offsetY + m_hHeaderHeight;
+    for ( int row = 0; row < rowPos; row++ )
+      startY += getHeightByRowPosition( row );
 
     return startY;
   }
 
-  /**************************************** getRowHeight *****************************************/
-  public int getRowHeight( int row )
+  /*********************************** getHeightByRowPosition ************************************/
+  public int getHeightByRowPosition( int rowPos )
   {
-    // return height of row
-    if ( row < 0 || row >= m_data.getRowCount() )
+    // return height from row index
+    if ( rowPos < 0 || rowPos >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
     int height = m_defaultRowHeight;
-
-    if ( m_rowHeights.containsKey( row ) )
+    int rowIndex = m_rowIndexes.get( rowPos );
+    if ( m_rowHeights.containsKey( rowIndex ) )
     {
-      height = m_rowHeights.get( row );
+      height = m_rowHeights.get( rowIndex );
       if ( height < 0 )
         return 0; // -ve means row hidden, so return zero
     }
@@ -205,12 +263,14 @@ public class Table extends StackPane
   public void setDefaultColumnWidth( int width )
   {
     m_defaultColumnWidth = width;
+    calculateWidth();
   }
 
   /************************************* setDefaultRowHeight *************************************/
   public void setDefaultRowHeight( int height )
   {
     m_defaultRowHeight = height;
+    calculateHeight();
   }
 
   /*********************************** getVerticalHeaderWidth ************************************/
@@ -237,39 +297,70 @@ public class Table extends StackPane
     m_hHeaderHeight = height;
   }
 
-  /*************************************** setColumnWidth ****************************************/
-  public void setColumnWidth( int column, int newWidth )
+  /********************************** setWidthByColumnIndex **************************************/
+  public void setWidthByColumnIndex( int columnIndex, int newWidth )
   {
     // width should not be below minimum
     if ( newWidth < m_minimumColumnWidth )
       newWidth = m_minimumColumnWidth;
 
     // record width so overrides default
-    int oldWidth = getColumnWidth( column );
-    m_columnWidths.put( column, newWidth );
+    int oldWidth = getWidthByColumnPosition( columnIndex );
+    m_columnWidths.put( columnIndex, newWidth );
 
     // if new width different to old width, update horizontal header and body cells
     if ( newWidth != oldWidth )
     {
-
+      // TODO
+      calculateWidth();
     }
   }
 
-  /**************************************** setRowHeight *****************************************/
-  public void setRowHeight( int row, int newHeight )
+  /************************************ setHeightByRowIndex **************************************/
+  public void setHeightByRowIndex( int rowIndex, int newHeight )
   {
     // height should not be below minimum
     if ( newHeight < m_minimumRowHeight )
       newHeight = m_minimumRowHeight;
 
     // record height so overrides default
-    int oldHeight = getRowHeight( row );
-    m_rowHeights.put( row, newHeight );
+    int oldHeight = getHeightByRowPosition( rowIndex );
+    m_rowHeights.put( rowIndex, newHeight );
 
     // if new height different to old height, update vertical header and body cells
     if ( newHeight != oldHeight )
     {
-
+      // TODO
+      calculateHeight();
     }
   }
+
+  /********************************** getColumnIndexByPosition ***********************************/
+  public int getColumnIndexByPosition( int columnPos )
+  {
+    // return column index from position
+    return m_columnIndexes.get( columnPos );
+  }
+
+  /********************************** getColumnPositionByIndex ***********************************/
+  public int getColumnPositionByIndex( int columnIndex )
+  {
+    // return column position from index
+    return m_columnIndexes.indexOf( columnIndex );
+  }
+
+  /************************************ getRowIndexByPosition ************************************/
+  public int getRowIndexByPosition( int rowPos )
+  {
+    // return row index from position
+    return m_rowIndexes.get( rowPos );
+  }
+
+  /************************************ getRowPositionByIndex ************************************/
+  public int getRowPositionByIndex( int rowIndex )
+  {
+    // return row position from index
+    return m_rowIndexes.indexOf( rowIndex );
+  }
+
 }
