@@ -117,7 +117,7 @@ public class TableCanvas extends Canvas
     drawWidth( 0.0, getWidth() );
   }
 
-  /*************************************** drawWidthChange ***************************************/
+  /****************************************** drawWidth ******************************************/
   public void drawWidth( double oldW, double newW )
   {
     // draw only if increase in width
@@ -161,7 +161,7 @@ public class TableCanvas extends Canvas
     }
   }
 
-  /************************************** drawHeightChange ***************************************/
+  /***************************************** drawHeight ******************************************/
   public void drawHeight( double oldH, double newH )
   {
     // draw only if increase in height
