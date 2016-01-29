@@ -30,6 +30,7 @@ import javafx.scene.layout.StackPane;
 public class Table extends StackPane
 {
   private ITableDataSource          m_data;                                                // data source for the table
+  private TableCanvas               m_canvas;
 
   private int                       m_defaultRowHeight   = 20;
   private int                       m_defaultColumnWidth = 100;
@@ -40,8 +41,8 @@ public class Table extends StackPane
 
   private int                       m_offsetX            = 0;
   private int                       m_offsetY            = 0;
-  private int                       m_width              = 0;                              // total width including header
-  private int                       m_height             = 0;                              // total width including header
+  private int                       m_width              = 0;                              // body cells total width (excludes header)
+  private int                       m_height             = 0;                              // body cells total height (excludes header)
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
   private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
@@ -67,10 +68,10 @@ public class Table extends StackPane
     this.name = name;
 
     // setup canvas for drawing the table
-    TableCanvas canvas = new TableCanvas( this );
-    canvas.widthProperty().bind( widthProperty() );
-    canvas.heightProperty().bind( heightProperty() );
-    getChildren().add( canvas );
+    m_canvas = new TableCanvas( this );
+    m_canvas.widthProperty().bind( widthProperty() );
+    m_canvas.heightProperty().bind( heightProperty() );
+    getChildren().add( m_canvas );
 
     // initialise position to index mapping
     int count = data.getColumnCount();
@@ -191,6 +192,24 @@ public class Table extends StackPane
     return width;
   }
 
+  /************************************ getWidthByColumnIndex ************************************/
+  public int getWidthByColumnIndex( int columnIndex )
+  {
+    // return width from column index
+    if ( columnIndex < 0 || columnIndex >= m_data.getColumnCount() )
+      return Integer.MAX_VALUE;
+
+    int width = m_defaultColumnWidth;
+    if ( m_columnWidths.containsKey( columnIndex ) )
+    {
+      width = m_columnWidths.get( columnIndex );
+      if ( width < 0 )
+        return 0; // -ve means column hidden, so return zero
+    }
+
+    return width;
+  }
+
   /*********************************** getRowPositionExactAtY ************************************/
   public int getRowPositionExactAtY( int y )
   {
@@ -243,12 +262,30 @@ public class Table extends StackPane
   /*********************************** getHeightByRowPosition ************************************/
   public int getHeightByRowPosition( int rowPos )
   {
-    // return height from row index
+    // return height from row position
     if ( rowPos < 0 || rowPos >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
     int height = m_defaultRowHeight;
     int rowIndex = m_rowIndexes.get( rowPos );
+    if ( m_rowHeights.containsKey( rowIndex ) )
+    {
+      height = m_rowHeights.get( rowIndex );
+      if ( height < 0 )
+        return 0; // -ve means row hidden, so return zero
+    }
+
+    return height;
+  }
+
+  /************************************* getHeightByRowIndex *************************************/
+  public int getHeightByRowIndex( int rowIndex )
+  {
+    // return height from row index
+    if ( rowIndex < 0 || rowIndex >= m_data.getRowCount() )
+      return Integer.MAX_VALUE;
+
+    int height = m_defaultRowHeight;
     if ( m_rowHeights.containsKey( rowIndex ) )
     {
       height = m_rowHeights.get( rowIndex );
@@ -305,14 +342,15 @@ public class Table extends StackPane
       newWidth = m_minimumColumnWidth;
 
     // record width so overrides default
-    int oldWidth = getWidthByColumnPosition( columnIndex );
+    int oldWidth = getWidthByColumnIndex( columnIndex );
     m_columnWidths.put( columnIndex, newWidth );
 
-    // if new width different to old width, update horizontal header and body cells
+    // if new width different to old width, update table canvas
     if ( newWidth != oldWidth )
     {
-      // TODO
-      calculateWidth();
+      m_width = m_width - oldWidth + newWidth;
+      int start = getXStartByColumnPosition( getColumnPositionByIndex( columnIndex ) );
+      m_canvas.drawWidth( start, m_canvas.getWidth() );
     }
   }
 
@@ -324,14 +362,15 @@ public class Table extends StackPane
       newHeight = m_minimumRowHeight;
 
     // record height so overrides default
-    int oldHeight = getHeightByRowPosition( rowIndex );
+    int oldHeight = getHeightByRowIndex( rowIndex );
     m_rowHeights.put( rowIndex, newHeight );
 
-    // if new height different to old height, update vertical header and body cells
+    // if new height different to old height, update table canvas
     if ( newHeight != oldHeight )
     {
-      // TODO
-      calculateHeight();
+      m_height = m_height - oldHeight + newHeight;
+      int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
+      m_canvas.drawHeight( start, m_canvas.getWidth() );
     }
   }
 

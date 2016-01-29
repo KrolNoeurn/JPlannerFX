@@ -21,6 +21,7 @@ package rjc.jplanner.gui.table;
 import java.util.ArrayList;
 
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
@@ -54,6 +55,7 @@ public class TableCanvas extends Canvas
 
   public static String      ELLIPSIS              = "...";                      // ellipsis to show text has been truncated
   public static int         CELL_PADDING          = 4;                          // cell padding for text left & right edges
+  private static int        PROXIMITY             = 4;                          // used to distinguish resize from reorder
 
   public static final Color COLOR_GRID            = Color.SILVER;
   public static final Color COLOR_DISABLED_CELL   = Color.rgb( 227, 227, 227 ); // medium grey
@@ -64,7 +66,12 @@ public class TableCanvas extends Canvas
   public static final Color COLOR_SELECTED_HEADER = Color.rgb( 192, 192, 192 ); // medium dark grey
   public static final Color COLOR_SELECTED_TEXT   = Color.WHITE;
 
-  private Table             m_table;
+  private Table             m_table;                                            // table defining this table canvs
+  private int               m_x;                                                // last mouse move x
+  private int               m_y;                                                // last mouse move y
+  private int               m_columnPos;                                        // column position associated with last mouse move
+  private int               m_rowPos;                                           // row position associated with last mouse move
+  private int               m_index               = -1;                         // column or row index for resize or reorder
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -74,11 +81,12 @@ public class TableCanvas extends Canvas
     m_table = table;
 
     // when size changes draw new bits
-    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidthChange( (double) oldW, (double) newW ) );
-    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeightChange( (double) oldH, (double) newH ) );
+    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( (double) oldW, (double) newW ) );
+    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( (double) oldH, (double) newH ) );
 
     // when mouse moves
     setOnMouseMoved( event -> mouseMoved( event ) );
+    setOnMouseDragged( event -> mouseDragged( event ) );
   }
 
   /***************************************** isResizable *****************************************/
@@ -102,11 +110,16 @@ public class TableCanvas extends Canvas
     return 0.0;
   }
 
-  /*************************************** drawWidthChange ***************************************/
-  private void drawWidthChange( double oldW, double newW )
+  /****************************************** redrawAll ******************************************/
+  public void redrawAll()
   {
-    JPlanner.trace( "WIDTH " + m_table.name + " " + oldW + "->" + newW );
+    // redraw whole canvas
+    drawWidth( 0.0, getWidth() );
+  }
 
+  /*************************************** drawWidthChange ***************************************/
+  public void drawWidth( double oldW, double newW )
+  {
     // draw only if increase in width
     if ( newW <= oldW )
       return;
@@ -115,12 +128,15 @@ public class TableCanvas extends Canvas
     if ( oldW > m_table.getBodyWidth() + m_table.getVerticalHeaderWidth() )
       return;
 
+    // clear background
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.clearRect( oldW, 0.0, newW, getHeight() );
+
     // check if any columns need to be drawn 
     if ( newW > m_table.getVerticalHeaderWidth() )
     {
       int column1 = m_table.getColumnPositionAtX( (int) oldW );
       int column2 = m_table.getColumnPositionAtX( (int) newW );
-      JPlanner.trace( "Columns " + column1 + " to " + column2 );
 
       // draw column cells
       if ( getHeight() > m_table.getHorizontalHeaderHeight() )
@@ -146,10 +162,8 @@ public class TableCanvas extends Canvas
   }
 
   /************************************** drawHeightChange ***************************************/
-  private void drawHeightChange( double oldH, double newH )
+  public void drawHeight( double oldH, double newH )
   {
-    JPlanner.trace( "HEIGHT " + m_table.name + " " + oldH + "->" + newH );
-
     // draw only if increase in height
     if ( newH <= oldH )
       return;
@@ -158,12 +172,15 @@ public class TableCanvas extends Canvas
     if ( oldH > m_table.getBodyHeight() + m_table.getHorizontalHeaderHeight() )
       return;
 
+    // clear background
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.clearRect( 0.0, oldH, getWidth(), newH );
+
     // check if any rows need to be drawn 
     if ( newH > m_table.getHorizontalHeaderHeight() )
     {
       int row1 = m_table.getRowPositionAtY( (int) oldH );
       int row2 = m_table.getRowPositionAtY( (int) newH );
-      JPlanner.trace( "Rows " + row1 + " to " + row2 );
 
       // draw column cells
       if ( getWidth() > m_table.getVerticalHeaderWidth() )
@@ -229,8 +246,6 @@ public class TableCanvas extends Canvas
   /****************************************** drawCell *******************************************/
   private void drawCell( int x, int y, int w, int h, int columnPos, int rowPos )
   {
-    JPlanner.trace( "Cell " + columnPos + "," + rowPos + " @ " + x + "," + y + " size " + w + "," + h );
-
     // draw body cell
     GraphicsContext gc = getGraphicsContext2D();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
@@ -269,8 +284,6 @@ public class TableCanvas extends Canvas
   /**************************************** drawRowHeader ****************************************/
   private void drawRowHeader( int rowPos )
   {
-    JPlanner.trace( "Row header " + rowPos );
-
     // draw row header
     GraphicsContext gc = getGraphicsContext2D();
     int y = m_table.getYStartByRowPosition( rowPos );
@@ -500,11 +513,105 @@ public class TableCanvas extends Canvas
   /****************************************** mouseMoved *****************************************/
   private void mouseMoved( MouseEvent event )
   {
-    int x = (int) event.getX();
-    int y = (int) event.getY();
-    //JPlanner.trace( "Mouse " + x + "," + y );
+    // update cursor for potential column/row resizing or re-ordering
+    m_x = (int) event.getX();
+    m_y = (int) event.getY();
+    m_columnPos = m_table.getColumnPositionExactAtX( m_x );
+    m_rowPos = m_table.getRowPositionExactAtY( m_y );
 
-    // TODO Auto-generated method stub
+    // check for column resize
+    if ( m_y < m_table.getHorizontalHeaderHeight() && m_x > m_table.getVerticalHeaderWidth() + PROXIMITY )
+    {
+      int start = m_table.getXStartByColumnPosition( m_columnPos );
+
+      if ( m_x - start < PROXIMITY )
+      {
+        setCursor( Cursor.H_RESIZE );
+        m_columnPos--;
+        if ( m_columnPos >= m_table.getDataSource().getColumnCount() )
+          m_columnPos = m_table.getDataSource().getColumnCount() - 1;
+        return;
+      }
+
+      int width = m_table.getWidthByColumnPosition( m_columnPos );
+      if ( start + width - m_x < PROXIMITY )
+      {
+        setCursor( Cursor.H_RESIZE );
+        return;
+      }
+    }
+
+    // check for row resize
+    if ( m_x < m_table.getVerticalHeaderWidth() && m_y > m_table.getHorizontalHeaderHeight() + PROXIMITY )
+    {
+      int start = m_table.getYStartByRowPosition( m_rowPos );
+
+      if ( m_y - start < PROXIMITY )
+      {
+        setCursor( Cursor.V_RESIZE );
+        m_rowPos--;
+        if ( m_rowPos >= m_table.getDataSource().getRowCount() )
+          m_rowPos = m_table.getDataSource().getRowCount() - 1;
+        return;
+      }
+
+      int height = m_table.getHeightByRowPosition( m_rowPos );
+      if ( start + height - m_y < PROXIMITY )
+      {
+        setCursor( Cursor.V_RESIZE );
+        return;
+      }
+    }
+
+    // not resize so default mouse cursor 
+    setCursor( Cursor.DEFAULT );
+    m_index = -1;
+  }
+
+  /***************************************** mouseDragged ****************************************/
+  private void mouseDragged( MouseEvent event )
+  {
+    // handle column resize
+    if ( getCursor() == Cursor.H_RESIZE )
+    {
+      if ( m_index < 0 )
+      {
+        m_index = m_table.getColumnIndexByPosition( m_columnPos );
+        m_x = m_x - m_table.getWidthByColumnPosition( m_columnPos );
+      }
+
+      m_table.setWidthByColumnIndex( m_index, ( (int) event.getX() ) - m_x );
+      return;
+    }
+
+    // handle row resize
+    if ( getCursor() == Cursor.V_RESIZE )
+    {
+      if ( m_index < 0 )
+      {
+        m_index = m_table.getRowIndexByPosition( m_rowPos );
+        m_y = m_y - m_table.getHeightByRowPosition( m_rowPos );
+      }
+
+      m_table.setHeightByRowIndex( m_index, ( (int) event.getY() ) - m_y );
+      return;
+    }
+
+    // handle column reorder
+    if ( m_y < m_table.getHorizontalHeaderHeight() )
+    {
+      JPlanner.trace( "COLUMN REORDER " + m_columnPos + " " + m_rowPos + " " );
+
+      return;
+    }
+
+    // handle row reorder
+    if ( m_x < m_table.getVerticalHeaderWidth() )
+    {
+      JPlanner.trace( "ROW REORDER " + m_columnPos + " " + m_rowPos + " " );
+
+      return;
+    }
 
   }
 
