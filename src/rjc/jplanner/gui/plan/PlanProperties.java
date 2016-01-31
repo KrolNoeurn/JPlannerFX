@@ -125,4 +125,10 @@ public class PlanProperties extends ScrollPane
     GridPane.setHgrow( m_savedWhen, Priority.ALWAYS );
   }
 
+  /**************************************** updateFromPlan ***************************************/
+  public void updateFromPlan()
+  {
+    // TODO Auto-generated method stub
+  }
+
 }

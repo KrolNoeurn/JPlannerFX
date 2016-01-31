@@ -28,6 +28,7 @@ import rjc.jplanner.model.Day;
 
 public class DaysTab extends Tab
 {
+  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public DaysTab( String text )
@@ -37,18 +38,24 @@ public class DaysTab extends Tab
     setClosable( false );
 
     // showing table of available plan day-types
-    Table table = new Table( text, new DaysData() );
-    table.setDefaultColumnWidth( 60 );
-    table.setWidthByColumnIndex( Day.SECTION_NAME, 150 );
+    m_table = new Table( text, new DaysData() );
+    m_table.setDefaultColumnWidth( 60 );
+    m_table.setWidthByColumnIndex( Day.SECTION_NAME, 150 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
     {
       if ( newValue )
-        setContent( table );
+        setContent( m_table );
       else
         setContent( null );
     } );
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
   }
 
 }

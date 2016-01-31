@@ -446,9 +446,13 @@ public class Table extends GridPane
     if ( newWidth != oldWidth )
     {
       m_bodyWidth = m_bodyWidth - oldWidth + newWidth;
+      m_canvas.redrawn = false;
       setCanvasScrollBars();
-      int start = getXStartByColumnPosition( getColumnPositionByIndex( columnIndex ) );
-      m_canvas.drawWidth( start, m_canvas.getWidth() );
+      if ( !m_canvas.redrawn )
+      {
+        int start = getXStartByColumnPosition( getColumnPositionByIndex( columnIndex ) );
+        m_canvas.drawWidth( start, m_canvas.getWidth() );
+      }
     }
   }
 
@@ -467,9 +471,13 @@ public class Table extends GridPane
     if ( newHeight != oldHeight )
     {
       m_bodyHeight = m_bodyHeight - oldHeight + newHeight;
+      m_canvas.redrawn = false;
       setCanvasScrollBars();
-      int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
-      m_canvas.drawHeight( start, m_canvas.getWidth() );
+      if ( !m_canvas.redrawn )
+      {
+        int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
+        m_canvas.drawHeight( start, m_canvas.getWidth() );
+      }
     }
   }
 
@@ -499,6 +507,50 @@ public class Table extends GridPane
   {
     // return row position from index
     return m_rowIndexes.indexOf( rowIndex );
+  }
+
+  /******************************************* redraw ********************************************/
+  public void redraw()
+  {
+    // trigger simple redraw/refresh of table
+    m_canvas.redrawAll();
+  }
+
+  /******************************************** reset ********************************************/
+  public void reset()
+  {
+    // reset for example after change in number of columns or rows
+    calculateBodyHeight();
+    calculateBodyWidth();
+    setCanvasScrollBars();
+    m_canvas.redrawAll();
+  }
+
+  /******************************************* hideRow *******************************************/
+  public void hideRow( int rowIndex, boolean redraw )
+  {
+    // get old height
+    int oldHeight = m_defaultRowHeight;
+    if ( m_rowHeights.containsKey( rowIndex ) )
+      oldHeight = m_rowHeights.get( rowIndex );
+
+    // if already hidden do nothing
+    if ( oldHeight < 0 )
+      return;
+
+    m_rowHeights.put( rowIndex, -oldHeight );
+    m_bodyHeight = m_bodyHeight - oldHeight;
+
+    if ( redraw )
+    {
+      m_canvas.redrawn = false;
+      setCanvasScrollBars();
+      if ( !m_canvas.redrawn )
+      {
+        int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
+        m_canvas.drawHeight( start, m_canvas.getWidth() );
+      }
+    }
   }
 
 }

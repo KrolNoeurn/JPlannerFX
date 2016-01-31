@@ -18,6 +18,8 @@
 
 package rjc.jplanner;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.MainWindow;
@@ -61,6 +63,7 @@ public class JPlanner extends Application
   {
     // create main window
     gui = new MainWindow( stage );
+    gui.load( new File( "C:\\Users\\Richard\\Desktop\\tests\\ttt.xml" ) );
   }
 
   /******************************************* trace *********************************************/

@@ -41,4 +41,16 @@ public class PlanTab extends Tab
     setContent( split );
   }
 
+  /**************************************** getPlanNotes *****************************************/
+  public PlanNotes getPlanNotes()
+  {
+    return m_notes;
+  }
+
+  /************************************** getPlanProperties **************************************/
+  public PlanProperties getPlanProperties()
+  {
+    return m_properties;
+  }
+
 }

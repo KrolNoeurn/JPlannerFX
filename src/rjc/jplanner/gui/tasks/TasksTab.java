@@ -30,6 +30,8 @@ import rjc.jplanner.model.Task;
 
 public class TasksTab extends Tab
 {
+  private Table m_table;
+  private Gantt m_gantt;
 
   /**************************************** constructor ******************************************/
   public TasksTab( String text )
@@ -39,16 +41,16 @@ public class TasksTab extends Tab
     setClosable( false );
 
     // showing table of the plan tasks
-    Table table = new Table( "Tasks", new TasksData() );
-    table.setDefaultColumnWidth( 110 );
-    table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );
-    table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
-    table.setWidthByColumnIndex( Task.SECTION_START, 140 );
-    table.setWidthByColumnIndex( Task.SECTION_END, 140 );
+    m_table = new Table( "Tasks", new TasksData() );
+    m_table.setDefaultColumnWidth( 110 );
+    m_table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );
+    m_table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
+    m_table.setWidthByColumnIndex( Task.SECTION_START, 140 );
+    m_table.setWidthByColumnIndex( Task.SECTION_END, 140 );
 
     // alongside the gantt
-    Gantt gantt = new Gantt();
-    SplitPane split = new SplitPane( table, gantt );
+    m_gantt = new Gantt();
+    SplitPane split = new SplitPane( m_table, m_gantt );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
@@ -58,6 +60,18 @@ public class TasksTab extends Tab
       else
         setContent( null );
     } );
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
+  }
+
+  /****************************************** getGantt *******************************************/
+  public Gantt getGantt()
+  {
+    return m_gantt;
   }
 
 }

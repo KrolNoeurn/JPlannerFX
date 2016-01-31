@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import javax.xml.stream.XMLInputFactory;
@@ -46,6 +47,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
+import rjc.jplanner.gui.plan.PlanNotes;
+import rjc.jplanner.gui.plan.PlanProperties;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Plan;
 
@@ -55,13 +58,14 @@ import rjc.jplanner.model.Plan;
 
 public class MainWindow
 {
-  public static final Color COLOR_GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
+  public static final Color        COLOR_GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
 
-  private Stage             m_stage;
-  private MainTabWidget     m_mainTabWidget          = new MainTabWidget();
-  private MenuBar           m_menus                  = new Menus();
-  private TextField         m_statusBar              = new TextField();
-  private UndoStackWindow   m_undoWindow;
+  private Stage                    m_stage;
+  private MainTabWidget            m_mainTabWidget          = new MainTabWidget();       // MainTabWidget associated with MainWindow
+  private MenuBar                  m_menus                  = new Menus();
+  private TextField                m_statusBar              = new TextField();
+  private UndoStackWindow          m_undoWindow;                                         // window to show plan undo-stack
+  private ArrayList<MainTabWidget> m_tabWidgets;                                         // list of MainTabWidgets including one in MainWindow
 
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
@@ -87,6 +91,20 @@ public class MainWindow
 
     // initialise private variables
     m_stage = stage;
+    m_tabWidgets = new ArrayList<MainTabWidget>();
+    m_tabWidgets.add( m_mainTabWidget );
+
+    // on close request also close (via hide) other windows
+    stage.setOnCloseRequest( event ->
+    {
+      for ( MainTabWidget tabs : m_tabWidgets )
+        if ( tabs != m_mainTabWidget )
+          tabs.getScene().getWindow().hide();
+
+      if ( m_undoWindow != null )
+        m_undoWindow.close();
+    } );
+
   }
 
   /****************************************** message ********************************************/
@@ -148,14 +166,14 @@ public class MainWindow
     // check file exists
     if ( !file.exists() )
     {
-      message( "Cannot find '" + file.getPath() + "'" );
+      message( "Could not find '" + file.getPath() + "'" );
       return false;
     }
 
     // check file can be read
     if ( !file.canRead() )
     {
-      message( "Cannot read '" + file.getPath() + "'" );
+      message( "Could not read '" + file.getPath() + "'" );
       return false;
     }
 
@@ -247,7 +265,7 @@ public class MainWindow
     // if file exists already, check file can be written
     if ( file.exists() && !file.canWrite() )
     {
-      message( "Cannot write to '" + file.getPath() + "'" );
+      message( "Could not write to '" + file.getPath() + "'" );
       return false;
     }
 
@@ -302,7 +320,7 @@ public class MainWindow
     }
 
     // save succeed, so update gui
-    //properties().updateFromPlan(); ########################## TODO
+    properties().updateFromPlan();
     JPlanner.plan.undostack().setClean();
     updateWindowTitles();
     message( "Saved plan to '" + file.getPath() + "'" );
@@ -325,17 +343,169 @@ public class MainWindow
   }
 
   /*************************************** loadDisplayData ***************************************/
-  private void loadDisplayData( XMLStreamReader xsr )
+  private void loadDisplayData( XMLStreamReader xsr ) throws XMLStreamException
   {
-    // TODO Auto-generated method stub
+    // close (done by hiding) all but main window, need to loop around copy to avoid concurrent modification
+    for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
+      if ( tabs != m_mainTabWidget )
+        tabs.getScene().getWindow().hide();
+
+    // read XML display data
+    MainTabWidget tabs = null;
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_DISPLAY_DATA:
+            if ( tabs == null )
+              tabs = m_mainTabWidget;
+            else
+              tabs = newWindow();
+
+            int tab = 0;
+
+            // read XML attributes
+            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+              switch ( xsr.getAttributeLocalName( i ) )
+              {
+                case XmlLabels.XML_WINDOW:
+                  break;
+                case XmlLabels.XML_X:
+                  tabs.getScene().getWindow().setX( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_Y:
+                  tabs.getScene().getWindow().setY( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_WIDTH:
+                  tabs.getScene().getWindow().setWidth( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_HEIGHT:
+                  tabs.getScene().getWindow().setHeight( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_TAB:
+                  tab = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+
+                default:
+                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+                  break;
+              }
+
+            // set selected tab and check window bounding rectangle fits display(s)
+            tabs.select( tab );
+            // TODO
+            //if ( tabs == m_mainTabWidget )
+            //  updateMenus();
+            //tabs.getShell().setBounds( checkShellBounds( rect ) );
+            break;
+
+          case XmlLabels.XML_TASKS_GANTT_TAB:
+            //tabs.loadXmlTasksGantt( xsr );
+            break;
+          case XmlLabels.XML_RESOURCES_TAB:
+            //tabs.loadXmlResources( xsr );
+            break;
+          case XmlLabels.XML_CALENDARS_TAB:
+            //tabs.loadXmlCalendars( xsr );
+            break;
+          case XmlLabels.XML_DAYS_TAB:
+            //tabs.loadXmlDayTypes( xsr );
+            break;
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
 
   }
 
   /****************************************** resetGui *******************************************/
   private void resetGui()
   {
-    // TODO Auto-generated method stub
+    // update window titles and plan tab
+    updateWindowTitles();
+    properties().updateFromPlan();
+    notes().updateFromPlan();
 
+    // if reset set all table row heights to default
+    //m_tabWidgets.forEach( tabs -> tabs.tasks().setRowsHeightToDefault() );
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().hideRow( 0, false ) );
+    //m_tabWidgets.forEach( tabs -> tabs.gantt().setDefault() );
+    //m_tabWidgets.forEach( tabs -> tabs.gantt().updateAll() );
+    resetTaskTables();
+
+    //m_tabWidgets.forEach( tabs -> tabs.resources().setRowsHeightToDefault() );
+    //m_tabWidgets.forEach( tabs -> tabs.resources().hideRow( 0 ) );
+    resetResourceTables();
+
+    //m_tabWidgets.forEach( tabs -> tabs.calendars().setRowsHeightToDefault() );
+    resetCalendarTables();
+
+    //m_tabWidgets.forEach( tabs -> tabs.days().setRowsHeightToDefault() );
+    resetDayTypeTables();
+
+    // update undo-stack window if exists
+    //if ( undoWindow != null )
+    //  undoWindow.setList();
+  }
+
+  /*************************************** resetTaskTables ***************************************/
+  public void resetTaskTables()
+  {
+    // reset all tasks tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().reset() );
+  }
+
+  /************************************* resetResourceTables *************************************/
+  public void resetResourceTables()
+  {
+    // reset all resources tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().reset() );
+  }
+
+  /************************************* resetCalendarTables *************************************/
+  public void resetCalendarTables()
+  {
+    // reset all calendars tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().reset() );
+  }
+
+  /************************************** resetDayTypeTables *************************************/
+  public void resetDayTypeTables()
+  {
+    // reset all day-type tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().reset() );
+  }
+
+  /************************************** redrawTaskTables ***************************************/
+  public void redrawTaskTables()
+  {
+    // redraw all tasks tables
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().redraw() );
+  }
+
+  /************************************ redrawResourceTables *************************************/
+  public void redrawResourceTables()
+  {
+    // redraw all resource tables
+    m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().redraw() );
+  }
+
+  /************************************ redrawCalendarTables *************************************/
+  public void redrawCalendarTables()
+  {
+    // redraw all calendar tables
+    m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().redraw() );
+  }
+
+  /************************************* redrawDayTypeTables *************************************/
+  public void redrawDayTypeTables()
+  {
+    // redraw all day-type tables
+    m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().redraw() );
   }
 
   /****************************************** schedule *******************************************/
@@ -346,10 +516,15 @@ public class MainWindow
   }
 
   /***************************************** properties ******************************************/
-  private Object properties()
+  private PlanProperties properties()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return m_mainTabWidget.getPlanTab().getPlanProperties();
+  }
+
+  /******************************************** notes ********************************************/
+  private PlanNotes notes()
+  {
+    return m_mainTabWidget.getPlanTab().getPlanNotes();
   }
 
   /************************************* updateWindowTitles **************************************/
@@ -364,6 +539,25 @@ public class MainWindow
   {
     // TODO Auto-generated method stub
 
+  }
+
+  /***************************************** newWindow *******************************************/
+  public MainTabWidget newWindow()
+  {
+    // create new window
+    Stage stage = new Stage();
+    MainTabWidget newTabWidget = new MainTabWidget();
+    stage.setScene( new Scene( newTabWidget ) );
+    stage.setTitle( m_stage.getTitle() );
+    stage.show();
+
+    // add new MainTabWidget to tracking list
+    m_tabWidgets.add( newTabWidget );
+
+    // on close (via hiding) remove from tracking list
+    stage.setOnHiding( event -> m_tabWidgets.remove( newTabWidget ) );
+
+    return newTabWidget;
   }
 
   /************************************* showUndoStackWindow *************************************/

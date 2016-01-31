@@ -18,7 +18,6 @@
 
 package rjc.jplanner.gui;
 
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import rjc.jplanner.gui.calendars.CalendarsTab;
 import rjc.jplanner.gui.days.DaysTab;
@@ -32,6 +31,11 @@ import rjc.jplanner.gui.tasks.TasksTab;
 
 public class MainTabWidget extends TabPane
 {
+  private PlanTab      m_tabPlan;
+  private TasksTab     m_tabTasks;
+  private ResourcesTab m_tabResources;
+  private CalendarsTab m_tabCalendars;
+  private DaysTab      m_tabDays;
 
   /**************************************** constructor ******************************************/
   public MainTabWidget()
@@ -40,16 +44,49 @@ public class MainTabWidget extends TabPane
     super();
 
     // create and add the five tabs
-    Tab tabPlan = new PlanTab( "Plan" );
-    Tab tabTasks = new TasksTab( "Tasks & Gantt" );
-    Tab tabResources = new ResourcesTab( "Resources" );
-    Tab tabCalendars = new CalendarsTab( "Calendars" );
-    Tab tabDays = new DaysTab( "Days" );
+    m_tabPlan = new PlanTab( "Plan" );
+    m_tabTasks = new TasksTab( "Tasks & Gantt" );
+    m_tabResources = new ResourcesTab( "Resources" );
+    m_tabCalendars = new CalendarsTab( "Calendars" );
+    m_tabDays = new DaysTab( "Days" );
 
-    getTabs().addAll( tabPlan, tabTasks, tabResources, tabCalendars, tabDays );
+    getTabs().addAll( m_tabPlan, m_tabTasks, m_tabResources, m_tabCalendars, m_tabDays );
+  }
 
-    // select day tab by default
-    getSelectionModel().select( 4 );
+  /******************************************* select ********************************************/
+  public void select( int tabNumber )
+  {
+    getSelectionModel().select( tabNumber );
+  }
+
+  /***************************************** getPlanTab ******************************************/
+  public PlanTab getPlanTab()
+  {
+    return m_tabPlan;
+  }
+
+  /**************************************** getTasksTab ******************************************/
+  public TasksTab getTasksTab()
+  {
+    return m_tabTasks;
+  }
+
+  /*************************************** getResourcesTab ***************************************/
+  public ResourcesTab getResourcesTab()
+  {
+    return m_tabResources;
+  }
+
+  /*************************************** getCalendarsTab ***************************************/
+  public CalendarsTab getCalendarsTab()
+  {
+    return m_tabCalendars;
+  }
+
+  /***************************************** getDaysTab ******************************************/
+  public DaysTab getDaysTab()
+  {
+    return m_tabDays;
   }
 
 }

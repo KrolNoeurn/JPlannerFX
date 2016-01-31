@@ -27,6 +27,7 @@ import rjc.jplanner.gui.table.Table;
 
 public class CalendarsTab extends Tab
 {
+  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public CalendarsTab( String text )
@@ -36,18 +37,24 @@ public class CalendarsTab extends Tab
     setClosable( false );
 
     // showing table of available plan calendars
-    Table table = new Table( text, new CalendarsData() );
-    table.setVerticalHeaderWidth( 80 );
-    table.setDefaultColumnWidth( 140 );
+    m_table = new Table( text, new CalendarsData() );
+    m_table.setVerticalHeaderWidth( 80 );
+    m_table.setDefaultColumnWidth( 140 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
     {
       if ( newValue )
-        setContent( table );
+        setContent( m_table );
       else
         setContent( null );
     } );
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
   }
 
 }

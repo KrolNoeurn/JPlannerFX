@@ -73,6 +73,8 @@ public class TableCanvas extends Canvas
   private int               m_rowPos;                                           // row position associated with last mouse move
   private int               m_index               = -1;                         // column or row index for resize or reorder
 
+  public boolean            redrawn;                                            // has table be totally redrawn recently
+
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
   {
@@ -115,6 +117,7 @@ public class TableCanvas extends Canvas
   {
     // redraw whole canvas
     drawWidth( 0.0, getWidth() );
+    redrawn = true;
   }
 
   /****************************************** drawWidth ******************************************/
@@ -137,6 +140,7 @@ public class TableCanvas extends Canvas
     {
       int column1 = m_table.getColumnPositionAtX( (int) oldW );
       int column2 = m_table.getColumnPositionAtX( (int) newW );
+      oldW = m_table.getXStartByColumnPosition( column1 );
 
       // draw column cells
       if ( getHeight() > m_table.getHorizontalHeaderHeight() )
@@ -181,6 +185,7 @@ public class TableCanvas extends Canvas
     {
       int row1 = m_table.getRowPositionAtY( (int) oldH );
       int row2 = m_table.getRowPositionAtY( (int) newH );
+      oldH = m_table.getYStartByRowPosition( row1 );
 
       // draw column cells
       if ( getWidth() > m_table.getVerticalHeaderWidth() )
@@ -219,8 +224,11 @@ public class TableCanvas extends Canvas
     for ( int rowPos = row1; rowPos <= row2; rowPos++ )
     {
       int h = m_table.getHeightByRowPosition( rowPos );
-      drawCell( x, y, w, h, columnPos, rowPos );
-      y += h;
+      if ( h > 0 )
+      {
+        drawCell( x, y, w, h, columnPos, rowPos );
+        y += h;
+      }
     }
   }
 
@@ -238,8 +246,11 @@ public class TableCanvas extends Canvas
     for ( int columnPos = column1; columnPos <= column2; columnPos++ )
     {
       int w = m_table.getWidthByColumnPosition( columnPos );
-      drawCell( x, y, w, h, columnPos, rowPos );
-      x += w;
+      if ( w > 0 )
+      {
+        drawCell( x, y, w, h, columnPos, rowPos );
+        x += w;
+      }
     }
   }
 

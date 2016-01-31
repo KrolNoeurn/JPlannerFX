@@ -64,4 +64,10 @@ public class PlanNotes extends GridPane
     m_notes.setText( txt );
   }
 
+  /**************************************** updateFromPlan ***************************************/
+  public void updateFromPlan()
+  {
+    // TODO Auto-generated method stub
+  }
+
 }

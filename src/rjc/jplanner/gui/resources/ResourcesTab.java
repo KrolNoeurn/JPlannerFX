@@ -28,6 +28,7 @@ import rjc.jplanner.model.Resource;
 
 public class ResourcesTab extends Tab
 {
+  private Table m_table;
 
   /**************************************** constructor ******************************************/
   public ResourcesTab( String text )
@@ -37,18 +38,24 @@ public class ResourcesTab extends Tab
     setClosable( false );
 
     //  showing table of available plan resources
-    Table table = new Table( text, new ResourcesData() );
-    table.setDefaultColumnWidth( 100 );
-    table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
+    m_table = new Table( text, new ResourcesData() );
+    m_table.setDefaultColumnWidth( 100 );
+    m_table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
     {
       if ( newValue )
-        setContent( table );
+        setContent( m_table );
       else
         setContent( null );
     } );
+  }
+
+  /****************************************** getTable *******************************************/
+  public Table getTable()
+  {
+    return m_table;
   }
 
 }

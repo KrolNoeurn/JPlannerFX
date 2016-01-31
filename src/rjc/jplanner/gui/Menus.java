@@ -174,7 +174,7 @@ public class Menus extends MenuBar
     viewUndoStack.setOnAction( event -> JPlanner.gui.showUndoStackWindow( viewUndoStack.isSelected() ) );
 
     MenuItem viewNewWindow = new MenuItem( "New Window..." );
-    viewNewWindow.setDisable( true );
+    viewNewWindow.setOnAction( event -> JPlanner.gui.newWindow() );
 
     CheckMenuItem viewStretch = new CheckMenuItem( "Stretch tasks" );
     viewStretch.setSelected( true );
