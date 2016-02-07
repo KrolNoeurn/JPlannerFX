@@ -273,7 +273,7 @@ public class Table extends GridPane
   /********************************** getWidthByColumnPosition ***********************************/
   public int getWidthByColumnPosition( int columnPos )
   {
-    // return width from column position
+    // return width from column position - bit slower
     if ( columnPos < 0 || columnPos >= m_data.getColumnCount() )
       return Integer.MAX_VALUE;
 
@@ -292,7 +292,7 @@ public class Table extends GridPane
   /************************************ getWidthByColumnIndex ************************************/
   public int getWidthByColumnIndex( int columnIndex )
   {
-    // return width from column index
+    // return width from column index - bit faster
     if ( columnIndex < 0 || columnIndex >= m_data.getColumnCount() )
       return Integer.MAX_VALUE;
 
@@ -359,7 +359,7 @@ public class Table extends GridPane
   /*********************************** getHeightByRowPosition ************************************/
   public int getHeightByRowPosition( int rowPos )
   {
-    // return height from row position
+    // return height from row position - bit slower
     if ( rowPos < 0 || rowPos >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
@@ -378,7 +378,7 @@ public class Table extends GridPane
   /************************************* getHeightByRowIndex *************************************/
   public int getHeightByRowIndex( int rowIndex )
   {
-    // return height from row index
+    // return height from row index - bit faster
     if ( rowIndex < 0 || rowIndex >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
@@ -551,6 +551,22 @@ public class Table extends GridPane
         m_canvas.drawHeight( start, m_canvas.getWidth() );
       }
     }
+  }
+
+  /***************************************** moveColumn ******************************************/
+  public void moveColumn( int oldPos, int newPos )
+  {
+    // move column index from old position to new position
+    int index = m_columnIndexes.remove( oldPos );
+    m_columnIndexes.add( newPos, index );
+  }
+
+  /******************************************* moveRow *******************************************/
+  public void moveRow( int oldPos, int newPos )
+  {
+    // move row index from old position to new position
+    int index = m_rowIndexes.remove( oldPos );
+    m_rowIndexes.add( newPos, index );
   }
 
 }

@@ -21,15 +21,18 @@ package rjc.jplanner.gui.table;
 import java.util.ArrayList;
 
 import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
+import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.Table.Alignment;
 
 /*************************************************************************************************/
@@ -53,27 +56,36 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static String      ELLIPSIS              = "...";                      // ellipsis to show text has been truncated
-  public static int         CELL_PADDING          = 4;                          // cell padding for text left & right edges
-  private static int        PROXIMITY             = 4;                          // used to distinguish resize from reorder
+  public static String       ELLIPSIS              = "...";                      // ellipsis to show text has been truncated
+  public static int          CELL_PADDING          = 4;                          // cell padding for text left & right edges
+  private static int         PROXIMITY             = 4;                          // used to distinguish resize from reorder
 
-  public static final Color COLOR_GRID            = Color.SILVER;
-  public static final Color COLOR_DISABLED_CELL   = Color.rgb( 227, 227, 227 ); // medium grey
-  public static final Color COLOR_NORMAL_CELL     = Color.WHITE;
-  public static final Color COLOR_NORMAL_HEADER   = Color.rgb( 240, 240, 240 ); // light grey
-  public static final Color COLOR_NORMAL_TEXT     = Color.BLACK;
-  public static final Color COLOR_SELECTED_CELL   = Color.rgb( 51, 153, 255 );  // light blue;
-  public static final Color COLOR_SELECTED_HEADER = Color.rgb( 192, 192, 192 ); // medium dark grey
-  public static final Color COLOR_SELECTED_TEXT   = Color.WHITE;
+  public static final Color  COLOR_GRID            = Color.SILVER;
+  public static final Color  COLOR_DISABLED_CELL   = Color.rgb( 227, 227, 227 ); // medium grey
+  public static final Color  COLOR_NORMAL_CELL     = Color.WHITE;
+  public static final Color  COLOR_NORMAL_HEADER   = Color.rgb( 240, 240, 240 ); // light grey
+  public static final Color  COLOR_NORMAL_TEXT     = Color.BLACK;
+  public static final Color  COLOR_SELECTED_CELL   = Color.rgb( 51, 153, 255 );  // light blue;
+  public static final Color  COLOR_SELECTED_HEADER = Color.rgb( 192, 192, 192 ); // medium dark grey
+  public static final Color  COLOR_SELECTED_TEXT   = Color.WHITE;
 
-  private Table             m_table;                                            // table defining this table canvs
-  private int               m_x;                                                // last mouse move x
-  private int               m_y;                                                // last mouse move y
-  private int               m_columnPos;                                        // column position associated with last mouse move
-  private int               m_rowPos;                                           // row position associated with last mouse move
-  private int               m_index               = -1;                         // column or row index for resize or reorder
+  public static final Cursor CURSOR_H_RESIZE       = Cursor.H_RESIZE;
+  public static final Cursor CURSOR_V_RESIZE       = Cursor.V_RESIZE;
+  public static final Cursor CURSOR_DEFAULT        = Cursor.DEFAULT;
+  public static Cursor       CURSOR_DOWNARROW;
+  public static Cursor       CURSOR_RIGHTARROW;
+  public static Cursor       CURSOR_CROSS;
 
-  public boolean            redrawn;                                            // has table be totally redrawn recently
+  private Table              m_table;                                            // table defining this table canvas
+  private int                m_x;                                                // last mouse move x
+  private int                m_y;                                                // last mouse move y
+  private int                m_columnPos;                                        // column position associated with last mouse move
+  private int                m_rowPos;                                           // row position associated with last mouse move
+  private int                m_index               = -1;                         // column or row index for resize or reorder
+  private Canvas             m_reorderSlider;
+  private Canvas             m_reorderPointer;
+
+  public boolean             redrawn;                                            // has table be totally redrawn recently?
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -82,6 +94,13 @@ public class TableCanvas extends Canvas
     super();
     m_table = table;
 
+    if ( CURSOR_DOWNARROW == null )
+    {
+      CURSOR_DOWNARROW = new ImageCursor( new Image( getClass().getResourceAsStream( "arrowdown.png" ) ), 7, 16 );
+      CURSOR_RIGHTARROW = new ImageCursor( new Image( getClass().getResourceAsStream( "arrowright.png" ) ), 16, 24 );
+      CURSOR_CROSS = new ImageCursor( new Image( getClass().getResourceAsStream( "cross.png" ) ), 16, 20 );
+    }
+
     // when size changes draw new bits
     widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( (double) oldW, (double) newW ) );
     heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( (double) oldH, (double) newH ) );
@@ -89,6 +108,7 @@ public class TableCanvas extends Canvas
     // when mouse moves
     setOnMouseMoved( event -> mouseMoved( event ) );
     setOnMouseDragged( event -> mouseDragged( event ) );
+    setOnMouseReleased( event -> mouseReleased( event ) );
   }
 
   /***************************************** isResizable *****************************************/
@@ -298,11 +318,22 @@ public class TableCanvas extends Canvas
     // draw row header
     GraphicsContext gc = getGraphicsContext2D();
     int y = m_table.getYStartByRowPosition( rowPos );
-    double w = m_table.getVerticalHeaderWidth();
-    double h = m_table.getHeightByRowPosition( rowPos );
+    int w = m_table.getVerticalHeaderWidth();
+    int h = m_table.getHeightByRowPosition( rowPos );
+    int rowIndex = m_table.getRowIndexByPosition( rowPos );
+    String text = m_table.getDataSource().getRowTitle( rowIndex );
 
-    // fill
-    gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
+    drawRowHeaderCell( gc, y, w, h, text, false );
+  }
+
+  /************************************** drawRowHeaderCell **************************************/
+  private void drawRowHeaderCell( GraphicsContext gc, int y, double w, double h, String text, boolean selected )
+  {
+    // draw row header - fill
+    if ( selected )
+      gc.setFill( TableCanvas.COLOR_SELECTED_HEADER );
+    else
+      gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
     gc.fillRect( 0, y, w - 1.0, h - 1.0 );
 
     // grid
@@ -311,11 +342,8 @@ public class TableCanvas extends Canvas
     gc.strokeLine( 0.5, y + h - 0.5, w - 0.5, y + h - 0.5 );
 
     // label
-    int rowIndex = m_table.getRowIndexByPosition( rowPos );
-    String text = m_table.getDataSource().getRowTitle( rowIndex );
     ArrayList<TextLine> lines = getTextLines( text, Alignment.MIDDLE, w, h );
-    boolean m_selected = false;
-    if ( m_selected )
+    if ( selected )
       gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
     else
       gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
@@ -331,11 +359,22 @@ public class TableCanvas extends Canvas
     // draw column header
     GraphicsContext gc = getGraphicsContext2D();
     int x = m_table.getXStartByColumnPosition( columnPos );
-    double w = m_table.getWidthByColumnPosition( columnPos );
-    double h = m_table.getHorizontalHeaderHeight();
+    int w = m_table.getWidthByColumnPosition( columnPos );
+    int h = m_table.getHorizontalHeaderHeight();
+    int columnIndex = m_table.getColumnIndexByPosition( columnPos );
+    String text = m_table.getDataSource().getColumnTitle( columnIndex );
 
-    // fill
-    gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
+    drawColumnHeaderCell( gc, x, w, h, text, false );
+  }
+
+  /************************************ drawColumnHeaderCell *************************************/
+  private void drawColumnHeaderCell( GraphicsContext gc, int x, int w, int h, String text, boolean selected )
+  {
+    // draw column header - fill
+    if ( selected )
+      gc.setFill( TableCanvas.COLOR_SELECTED_HEADER );
+    else
+      gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
     gc.fillRect( x, 0, w - 1.0, h - 1.0 );
 
     // grid
@@ -344,8 +383,6 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, h - 0.5, x + w - 0.5, h - 0.5 );
 
     // label
-    int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    String text = m_table.getDataSource().getColumnTitle( columnIndex );
     ArrayList<TextLine> lines = getTextLines( text, Alignment.MIDDLE, w, h );
     boolean m_selected = false;
     if ( m_selected )
@@ -521,6 +558,33 @@ public class TableCanvas extends Canvas
     return lines;
   }
 
+  /************************************ createReorderPointer *************************************/
+  private Canvas createReorderPointer()
+  {
+    // create reorder pointer
+    Canvas pointer = new Canvas();
+    GraphicsContext gc = pointer.getGraphicsContext2D();
+    gc.setLineWidth( 3.0 );
+    gc.setStroke( Color.RED );
+
+    if ( getCursor() == CURSOR_DOWNARROW )
+    {
+      double h = Math.min( m_table.getBodyHeight() + m_table.getHorizontalHeaderHeight(), getHeight() );
+      pointer.setWidth( 5.0 );
+      pointer.setHeight( h );
+      gc.strokeLine( 2.5, 0.0, 2.5, h );
+    }
+    else
+    {
+      double w = Math.min( m_table.getBodyWidth() + m_table.getVerticalHeaderWidth(), getWidth() );
+      pointer.setHeight( 5.0 );
+      pointer.setWidth( w );
+      gc.strokeLine( 0.0, 2.5, w, 2.5 );
+    }
+
+    return pointer;
+  }
+
   /****************************************** mouseMoved *****************************************/
   private void mouseMoved( MouseEvent event )
   {
@@ -530,60 +594,78 @@ public class TableCanvas extends Canvas
     m_columnPos = m_table.getColumnPositionExactAtX( m_x );
     m_rowPos = m_table.getRowPositionExactAtY( m_y );
 
-    // check for column resize
-    if ( m_y < m_table.getHorizontalHeaderHeight() && m_x > m_table.getVerticalHeaderWidth() + PROXIMITY )
-    {
-      int start = m_table.getXStartByColumnPosition( m_columnPos );
-
-      if ( m_x - start < PROXIMITY )
-      {
-        setCursor( Cursor.H_RESIZE );
-        m_columnPos--;
-        if ( m_columnPos >= m_table.getDataSource().getColumnCount() )
-          m_columnPos = m_table.getDataSource().getColumnCount() - 1;
-        return;
-      }
-
-      int width = m_table.getWidthByColumnPosition( m_columnPos );
-      if ( start + width - m_x < PROXIMITY )
-      {
-        setCursor( Cursor.H_RESIZE );
-        return;
-      }
-    }
-
-    // check for row resize
-    if ( m_x < m_table.getVerticalHeaderWidth() && m_y > m_table.getHorizontalHeaderHeight() + PROXIMITY )
-    {
-      int start = m_table.getYStartByRowPosition( m_rowPos );
-
-      if ( m_y - start < PROXIMITY )
-      {
-        setCursor( Cursor.V_RESIZE );
-        m_rowPos--;
-        if ( m_rowPos >= m_table.getDataSource().getRowCount() )
-          m_rowPos = m_table.getDataSource().getRowCount() - 1;
-        return;
-      }
-
-      int height = m_table.getHeightByRowPosition( m_rowPos );
-      if ( start + height - m_y < PROXIMITY )
-      {
-        setCursor( Cursor.V_RESIZE );
-        return;
-      }
-    }
-
-    // not resize so default mouse cursor 
-    setCursor( Cursor.DEFAULT );
+    setCursor( CURSOR_CROSS );
     m_index = -1;
+
+    // check for column resize or reorder
+    if ( m_y < m_table.getHorizontalHeaderHeight() )
+    {
+      if ( m_x > m_table.getVerticalHeaderWidth() + PROXIMITY )
+      {
+        int start = m_table.getXStartByColumnPosition( m_columnPos );
+
+        if ( m_x - start < PROXIMITY )
+        {
+          setCursor( CURSOR_H_RESIZE );
+          m_columnPos--;
+          if ( m_columnPos >= m_table.getDataSource().getColumnCount() )
+            m_columnPos = m_table.getDataSource().getColumnCount() - 1;
+          return;
+        }
+
+        int width = m_table.getWidthByColumnPosition( m_columnPos );
+        if ( start + width - m_x < PROXIMITY )
+        {
+          setCursor( CURSOR_H_RESIZE );
+          return;
+        }
+      }
+
+      setCursor( CURSOR_DOWNARROW );
+    }
+
+    // check for row resize or reorder
+    if ( m_x < m_table.getVerticalHeaderWidth() )
+    {
+      if ( m_y > m_table.getHorizontalHeaderHeight() + PROXIMITY )
+      {
+        int start = m_table.getYStartByRowPosition( m_rowPos );
+
+        if ( m_y - start < PROXIMITY )
+        {
+          setCursor( CURSOR_V_RESIZE );
+          m_rowPos--;
+          if ( m_rowPos >= m_table.getDataSource().getRowCount() )
+            m_rowPos = m_table.getDataSource().getRowCount() - 1;
+          return;
+        }
+
+        int height = m_table.getHeightByRowPosition( m_rowPos );
+        if ( start + height - m_y < PROXIMITY )
+        {
+          setCursor( CURSOR_V_RESIZE );
+          return;
+        }
+      }
+
+      setCursor( CURSOR_RIGHTARROW );
+    }
+
+    // check for table headers corner
+    if ( m_x < m_table.getVerticalHeaderWidth() && m_y < m_table.getHorizontalHeaderHeight() )
+      setCursor( CURSOR_DEFAULT );
+
+    // check for beyond table cells
+    if ( m_x >= m_table.getVerticalHeaderWidth() + m_table.getBodyWidth()
+        || m_y >= m_table.getHorizontalHeaderHeight() + m_table.getBodyHeight() )
+      setCursor( CURSOR_DEFAULT );
   }
 
   /***************************************** mouseDragged ****************************************/
   private void mouseDragged( MouseEvent event )
   {
     // handle column resize
-    if ( getCursor() == Cursor.H_RESIZE )
+    if ( getCursor() == CURSOR_H_RESIZE )
     {
       if ( m_index < 0 )
       {
@@ -596,7 +678,7 @@ public class TableCanvas extends Canvas
     }
 
     // handle row resize
-    if ( getCursor() == Cursor.V_RESIZE )
+    if ( getCursor() == CURSOR_V_RESIZE )
     {
       if ( m_index < 0 )
       {
@@ -609,21 +691,169 @@ public class TableCanvas extends Canvas
     }
 
     // handle column reorder
-    if ( m_y < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == CURSOR_DOWNARROW )
     {
-      JPlanner.trace( "COLUMN REORDER " + m_columnPos + " " + m_rowPos + " " );
+      if ( m_index < 0 )
+      {
+        m_index = m_table.getColumnIndexByPosition( m_columnPos );
+        m_x = m_x - m_table.getXStartByColumnPosition( m_columnPos );
+
+        // create reorder slider
+        int w = m_table.getWidthByColumnIndex( m_index );
+        int h = m_table.getHorizontalHeaderHeight();
+        String text = m_table.getDataSource().getColumnTitle( m_index );
+        m_reorderSlider = new Canvas( w, h );
+        drawColumnHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
+        m_reorderSlider.setOpacity( 0.8 );
+        GridPane.setValignment( m_reorderSlider, VPos.TOP );
+
+        // create reorder pointer
+        m_reorderPointer = createReorderPointer();
+        GridPane.setValignment( m_reorderPointer, VPos.TOP );
+
+        // add slider & pointer to display
+        m_table.add( m_reorderSlider, 0, 0 );
+        m_table.add( m_reorderPointer, 0, 0, 1, 2 );
+      }
+
+      // set slider position
+      m_reorderSlider.setTranslateX( event.getX() - m_x );
+
+      // set reorder position
+      m_columnPos = m_table.getColumnPositionAtX( (int) event.getX() );
+      int x = m_table.getXStartByColumnPosition( m_columnPos );
+      int w = m_table.getWidthByColumnPosition( m_columnPos );
+      if ( event.getX() > x + w / 2 )
+      {
+        m_columnPos++;
+        x += w;
+      }
+      m_reorderPointer.setTranslateX( x - m_reorderPointer.getWidth() / 2.0 );
 
       return;
     }
 
     // handle row reorder
-    if ( m_x < m_table.getVerticalHeaderWidth() )
+    if ( getCursor() == CURSOR_RIGHTARROW )
     {
-      JPlanner.trace( "ROW REORDER " + m_columnPos + " " + m_rowPos + " " );
+      if ( m_index < 0 )
+      {
+        m_index = m_table.getRowIndexByPosition( m_rowPos );
+        m_y = m_y - m_table.getYStartByRowPosition( m_rowPos );
+
+        // create reorder slider
+        int h = m_table.getHeightByRowIndex( m_index );
+        int w = m_table.getVerticalHeaderWidth();
+        String text = m_table.getDataSource().getRowTitle( m_index );
+        m_reorderSlider = new Canvas( w, h );
+        drawRowHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
+        m_reorderSlider.setOpacity( 0.8 );
+        GridPane.setValignment( m_reorderSlider, VPos.TOP );
+
+        // create reorder pointer
+        m_reorderPointer = createReorderPointer();
+        GridPane.setValignment( m_reorderPointer, VPos.TOP );
+
+        // add slider & pointer to display
+        m_table.add( m_reorderSlider, 0, 0 );
+        m_table.add( m_reorderPointer, 0, 0, 2, 1 );
+      }
+
+      // set slider position
+      m_reorderSlider.setTranslateY( event.getY() - m_y );
+
+      // set reorder position
+      m_rowPos = m_table.getRowPositionAtY( (int) event.getY() );
+      int y = m_table.getYStartByRowPosition( m_rowPos );
+      int h = m_table.getHeightByRowPosition( m_rowPos );
+      if ( event.getY() > y + h / 2 )
+      {
+        m_rowPos++;
+        y += h;
+      }
+      m_reorderPointer.setTranslateY( y - m_reorderPointer.getHeight() / 2.0 );
 
       return;
     }
+  }
 
+  /**************************************** mouseReleased ****************************************/
+  private void mouseReleased( MouseEvent event )
+  {
+    // handle down arrow
+    if ( getCursor() == CURSOR_DOWNARROW )
+    {
+      if ( m_reorderPointer != null )
+      {
+        // handle column reorder completion
+        m_table.getChildren().remove( m_reorderSlider );
+        m_table.getChildren().remove( m_reorderPointer );
+        m_reorderSlider = null;
+        m_reorderPointer = null;
+
+        int oldPos = m_table.getColumnPositionByIndex( m_index );
+        if ( m_columnPos < oldPos )
+        {
+          m_table.moveColumn( oldPos, m_columnPos );
+          redrawAll();
+          mouseMoved( event );
+          return;
+        }
+        if ( m_columnPos > oldPos + 1 )
+        {
+          m_table.moveColumn( oldPos, m_columnPos - 1 );
+          redrawAll();
+          mouseMoved( event );
+          return;
+        }
+      }
+      else
+      {
+        // handle column select
+
+        mouseMoved( event );
+        return;
+      }
+    }
+
+    // handle right arrow
+    if ( getCursor() == CURSOR_RIGHTARROW )
+    {
+      if ( m_reorderPointer != null )
+      {
+        // handle row reorder completion
+        m_table.getChildren().remove( m_reorderSlider );
+        m_table.getChildren().remove( m_reorderPointer );
+        m_reorderSlider = null;
+        m_reorderPointer = null;
+
+        int oldPos = m_table.getRowPositionByIndex( m_index );
+        if ( m_rowPos < oldPos )
+        {
+          m_table.moveRow( oldPos, m_rowPos );
+          redrawAll();
+          mouseMoved( event );
+          return;
+        }
+        if ( m_rowPos > oldPos + 1 )
+        {
+          m_table.moveRow( oldPos, m_rowPos - 1 );
+          redrawAll();
+          mouseMoved( event );
+          return;
+        }
+      }
+      else
+      {
+        // handle row select
+
+        mouseMoved( event );
+        return;
+      }
+    }
+
+    // call mouse moved to ensure cursor is correct etc 
+    mouseMoved( event );
   }
 
 }
