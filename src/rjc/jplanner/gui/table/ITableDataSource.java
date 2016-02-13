@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2015 by Richard Crook                                   *
+ *  Copyright (C) 2016 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -33,27 +33,27 @@ public interface ITableDataSource
   // return number of rows to be displayed
   int getRowCount();
 
-  // return column titles to be displayed
-  String getColumnTitle( int column );
+  // return column title to be displayed
+  String getColumnTitle( int columnIndex );
 
-  // return row titles to be displayed
-  String getRowTitle( int row );
+  // return row title to be displayed
+  String getRowTitle( int rowIndex );
 
   // return editor
   CellEditor getEditor();
 
   // return cell text to be displayed
-  String getCellText( int column, int row );
+  String getCellText( int columnIndex, int rowIndex );
 
   // return cell value
-  Object getValue( int column, int row );
+  Object getValue( int columnIndex, int rowIndex );
 
   // set cell value
-  void setValue( int column, int row, Object newValue );
+  void setValue( int columnIndex, int rowIndex, Object newValue );
 
   // return cell text alignment
-  Alignment getCellAlignment( int column, int row );
+  Alignment getCellAlignment( int columnIndex, int rowIndex );
 
   // return cell background colour
-  Paint getCellBackground( int column, int row );
+  Paint getCellBackground( int columnIndex, int rowIndex );
 }

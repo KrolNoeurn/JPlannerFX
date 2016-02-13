@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2015 by Richard Crook                                   *
+ *  Copyright (C) 2016 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -33,10 +33,10 @@ public class CommandCalendarSetValue implements IUndoCommand
   private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandCalendarSetValue( int calID, int section, Object newValue, Object oldValue )
+  public CommandCalendarSetValue( int calendarID, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_calID = calID;
+    m_calID = calendarID;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;

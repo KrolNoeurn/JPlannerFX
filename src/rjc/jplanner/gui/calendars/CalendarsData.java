@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2015 by Richard Crook                                   *
+ *  Copyright (C) 2016 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -60,39 +60,39 @@ public class CalendarsData implements ITableDataSource
 
   /************************************** getColumnTitle *****************************************/
   @Override
-  public String getColumnTitle( int column )
+  public String getColumnTitle( int columnIndex )
   {
-    return "Calendar " + ( column + 1 );
+    return "Calendar " + ( columnIndex + 1 );
   }
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int row )
+  public String getRowTitle( int rowIndex )
   {
-    return Calendar.sectionName( row );
+    return Calendar.sectionName( rowIndex );
   }
 
   /**************************************** getCellText ******************************************/
   @Override
-  public String getCellText( int column, int row )
+  public String getCellText( int columnIndex, int rowIndex )
   {
-    return JPlanner.plan.calendar( column ).toString( row );
+    return JPlanner.plan.calendar( columnIndex ).toString( rowIndex );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int column, int row )
+  public Alignment getCellAlignment( int columnIndex, int rowIndex )
   {
     return Alignment.LEFT;
   }
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int column, int row )
+  public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // all cells are normal coloured except unused normal section cells
-    Calendar cal = JPlanner.plan.calendar( column );
-    if ( row >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
+    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    if ( rowIndex >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
       return TableCanvas.COLOR_DISABLED_CELL;
 
     return TableCanvas.COLOR_NORMAL_CELL;
@@ -108,27 +108,27 @@ public class CalendarsData implements ITableDataSource
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int column, int row, Object newValue )
+  public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Object oldValue = getValue( column, row );
+    Object oldValue = getValue( columnIndex, rowIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic
-    if ( row == Calendar.SECTION_EXCEPTIONS )
-      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( column, newValue, oldValue ) );
-    else if ( row == Calendar.SECTION_CYCLE )
-      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( column, newValue, oldValue ) );
+    if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
+      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( columnIndex, newValue, oldValue ) );
+    else if ( rowIndex == Calendar.SECTION_CYCLE )
+      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( columnIndex, newValue, oldValue ) );
     else
-      JPlanner.plan.undostack().push( new CommandCalendarSetValue( column, row, newValue, oldValue ) );
+      JPlanner.plan.undostack().push( new CommandCalendarSetValue( columnIndex, rowIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int column, int row )
+  public Object getValue( int columnIndex, int rowIndex )
   {
-    return getCellText( column, row );
+    return getCellText( columnIndex, rowIndex );
   }
 
 }

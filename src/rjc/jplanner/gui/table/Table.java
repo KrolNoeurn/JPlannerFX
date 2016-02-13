@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2015 by Richard Crook                                   *
+ *  Copyright (C) 2016 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -20,6 +20,7 @@ package rjc.jplanner.gui.table;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
@@ -55,6 +56,10 @@ public class Table extends GridPane
   // array with mapping from position to index
   private ArrayList<Integer>        m_columnIndexes      = new ArrayList<Integer>();
   private ArrayList<Integer>        m_rowIndexes         = new ArrayList<Integer>();
+
+  // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + rowPos
+  private static final int          SELECT_HASH          = 9999;
+  private HashSet<Integer>          m_selected           = new HashSet<Integer>();
 
   private static int                SCROLLBAR_SIZE       = 18;
 
@@ -567,6 +572,109 @@ public class Table extends GridPane
     // move row index from old position to new position
     int index = m_rowIndexes.remove( oldPos );
     m_rowIndexes.add( newPos, index );
+  }
+
+  /************************************** clearAllSelection **************************************/
+  public void clearAllSelection()
+  {
+    // clear selection from all cells
+    m_selected.clear();
+  }
+
+  /**************************************** selectionCount ***************************************/
+  public int selectionCount()
+  {
+    // return number of selected cells
+    return m_selected.size();
+  }
+
+  /***************************************** isSelected ******************************************/
+  public boolean isSelected( int columnPos, int rowPos )
+  {
+    // return true if specified body cell is selected
+    return m_selected.contains( columnPos * SELECT_HASH + rowPos );
+  }
+
+  /************************************ doesRowHaveSelection *************************************/
+  public boolean doesRowHaveSelection( int rowPos )
+  {
+    // return true if any selected body cells on specified row
+    for ( int hash : m_selected )
+      if ( hash % SELECT_HASH == rowPos )
+        return true;
+
+    return false;
+  }
+
+  /************************************** isRowAllSelected ***************************************/
+  public boolean isRowAllSelected( int rowPos )
+  {
+    // return true if every body cell in row is selected
+    int num = getDataSource().getColumnCount();
+    for ( int columnPos = 0; columnPos < num; columnPos++ )
+      if ( !isSelected( columnPos, rowPos ) )
+        return false;
+
+    return true;
+  }
+
+  /*********************************** doesColumnHaveSelection ***********************************/
+  public boolean doesColumnHaveSelection( int columnPos )
+  {
+    // return true if any selected body cells on specified column
+    for ( int hash : m_selected )
+      if ( hash / SELECT_HASH == columnPos )
+        return true;
+
+    return false;
+  }
+
+  /************************************* isColumnAllSelected *************************************/
+  public boolean isColumnAllSelected( int columnPos )
+  {
+    // return true if every body cell in column is selected
+    int num = getDataSource().getRowCount();
+    for ( int rowPos = 0; rowPos < num; rowPos++ )
+      if ( !isSelected( columnPos, rowPos ) )
+        return false;
+
+    return true;
+  }
+
+  /**************************************** setSelection *****************************************/
+  public void setSelection( int columnPos, int rowPos, boolean selected )
+  {
+    // set whether specified body cell is selected
+    if ( selected )
+      m_selected.add( columnPos * SELECT_HASH + rowPos );
+    else
+      m_selected.remove( columnPos * SELECT_HASH + rowPos );
+  }
+
+  /*************************************** setRowSelection ***************************************/
+  public void setRowSelection( int rowPos, boolean selected )
+  {
+    // set whether specified table row is selected
+    int num = getDataSource().getColumnCount();
+    if ( selected )
+      for ( int columnPos = 0; columnPos < num; columnPos++ )
+        m_selected.add( columnPos * SELECT_HASH + rowPos );
+    else
+      for ( int columnPos = 0; columnPos < num; columnPos++ )
+        m_selected.remove( columnPos * SELECT_HASH + rowPos );
+  }
+
+  /************************************* setColumnSelection **************************************/
+  public void setColumnSelection( int columnPos, boolean selected )
+  {
+    // set whether specified table column is selected
+    int num = getDataSource().getRowCount();
+    if ( selected )
+      for ( int rowPos = 0; rowPos < num; rowPos++ )
+        m_selected.add( columnPos * SELECT_HASH + rowPos );
+    else
+      for ( int rowPos = 0; rowPos < num; rowPos++ )
+        m_selected.remove( columnPos * SELECT_HASH + rowPos );
   }
 
 }

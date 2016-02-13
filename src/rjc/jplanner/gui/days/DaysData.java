@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2015 by Richard Crook                                   *
+ *  Copyright (C) 2016 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -58,31 +58,31 @@ public class DaysData implements ITableDataSource
 
   /************************************** getColumnTitle *****************************************/
   @Override
-  public String getColumnTitle( int column )
+  public String getColumnTitle( int columnIndex )
   {
-    return Day.sectionName( column );
+    return Day.sectionName( columnIndex );
   }
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int row )
+  public String getRowTitle( int rowIndex )
   {
-    return Integer.toString( row + 1 );
+    return Integer.toString( rowIndex + 1 );
   }
 
   /**************************************** getCellText ******************************************/
   @Override
-  public String getCellText( int column, int row )
+  public String getCellText( int columnIndex, int rowIndex )
   {
-    return JPlanner.plan.day( row ).toString( column );
+    return JPlanner.plan.day( rowIndex ).toString( columnIndex );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int column, int row )
+  public Alignment getCellAlignment( int columnIndex, int rowIndex )
   {
     // all cells are middle aligned except name which is left aligned
-    if ( column == Day.SECTION_NAME )
+    if ( columnIndex == Day.SECTION_NAME )
       return Alignment.LEFT;
 
     return Alignment.MIDDLE;
@@ -90,11 +90,11 @@ public class DaysData implements ITableDataSource
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int column, int row )
+  public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // all cells are normal coloured except unused start/end
-    Day day = JPlanner.plan.day( row );
-    if ( column >= day.numPeriods() * 2 + Day.SECTION_START1 )
+    Day day = JPlanner.plan.day( rowIndex );
+    if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
       return TableCanvas.COLOR_DISABLED_CELL;
 
     return TableCanvas.COLOR_NORMAL_CELL;
@@ -110,25 +110,25 @@ public class DaysData implements ITableDataSource
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int column, int row, Object newValue )
+  public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Object oldValue = getValue( column, row );
+    Object oldValue = getValue( columnIndex, rowIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting number of work periods, otherwise generic
-    if ( column == Day.SECTION_PERIODS )
-      JPlanner.plan.undostack().push( new CommandDaySetNumPeriods( row, newValue, oldValue ) );
+    if ( columnIndex == Day.SECTION_PERIODS )
+      JPlanner.plan.undostack().push( new CommandDaySetNumPeriods( rowIndex, newValue, oldValue ) );
     else
-      JPlanner.plan.undostack().push( new CommandDaySetValue( row, column, newValue, oldValue ) );
+      JPlanner.plan.undostack().push( new CommandDaySetValue( rowIndex, columnIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int column, int row )
+  public Object getValue( int columnIndex, int rowIndex )
   {
-    return getCellText( column, row );
+    return getCellText( columnIndex, rowIndex );
   }
 
 }
