@@ -22,11 +22,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.util.Duration;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /**************** Display gui scrollable table with horizontal & vertical header *****************/
@@ -35,16 +40,17 @@ import javafx.scene.layout.Priority;
 public class Table extends GridPane
 {
   private ITableDataSource          m_data;                                                // data source for the table
-  private TableCanvas               m_canvas;
-  private ScrollBar                 m_vScrollBar;
-  private ScrollBar                 m_hScrollBar;
+  private TableCanvas               m_canvas;                                              // canvas where table is drawn
+  private ScrollBar                 m_vScrollBar;                                          // vertical scroll bar
+  private ScrollBar                 m_hScrollBar;                                          // horizontal scroll bar
+  private Timeline                  m_animation;                                           // used for table scrolling
 
   private int                       m_defaultRowHeight   = 20;
   private int                       m_defaultColumnWidth = 100;
   private int                       m_minimumRowHeight   = 15;
   private int                       m_minimumColumnWidth = 40;
   private int                       m_hHeaderHeight      = 20;
-  private int                       m_vHeaderWidth       = 30;                             //30;
+  private int                       m_vHeaderWidth       = 30;
 
   private int                       m_bodyWidth          = 0;                              // body cells total width (excludes header)
   private int                       m_bodyHeight         = 0;                              // body cells total height (excludes header)
@@ -79,10 +85,10 @@ public class Table extends GridPane
     this.name = name;
 
     // initialise column & row position to index mapping
-    int count = data.getColumnCount();
+    int count = m_data.getColumnCount();
     for ( int column = 0; column < count; column++ )
       m_columnIndexes.add( column );
-    count = data.getRowCount();
+    count = m_data.getRowCount();
     for ( int row = 0; row < count; row++ )
       m_rowIndexes.add( row );
 
@@ -109,14 +115,14 @@ public class Table extends GridPane
     widthProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
     m_vScrollBar.visibleProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
     m_hScrollBar.visibleProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
-    m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> m_canvas.redrawAll() );
-    m_hScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> m_canvas.redrawAll() );
+    m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
+    m_hScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
   }
 
   /************************************ setCanvasScrollBars **************************************/
-  private void setCanvasScrollBars()
+  public void setCanvasScrollBars()
   {
-    // set canvas size
+    // set canvas to correct size to not overlap scroll bars
     int height = (int) getHeight();
     if ( m_hScrollBar.isVisible() )
       height -= SCROLLBAR_SIZE;
@@ -129,7 +135,7 @@ public class Table extends GridPane
     if ( width != (int) m_canvas.getWidth() )
       m_canvas.setWidth( width );
 
-    // set scroll bars visibility
+    // set scroll bars to correct visibility
     boolean hNeed = width < m_bodyWidth + m_vHeaderWidth;
     if ( hNeed != m_hScrollBar.isVisible() )
     {
@@ -144,7 +150,7 @@ public class Table extends GridPane
       return;
     }
 
-    // set scroll bars span
+    // set scroll bars to correct span
     if ( m_vScrollBar.isVisible() && m_hScrollBar.isVisible() )
     {
       // both visible so both should have span of 1
@@ -164,7 +170,7 @@ public class Table extends GridPane
         setColumnSpan( m_hScrollBar, 2 );
     }
 
-    // set scroll bars thumb
+    // set scroll bars correct thumb size and position
     if ( m_vScrollBar.isVisible() )
     {
       double max = m_bodyHeight + m_hHeaderHeight - height;
@@ -445,20 +451,8 @@ public class Table extends GridPane
 
     // record width so overrides default
     int oldWidth = getWidthByColumnIndex( columnIndex );
+    m_bodyWidth = m_bodyWidth - oldWidth + newWidth;
     m_columnWidths.put( columnIndex, newWidth );
-
-    // if new width different to old width, update table canvas
-    if ( newWidth != oldWidth )
-    {
-      m_bodyWidth = m_bodyWidth - oldWidth + newWidth;
-      m_canvas.redrawn = false;
-      setCanvasScrollBars();
-      if ( !m_canvas.redrawn )
-      {
-        int start = getXStartByColumnPosition( getColumnPositionByIndex( columnIndex ) );
-        m_canvas.drawWidth( start, m_canvas.getWidth() );
-      }
-    }
   }
 
   /************************************ setHeightByRowIndex **************************************/
@@ -470,20 +464,8 @@ public class Table extends GridPane
 
     // record height so overrides default
     int oldHeight = getHeightByRowIndex( rowIndex );
+    m_bodyHeight = m_bodyHeight - oldHeight + newHeight;
     m_rowHeights.put( rowIndex, newHeight );
-
-    // if new height different to old height, update table canvas
-    if ( newHeight != oldHeight )
-    {
-      m_bodyHeight = m_bodyHeight - oldHeight + newHeight;
-      m_canvas.redrawn = false;
-      setCanvasScrollBars();
-      if ( !m_canvas.redrawn )
-      {
-        int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
-        m_canvas.drawHeight( start, m_canvas.getWidth() );
-      }
-    }
   }
 
   /********************************** getColumnIndexByPosition ***********************************/
@@ -517,14 +499,14 @@ public class Table extends GridPane
   /******************************************* redraw ********************************************/
   public void redraw()
   {
-    // trigger simple redraw/refresh of table
+    // trigger simple complete redraw of table
     m_canvas.redrawAll();
   }
 
   /******************************************** reset ********************************************/
   public void reset()
   {
-    // reset for example after change in number of columns or rows
+    // reset table canvas for example after change in number of columns or rows
     calculateBodyHeight();
     calculateBodyWidth();
     setCanvasScrollBars();
@@ -532,7 +514,7 @@ public class Table extends GridPane
   }
 
   /******************************************* hideRow *******************************************/
-  public void hideRow( int rowIndex, boolean redraw )
+  public void hideRow( int rowIndex )
   {
     // get old height
     int oldHeight = m_defaultRowHeight;
@@ -545,17 +527,6 @@ public class Table extends GridPane
 
     m_rowHeights.put( rowIndex, -oldHeight );
     m_bodyHeight = m_bodyHeight - oldHeight;
-
-    if ( redraw )
-    {
-      m_canvas.redrawn = false;
-      setCanvasScrollBars();
-      if ( !m_canvas.redrawn )
-      {
-        int start = getYStartByRowPosition( getRowPositionByIndex( rowIndex ) );
-        m_canvas.drawHeight( start, m_canvas.getWidth() );
-      }
-    }
   }
 
   /***************************************** moveColumn ******************************************/
@@ -675,6 +646,75 @@ public class Table extends GridPane
     else
       for ( int rowPos = 0; rowPos < num; rowPos++ )
         m_selected.remove( columnPos * SELECT_HASH + rowPos );
+  }
+
+  /************************************** animationScrollUp **************************************/
+  public void animationScrollUp()
+  {
+    // create scroll up animation, stopping any old animation first
+    if ( m_animation != null )
+      m_animation.stop();
+
+    double value = m_vScrollBar.getValue();
+    KeyValue kv = new KeyValue( m_vScrollBar.valueProperty(), 0 );
+    KeyFrame kf = new KeyFrame( Duration.millis( value * 5 ), kv );
+    m_animation = new Timeline( kf );
+    m_animation.play();
+  }
+
+  /************************************* animationScrollDown *************************************/
+  public void animationScrollDown()
+  {
+    // create scroll down animation, stopping any old animation first
+    if ( m_animation != null )
+      m_animation.stop();
+
+    double value = m_vScrollBar.getValue();
+    double max = m_vScrollBar.getMax();
+    KeyValue kv = new KeyValue( m_vScrollBar.valueProperty(), max );
+    KeyFrame kf = new KeyFrame( Duration.millis( ( max - value ) * 5 ), kv );
+    m_animation = new Timeline( kf );
+    m_animation.play();
+  }
+
+  /************************************ animationScrollRight *************************************/
+  public void animationScrollRight()
+  {
+    // create scroll right animation, stopping any old animation first
+    if ( m_animation != null )
+      m_animation.stop();
+
+    double value = m_hScrollBar.getValue();
+    double max = m_hScrollBar.getMax();
+    KeyValue kv = new KeyValue( m_hScrollBar.valueProperty(), max );
+    KeyFrame kf = new KeyFrame( Duration.millis( ( max - value ) * 5 ), kv );
+    m_animation = new Timeline( kf );
+    m_animation.play();
+  }
+
+  /************************************* animationScrollLeft *************************************/
+  public void animationScrollLeft()
+  {
+    // create scroll left animation, stopping any old animation first
+    if ( m_animation != null )
+      m_animation.stop();
+
+    double value = m_hScrollBar.getValue();
+    KeyValue kv = new KeyValue( m_hScrollBar.valueProperty(), 0 );
+    KeyFrame kf = new KeyFrame( Duration.millis( value * 5 ), kv );
+    m_animation = new Timeline( kf );
+    m_animation.play();
+  }
+
+  /**************************************** animationStop ****************************************/
+  public void animationStop()
+  {
+    // stop animation if one exists
+    if ( m_animation == null )
+      return;
+
+    m_animation.stop();
+    m_animation = null;
   }
 
 }

@@ -432,7 +432,7 @@ public class MainWindow
 
     // if reset set all table row heights to default
     //m_tabWidgets.forEach( tabs -> tabs.tasks().setRowsHeightToDefault() );
-    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().hideRow( 0, false ) );
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().hideRow( 0 ) );
     //m_tabWidgets.forEach( tabs -> tabs.gantt().setDefault() );
     //m_tabWidgets.forEach( tabs -> tabs.gantt().updateAll() );
     resetTaskTables();
