@@ -18,8 +18,6 @@
 
 package rjc.jplanner.model;
 
-import java.io.FileOutputStream;
-
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
@@ -339,7 +337,7 @@ public class Plan
   }
 
   /****************************************** savePlan *******************************************/
-  public boolean savePlan( XMLStreamWriter xsw, FileOutputStream fos )
+  public boolean savePlan( XMLStreamWriter xsw )
   {
     // save plan to specified XML stream
     try

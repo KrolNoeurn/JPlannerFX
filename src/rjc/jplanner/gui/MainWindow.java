@@ -45,6 +45,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.gui.plan.PlanNotes;
@@ -238,7 +239,7 @@ public class MainWindow
     // use file-chooser to ask user which file to save to
     FileChooser fc = new FileChooser();
     fc.setTitle( "Save plan" );
-    File file = fc.showOpenDialog( m_stage );
+    File file = fc.showSaveDialog( m_stage );
 
     // if user cancels file is null, so exit immediately
     if ( file == null )
@@ -289,7 +290,7 @@ public class MainWindow
       xsw.writeAttribute( XmlLabels.XML_SAVEWHERE, file.getParent() );
 
       // save plan data to stream
-      if ( !JPlanner.plan.savePlan( xsw, fos ) )
+      if ( !JPlanner.plan.savePlan( xsw ) )
       {
         message( "Failed to save plan to '" + file.getPath() + "'" );
         return false;
@@ -309,7 +310,7 @@ public class MainWindow
       File backupFile = new File( file.getAbsolutePath() + "~" );
       backupFile.delete();
       file.renameTo( backupFile );
-      tempFile.renameTo( file );
+      prettyPrintXML( tempFile, file );
       JPlanner.plan.setFileDetails( file.getName(), file.getParent(), saveUser, saveWhen );
     }
     catch ( XMLStreamException | IOException exception )
@@ -325,6 +326,57 @@ public class MainWindow
     updateWindowTitles();
     message( "Saved plan to '" + file.getPath() + "'" );
     return true;
+  }
+
+  /**************************************** temporaryFile ****************************************/
+  private void prettyPrintXML( File unformatted, File formatted )
+  {
+    // take XML contents of unindented unformatted file and write out indented to formatted file
+    try
+    {
+      FileInputStream fis = new FileInputStream( unformatted );
+      FileOutputStream fos = new FileOutputStream( formatted );
+      int content = fis.read();
+      int next;
+      int indent = -1;
+      boolean inQuotes = false;
+      boolean inSeq = false;
+      while ( ( next = fis.read() ) != -1 )
+      {
+        if ( content == '<' && next != '?' && ( next != '/' || inSeq ) )
+        {
+          if ( next != '/' )
+            indent++;
+          fos.write( 10 );
+          for ( int count = 0; count < indent; count++ )
+          {
+            fos.write( 32 );
+            fos.write( 32 );
+          }
+          inSeq = false;
+        }
+
+        if ( content == '/' && !inQuotes )
+        {
+          indent--;
+          inSeq = true;
+        }
+
+        if ( content == '"' )
+          inQuotes = !inQuotes;
+
+        fos.write( content );
+        content = next;
+      }
+      fos.write( content );
+      fos.close();
+      fis.close();
+      unformatted.delete();
+    }
+    catch ( Exception exception )
+    {
+      exception.printStackTrace();
+    }
   }
 
   /**************************************** temporaryFile ****************************************/
@@ -535,10 +587,25 @@ public class MainWindow
   }
 
   /*************************************** saveDisplayData ***************************************/
-  private void saveDisplayData( XMLStreamWriter xsw )
+  private void saveDisplayData( XMLStreamWriter xsw ) throws XMLStreamException
   {
-    // TODO Auto-generated method stub
+    // save display data to stream for each window
+    for ( MainTabWidget tabs : m_tabWidgets )
+    {
+      Window window = tabs.getScene().getWindow();
 
+      xsw.writeStartElement( XmlLabels.XML_DISPLAY_DATA );
+      xsw.writeAttribute( XmlLabels.XML_WINDOW, Integer.toString( m_tabWidgets.indexOf( tabs ) ) );
+      xsw.writeAttribute( XmlLabels.XML_X, Integer.toString( (int) window.getX() ) );
+      xsw.writeAttribute( XmlLabels.XML_Y, Integer.toString( (int) window.getY() ) );
+      xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( (int) window.getWidth() ) );
+      xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( (int) window.getHeight() ) );
+      xsw.writeAttribute( XmlLabels.XML_TAB, Integer.toString( tabs.getSelectionModel().getSelectedIndex() ) );
+
+      tabs.writeXML( xsw );
+
+      xsw.writeEndElement(); // XML_DISPLAY_DATA
+    }
   }
 
   /***************************************** newWindow *******************************************/

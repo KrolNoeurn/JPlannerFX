@@ -18,7 +18,11 @@
 
 package rjc.jplanner.gui;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
 import javafx.scene.control.TabPane;
+import rjc.jplanner.XmlLabels;
 import rjc.jplanner.gui.calendars.CalendarsTab;
 import rjc.jplanner.gui.days.DaysTab;
 import rjc.jplanner.gui.plan.PlanTab;
@@ -87,6 +91,45 @@ public class MainTabWidget extends TabPane
   public DaysTab getDaysTab()
   {
     return m_tabDays;
+  }
+
+  /****************************************** writeXML *******************************************/
+  public boolean writeXML( XMLStreamWriter xsw )
+  {
+    // write display data to XML stream
+    try
+    {
+      // write tasks-gantt display data
+      xsw.writeStartElement( XmlLabels.XML_TASKS_GANTT_TAB );
+      //xsw.writeAttribute( XmlLabels.XML_SPLITTER,
+      //    Integer.toString( m_tabTasks.getSplitter().preferredLeftChildWidth ) );
+      m_tabTasks.getGantt().writeXML( xsw );
+      m_tabTasks.getTable().writeXML( xsw );
+      xsw.writeEndElement(); // XML_TASKS_GANTT_TAB
+
+      // write resources display data
+      xsw.writeStartElement( XmlLabels.XML_RESOURCES_TAB );
+      m_tabResources.getTable().writeXML( xsw );
+      xsw.writeEndElement(); // XML_RESOURCES_TAB
+
+      // write calendars display data
+      xsw.writeStartElement( XmlLabels.XML_CALENDARS_TAB );
+      m_tabCalendars.getTable().writeXML( xsw );
+      xsw.writeEndElement(); // XML_CALENDARS_TAB
+
+      // write day-types display data
+      xsw.writeStartElement( XmlLabels.XML_DAYS_TAB );
+      m_tabDays.getTable().writeXML( xsw );
+      xsw.writeEndElement(); // XML_DAYS_TAB
+    }
+    catch ( XMLStreamException exception )
+    {
+      // some sort of exception thrown
+      exception.printStackTrace();
+      return false;
+    }
+
+    return true;
   }
 
 }

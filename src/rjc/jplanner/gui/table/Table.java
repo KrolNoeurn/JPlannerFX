@@ -22,6 +22,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -32,6 +36,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.XmlLabels;
 
 /*************************************************************************************************/
 /**************** Display gui scrollable table with horizontal & vertical header *****************/
@@ -715,6 +720,154 @@ public class Table extends GridPane
 
     m_animation.stop();
     m_animation = null;
+  }
+
+  /****************************************** writeXML *******************************************/
+  public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
+  {
+    // write column widths
+    xsw.writeStartElement( XmlLabels.XML_COLUMNS );
+    xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( m_defaultColumnWidth ) );
+    int count = m_data.getColumnCount();
+    for ( int columnIndex = 0; columnIndex < count; columnIndex++ )
+    {
+      xsw.writeStartElement( XmlLabels.XML_COLUMN );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( columnIndex ) );
+
+      if ( m_columnWidths.containsKey( columnIndex ) )
+        xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( m_columnWidths.get( columnIndex ) ) );
+
+      xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getColumnPositionByIndex( columnIndex ) ) );
+      xsw.writeEndElement(); // XML_COLUMN
+    }
+    xsw.writeEndElement(); // XML_COLUMNS
+
+    // write row heights
+    xsw.writeStartElement( XmlLabels.XML_ROWS );
+    xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_defaultRowHeight ) );
+    count = m_data.getRowCount();
+    for ( int rowIndex = 0; rowIndex < count; rowIndex++ )
+    {
+      xsw.writeStartElement( XmlLabels.XML_ROW );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( rowIndex ) );
+
+      if ( m_rowHeights.containsKey( rowIndex ) )
+        xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
+
+      /*
+      if ( m_type == TableType.TASK )
+        if ( collapsedTasks.contains( JPlanner.plan.task( row ) ) )
+          xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
+      */
+
+      xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getRowPositionByIndex( rowIndex ) ) );
+      xsw.writeEndElement(); // XML_ROW
+    }
+    xsw.writeEndElement(); // XML_ROWS
+  }
+
+  /***************************************** loadColumns *****************************************/
+  public void loadColumns( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // read XML columns data
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      // if reached end of columns data, return
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_COLUMNS ) )
+        return;
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_COLUMN:
+
+            // get attributes from column element to set column width
+            int id = -1;
+            int width = m_defaultColumnWidth;
+            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+              switch ( xsr.getAttributeLocalName( i ) )
+              {
+                case XmlLabels.XML_ID:
+                  id = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                case XmlLabels.XML_WIDTH:
+                  width = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                default:
+                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+                  break;
+              }
+            if ( id >= 0 && id < m_data.getColumnCount() && width != m_defaultColumnWidth )
+              setWidthByColumnIndex( id, width );
+            break;
+
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
+  }
+
+  /****************************************** loadRows *******************************************/
+  public void loadRows( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // read XML rows data
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      // if reached end of rows data, return
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_ROWS ) )
+        return;
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_ROW:
+
+            // get attributes from row element to set row height and hidden
+            int id = -1;
+            int height = m_defaultRowHeight;
+            boolean hidden = false;
+            boolean collapsed = false;
+
+            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+              switch ( xsr.getAttributeLocalName( i ) )
+              {
+                case XmlLabels.XML_ID:
+                  id = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                case XmlLabels.XML_HEIGHT:
+                  height = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                case XmlLabels.XML_HIDDEN:
+                  hidden = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+                  break;
+                case XmlLabels.XML_COLLAPSED:
+                  collapsed = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+                  break;
+                default:
+                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+                  break;
+              }
+
+            if ( id >= 0 && id < m_data.getRowCount() && height != m_defaultRowHeight )
+            {
+              setHeightByRowIndex( id, height );
+              if ( hidden )
+                hideRow( id );
+              //if ( collapsed && collapsedTasks != null )
+              //  collapsedTasks.add( JPlanner.plan.task( id ) );
+            }
+            break;
+
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
   }
 
 }
