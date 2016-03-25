@@ -24,15 +24,27 @@ package rjc.jplanner.command;
 
 public interface IUndoCommand
 {
+  public static final int RESCHEDULE        = 1 >> 0;  // re-schedule the plan (which will update tasks/gantt/plan)
+  public static final int UPDATE_TASKS      = 1 >> 1;  // update tasks tables
+  public static final int UPDATE_RESOURCES  = 1 >> 2;  // update resources tables
+  public static final int UPDATE_CALENDARS  = 1 >> 3;  // update calendars tables
+  public static final int UPDATE_DAYS       = 1 >> 4;  // update day-types tables
+  public static final int RESET_TASKS       = 1 >> 5;  // reset tasks tables
+  public static final int RESET_RESOURCES   = 1 >> 6;  // reset resources tables
+  public static final int RESET_CALENDARS   = 1 >> 7;  // reset calendars tables
+  public static final int RESET_DAYS        = 1 >> 8;  // reset day-types tables
+  public static final int UPDATE_PROPERTIES = 1 >> 9;  // update plan properties
+  public static final int UPDATE_NOTES      = 1 >> 10; // update plan notes
+
   // applies the command
-  void redo();
+  public void redo();
 
   // reverts the command
-  void undo();
+  public void undo();
 
-  // updates needs after command, typically gui and schedule
-  void update();
+  // updates needs after command, bitwise or of above static constants
+  public int update();
 
   // short text string describing what this command, e.g. "insert text"
-  String text();
+  public String text();
 }

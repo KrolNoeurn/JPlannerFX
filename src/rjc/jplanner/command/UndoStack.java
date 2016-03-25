@@ -20,6 +20,8 @@ package rjc.jplanner.command;
 
 import java.util.ArrayList;
 
+import rjc.jplanner.JPlanner;
+
 /*************************************************************************************************/
 /********************************** Stack of UndoCommand objects *********************************/
 /*************************************************************************************************/
@@ -56,6 +58,41 @@ public class UndoStack
     return m_index == m_cleanIndex;
   }
 
+  /******************************************** update *********************************************/
+  public void update( int updates )
+  {
+    // perform requested gui updates
+    if ( JPlanner.gui != null )
+    {
+      if ( ( updates & IUndoCommand.UPDATE_TASKS ) > 0 )
+        JPlanner.gui.redrawTaskTables();
+      if ( ( updates & IUndoCommand.UPDATE_RESOURCES ) > 0 )
+        JPlanner.gui.redrawResourceTables();
+      if ( ( updates & IUndoCommand.UPDATE_CALENDARS ) > 0 )
+        JPlanner.gui.redrawCalendarTables();
+      if ( ( updates & IUndoCommand.UPDATE_DAYS ) > 0 )
+        JPlanner.gui.redrawDayTypeTables();
+
+      if ( ( updates & IUndoCommand.RESET_TASKS ) > 0 )
+        JPlanner.gui.resetTaskTables();
+      if ( ( updates & IUndoCommand.RESET_RESOURCES ) > 0 )
+        JPlanner.gui.resetResourceTables();
+      if ( ( updates & IUndoCommand.RESET_CALENDARS ) > 0 )
+        JPlanner.gui.resetCalendarTables();
+      if ( ( updates & IUndoCommand.RESET_DAYS ) > 0 )
+        JPlanner.gui.resetDayTypeTables();
+
+      if ( ( updates & IUndoCommand.UPDATE_PROPERTIES ) > 0 )
+        JPlanner.gui.properties().updateFromPlan();
+      if ( ( updates & IUndoCommand.UPDATE_NOTES ) > 0 )
+        JPlanner.gui.notes().updateFromPlan();
+    }
+
+    // performed re-schedule if requested
+    if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
+      JPlanner.gui.schedule();
+  }
+
   /******************************************** push *********************************************/
   public void push( IUndoCommand command )
   {
@@ -66,7 +103,7 @@ public class UndoStack
     // add new command to stack, do it, and increment stack index
     m_stack.add( command );
     command.redo();
-    command.update();
+    update( command.update() );
     m_index++;
     updateUndoRedoMenuItems();
 
@@ -81,7 +118,7 @@ public class UndoStack
     // decrement index and revert command
     m_index--;
     m_stack.get( m_index ).undo();
-    m_stack.get( m_index ).update();
+    update( m_stack.get( m_index ).update() );
     updateUndoRedoMenuItems();
   }
 
@@ -90,7 +127,7 @@ public class UndoStack
   {
     // action command and increment index
     m_stack.get( m_index ).redo();
-    m_stack.get( m_index ).update();
+    update( m_stack.get( m_index ).update() );
     m_index++;
     updateUndoRedoMenuItems();
   }
@@ -186,10 +223,23 @@ public class UndoStack
   public void setIndex( int index )
   {
     // execute redo's or undo's as necessary to get to target index
+    int updates = 0;
     while ( index < m_index && m_index > 0 )
-      undo();
+    {
+      m_index--;
+      m_stack.get( m_index ).undo();
+      updates |= m_stack.get( m_index ).update();
+    }
     while ( index > m_index && m_index < m_stack.size() )
-      redo();
+    {
+      m_stack.get( m_index ).redo();
+      updates |= m_stack.get( m_index ).update();
+      m_index++;
+    }
+
+    // perform updates collected from the redo's and undo's
+    update( updates );
+    updateUndoRedoMenuItems();
   }
 
 }

@@ -55,10 +55,10 @@ public class CommandPlanSetNotes implements IUndoCommand
 
   /****************************************** update *********************************************/
   @Override
-  public void update()
+  public int update()
   {
     // update plan notes on gui
-    //JPlanner.gui.notes().updateFromPlan();
+    return UPDATE_NOTES;
   }
 
   /******************************************* text **********************************************/

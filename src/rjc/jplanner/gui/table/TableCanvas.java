@@ -749,8 +749,8 @@ public class TableCanvas extends Canvas
       }
     }
 
+    // no scrolling needed so make sure any previous animation is stopped
     m_table.animationStop();
-    m_reorderMarker.setVisible( true );
   }
 
   /****************************************** mouseMoved *****************************************/

@@ -105,13 +105,10 @@ public class CommandDaySetNumPeriods implements IUndoCommand
 
   /****************************************** update *********************************************/
   @Override
-  public void update()
+  public int update()
   {
-    // reset day-types table because number of columns might have changed
-    //JPlanner.gui.resetDayTypeTables();
-
-    // re-schedule plan (which in turn will also update gui)
-    //JPlanner.gui.schedule();
+    // reset day-types tables because number of row probably changed, and trigger re-schedule
+    return RESET_DAYS | RESCHEDULE;
   }
 
   /******************************************* text **********************************************/

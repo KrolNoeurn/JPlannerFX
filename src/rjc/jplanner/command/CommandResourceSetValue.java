@@ -60,18 +60,20 @@ public class CommandResourceSetValue implements IUndoCommand
 
   /****************************************** update *********************************************/
   @Override
-  public void update()
+  public int update()
   {
     // update resources tables
-    //JPlanner.gui.redrawResourceTables();
+    int updates = UPDATE_RESOURCES;
 
     // if initials and old value was null, update properties so it shows new count of resources
-    //if ( m_section == Resource.SECTION_INITIALS && m_oldValue == null )
-    //JPlanner.gui.properties().updateFromPlan();
+    if ( m_section == Resource.SECTION_INITIALS && m_oldValue == null )
+      updates |= UPDATE_PROPERTIES;
 
-    // update schedule
-    //if ( m_section != Resource.SECTION_COMMENT )
-    //JPlanner.gui.schedule();
+    // if updating field other than comment, trigger re-schedule
+    if ( m_section != Resource.SECTION_COMMENT )
+      updates |= RESCHEDULE;
+
+    return updates;
   }
 
   /******************************************* text **********************************************/

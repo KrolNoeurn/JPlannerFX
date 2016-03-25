@@ -16,7 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui;
 
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Region;

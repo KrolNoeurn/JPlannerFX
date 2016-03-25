@@ -60,24 +60,20 @@ public class CommandTaskSetValue implements IUndoCommand
 
   /****************************************** update *********************************************/
   @Override
-  public void update()
+  public int update()
   {
-    if ( JPlanner.gui == null )
-      return;
-
     // update tasks tables
-    JPlanner.gui.redrawTaskTables();
+    int updates = UPDATE_TASKS;
 
-    // if title and old value was null, update properties so it shows new count of tasks
+    // if initials and old value was null, update properties so it shows new count of tasks
     if ( m_section == Task.SECTION_TITLE && m_oldValue == null )
-    {
-      //JPlanner.gui.properties().updateFromPlan();
-      //JPlanner.gui.schedule();
-    }
+      updates |= UPDATE_PROPERTIES;
 
-    // update schedule for other changes
-    //if ( m_section != Task.SECTION_TITLE && m_section != Task.SECTION_COMMENT && m_section != Task.SECTION_COST )
-    //JPlanner.gui.schedule();
+    // if updating field other than title/comment/cost, trigger re-schedule
+    if ( m_section != Task.SECTION_TITLE && m_section != Task.SECTION_COMMENT && m_section != Task.SECTION_COST )
+      updates |= RESCHEDULE;
+
+    return updates;
   }
 
   /******************************************* text **********************************************/

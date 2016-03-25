@@ -98,7 +98,7 @@ public class MainWindow
     // on close request also close (via hide) other windows
     stage.setOnCloseRequest( event ->
     {
-      for ( MainTabWidget tabs : m_tabWidgets )
+      for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
         if ( tabs != m_mainTabWidget )
           tabs.getScene().getWindow().hide();
 
@@ -411,7 +411,7 @@ public class MainWindow
       if ( xsr.isStartElement() )
         switch ( xsr.getLocalName() )
         {
-          case XmlLabels.XML_DISPLAY_DATA:
+          case XmlLabels.XML_WINDOW:
             if ( tabs == null )
               tabs = m_mainTabWidget;
             else
@@ -423,7 +423,7 @@ public class MainWindow
             for ( int i = 0; i < xsr.getAttributeCount(); i++ )
               switch ( xsr.getAttributeLocalName( i ) )
               {
-                case XmlLabels.XML_WINDOW:
+                case XmlLabels.XML_ID:
                   break;
                 case XmlLabels.XML_X:
                   tabs.getScene().getWindow().setX( Integer.parseInt( xsr.getAttributeValue( i ) ) );
@@ -446,25 +446,21 @@ public class MainWindow
                   break;
               }
 
-            // set selected tab and check window bounding rectangle fits display(s)
+            // set selected tab
             tabs.select( tab );
-            // TODO
-            //if ( tabs == m_mainTabWidget )
-            //  updateMenus();
-            //tabs.getShell().setBounds( checkShellBounds( rect ) );
             break;
 
           case XmlLabels.XML_TASKS_GANTT_TAB:
-            //tabs.loadXmlTasksGantt( xsr );
+            tabs.loadXmlTasksGantt( xsr );
             break;
           case XmlLabels.XML_RESOURCES_TAB:
-            //tabs.loadXmlResources( xsr );
+            tabs.loadXmlResources( xsr );
             break;
           case XmlLabels.XML_CALENDARS_TAB:
-            //tabs.loadXmlCalendars( xsr );
+            tabs.loadXmlCalendars( xsr );
             break;
           case XmlLabels.XML_DAYS_TAB:
-            //tabs.loadXmlDayTypes( xsr );
+            tabs.loadXmlDayTypes( xsr );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
@@ -561,20 +557,20 @@ public class MainWindow
   }
 
   /****************************************** schedule *******************************************/
-  private void schedule()
+  public void schedule()
   {
     // TODO Auto-generated method stub
-
+    JPlanner.trace( "NOT YET IMPLEMENTED !!!" );
   }
 
   /***************************************** properties ******************************************/
-  private PlanProperties properties()
+  public PlanProperties properties()
   {
     return m_mainTabWidget.getPlanTab().getPlanProperties();
   }
 
   /******************************************** notes ********************************************/
-  private PlanNotes notes()
+  public PlanNotes notes()
   {
     return m_mainTabWidget.getPlanTab().getPlanNotes();
   }
@@ -589,13 +585,16 @@ public class MainWindow
   /*************************************** saveDisplayData ***************************************/
   private void saveDisplayData( XMLStreamWriter xsw ) throws XMLStreamException
   {
-    // save display data to stream for each window
+    // save display data to XML stream
+    xsw.writeStartElement( XmlLabels.XML_DISPLAY_DATA );
+
+    // save data for each window
     for ( MainTabWidget tabs : m_tabWidgets )
     {
       Window window = tabs.getScene().getWindow();
 
-      xsw.writeStartElement( XmlLabels.XML_DISPLAY_DATA );
-      xsw.writeAttribute( XmlLabels.XML_WINDOW, Integer.toString( m_tabWidgets.indexOf( tabs ) ) );
+      xsw.writeStartElement( XmlLabels.XML_WINDOW );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( m_tabWidgets.indexOf( tabs ) ) );
       xsw.writeAttribute( XmlLabels.XML_X, Integer.toString( (int) window.getX() ) );
       xsw.writeAttribute( XmlLabels.XML_Y, Integer.toString( (int) window.getY() ) );
       xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( (int) window.getWidth() ) );
@@ -604,8 +603,10 @@ public class MainWindow
 
       tabs.writeXML( xsw );
 
-      xsw.writeEndElement(); // XML_DISPLAY_DATA
+      xsw.writeEndElement(); // XML_WINDOW
     }
+
+    xsw.writeEndElement(); // XML_DISPLAY_DATA
   }
 
   /***************************************** newWindow *******************************************/
@@ -634,10 +635,7 @@ public class MainWindow
 
     // show undo-stack window
     if ( m_undoWindow == null )
-    {
       m_undoWindow = new UndoStackWindow();
-      m_undoWindow.initOwner( m_stage );
-    }
 
     if ( show )
     {
@@ -645,9 +643,7 @@ public class MainWindow
       m_undoWindow.toFront();
     }
     else
-    {
       m_undoWindow.hide();
-    }
   }
 
 }

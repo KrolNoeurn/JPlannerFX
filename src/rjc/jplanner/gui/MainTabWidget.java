@@ -19,9 +19,11 @@
 package rjc.jplanner.gui;
 
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import javafx.scene.control.TabPane;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.gui.calendars.CalendarsTab;
 import rjc.jplanner.gui.days.DaysTab;
@@ -129,6 +131,71 @@ public class MainTabWidget extends TabPane
     }
 
     return true;
+  }
+
+  /************************************** loadXmlTasksGantt **************************************/
+  public void loadXmlTasksGantt( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // adopt tasks-gantt tab data from XML stream, starting with the attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        case XmlLabels.XML_SPLITTER:
+          m_tabTasks.setSplitPosition( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
+    // read tasks-gantt tab XML elements
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      // if reached end of tab data, break
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_TASKS_GANTT_TAB ) )
+        break;
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_GANTT:
+            m_tabTasks.getGantt().loadXML( xsr );
+            break;
+          case XmlLabels.XML_COLUMNS:
+            m_tabTasks.getTable().loadColumns( xsr );
+            break;
+          case XmlLabels.XML_ROWS:
+            m_tabTasks.getTable().loadRows( xsr );
+            break;
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
+
+  }
+
+  /************************************** loadXmlResources ***************************************/
+  public void loadXmlResources( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // TODO Auto-generated method stub
+
+  }
+
+  /************************************** loadXmlCalendars ***************************************/
+  public void loadXmlCalendars( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // TODO Auto-generated method stub
+
+  }
+
+  /*************************************** loadXmlDayTypes ***************************************/
+  public void loadXmlDayTypes( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // TODO Auto-generated method stub
+
   }
 
 }

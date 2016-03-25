@@ -658,9 +658,9 @@ public class Table extends GridPane
   /************************************** animationScrollUp **************************************/
   public void animationScrollUp()
   {
-    // create scroll up animation, stopping any old animation first
+    // create scroll up animation, unless animation already in place
     if ( m_animation != null )
-      m_animation.stop();
+      return;
 
     double value = m_vScrollBar.getValue();
     KeyValue kv = new KeyValue( m_vScrollBar.valueProperty(), 0 );
@@ -672,9 +672,9 @@ public class Table extends GridPane
   /************************************* animationScrollDown *************************************/
   public void animationScrollDown()
   {
-    // create scroll down animation, stopping any old animation first
+    // create scroll down animation, unless animation already in place
     if ( m_animation != null )
-      m_animation.stop();
+      return;
 
     double value = m_vScrollBar.getValue();
     double max = m_vScrollBar.getMax();
@@ -687,9 +687,9 @@ public class Table extends GridPane
   /************************************ animationScrollRight *************************************/
   public void animationScrollRight()
   {
-    // create scroll right animation, stopping any old animation first
+    // create scroll right animation, unless animation already in place
     if ( m_animation != null )
-      m_animation.stop();
+      return;
 
     double value = m_hScrollBar.getValue();
     double max = m_hScrollBar.getMax();
@@ -702,9 +702,9 @@ public class Table extends GridPane
   /************************************* animationScrollLeft *************************************/
   public void animationScrollLeft()
   {
-    // create scroll left animation, stopping any old animation first
+    // create scroll left animation, unless animation already in place
     if ( m_animation != null )
-      m_animation.stop();
+      return;
 
     double value = m_hScrollBar.getValue();
     KeyValue kv = new KeyValue( m_hScrollBar.valueProperty(), 0 );

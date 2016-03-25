@@ -19,7 +19,7 @@
 package rjc.jplanner.gui.plan;
 
 import javafx.scene.control.Tab;
-import rjc.jplanner.gui.tasks.XSplitPane;
+import rjc.jplanner.gui.XSplitPane;
 
 /*************************************************************************************************/
 /************************* Tab showing table of available plan day-types *************************/

@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.tasks;
 
 import javafx.scene.control.Tab;
+import rjc.jplanner.gui.XSplitPane;
 import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
@@ -78,6 +79,12 @@ public class TasksTab extends Tab
   public int getSplitPosition()
   {
     return m_split.preferredLeftNodeWidth;
+  }
+
+  /************************************** setSplitPosition ***************************************/
+  public void setSplitPosition( int pos )
+  {
+    m_split.preferredLeftNodeWidth = pos;
   }
 
 }

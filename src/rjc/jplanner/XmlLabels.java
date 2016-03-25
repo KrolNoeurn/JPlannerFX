@@ -28,7 +28,7 @@ public class XmlLabels
   public static final String ENCODING            = "UTF-8";
 
   // 'JPlanner' labels
-  public static final String FORMAT              = "2016-02";
+  public static final String FORMAT              = "2016-03";
   public static final String XML_JPLANNER        = "JPlanner";
   public static final String XML_FORMAT          = "format";
   public static final String XML_SAVEUSER        = "saved-by";
