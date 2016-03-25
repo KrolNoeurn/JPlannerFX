@@ -18,7 +18,6 @@
 
 package rjc.jplanner.gui.tasks;
 
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.Table;
@@ -30,8 +29,9 @@ import rjc.jplanner.model.Task;
 
 public class TasksTab extends Tab
 {
-  private Table m_table;
-  private Gantt m_gantt;
+  private Table      m_table;
+  private Gantt      m_gantt;
+  private XSplitPane m_split;
 
   /**************************************** constructor ******************************************/
   public TasksTab( String text )
@@ -50,13 +50,13 @@ public class TasksTab extends Tab
 
     // alongside the gantt
     m_gantt = new Gantt();
-    SplitPane split = new SplitPane( m_table, m_gantt );
+    m_split = new XSplitPane( m_table, m_gantt );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
     {
       if ( newValue )
-        setContent( split );
+        setContent( m_split );
       else
         setContent( null );
     } );
@@ -72,6 +72,12 @@ public class TasksTab extends Tab
   public Gantt getGantt()
   {
     return m_gantt;
+  }
+
+  /************************************** getSplitPosition ***************************************/
+  public int getSplitPosition()
+  {
+    return m_split.preferredLeftNodeWidth;
   }
 
 }

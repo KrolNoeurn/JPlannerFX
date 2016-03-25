@@ -98,6 +98,8 @@ public class Table extends GridPane
       m_rowIndexes.add( row );
 
     // calculate body width & height
+    setMinWidth( 0.0 );
+    setMinHeight( 0.0 );
     calculateBodyWidth();
     calculateBodyHeight();
 

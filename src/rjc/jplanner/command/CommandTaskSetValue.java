@@ -62,8 +62,11 @@ public class CommandTaskSetValue implements IUndoCommand
   @Override
   public void update()
   {
+    if ( JPlanner.gui == null )
+      return;
+
     // update tasks tables
-    //JPlanner.gui.redrawTaskTables();
+    JPlanner.gui.redrawTaskTables();
 
     // if title and old value was null, update properties so it shows new count of tasks
     if ( m_section == Task.SECTION_TITLE && m_oldValue == null )

@@ -16,49 +16,48 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.plan;
+package rjc.jplanner.gui.tasks;
 
-import javafx.scene.control.Tab;
-import rjc.jplanner.gui.tasks.XSplitPane;
+import javafx.scene.control.SplitPane;
+import javafx.scene.layout.Region;
 
 /*************************************************************************************************/
-/************************* Tab showing table of available plan day-types *************************/
+/***************** Extended version of SplitPane with preferred left node width ******************/
 /*************************************************************************************************/
 
-public class PlanTab extends Tab
+public class XSplitPane extends SplitPane
 {
-  PlanNotes      m_notes      = new PlanNotes();
-  PlanProperties m_properties = new PlanProperties();
+  public int               preferredLeftNodeWidth = 300;
+  private boolean          m_ignore               = false;
+
+  private static final int DIVIDER_WIDTH          = 6;
 
   /**************************************** constructor ******************************************/
-  public PlanTab( String text )
+  public XSplitPane( Region... regions )
   {
-    // construct tab showing plan properties & notes
-    super( text );
-    setClosable( false );
+    super( regions );
+    setMinWidth( 0.0 );
 
-    XSplitPane split = new XSplitPane( m_properties, m_notes );
-
-    // only have tab contents set if tab selected
-    selectedProperty().addListener( ( observable, oldValue, newValue ) ->
+    // add listener to ensure divider is at preferred position when pane resized
+    widthProperty().addListener( ( observable, oldValue, newValue ) ->
     {
-      if ( newValue )
-        setContent( split );
-      else
-        setContent( null );
+      m_ignore = true;
+      setDividerPosition( 0, preferredLeftNodeWidth / newValue.doubleValue() );
     } );
-  }
 
-  /**************************************** getPlanNotes *****************************************/
-  public PlanNotes getPlanNotes()
-  {
-    return m_notes;
-  }
+    // add listener to ensure preferred position is updated when divider manually moved
+    getDividers().get( 0 ).positionProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( !m_ignore )
+      {
+        // don't confuse divider movement due to pane resize
+        if ( regions[1].getWidth() == 0.0 || getWidth() - regions[0].getWidth() < DIVIDER_WIDTH )
+          return;
 
-  /************************************** getPlanProperties **************************************/
-  public PlanProperties getPlanProperties()
-  {
-    return m_properties;
+        preferredLeftNodeWidth = (int) ( getWidth() * newValue.doubleValue() );
+      }
+      m_ignore = false;
+    } );
   }
 
 }

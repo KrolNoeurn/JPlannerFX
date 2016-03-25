@@ -350,6 +350,8 @@ public class Plan
       xsw.writeAttribute( XmlLabels.XML_DT_FORMAT, m_datetimeFormat );
       xsw.writeAttribute( XmlLabels.XML_D_FORMAT, m_dateFormat );
 
+      xsw.writeAttribute( XmlLabels.XML_NOTES, m_notes );
+
       // because XMLStreamWriter doesn't encode new-lines correctly 
       // write notes attribute directly instead of xsw.writeAttribute( XML_NOTES, m_notes );
       /* NEEDS FIXING TODO

@@ -48,6 +48,7 @@ public class PlanProperties extends ScrollPane
   {
     // setup scrolling properties panel
     super();
+    setMinWidth( 0.0 );
 
     // grid for properties layout
     GridPane grid = new GridPane();

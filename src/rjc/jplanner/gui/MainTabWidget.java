@@ -101,8 +101,7 @@ public class MainTabWidget extends TabPane
     {
       // write tasks-gantt display data
       xsw.writeStartElement( XmlLabels.XML_TASKS_GANTT_TAB );
-      //xsw.writeAttribute( XmlLabels.XML_SPLITTER,
-      //    Integer.toString( m_tabTasks.getSplitter().preferredLeftChildWidth ) );
+      xsw.writeAttribute( XmlLabels.XML_SPLITTER, Integer.toString( m_tabTasks.getSplitPosition() ) );
       m_tabTasks.getGantt().writeXML( xsw );
       m_tabTasks.getTable().writeXML( xsw );
       xsw.writeEndElement(); // XML_TASKS_GANTT_TAB

@@ -182,4 +182,14 @@ public class UndoStack
     return m_index;
   }
 
+  /****************************************** setIndex *******************************************/
+  public void setIndex( int index )
+  {
+    // execute redo's or undo's as necessary to get to target index
+    while ( index < m_index && m_index > 0 )
+      undo();
+    while ( index > m_index && m_index < m_stack.size() )
+      redo();
+  }
+
 }
