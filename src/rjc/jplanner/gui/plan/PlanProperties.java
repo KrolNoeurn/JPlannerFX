@@ -24,6 +24,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandPlanSetProperties;
+import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
 /************************** Widget display & editing of plan properties **************************/
@@ -42,6 +46,7 @@ public class PlanProperties extends ScrollPane
   private TextField m_fileLocation    = new TextField();
   private TextField m_savedBy         = new TextField();
   private TextField m_savedWhen       = new TextField();
+  private NumberOf  m_numberOf        = new NumberOf();
 
   /**************************************** constructor ******************************************/
   public PlanProperties()
@@ -124,12 +129,52 @@ public class PlanProperties extends ScrollPane
     grid.add( new Label( "Saved when" ), 0, row );
     grid.add( m_savedWhen, 1, row );
     GridPane.setHgrow( m_savedWhen, Priority.ALWAYS );
+
+    // number of
+    row++;
+    grid.add( m_numberOf, 0, row, 2, 1 );
+    GridPane.setHgrow( m_numberOf, Priority.ALWAYS );
+    GridPane.setVgrow( m_numberOf, Priority.ALWAYS );
   }
 
   /**************************************** updateFromPlan ***************************************/
   public void updateFromPlan()
   {
-    // TODO Auto-generated method stub
+    // update the gui property widgets with values from plan
+    m_title.setText( JPlanner.plan.title() );
+    m_defaultStart.setText( JPlanner.plan.start().toString() );
+    m_actualStart.setText( JPlanner.plan.earliest().toString() );
+    m_end.setText( JPlanner.plan.end().toString() );
+    m_defaultCalendar.setText( JPlanner.plan.calendar().name() );
+    m_DTformat.setText( JPlanner.plan.datetimeFormat() );
+    m_Dformat.setText( JPlanner.plan.dateFormat() );
+    m_fileName.setText( JPlanner.plan.filename() );
+    m_fileLocation.setText( JPlanner.plan.fileLocation() );
+    m_savedBy.setText( JPlanner.plan.savedBy() );
+    m_savedWhen.setText( JPlanner.plan.savedWhen().toString() );
+
+    // update the gui "number of" pane
+    m_numberOf.redraw();
+  }
+
+  /************************************ updatePlanProperties *************************************/
+  public void updatePlan()
+  {
+    // get values from gui editors
+    String title = m_title.getText();
+    DateTime start = JPlanner.plan.start(); // TODO
+    Calendar cal = JPlanner.plan.calendar(); // TODO
+    String DTformat = m_DTformat.getText();
+    String Dformat = m_Dformat.getText();
+
+    // if properties not changed, return doing nothing
+    if ( JPlanner.plan.title().equals( title ) && JPlanner.plan.start().equals( start )
+        && JPlanner.plan.calendar() == cal && JPlanner.plan.datetimeFormat().equals( DTformat )
+        && JPlanner.plan.dateFormat().equals( Dformat ) )
+      return;
+
+    // update plan via undo-stack
+    JPlanner.plan.undostack().push( new CommandPlanSetProperties( title, start, cal, DTformat, Dformat ) );
   }
 
 }

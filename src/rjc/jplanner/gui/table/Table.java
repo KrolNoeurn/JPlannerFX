@@ -64,6 +64,9 @@ public class Table extends GridPane
   private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
   private HashMap<Integer, Integer> m_rowHeights         = new HashMap<Integer, Integer>();
 
+  // set of collapsed rows (only used for collapsed tasks)
+  private HashSet<Integer>          m_rowCollapsed       = new HashSet<Integer>();
+
   // array with mapping from position to index
   private ArrayList<Integer>        m_columnIndexes      = new ArrayList<Integer>();
   private ArrayList<Integer>        m_rowIndexes         = new ArrayList<Integer>();
@@ -207,8 +210,12 @@ public class Table extends GridPane
     // calculate height of table body rows
     m_bodyHeight = 0;
     int count = m_data.getRowCount();
-    for ( int row = 0; row < count; row++ )
-      m_bodyHeight += getHeightByRowPosition( row );
+    for ( int index = 0; index < count; index++ )
+    {
+      int height = m_rowHeights.getOrDefault( index, m_defaultRowHeight );
+      if ( height > 0 )
+        m_bodyHeight += height;
+    }
   }
 
   /************************************ calculateBodyWidth ***************************************/
@@ -217,8 +224,12 @@ public class Table extends GridPane
     // calculate width of table body columns
     m_bodyWidth = 0;
     int count = m_data.getColumnCount();
-    for ( int column = 0; column < count; column++ )
-      m_bodyWidth += getWidthByColumnPosition( column );
+    for ( int index = 0; index < count; index++ )
+    {
+      int width = m_columnWidths.getOrDefault( index, m_defaultColumnWidth );
+      if ( width > 0 )
+        m_bodyWidth += width;
+    }
   }
 
   /************************************** getBodyHeight ******************************************/
@@ -295,14 +306,9 @@ public class Table extends GridPane
     if ( columnPos < 0 || columnPos >= m_data.getColumnCount() )
       return Integer.MAX_VALUE;
 
-    int width = m_defaultColumnWidth;
-    int columnIndex = m_columnIndexes.get( columnPos );
-    if ( m_columnWidths.containsKey( columnIndex ) )
-    {
-      width = m_columnWidths.get( columnIndex );
-      if ( width < 0 )
-        return 0; // -ve means column hidden, so return zero
-    }
+    int width = m_columnWidths.getOrDefault( m_columnIndexes.get( columnPos ), m_defaultColumnWidth );
+    if ( width < 0 )
+      return 0; // -ve means column hidden, so return zero
 
     return width;
   }
@@ -314,13 +320,9 @@ public class Table extends GridPane
     if ( columnIndex < 0 || columnIndex >= m_data.getColumnCount() )
       return Integer.MAX_VALUE;
 
-    int width = m_defaultColumnWidth;
-    if ( m_columnWidths.containsKey( columnIndex ) )
-    {
-      width = m_columnWidths.get( columnIndex );
-      if ( width < 0 )
-        return 0; // -ve means column hidden, so return zero
-    }
+    int width = m_columnWidths.getOrDefault( columnIndex, m_defaultColumnWidth );
+    if ( width < 0 )
+      return 0; // -ve means column hidden, so return zero
 
     return width;
   }
@@ -381,14 +383,9 @@ public class Table extends GridPane
     if ( rowPos < 0 || rowPos >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
-    int height = m_defaultRowHeight;
-    int rowIndex = m_rowIndexes.get( rowPos );
-    if ( m_rowHeights.containsKey( rowIndex ) )
-    {
-      height = m_rowHeights.get( rowIndex );
-      if ( height < 0 )
-        return 0; // -ve means row hidden, so return zero
-    }
+    int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+    if ( height < 0 )
+      return 0; // -ve means row hidden, so return zero
 
     return height;
   }
@@ -400,13 +397,9 @@ public class Table extends GridPane
     if ( rowIndex < 0 || rowIndex >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
-    int height = m_defaultRowHeight;
-    if ( m_rowHeights.containsKey( rowIndex ) )
-    {
-      height = m_rowHeights.get( rowIndex );
-      if ( height < 0 )
-        return 0; // -ve means row hidden, so return zero
-    }
+    int height = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
+    if ( height < 0 )
+      return 0; // -ve means row hidden, so return zero
 
     return height;
   }
@@ -756,11 +749,8 @@ public class Table extends GridPane
       if ( m_rowHeights.containsKey( rowIndex ) )
         xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
 
-      /*
-      if ( m_type == TableType.TASK )
-        if ( collapsedTasks.contains( JPlanner.plan.task( row ) ) )
-          xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
-      */
+      if ( m_rowCollapsed.contains( rowIndex ) )
+        xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
 
       xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getRowPositionByIndex( rowIndex ) ) );
       xsw.writeEndElement(); // XML_ROW
@@ -776,9 +766,9 @@ public class Table extends GridPane
     {
       xsr.next();
 
-      // if reached end of columns data, return
+      // if reached end of columns data, exit loop
       if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_COLUMNS ) )
-        return;
+        break;
 
       if ( xsr.isStartElement() )
         switch ( xsr.getLocalName() )
@@ -787,7 +777,6 @@ public class Table extends GridPane
 
             // get attributes from column element to set column width
             int id = -1;
-            int width = m_defaultColumnWidth;
             for ( int i = 0; i < xsr.getAttributeCount(); i++ )
               switch ( xsr.getAttributeLocalName( i ) )
               {
@@ -795,14 +784,15 @@ public class Table extends GridPane
                   id = Integer.parseInt( xsr.getAttributeValue( i ) );
                   break;
                 case XmlLabels.XML_WIDTH:
-                  width = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  m_columnWidths.put( id, Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_POSITION:
+                  m_columnIndexes.set( Integer.parseInt( xsr.getAttributeValue( i ) ), id );
                   break;
                 default:
                   JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
                   break;
               }
-            if ( id >= 0 && id < m_data.getColumnCount() && width != m_defaultColumnWidth )
-              setWidthByColumnIndex( id, width );
             break;
 
           default:
@@ -810,6 +800,9 @@ public class Table extends GridPane
             break;
         }
     }
+
+    // refresh calculated body width
+    calculateBodyWidth();
   }
 
   /****************************************** loadRows *******************************************/
@@ -820,9 +813,9 @@ public class Table extends GridPane
     {
       xsr.next();
 
-      // if reached end of rows data, return
+      // if reached end of rows data, exit loop
       if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_ROWS ) )
-        return;
+        break;
 
       if ( xsr.isStartElement() )
         switch ( xsr.getLocalName() )
@@ -831,10 +824,6 @@ public class Table extends GridPane
 
             // get attributes from row element to set row height and hidden
             int id = -1;
-            int height = m_defaultRowHeight;
-            boolean hidden = false;
-            boolean collapsed = false;
-
             for ( int i = 0; i < xsr.getAttributeCount(); i++ )
               switch ( xsr.getAttributeLocalName( i ) )
               {
@@ -842,27 +831,19 @@ public class Table extends GridPane
                   id = Integer.parseInt( xsr.getAttributeValue( i ) );
                   break;
                 case XmlLabels.XML_HEIGHT:
-                  height = Integer.parseInt( xsr.getAttributeValue( i ) );
-                  break;
-                case XmlLabels.XML_HIDDEN:
-                  hidden = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+                  m_rowHeights.put( id, Integer.parseInt( xsr.getAttributeValue( i ) ) );
                   break;
                 case XmlLabels.XML_COLLAPSED:
-                  collapsed = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+                  if ( Boolean.parseBoolean( xsr.getAttributeValue( i ) ) )
+                    m_rowCollapsed.add( id );
+                  break;
+                case XmlLabels.XML_POSITION:
+                  m_rowIndexes.set( Integer.parseInt( xsr.getAttributeValue( i ) ), id );
                   break;
                 default:
                   JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
                   break;
               }
-
-            if ( id >= 0 && id < m_data.getRowCount() && height != m_defaultRowHeight )
-            {
-              setHeightByRowIndex( id, height );
-              if ( hidden )
-                hideRow( id );
-              //if ( collapsed && collapsedTasks != null )
-              //  collapsedTasks.add( JPlanner.plan.task( id ) );
-            }
             break;
 
           default:
@@ -870,6 +851,9 @@ public class Table extends GridPane
             break;
         }
     }
+
+    // refresh calculated body height
+    calculateBodyHeight();
   }
 
 }

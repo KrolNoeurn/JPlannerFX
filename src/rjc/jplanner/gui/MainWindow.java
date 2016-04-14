@@ -450,6 +450,8 @@ public class MainWindow
             tabs.select( tab );
             break;
 
+          case XmlLabels.XML_DISPLAY_DATA:
+            break;
           case XmlLabels.XML_TASKS_GANTT_TAB:
             tabs.loadXmlTasksGantt( xsr );
             break;

@@ -98,6 +98,15 @@ public class Gantt extends Pane
         case XmlLabels.XML_MSPP:
           setMsPP( Long.parseLong( xsr.getAttributeValue( i ) ) );
           break;
+        case XmlLabels.XML_NONWORKING:
+          // TODO ..................
+          break;
+        case XmlLabels.XML_CURRENT:
+          // TODO ..................
+          break;
+        case XmlLabels.XML_STRETCH:
+          GanttPlot.ganttStretch = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+          break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
           break;

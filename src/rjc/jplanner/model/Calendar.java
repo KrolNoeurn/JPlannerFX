@@ -89,16 +89,16 @@ public class Calendar
           m_normal.add( working );
       }
 
-      m_exceptions.put( new Date( 2014, 12, 25 ), nonWorking );
-      m_exceptions.put( new Date( 2014, 12, 26 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 1, 1 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 4, 3 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 4, 6 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 5, 4 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 5, 25 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 8, 31 ), nonWorking );
       m_exceptions.put( new Date( 2015, 12, 25 ), nonWorking );
       m_exceptions.put( new Date( 2015, 12, 28 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 1, 1 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 3, 25 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 3, 28 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 5, 2 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 5, 30 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 8, 29 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 12, 26 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 12, 27 ), nonWorking );
     }
     else if ( type == DefaultCalendarTypes.FULLTIME )
     {
@@ -123,8 +123,8 @@ public class Calendar
       m_normal.add( nonWorking );
       m_normal.add( fullTime );
 
-      m_exceptions.put( new Date( 2015, 12, 25 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 12, 28 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 12, 26 ), nonWorking );
+      m_exceptions.put( new Date( 2016, 12, 27 ), nonWorking );
     }
     else
     {
