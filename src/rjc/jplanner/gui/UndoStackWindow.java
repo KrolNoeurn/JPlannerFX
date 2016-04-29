@@ -75,8 +75,8 @@ public class UndoStackWindow extends Stage
     m_rowDescent = (int) Math.floor( -bounds.getMinY() );
 
     // update scroll bar and canvas on scene size change
-    scene.heightProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarsAndCanvas() );
-    scene.widthProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarsAndCanvas() );
+    scene.heightProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
+    scene.widthProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
     m_canvas.heightProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
     m_canvas.widthProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
     m_scrollbar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
@@ -189,7 +189,7 @@ public class UndoStackWindow extends Stage
   }
 
   /********************************* updateScrollBarsAndCanvas ***********************************/
-  private void updateScrollBarsAndCanvas()
+  private void updateScrollBarAndCanvas()
   {
     // set scroll bar to correct visibility
     double fullHeight = m_rowHeight * ( size() + 1 );
