@@ -16,9 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.plan;
-
-import java.util.ArrayList;
+package rjc.jplanner.gui;
 
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -29,7 +27,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /******************* Abstract JavaFX control to allow user to pick from list *********************/
@@ -37,63 +34,94 @@ import rjc.jplanner.JPlanner;
 
 public abstract class AbstractCombo extends StackPane
 {
-  private TextField           m_display = new TextField();
-  private Canvas              m_button  = new Canvas();
-  protected ArrayList<String> m_items   = new ArrayList<String>();
-  protected int               m_index   = -1;
+  private TextField          m_displayText     = new TextField();
+  private Canvas             m_button          = new Canvas();
+  private DropDown           m_dropdown;
+  private int                m_selectedIndex   = -1;
 
-  private static Color        LIGHTGRAY = Color.rgb( 225, 225, 225 );
+  private static final Color BUTTON_BACKGROUND = Color.rgb( 225, 225, 225 ); // light gray
+  private static final Color BUTTON_ARROW      = Color.BLACK;
 
   /**************************************** constructor ******************************************/
   public AbstractCombo()
   {
     // construct combo box
     super();
-    m_display.setEditable( false );
-    getChildren().addAll( m_display, m_button );
+    m_displayText.setEditable( false );
+    getChildren().addAll( m_displayText, m_button );
     StackPane.setAlignment( m_button, Pos.CENTER_RIGHT );
 
-    // when display changes size re-draw button
-    m_display.heightProperty().addListener( ( observable, oldValue, newValue ) -> drawButton() );
-    m_display.widthProperty().addListener( ( observable, oldValue, newValue ) -> drawButton() );
+    // when combo box changes size re-draw button
+    heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButton() );
+    widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButton() );
 
-    // when display gains focus refresh the items list
-    m_display.focusedProperty().addListener( ( observable, oldValue, newValue ) -> focusChanged( newValue ) );
-
-    // when .............
-    m_display.setOnKeyPressed( event -> keyPressed( event ) );
-    m_display.setOnKeyTyped( event -> keyTyped( event ) );
-    m_display.setOnMousePressed( event -> mousePressed( event ) );
+    // react to key presses and mouse clicks
+    m_displayText.setOnKeyPressed( event -> keyPressed( event ) );
+    m_displayText.setOnKeyTyped( event -> keyTyped( event ) );
+    m_displayText.setOnMousePressed( event -> mousePressed( event ) );
     m_button.setOnMousePressed( event -> mousePressed( event ) );
   }
 
-  /***************************************** refreshList *****************************************/
-  abstract void refreshList();
+  /**************************************** getItemCount *****************************************/
+  abstract public int getItemCount();
 
-  /**************************************** focusChanged *****************************************/
-  private void focusChanged( Boolean focus )
+  /******************************************* getItem *******************************************/
+  abstract public String getItem( int num );
+
+  /************************************** setSelectedIndex ***************************************/
+  public void setSelectedIndex( int index )
   {
-    // if display has gained focus refresh items list
-    if ( focus )
-    {
-      refreshList();
-      m_index = m_items.indexOf( m_display.getText() );
-    }
+    // set selected index and update displayed text to match
+    m_selectedIndex = index;
+    m_displayText.setText( getItem( index ) );
+    if ( m_dropdown != null )
+      m_dropdown.redrawCanvas();
+  }
+
+  /************************************** getSelectedIndex ***************************************/
+  public int getSelectedIndex()
+  {
+    // return currently selected index
+    return m_selectedIndex;
+  }
+
+  /******************************************* setText *******************************************/
+  public void setText( String text )
+  {
+    // set displayed text and set selected index to found match
+    m_displayText.setText( text );
+
+    m_selectedIndex = -1;
+    int size = getItemCount();
+    for ( int i = 0; i < size; i++ )
+      if ( text.equals( getItem( i ) ) )
+      {
+        m_selectedIndex = i;
+        if ( m_dropdown != null )
+          m_dropdown.redrawCanvas();
+        break;
+      }
+  }
+
+  /******************************************* getText *******************************************/
+  public String getText()
+  {
+    // return displayed text
+    return m_displayText.getText();
   }
 
   /****************************************** keyTyped *******************************************/
   private void keyTyped( KeyEvent event )
   {
-    // find next item that starts with typed key case insensitive
+    // find next item that starts with typed key (case-insensitive)
     String key = event.getCharacter().substring( 0, 1 ).toLowerCase();
-    int size = m_items.size();
+    int size = getItemCount();
     for ( int i = 1; i < size; i++ )
     {
-      String item = m_items.get( ( m_index + i ) % size ).substring( 0, 1 ).toLowerCase();
-      if ( key.equals( item ) )
+      String itemFirstChar = getItem( ( m_selectedIndex + i ) % size ).substring( 0, 1 ).toLowerCase();
+      if ( key.equals( itemFirstChar ) )
       {
-        m_index = ( m_index + i ) % size;
-        m_display.setText( m_items.get( m_index ) );
+        setSelectedIndex( ( m_selectedIndex + i ) % size );
         break;
       }
     }
@@ -108,22 +136,18 @@ public abstract class AbstractCombo extends StackPane
       case DOWN:
       case RIGHT:
       case PAGE_DOWN:
-        m_index = ( m_index + 1 ) % m_items.size();
-        m_display.setText( m_items.get( m_index ) );
+        setSelectedIndex( ( m_selectedIndex + 1 ) % getItemCount() );
         break;
       case UP:
       case LEFT:
       case PAGE_UP:
-        m_index = ( m_index - 1 + m_items.size() ) % m_items.size();
-        m_display.setText( m_items.get( m_index ) );
+        setSelectedIndex( ( m_selectedIndex - 1 + getItemCount() ) % getItemCount() );
         break;
       case HOME:
-        m_index = 0;
-        m_display.setText( m_items.get( m_index ) );
+        setSelectedIndex( 0 );
         break;
       case END:
-        m_index = m_items.size() - 1;
-        m_display.setText( m_items.get( m_index ) );
+        setSelectedIndex( getItemCount() - 1 );
         break;
       default:
         break;
@@ -133,28 +157,32 @@ public abstract class AbstractCombo extends StackPane
   /**************************************** mousePressed ****************************************/
   private void mousePressed( MouseEvent event )
   {
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    JPlanner.trace( "Mouse pressed" );
-
+    // request focus for display text field
     Platform.runLater( new Runnable()
     {
       @Override
       public void run()
       {
-        m_display.requestFocus();
+        m_displayText.requestFocus();
       }
     } );
 
-    Dropdown dd = new Dropdown( this );
+    // open drop-down list
+    m_dropdown = new DropDown( this );
+    m_dropdown.setOnHiding( hideEvent ->
+    {
+      m_dropdown = null;
+    } );
+
   }
 
   /****************************************** drawButton *****************************************/
   private void drawButton()
   {
-    // size and draw button
+    // determine size and draw button
     GraphicsContext gc = m_button.getGraphicsContext2D();
-    double h = m_display.getHeight() - 4;
-    double w = m_display.getWidth() / 2;
+    double h = getHeight() - 4;
+    double w = getWidth() / 2;
     if ( w > h )
       w = h;
     m_button.setHeight( h );
@@ -162,12 +190,12 @@ public abstract class AbstractCombo extends StackPane
 
     // fill background
     gc.clearRect( 0.0, 0.0, w, h );
-    gc.setFill( LIGHTGRAY );
+    gc.setFill( BUTTON_BACKGROUND );
     w -= 2;
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw down arrow
-    gc.setStroke( Color.BLACK );
+    gc.setStroke( BUTTON_ARROW );
     int x1 = (int) ( w * 0.3 + 0.5 );
     int y1 = (int) ( h * 0.3 + 0.5 );
     int y2 = (int) ( h - y1 );
@@ -176,36 +204,6 @@ public abstract class AbstractCombo extends StackPane
       double x = x1 + ( w * 0.5 - x1 ) / ( y2 - y1 ) * ( y - y1 );
       gc.strokeLine( x, y + .5, w - x, y + .5 );
     }
-  }
-
-  /******************************************* setText *******************************************/
-  public void setText( String text )
-  {
-    // set displayed text and update index to match
-    m_display.setText( text );
-    m_index = m_items.indexOf( text );
-  }
-
-  /******************************************* getText *******************************************/
-  public String getText()
-  {
-    // get displayed index
-    return m_display.getText();
-  }
-
-  /****************************************** setIndex *******************************************/
-  public void setIndex( int index )
-  {
-    // set index and update displayed text to match
-    m_display.setText( m_items.get( index ) );
-    m_index = index;
-  }
-
-  /****************************************** getIndex *******************************************/
-  public int getIndex()
-  {
-    // get index
-    return m_index;
   }
 
 }

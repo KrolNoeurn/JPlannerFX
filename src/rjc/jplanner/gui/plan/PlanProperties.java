@@ -31,6 +31,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandPlanSetProperties;
+import rjc.jplanner.gui.CalendarCombo;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.DateTime;
 
@@ -129,13 +130,13 @@ public class PlanProperties extends ScrollPane
     m_numberOf.redraw();
   }
 
-  /************************************ updatePlanProperties *************************************/
+  /***************************************** updatePlan ******************************************/
   public void updatePlan()
   {
     // get values from gui editors
     String title = m_title.getText();
-    DateTime start = JPlanner.plan.start(); // TODO
-    Calendar cal = JPlanner.plan.calendar(); // TODO
+    DateTime start = JPlanner.plan.start(); // TODO 
+    Calendar cal = JPlanner.plan.calendar( m_defaultCalendar.getSelectedIndex() );
     String DTformat = m_DTformat.getText();
     String Dformat = m_Dformat.getText();
 

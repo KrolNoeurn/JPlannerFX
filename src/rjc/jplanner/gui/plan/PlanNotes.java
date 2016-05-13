@@ -23,6 +23,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandPlanSetNotes;
 
 /*************************************************************************************************/
 /**************************** Widget display & editing of plan notes *****************************/
@@ -65,10 +67,21 @@ public class PlanNotes extends GridPane
     m_notes.setText( txt );
   }
 
-  /**************************************** updateFromPlan ***************************************/
+  /*************************************** updateFromPlan ****************************************/
   public void updateFromPlan()
   {
-    // TODO Auto-generated method stub
+    // update the gui notes with text from plan
+    m_notes.setText( JPlanner.plan.notes() );
+  }
+
+  /************************************** updatePlanNotes ****************************************/
+  public void updatePlan()
+  {
+    // if notes not changed, return doing nothing, otherwise update via undo-stack command
+    if ( JPlanner.plan.notes().equals( m_notes.getText() ) )
+      return;
+
+    JPlanner.plan.undostack().push( new CommandPlanSetNotes( m_notes.getText() ) );
   }
 
 }

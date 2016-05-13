@@ -16,7 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.plan;
+package rjc.jplanner.gui;
 
 import rjc.jplanner.JPlanner;
 
@@ -27,15 +27,20 @@ import rjc.jplanner.JPlanner;
 public class CalendarCombo extends AbstractCombo
 {
 
-  /**************************************** refreshItems *****************************************/
+  /**************************************** getItemCount *****************************************/
   @Override
-  void refreshList()
+  public int getItemCount()
   {
-    // refresh items that user can select from
-    m_items.clear();
-    int count = JPlanner.plan.calendarsCount();
-    for ( int index = 0; index < count; index++ )
-      m_items.add( JPlanner.plan.calendar( index ).name() );
+    // return number of calendars
+    return JPlanner.plan.calendarsCount();
+  }
+
+  /******************************************* getItem *******************************************/
+  @Override
+  public String getItem( int num )
+  {
+    // return calendar name
+    return JPlanner.plan.calendar( num ).name();
   }
 
 }
