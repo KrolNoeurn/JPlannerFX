@@ -32,23 +32,25 @@ import rjc.jplanner.command.UndoStack;
 
 public class Plan
 {
-  private String    m_title;          // plan title as set in properties
-  private DateTime  m_start;          // plan start date-time as set in properties
-  private Calendar  m_calendar;       // plan's default calendar
-  private String    m_datetimeFormat; // format to display date-times
-  private String    m_dateFormat;     // format to display dates
-  private String    m_filename;       // filename when saved or loaded
-  private String    m_fileLocation;   // file location
-  private String    m_savedBy;        // who saved last
-  private DateTime  m_savedWhen;      // when was last saved
-  private String    m_notes;          // plan notes as on plan tab
+  private String              m_title;               // plan title as set in properties
+  private DateTime            m_start;               // plan start date-time as set in properties
+  private Calendar            m_calendar;            // plan's default calendar
+  private String              m_datetimeFormat;      // format to display date-times
+  private String              m_dateFormat;          // format to display dates
+  private String              m_filename;            // filename when saved or loaded
+  private String              m_fileLocation;        // file location
+  private String              m_savedBy;             // who saved last
+  private DateTime            m_savedWhen;           // when was last saved
+  private String              m_notes;               // plan notes as on plan tab
 
-  private UndoStack m_undostack;      // undo stack for plan editing
+  private UndoStack           m_undostack;           // undo stack for plan editing
 
-  public Tasks      tasks;            // list of plan tasks
-  public Resources  resources;        // list of plan resources
-  public Calendars  calendars;        // list of plan calendars
-  public Days       daytypes;         // list of plan day types
+  public Tasks                tasks;                 // list of plan tasks
+  public Resources            resources;             // list of plan resources
+  public Calendars            calendars;             // list of plan calendars
+  public Days                 daytypes;              // list of plan day types
+
+  private static final String NOTES_CR = "#NCR!£%#"; // because XMLStreamWriter doesn't encode new-lines correctly
 
   /**************************************** constructor ******************************************/
   public Plan()
@@ -350,16 +352,8 @@ public class Plan
       xsw.writeAttribute( XmlLabels.XML_DT_FORMAT, m_datetimeFormat );
       xsw.writeAttribute( XmlLabels.XML_D_FORMAT, m_dateFormat );
 
-      xsw.writeAttribute( XmlLabels.XML_NOTES, m_notes );
-
       // because XMLStreamWriter doesn't encode new-lines correctly 
-      // write notes attribute directly instead of xsw.writeAttribute( XML_NOTES, m_notes );
-      /* NEEDS FIXING TODO
-      String notes = StringEscapeUtils.escapeXml( m_notes ).replaceAll( "\\n", "&#10;" );
-      notes = notes.replaceAll( "\\r", "" );
-      notes = " " + XmlLabels.XML_NOTES + "=\"" + notes + "\"";
-      fos.write( notes.getBytes( Charset.forName( XmlLabels.ENCODING ) ) );
-      */
+      xsw.writeAttribute( XmlLabels.XML_NOTES, m_notes.replaceAll( "\\n", NOTES_CR ) );
 
       // write day, calendar, resource, and task data to XML stream
       daytypes.writeXML( xsw );
@@ -457,7 +451,7 @@ public class Plan
           calendarId = Integer.parseInt( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_NOTES:
-          m_notes = xsr.getAttributeValue( i );
+          m_notes = xsr.getAttributeValue( i ).replaceAll( NOTES_CR, "\n" );
           break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );

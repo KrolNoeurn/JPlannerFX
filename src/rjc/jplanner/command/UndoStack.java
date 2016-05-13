@@ -86,11 +86,10 @@ public class UndoStack
         JPlanner.gui.properties().updateFromPlan();
       if ( ( updates & IUndoCommand.UPDATE_NOTES ) > 0 )
         JPlanner.gui.notes().updateFromPlan();
-    }
 
-    // performed re-schedule if requested
-    if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
-      JPlanner.gui.schedule();
+      if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
+        JPlanner.gui.schedule();
+    }
   }
 
   /******************************************** push *********************************************/
@@ -105,11 +104,7 @@ public class UndoStack
     command.redo();
     update( command.update() );
     m_index++;
-    updateUndoRedoMenuItems();
-
-    // update undo-stack window if exists
-    //if ( JPlanner.gui.undoWindow != null )
-    //JPlanner.gui.undoWindow.updateList( command, m_index );
+    JPlanner.gui.updateUndoRedo();
   }
 
   /******************************************** undo *********************************************/
@@ -119,7 +114,7 @@ public class UndoStack
     m_index--;
     m_stack.get( m_index ).undo();
     update( m_stack.get( m_index ).update() );
-    updateUndoRedoMenuItems();
+    JPlanner.gui.updateUndoRedo();
   }
 
   /******************************************** redo *********************************************/
@@ -129,48 +124,7 @@ public class UndoStack
     m_stack.get( m_index ).redo();
     update( m_stack.get( m_index ).update() );
     m_index++;
-    updateUndoRedoMenuItems();
-  }
-
-  /*********************************** updateUndoRedoMenuItems ***********************************/
-  private void updateUndoRedoMenuItems()
-  {
-    // update undo menu-item
-    /*
-    MenuItem undo = JPlanner.gui.actionUndo;
-    if ( m_index > 0 )
-    {
-      undo.setText( "Undo " + undoText() + "\tCtrl+Z" );
-      undo.setEnabled( true );
-    }
-    else
-    {
-      undo.setText( "Undo\tCtrl+Z" );
-      undo.setEnabled( false );
-    }
-    
-    // update redo menu-item
-    MenuItem redo = JPlanner.gui.actionRedo;
-    if ( m_index < size() )
-    {
-      redo.setText( "Redo " + redoText() + "\tCtrl+Y" );
-      redo.setEnabled( true );
-    }
-    else
-    {
-      redo.setText( "Redo\tCtrl+Y" );
-      redo.setEnabled( false );
-    }
-    
-    // also update undo-stack window selected item if exists
-    if ( JPlanner.gui.undoWindow != null )
-      JPlanner.gui.undoWindow.updateSelection();
-    
-    // if clean state changed, update window titles
-    if ( m_previousCleanState != isClean() )
-      JPlanner.gui.updateWindowTitles();
-    m_previousCleanState = isClean();
-    */
+    JPlanner.gui.updateUndoRedo();
   }
 
   /****************************************** undoText *******************************************/
@@ -202,7 +156,7 @@ public class UndoStack
     m_index = 0;
     m_cleanIndex = 0;
     m_previousCleanState = true;
-    updateUndoRedoMenuItems();
+    JPlanner.gui.updateUndoRedo();
   }
 
   /******************************************** size *********************************************/
@@ -223,6 +177,9 @@ public class UndoStack
   public void setIndex( int index )
   {
     // execute redo's or undo's as necessary to get to target index
+    if ( index == m_index )
+      return;
+
     int updates = 0;
     while ( index < m_index && m_index > 0 )
     {
@@ -239,7 +196,7 @@ public class UndoStack
 
     // perform updates collected from the redo's and undo's
     update( updates );
-    updateUndoRedoMenuItems();
+    JPlanner.gui.updateUndoRedo();
   }
 
 }

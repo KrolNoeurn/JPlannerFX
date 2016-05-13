@@ -124,7 +124,8 @@ public class PlanProperties extends ScrollPane
     m_fileName.setText( JPlanner.plan.filename() );
     m_fileLocation.setText( JPlanner.plan.fileLocation() );
     m_savedBy.setText( JPlanner.plan.savedBy() );
-    m_savedWhen.setText( JPlanner.plan.savedWhen().toString() );
+    if ( JPlanner.plan.savedWhen() != null )
+      m_savedWhen.setText( JPlanner.plan.savedWhen().toString() );
 
     // update the gui "number of" pane
     m_numberOf.redraw();

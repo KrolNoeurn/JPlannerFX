@@ -94,6 +94,7 @@ public class MainWindow
     m_stage = stage;
     m_tabWidgets = new ArrayList<MainTabWidget>();
     m_tabWidgets.add( m_mainTabWidget );
+    properties().updateFromPlan();
 
     // on close request also close (via hide) other windows
     stage.setOnCloseRequest( event ->
@@ -148,9 +149,13 @@ public class MainWindow
       }
     }
 
-    // use file-chooser to ask user which file to be opened
+    // use file-chooser defaulting if available to current directory
     FileChooser fc = new FileChooser();
     fc.setTitle( "Open plan" );
+    File initialDirectory = new File( JPlanner.plan.fileLocation() );
+    if ( initialDirectory.isDirectory() )
+      fc.setInitialDirectory( initialDirectory );
+    fc.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Plan files (*.xml)", "*.xml" ) );
     File file = fc.showOpenDialog( m_stage );
 
     // if user cancels file is null, so exit immediately
@@ -236,9 +241,14 @@ public class MainWindow
   /******************************************* saveAs ********************************************/
   public boolean saveAs()
   {
-    // use file-chooser to ask user which file to save to
+    // use file-chooser defaulting if available to current directory and file-name
     FileChooser fc = new FileChooser();
     fc.setTitle( "Save plan" );
+    File initialDirectory = new File( JPlanner.plan.fileLocation() );
+    if ( initialDirectory.isDirectory() )
+      fc.setInitialDirectory( initialDirectory );
+    fc.setInitialFileName( JPlanner.plan.filename() );
+    fc.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Plan files (*.xml)", "*.xml" ) );
     File file = fc.showSaveDialog( m_stage );
 
     // if user cancels file is null, so exit immediately
@@ -450,6 +460,36 @@ public class MainWindow
             tabs.select( tab );
             break;
 
+          case XmlLabels.XML_UNDOSTACK:
+            if ( m_undoWindow == null )
+              showUndoStackWindow( false );
+
+            // read XML attributes
+            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+              switch ( xsr.getAttributeLocalName( i ) )
+              {
+                case XmlLabels.XML_VISIBLE:
+                  showUndoStackWindow( Boolean.parseBoolean( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_X:
+                  m_undoWindow.setX( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_Y:
+                  m_undoWindow.setY( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_WIDTH:
+                  m_undoWindow.setWidth( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+                case XmlLabels.XML_HEIGHT:
+                  m_undoWindow.setHeight( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+                  break;
+
+                default:
+                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+                  break;
+              }
+            break;
+
           case XmlLabels.XML_DISPLAY_DATA:
             break;
           case XmlLabels.XML_TASKS_GANTT_TAB:
@@ -565,6 +605,12 @@ public class MainWindow
     JPlanner.trace( "NOT YET IMPLEMENTED !!!" );
   }
 
+  /************************************** isPlanTabSelected **************************************/
+  public boolean isPlanTabSelected()
+  {
+    return m_mainTabWidget.getPlanTab().isSelected();
+  }
+
   /***************************************** properties ******************************************/
   public PlanProperties properties()
   {
@@ -590,7 +636,7 @@ public class MainWindow
     // save display data to XML stream
     xsw.writeStartElement( XmlLabels.XML_DISPLAY_DATA );
 
-    // save data for each window
+    // save data for each plan window
     for ( MainTabWidget tabs : m_tabWidgets )
     {
       Window window = tabs.getScene().getWindow();
@@ -606,6 +652,18 @@ public class MainWindow
       tabs.writeXML( xsw );
 
       xsw.writeEndElement(); // XML_WINDOW
+    }
+
+    // save data for undo-stack window
+    if ( m_undoWindow != null )
+    {
+      xsw.writeStartElement( XmlLabels.XML_UNDOSTACK );
+      xsw.writeAttribute( XmlLabels.XML_VISIBLE, Boolean.toString( m_undoWindow.isShowing() ) );
+      xsw.writeAttribute( XmlLabels.XML_X, Integer.toString( (int) m_undoWindow.getX() ) );
+      xsw.writeAttribute( XmlLabels.XML_Y, Integer.toString( (int) m_undoWindow.getY() ) );
+      xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( (int) m_undoWindow.getWidth() ) );
+      xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( (int) m_undoWindow.getHeight() ) );
+      xsw.writeEndElement(); // XML_UNDOSTACK
     }
 
     xsw.writeEndElement(); // XML_DISPLAY_DATA
@@ -643,9 +701,55 @@ public class MainWindow
     {
       m_undoWindow.show();
       m_undoWindow.toFront();
+      m_undoWindow.makeCurrentIndexVisible();
     }
     else
       m_undoWindow.hide();
+  }
+
+  /*************************************** updateUndoRedo ****************************************/
+  public void updateUndoRedo()
+  {
+    // update undo-stack window if visible
+    if ( m_undoWindow != null )
+      m_undoWindow.updateScrollBarAndCanvas();
+
+    // update undo menu-item
+    /*
+    MenuItem undo = JPlanner.gui.actionUndo;
+    if ( m_index > 0 )
+    {
+      undo.setText( "Undo " + undoText() + "\tCtrl+Z" );
+      undo.setEnabled( true );
+    }
+    else
+    {
+      undo.setText( "Undo\tCtrl+Z" );
+      undo.setEnabled( false );
+    }
+    
+    // update redo menu-item
+    MenuItem redo = JPlanner.gui.actionRedo;
+    if ( m_index < size() )
+    {
+      redo.setText( "Redo " + redoText() + "\tCtrl+Y" );
+      redo.setEnabled( true );
+    }
+    else
+    {
+      redo.setText( "Redo\tCtrl+Y" );
+      redo.setEnabled( false );
+    }
+    
+    // also update undo-stack window selected item if exists
+    if ( JPlanner.gui.undoWindow != null )
+      JPlanner.gui.undoWindow.updateSelection();
+    
+    // if clean state changed, update window titles
+    if ( m_previousCleanState != isClean() )
+      JPlanner.gui.updateWindowTitles();
+    m_previousCleanState = isClean();
+    */
   }
 
 }

@@ -61,13 +61,13 @@ public class UndoStackWindow extends Stage
     // setup scroll bar
     m_scrollbar.setOrientation( Orientation.VERTICAL );
     m_scrollbar.setMinWidth( SCROLLBAR_SIZE );
+    m_scrollbar.setVisible( false );
 
     // set grid layout    
     GridPane grid = new GridPane();
     Scene scene = new Scene( grid );
     setScene( scene );
-    grid.add( m_canvas, 0, 0 );
-    grid.add( m_scrollbar, 1, 0 );
+    grid.addRow( 0, m_canvas, m_scrollbar );
 
     // determine typical text bounds and step
     Bounds bounds = ( new Text( "Qwerty" ) ).getLayoutBounds();
@@ -77,13 +77,13 @@ public class UndoStackWindow extends Stage
     // update scroll bar and canvas on scene size change
     scene.heightProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
     scene.widthProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
-    m_canvas.heightProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
-    m_canvas.widthProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
+
+    // update canvas on scroll bar movement
     m_scrollbar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
 
     // update selected index on mouse button press and drag
-    m_canvas.setOnMousePressed( event -> select( (int) event.getY() ) );
-    m_canvas.setOnMouseDragged( event -> select( (int) event.getY() ) );
+    m_canvas.setOnMousePressed( event -> setIndex( getIndexAtY( event.getY() ) + 1 ) );
+    m_canvas.setOnMouseDragged( event -> setIndex( getIndexAtY( event.getY() ) + 1 ) );
 
     // let canvas has focus and react to key presses to navigate undo stack 
     m_canvas.setFocusTraversable( true );
@@ -123,8 +123,6 @@ public class UndoStackWindow extends Stage
       }
     } );
 
-    // make current index visible
-    makeCurrentIndexVisible();
   }
 
   /******************************************** size *********************************************/
@@ -149,12 +147,14 @@ public class UndoStackWindow extends Stage
   }
 
   /**************************************** getIndexAtY ******************************************/
-  private int getIndexAtY( int y )
+  private int getIndexAtY( double y )
   {
     // get index at y-coordinate on canvas
     int row = (int) ( ( y + m_scrollbar.getValue() ) / m_rowHeight ) - 1;
     if ( row >= size() )
       return size() - 1;
+    if ( row < -1 )
+      return -1;
 
     return row;
   }
@@ -167,7 +167,7 @@ public class UndoStackWindow extends Stage
   }
 
   /************************************** makeIndexVisible ***************************************/
-  private void makeCurrentIndexVisible()
+  public void makeCurrentIndexVisible()
   {
     // scroll canvas to make current index visible
     makeIndexVisible( index() );
@@ -183,22 +183,19 @@ public class UndoStackWindow extends Stage
       m_scrollbar.setValue( m_scrollbar.getValue() + y );
     else if ( y > m_canvas.getHeight() - m_rowHeight )
       m_scrollbar.setValue( m_scrollbar.getValue() + y - m_canvas.getHeight() + m_rowHeight );
-
-    // make sure canvas is redrawn
-    redrawCanvas();
   }
 
   /********************************* updateScrollBarsAndCanvas ***********************************/
-  private void updateScrollBarAndCanvas()
+  public void updateScrollBarAndCanvas()
   {
+    // if window not showing, return immediately
+    if ( !isShowing() )
+      return;
+
     // set scroll bar to correct visibility
     double fullHeight = m_rowHeight * ( size() + 1 );
     boolean need = getScene().getHeight() < fullHeight;
-    if ( need != m_scrollbar.isVisible() )
-    {
-      m_scrollbar.setVisible( need );
-      return;
-    }
+    m_scrollbar.setVisible( need );
 
     // set scroll bars correct thumb size and position
     if ( m_scrollbar.isVisible() )
@@ -218,20 +215,10 @@ public class UndoStackWindow extends Stage
     int width = (int) getScene().getWidth();
     if ( m_scrollbar.isVisible() )
       width -= SCROLLBAR_SIZE;
-    if ( width != (int) m_canvas.getWidth() )
-      m_canvas.setWidth( width );
-  }
+    m_canvas.setWidth( width );
 
-  /******************************************* select ********************************************/
-  private void select( int y )
-  {
-    // select undo stack index at y-coordinate and update canvas 
-    int index = getIndexAtY( y ) + 1;
-    if ( index != index() )
-    {
-      setIndex( index );
-      redrawCanvas();
-    }
+    // make sure canvas is redrawn
+    redrawCanvas();
   }
 
   /**************************************** redrawCanvas *****************************************/
@@ -246,8 +233,8 @@ public class UndoStackWindow extends Stage
     gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
 
     // determine undo-stack visible range
-    int min = getIndexAtY( 0 );
-    int max = getIndexAtY( (int) m_canvas.getHeight() - 1 );
+    int min = getIndexAtY( 0.0 );
+    int max = getIndexAtY( m_canvas.getHeight() - 1.0 );
 
     // draw undo-stack text
     String text;

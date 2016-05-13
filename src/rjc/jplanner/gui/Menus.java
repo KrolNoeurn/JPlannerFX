@@ -55,12 +55,19 @@ public class Menus extends MenuBar
   /***************************************** onMenuShow ******************************************/
   private void onMenuShow()
   {
-    // clear status bar message & end any in progress table cell editing
+    // clear status bar message
     JPlanner.gui.message( "" );
 
     // if any table cell editing in progress, end it
     if ( CellEditor.cellEditorInProgress != null )
       CellEditor.cellEditorInProgress.endEditing();
+
+    // ensure plan is up-to-date
+    if ( JPlanner.gui.isPlanTabSelected() )
+    {
+      JPlanner.gui.properties().updatePlan();
+      JPlanner.gui.notes().updatePlan();
+    }
   }
 
   /****************************************** fileMenu *******************************************/
