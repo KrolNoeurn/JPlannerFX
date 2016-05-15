@@ -36,7 +36,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -63,7 +62,7 @@ public class MainWindow
 
   private Stage                    m_stage;
   private MainTabWidget            m_mainTabWidget          = new MainTabWidget();       // MainTabWidget associated with MainWindow
-  private MenuBar                  m_menus                  = new Menus();
+  private Menus                    m_menus                  = new Menus();
   private TextField                m_statusBar              = new TextField();
   private UndoStackWindow          m_undoWindow;                                         // window to show plan undo-stack
   private ArrayList<MainTabWidget> m_tabWidgets;                                         // list of MainTabWidgets including one in MainWindow
@@ -691,12 +690,15 @@ public class MainWindow
   /************************************* showUndoStackWindow *************************************/
   public void showUndoStackWindow( boolean show )
   {
-    JPlanner.trace( "SHOW UNDOSTACK WINDOW " + show );
-
-    // show undo-stack window
+    // create undo-stack window if not already created
     if ( m_undoWindow == null )
+    {
       m_undoWindow = new UndoStackWindow();
+      m_undoWindow.showingProperty()
+          .addListener( ( observable, oldValue, newValue ) -> m_menus.viewUndoStack.setSelected( newValue ) );
+    }
 
+    // make the undo-stack window visible or hidden
     if ( show )
     {
       m_undoWindow.show();

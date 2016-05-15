@@ -20,6 +20,7 @@ package rjc.jplanner.gui;
 
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Region;
+import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
 /***************** Extended version of SplitPane with preferred left node width ******************/
@@ -28,7 +29,7 @@ import javafx.scene.layout.Region;
 public class XSplitPane extends SplitPane
 {
   public int               preferredLeftNodeWidth = 300;
-  private boolean          m_ignore               = false;
+  private boolean          m_paneResize           = false;
 
   private static final int DIVIDER_WIDTH          = 6;
 
@@ -41,14 +42,14 @@ public class XSplitPane extends SplitPane
     // add listener to ensure divider is at preferred position when pane resized
     widthProperty().addListener( ( observable, oldValue, newValue ) ->
     {
-      m_ignore = true;
+      m_paneResize = true;
       setDividerPosition( 0, preferredLeftNodeWidth / newValue.doubleValue() );
     } );
 
     // add listener to ensure preferred position is updated when divider manually moved
     getDividers().get( 0 ).positionProperty().addListener( ( observable, oldValue, newValue ) ->
     {
-      if ( !m_ignore )
+      if ( !m_paneResize )
       {
         // don't confuse divider movement due to pane resize
         if ( regions[1].getWidth() == 0.0 || getWidth() - regions[0].getWidth() < DIVIDER_WIDTH )
@@ -56,7 +57,37 @@ public class XSplitPane extends SplitPane
 
         preferredLeftNodeWidth = (int) ( getWidth() * newValue.doubleValue() );
       }
-      m_ignore = false;
+      m_paneResize = false;
+    } );
+  }
+
+  /**************************************** constructor ******************************************/
+  public XSplitPane( Table table, Region... regions )
+  {
+    super();
+    getItems().add( table );
+    getItems().addAll( regions );
+    setMinWidth( 0.0 );
+
+    // add listener to ensure divider is at preferred position when pane resized
+    widthProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      m_paneResize = true;
+      setDividerPosition( 0, preferredLeftNodeWidth / newValue.doubleValue() );
+    } );
+
+    // add listener to ensure preferred position is updated when divider manually moved
+    getDividers().get( 0 ).positionProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( !m_paneResize )
+      {
+        // don't confuse divider movement due to pane resize
+        if ( regions[0].getWidth() == 0.0 || getWidth() - table.getWidth() < DIVIDER_WIDTH )
+          return;
+
+        preferredLeftNodeWidth = (int) ( getWidth() * newValue.doubleValue() );
+      }
+      m_paneResize = false;
     } );
   }
 

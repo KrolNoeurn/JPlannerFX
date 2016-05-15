@@ -35,6 +35,9 @@ import rjc.jplanner.gui.table.CellEditor;
 
 public class Menus extends MenuBar
 {
+  public CheckMenuItem viewUndoStack;
+  public MenuItem      editUndo;
+  public MenuItem      editRedo;
 
   /**************************************** constructor ******************************************/
   public Menus()
@@ -115,11 +118,11 @@ public class Menus extends MenuBar
     Menu menu = new Menu( "Edit" );
     menu.setOnShowing( event -> onMenuShow() );
 
-    MenuItem editUndo = new MenuItem( "Undo" );
+    editUndo = new MenuItem( "Undo" );
     editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, KeyCombination.CONTROL_DOWN ) );
     editUndo.setDisable( true );
 
-    MenuItem editRedo = new MenuItem( "Redo" );
+    editRedo = new MenuItem( "Redo" );
     editRedo.setAccelerator( new KeyCodeCombination( KeyCode.Y, KeyCombination.CONTROL_DOWN ) );
     editRedo.setDisable( true );
 
@@ -177,7 +180,7 @@ public class Menus extends MenuBar
     Menu menu = new Menu( "View" );
     menu.setOnShowing( event -> onMenuShow() );
 
-    CheckMenuItem viewUndoStack = new CheckMenuItem( "Undo Stack..." );
+    viewUndoStack = new CheckMenuItem( "Undo Stack..." );
     viewUndoStack.setOnAction( event -> JPlanner.gui.showUndoStackWindow( viewUndoStack.isSelected() ) );
 
     MenuItem viewNewWindow = new MenuItem( "New Window..." );

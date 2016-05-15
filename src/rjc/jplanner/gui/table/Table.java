@@ -30,10 +30,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.Orientation;
-import javafx.geometry.VPos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.ScrollBar;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Priority;
 import javafx.util.Duration;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
@@ -42,13 +41,16 @@ import rjc.jplanner.XmlLabels;
 /**************** Display gui scrollable table with horizontal & vertical header *****************/
 /*************************************************************************************************/
 
-public class Table extends GridPane
+public class Table extends Parent
 {
   private ITableDataSource          m_data;                                                // data source for the table
   private TableCanvas               m_canvas;                                              // canvas where table is drawn
   private ScrollBar                 m_vScrollBar;                                          // vertical scroll bar
   private ScrollBar                 m_hScrollBar;                                          // horizontal scroll bar
   private Timeline                  m_animation;                                           // used for table scrolling
+
+  private int                       m_height;
+  private int                       m_width;
 
   private int                       m_defaultRowHeight   = 20;
   private int                       m_defaultColumnWidth = 100;
@@ -101,8 +103,6 @@ public class Table extends GridPane
       m_rowIndexes.add( row );
 
     // calculate body width & height
-    setMinWidth( 0.0 );
-    setMinHeight( 0.0 );
     calculateBodyWidth();
     calculateBodyHeight();
 
@@ -113,123 +113,213 @@ public class Table extends GridPane
     m_vScrollBar.setMinWidth( SCROLLBAR_SIZE );
     m_hScrollBar = new ScrollBar();
     m_hScrollBar.setMinHeight( SCROLLBAR_SIZE );
-    add( m_canvas, 0, 0 );
-    add( m_vScrollBar, 1, 0, 1, 1 );
-    add( m_hScrollBar, 0, 1, 1, 1 );
+    add( m_canvas );
+    add( m_vScrollBar );
+    add( m_hScrollBar );
 
-    // table body to grow to fill all available space
-    setValignment( m_canvas, VPos.TOP );
-    setHgrow( m_canvas, Priority.ALWAYS );
-    setVgrow( m_canvas, Priority.ALWAYS );
-    heightProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
-    widthProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
-    m_vScrollBar.visibleProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
-    m_hScrollBar.visibleProperty().addListener( ( observable, oldValue, newValue ) -> setCanvasScrollBars() );
+    // listen to scroll bars for table scrolling
     m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
     m_hScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
+
+    // lock layout to 0,0 to prevent any shudder or incorrect placing
+    layoutXProperty().addListener( ( observable, oldValue, newValue ) -> setLayoutX( 0.0 ) );
+    layoutYProperty().addListener( ( observable, oldValue, newValue ) -> setLayoutY( 0.0 ) );
+  }
+
+  /******************************************* resize ********************************************/
+  @Override
+  public void resize( double width, double height )
+  {
+    // resize the table
+    m_width = (int) width;
+    m_height = (int) height;
+    setCanvasScrollBars();
+  }
+
+  /**************************************** isResizable ******************************************/
+  @Override
+  public boolean isResizable()
+  {
+    // table is resizable
+    return true;
+  }
+
+  /***************************************** minHeight *******************************************/
+  @Override
+  public double minHeight( double width )
+  {
+    // table minimum height is zero
+    return 0.0;
+  }
+
+  /****************************************** minWidth *******************************************/
+  @Override
+  public double minWidth( double height )
+  {
+    // table minimum width is zero
+    return 0.0;
+  }
+
+  /***************************************** prefHeight ******************************************/
+  @Override
+  public double prefHeight( double width )
+  {
+    // table will take as much space as it can get so scroll-bars at edge of area
+    return Integer.MAX_VALUE;
+  }
+
+  /****************************************** prefWidth ******************************************/
+  @Override
+  public double prefWidth( double height )
+  {
+    // table will take as much space as it can get so scroll-bars at edge of area
+    return Integer.MAX_VALUE;
+  }
+
+  /****************************************** getWidth *******************************************/
+  public double getWidth()
+  {
+    return m_width;
+  }
+
+  /****************************************** getHeight ******************************************/
+  public double getHeight()
+  {
+    return m_height;
+  }
+
+  /********************************************* add *********************************************/
+  public void add( Node node )
+  {
+    // add node to table displayed children
+    getChildren().add( node );
+  }
+
+  /******************************************* remove ********************************************/
+  public void remove( Node node )
+  {
+    // remove node from table displayed children
+    getChildren().remove( node );
   }
 
   /************************************ setCanvasScrollBars **************************************/
   public void setCanvasScrollBars()
   {
-    // set canvas to correct size to not overlap scroll bars
-    int height = (int) getHeight();
-    if ( m_hScrollBar.isVisible() )
-      height -= SCROLLBAR_SIZE;
-    if ( height != (int) m_canvas.getHeight() )
-      m_canvas.setHeight( height );
+    // determine which scroll-bars should be visible
+    boolean isVSBvisible = m_height < m_bodyHeight + m_hHeaderHeight;
+    int visibleWidth = isVSBvisible ? m_width - SCROLLBAR_SIZE : m_width;
+    boolean isHSBvisible = visibleWidth < m_bodyWidth + m_vHeaderWidth;
+    int visibleHeight = isHSBvisible ? m_height - SCROLLBAR_SIZE : m_height;
+    isVSBvisible = visibleHeight < m_bodyHeight + m_hHeaderHeight;
+    visibleWidth = isVSBvisible ? m_width - SCROLLBAR_SIZE : m_width;
 
-    int width = (int) getWidth();
-    if ( m_vScrollBar.isVisible() )
-      width -= SCROLLBAR_SIZE;
-    if ( width != (int) m_canvas.getWidth() )
-      m_canvas.setWidth( width );
+    // ensure scroll-bars are setup correctly 
+    setVScrollBar( isVSBvisible, isHSBvisible ? m_height - SCROLLBAR_SIZE : m_height );
+    setHScrollBar( isHSBvisible, isVSBvisible ? m_width - SCROLLBAR_SIZE : m_width );
 
-    // set scroll bars to correct visibility
-    boolean hNeed = width < m_bodyWidth + m_vHeaderWidth;
-    if ( hNeed != m_hScrollBar.isVisible() )
-    {
-      m_hScrollBar.setVisible( hNeed );
-      return;
-    }
-
-    boolean vNeed = height < m_bodyHeight + m_hHeaderHeight;
-    if ( vNeed != m_vScrollBar.isVisible() )
-    {
-      m_vScrollBar.setVisible( vNeed );
-      return;
-    }
-
-    // set scroll bars to correct span
-    if ( m_vScrollBar.isVisible() && m_hScrollBar.isVisible() )
-    {
-      // both visible so both should have span of 1
-      if ( getRowSpan( m_vScrollBar ) != 1 )
-        setRowSpan( m_vScrollBar, 1 );
-
-      if ( getColumnSpan( m_hScrollBar ) != 1 )
-        setColumnSpan( m_hScrollBar, 1 );
-    }
+    // ensure table canvas is correct size
+    if ( isVSBvisible )
+      m_canvas.setHeight( visibleHeight );
     else
-    {
-      // if either visible should have span of 2
-      if ( m_vScrollBar.isVisible() && getRowSpan( m_vScrollBar ) != 2 )
-        setRowSpan( m_vScrollBar, 2 );
-
-      if ( m_hScrollBar.isVisible() && getColumnSpan( m_hScrollBar ) != 2 )
-        setColumnSpan( m_hScrollBar, 2 );
-    }
-
-    // set scroll bars correct thumb size and position
-    if ( m_vScrollBar.isVisible() )
-    {
-      double max = m_bodyHeight + m_hHeaderHeight - height;
-      m_vScrollBar.setMax( max );
-      m_vScrollBar.setVisibleAmount( max * height / ( m_bodyHeight + m_hHeaderHeight ) );
-      if ( m_vScrollBar.getValue() > max )
-        m_vScrollBar.setValue( max );
-    }
+      m_canvas.setHeight( m_bodyHeight + m_hHeaderHeight );
+    if ( isHSBvisible )
+      m_canvas.setWidth( visibleWidth );
     else
-      m_vScrollBar.setValue( 0.0 );
+      m_canvas.setWidth( m_bodyWidth + m_vHeaderWidth );
+  }
 
-    if ( m_hScrollBar.isVisible() )
+  /*************************************** setHScrollBar *****************************************/
+  private void setHScrollBar( boolean visible, int width )
+  {
+    // make the horizontal scroll-bar visible and setup correctly
+    m_hScrollBar.setVisible( visible );
+
+    if ( visible )
     {
+      m_hScrollBar.setMinWidth( width );
+      m_hScrollBar.setLayoutY( m_height - SCROLLBAR_SIZE );
+
       double max = m_bodyWidth + m_vHeaderWidth - width;
       m_hScrollBar.setMax( max );
       m_hScrollBar.setVisibleAmount( max * width / ( m_bodyWidth + m_vHeaderWidth ) );
+
       if ( m_hScrollBar.getValue() > max )
         m_hScrollBar.setValue( max );
+      if ( m_hScrollBar.getValue() < 0.0 )
+        m_hScrollBar.setValue( 0.0 );
     }
     else
       m_hScrollBar.setValue( 0.0 );
+  }
+
+  /*************************************** setVScrollBar *****************************************/
+  private void setVScrollBar( boolean visible, int height )
+  {
+    // make the vertical scroll-bar visible and setup correctly
+    m_vScrollBar.setVisible( visible );
+
+    if ( visible )
+    {
+      m_vScrollBar.setMinHeight( height );
+      m_vScrollBar.setLayoutX( m_width - SCROLLBAR_SIZE );
+
+      double max = m_bodyHeight + m_hHeaderHeight - height;
+      m_vScrollBar.setMax( max );
+      m_vScrollBar.setVisibleAmount( max * height / ( m_bodyHeight + m_hHeaderHeight ) );
+
+      if ( m_vScrollBar.getValue() > max )
+        m_vScrollBar.setValue( max );
+      if ( m_vScrollBar.getValue() < 0.0 )
+        m_vScrollBar.setValue( 0.0 );
+    }
+    else
+      m_vScrollBar.setValue( 0.0 );
   }
 
   /************************************ calculateBodyHeight **************************************/
   private void calculateBodyHeight()
   {
     // calculate height of table body rows
+    int exceptionsCount = 0;
+    int rowCount = m_data.getRowCount();
     m_bodyHeight = 0;
-    int count = m_data.getRowCount();
-    for ( int index = 0; index < count; index++ )
+    for ( int row : m_rowHeights.keySet() )
     {
-      int height = m_rowHeights.getOrDefault( index, m_defaultRowHeight );
-      if ( height > 0 )
-        m_bodyHeight += height;
+      if ( row < rowCount )
+      {
+        exceptionsCount++;
+        int height = m_rowHeights.get( row );
+        if ( height > 0 )
+          m_bodyHeight += height;
+      }
+      else
+        m_rowHeights.remove( row );
     }
+
+    m_bodyHeight += ( rowCount - exceptionsCount ) * m_defaultRowHeight;
   }
 
   /************************************ calculateBodyWidth ***************************************/
   private void calculateBodyWidth()
   {
     // calculate width of table body columns
+    int exceptionsCount = 0;
+    int columnCount = m_data.getColumnCount();
     m_bodyWidth = 0;
-    int count = m_data.getColumnCount();
-    for ( int index = 0; index < count; index++ )
+    for ( int row : m_columnWidths.keySet() )
     {
-      int width = m_columnWidths.getOrDefault( index, m_defaultColumnWidth );
-      if ( width > 0 )
-        m_bodyWidth += width;
+      if ( row < columnCount )
+      {
+        exceptionsCount++;
+        int width = m_columnWidths.get( row );
+        if ( width > 0 )
+          m_bodyWidth += width;
+      }
+      else
+        m_columnWidths.remove( row );
     }
+
+    m_bodyWidth += ( columnCount - exceptionsCount ) * m_defaultColumnWidth;
   }
 
   /************************************** getBodyHeight ******************************************/

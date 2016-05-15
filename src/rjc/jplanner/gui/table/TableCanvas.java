@@ -21,14 +21,12 @@ package rjc.jplanner.gui.table;
 import java.util.ArrayList;
 
 import javafx.geometry.Bounds;
-import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.FontSmoothingType;
@@ -106,8 +104,8 @@ public class TableCanvas extends Canvas
     }
 
     // when size changes draw new bits
-    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( (double) oldW, (double) newW ) );
-    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( (double) oldH, (double) newH ) );
+    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( oldW.intValue(), newW.intValue() ) );
+    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( oldH.intValue(), newH.intValue() ) );
 
     // when mouse moves
     setOnMouseMoved( event -> mouseMoved( event ) );
@@ -117,45 +115,25 @@ public class TableCanvas extends Canvas
     setOnMouseClicked( event -> mouseClicked( event ) );
   }
 
-  /***************************************** isResizable *****************************************/
-  @Override
-  public boolean isResizable()
-  {
-    return true;
-  }
-
-  /****************************************** prefWidth ******************************************/
-  @Override
-  public double prefWidth( double height )
-  {
-    return 0.0;
-  }
-
-  /***************************************** prefHeight ******************************************/
-  @Override
-  public double prefHeight( double width )
-  {
-    return 0.0;
-  }
-
   /****************************************** redrawAll ******************************************/
   public void redrawAll()
   {
     // redraw whole canvas
-    drawWidth( 0.0, getWidth() );
+    drawWidth( 0, (int) getWidth() );
     setMarkerPosition();
     redrawn = true;
   }
 
   /****************************************** drawWidth ******************************************/
-  private void drawWidth( double oldW, double newW )
+  public void drawWidth( int oldW, int newW )
   {
     // draw only if increase in width
     if ( newW <= oldW )
       return;
 
     // draw only if not beyond edge of table
-    if ( oldW > m_table.getBodyWidth() + m_table.getVerticalHeaderWidth() )
+    int headerWidth = m_table.getVerticalHeaderWidth();
+    if ( oldW > m_table.getBodyWidth() + headerWidth )
       return;
 
     // clear background
@@ -163,10 +141,10 @@ public class TableCanvas extends Canvas
     gc.clearRect( oldW, 0.0, newW, getHeight() );
 
     // check if any columns need to be drawn 
-    if ( newW > m_table.getVerticalHeaderWidth() )
+    if ( newW > headerWidth )
     {
-      int column1 = m_table.getColumnPositionAtX( (int) oldW );
-      int column2 = m_table.getColumnPositionAtX( (int) newW );
+      int column1 = m_table.getColumnPositionAtX( oldW < headerWidth ? headerWidth : oldW );
+      int column2 = m_table.getColumnPositionAtX( newW );
       oldW = m_table.getXStartByColumnPosition( column1 );
 
       // draw column cells
@@ -180,7 +158,7 @@ public class TableCanvas extends Canvas
     }
 
     // check if any vertical header needs to be drawn
-    if ( oldW <= m_table.getVerticalHeaderWidth() )
+    if ( oldW <= headerWidth )
     {
       int row1 = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() );
       int row2 = m_table.getRowPositionAtY( (int) getHeight() );
@@ -193,14 +171,15 @@ public class TableCanvas extends Canvas
   }
 
   /***************************************** drawHeight ******************************************/
-  private void drawHeight( double oldH, double newH )
+  public void drawHeight( int oldH, int newH )
   {
     // draw only if increase in height
     if ( newH <= oldH )
       return;
 
     // draw only if not below edge of table
-    if ( oldH > m_table.getBodyHeight() + m_table.getHorizontalHeaderHeight() )
+    int headerHeight = m_table.getHorizontalHeaderHeight();
+    if ( oldH > m_table.getBodyHeight() + headerHeight )
       return;
 
     // clear background
@@ -208,10 +187,10 @@ public class TableCanvas extends Canvas
     gc.clearRect( 0.0, oldH, getWidth(), newH );
 
     // check if any rows need to be drawn 
-    if ( newH > m_table.getHorizontalHeaderHeight() )
+    if ( newH > headerHeight )
     {
-      int row1 = m_table.getRowPositionAtY( (int) oldH );
-      int row2 = m_table.getRowPositionAtY( (int) newH );
+      int row1 = m_table.getRowPositionAtY( oldH < headerHeight ? headerHeight : oldH );
+      int row2 = m_table.getRowPositionAtY( newH );
       oldH = m_table.getYStartByRowPosition( row1 );
 
       // draw column cells
@@ -225,7 +204,7 @@ public class TableCanvas extends Canvas
     }
 
     // check if any horizontal header needs to be drawn
-    if ( oldH <= m_table.getHorizontalHeaderHeight() )
+    if ( oldH <= headerHeight )
     {
       int column1 = m_table.getColumnPositionAtX( m_table.getVerticalHeaderWidth() );
       int column2 = m_table.getColumnPositionAtX( (int) getWidth() );
@@ -653,15 +632,13 @@ public class TableCanvas extends Canvas
       m_reorderSlider = new Canvas( w, h );
       drawRowHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
-      GridPane.setValignment( m_reorderSlider, VPos.TOP );
 
       // create reorder marker
       m_reorderMarker = createReorderMarker();
-      GridPane.setValignment( m_reorderMarker, VPos.TOP );
 
       // add slider & marker to display
-      m_table.add( m_reorderSlider, 0, 0 );
-      m_table.add( m_reorderMarker, 0, 0, 2, 1 );
+      m_table.add( m_reorderSlider );
+      m_table.add( m_reorderMarker );
     }
 
     // set slider position
@@ -693,15 +670,13 @@ public class TableCanvas extends Canvas
       m_reorderSlider = new Canvas( w, h );
       drawColumnHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
-      GridPane.setValignment( m_reorderSlider, VPos.TOP );
 
       // create reorder marker
       m_reorderMarker = createReorderMarker();
-      GridPane.setValignment( m_reorderMarker, VPos.TOP );
 
       // add slider & marker to display
-      m_table.add( m_reorderSlider, 0, 0 );
-      m_table.add( m_reorderMarker, 0, 0, 1, 2 );
+      m_table.add( m_reorderSlider );
+      m_table.add( m_reorderMarker );
     }
 
     // set slider position
@@ -849,7 +824,7 @@ public class TableCanvas extends Canvas
       redrawn = false;
       m_table.setCanvasScrollBars();
       if ( !redrawn )
-        drawWidth( m_table.getXStartByColumnPosition( m_columnPos ), getWidth() );
+        drawWidth( m_table.getXStartByColumnPosition( m_columnPos ), (int) getWidth() );
       return;
     }
 
@@ -866,7 +841,7 @@ public class TableCanvas extends Canvas
       redrawn = false;
       m_table.setCanvasScrollBars();
       if ( !redrawn )
-        drawHeight( m_table.getYStartByRowPosition( m_rowPos ), getHeight() );
+        drawHeight( m_table.getYStartByRowPosition( m_rowPos ), (int) getHeight() );
       return;
     }
 
@@ -911,8 +886,8 @@ public class TableCanvas extends Canvas
       if ( m_reorderMarker != null )
       {
         // handle column reorder completion
-        m_table.getChildren().remove( m_reorderSlider );
-        m_table.getChildren().remove( m_reorderMarker );
+        m_table.remove( m_reorderSlider );
+        m_table.remove( m_reorderMarker );
         m_reorderSlider = null;
         m_reorderMarker = null;
 
@@ -959,8 +934,8 @@ public class TableCanvas extends Canvas
       if ( m_reorderMarker != null )
       {
         // handle row reorder completion
-        m_table.getChildren().remove( m_reorderSlider );
-        m_table.getChildren().remove( m_reorderMarker );
+        m_table.remove( m_reorderSlider );
+        m_table.remove( m_reorderMarker );
         m_reorderSlider = null;
         m_reorderMarker = null;
 
@@ -1079,6 +1054,7 @@ public class TableCanvas extends Canvas
       // edit cell
       JPlanner.trace( "EDIT CELL " + m_columnPos + "," + m_rowPos );
 
+      CellEditor editor = m_table.getDataSource().getEditor();
     }
 
   }
