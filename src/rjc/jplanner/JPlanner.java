@@ -19,9 +19,13 @@
 package rjc.jplanner;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 
 import javafx.application.Application;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Plan;
@@ -37,19 +41,21 @@ import rjc.jplanner.model.Plan;
 
 public class JPlanner extends Application
 {
-  public static Plan       plan; // globally accessible plan
-  public static MainWindow gui;  // globally accessible main-window
+  public static Plan         plan;           // globally accessible plan
+  public static MainWindow   gui;            // globally accessible main-window
+
+  public static final String ERROR = "error";
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
   {
     // main entry point for application startup
     trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
-    trace( "" + plan );
+    trace( plan );
     plan = new Plan();
-    trace( "" + plan );
+    trace( plan );
     plan.initialise();
-    trace( "" + plan );
+    trace( plan );
 
     // launch main application display
     launch( args );
@@ -67,13 +73,23 @@ public class JPlanner extends Application
   }
 
   /******************************************* trace *********************************************/
-  public static void trace( String txt )
+  public static void trace( Object... objects )
   {
-    // prints txt prefixed by date-time and suffixed by file+line-number & method
+    // prints space separated objects in string representation prefixed by date-time and suffixed by file+line-number & method
+    StringBuilder str = new StringBuilder();
+    for ( Object obj : objects )
+    {
+      if ( obj == null )
+        str.append( "null " );
+      else
+        str.append( obj.toString() + " " );
+    }
+    //trace( str.toString() );
+
     StackTraceElement[] stack = new Throwable().getStackTrace();
     String method = stack[1].getMethodName() + "()";
-    String file = " (" + stack[1].getFileName() + ":" + stack[1].getLineNumber() + ") ";
-    System.out.println( DateTime.now() + " " + txt + file + method );
+    String file = "(" + stack[1].getFileName() + ":" + stack[1].getLineNumber() + ") ";
+    System.out.println( DateTime.now() + " " + str.toString() + file + method );
   }
 
   /******************************************* stack *********************************************/
@@ -94,4 +110,28 @@ public class JPlanner extends Application
     return txt.trim().replaceAll( "\\s", " " ).replaceAll( "(\\s{2,})", " " );
   }
 
+  /*************************************** tool-tip hack *****************************************/
+  static
+  {
+    // hack tool-tip durations behaviour (temporary until Java 9)
+    try
+    {
+      Tooltip obj = new Tooltip();
+      Class<?> clazz = obj.getClass().getDeclaredClasses()[1];
+      Constructor<?> constructor = clazz.getDeclaredConstructor( Duration.class, Duration.class, Duration.class,
+          boolean.class );
+      constructor.setAccessible( true );
+      Object tooltipBehavior = constructor.newInstance( new Duration( 100 ), //open
+          new Duration( 60000 ), //visible
+          new Duration( 200 ), //close
+          false );
+      Field fieldBehavior = obj.getClass().getDeclaredField( "BEHAVIOR" );
+      fieldBehavior.setAccessible( true );
+      fieldBehavior.set( obj, tooltipBehavior );
+    }
+    catch ( Exception exception )
+    {
+      trace( "" + exception );
+    }
+  }
 }

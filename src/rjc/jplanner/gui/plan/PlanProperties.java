@@ -23,6 +23,9 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -32,7 +35,9 @@ import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandPlanSetProperties;
 import rjc.jplanner.gui.CalendarCombo;
+import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
@@ -92,6 +97,138 @@ public class PlanProperties extends ScrollPane
     m_grid.add( m_numberOf, 0, row, 2, 1 );
     GridPane.setHgrow( m_numberOf, Priority.ALWAYS );
     GridPane.setVgrow( m_numberOf, Priority.ALWAYS );
+
+    // set tool tips
+    Tooltip DTtip = new Tooltip(
+        "Symbol\tMeaning\t\t\t\t\tPresentation\tExamples\n" + "--------\t---------\t\t\t\t\t--------------\t---------\n"
+            + " G\t\t era\t\t\t\t\t\t text\t\t\t AD; Anno Domini; A\n" + " u\t\t year\t\t\t\t\t\t year\t\t\t 2004; 04\n"
+            + " y\t\t year-of-era\t\t\t\t year\t\t\t 2004; 04\n" + " D\t\t day-of-year\t\t\t\t number\t\t 189\n"
+            + " M/L\t\t month-of-year\t\t\t number/text\t 7; 07; Jul; July; J\n"
+            + " d\t\t day-of-month\t\t\t\t number\t\t 10\n\n"
+            + " B\t\t half-of-year\t\t\t\t number/text\t 2; H2; 2nd half\n"
+            + " Q/q\t\t quarter-of-year\t\t\t number/text\t 3; 03; Q3; 3rd quarter\n"
+            + " Y\t\t week-based-year\t\t\t year\t\t\t 1996; 96\n" + " w\t\t week-of-week-based-year\t number\t\t 27\n"
+            + " W\t\t week-of-month\t\t\t number\t\t 4\n" + " E\t\t day-of-week\t\t\t\t text\t\t\t Tue; Tuesday; T\n"
+            + " e/c\t\t localized day-of-week\t\t number/text\t 2; 02; Tue; Tuesday; T\n"
+            + " F\t\t week-of-month\t\t\t number\t\t 3\n\n" + " a\t\t am-pm-of-day\t\t\t text\t\t\t PM\n"
+            + " h\t\t clock-hour-of-am-pm (1-12)\t number\t\t 12\n" + " K\t\t hour-of-am-pm (0-11)\t\t number\t\t 0\n"
+            + " k\t\t clock-hour-of-am-pm (1-24)\t number\t\t 0\n\n" + " H\t\t hour-of-day (0-23)\t\t\t number\t\t 0\n"
+            + " m\t\t minute-of-hour\t\t\t number\t\t 30\n" + " s\t\t second-of-minute\t\t\t number\t\t 55\n"
+            + " S\t\t fraction-of-second\t\t\t fraction\t\t 978\n" + " A\t\t milli-of-day\t\t\t\t number\t\t 1234\n"
+            + " N\t\t nano-of-day\t\t\t\t number\t\t 1234000000\n\n" + " p\t\t pad next\t\t\t\t\t pad modifier\t 1\n"
+            + " '\t\t escape for text\t\t\t delimiter\n" + " ''\t\t single quote\t\t\t\t literal\t\t '\n" );
+    DTtip.setStyle( MainWindow.STYLE_TOOLTIP );
+    m_DTformat.setTooltip( DTtip );
+
+    Tooltip Dtip = new Tooltip(
+        "Symbol\tMeaning\t\t\t\t\tPresentation\tExamples\n" + "--------\t---------\t\t\t\t\t--------------\t---------\n"
+            + " G\t\t era\t\t\t\t\t\t text\t\t\t AD; Anno Domini; A\n" + " u\t\t year\t\t\t\t\t\t year\t\t\t 2004; 04\n"
+            + " y\t\t year-of-era\t\t\t\t year\t\t\t 2004; 04\n" + " D\t\t day-of-year\t\t\t\t number\t\t 189\n"
+            + " M/L\t\t month-of-year\t\t\t number/text\t 7; 07; Jul; July; J\n"
+            + " d\t\t day-of-month\t\t\t\t number\t\t 10\n\n"
+            + " B\t\t half-of-year\t\t\t\t number/text\t 2; H2; 2nd half\n"
+            + " Q/q\t\t quarter-of-year\t\t\t number/text\t 3; 03; Q3; 3rd quarter\n"
+            + " Y\t\t week-based-year\t\t\t year\t\t\t 1996; 96\n" + " w\t\t week-of-week-based-year\t number\t\t 27\n"
+            + " W\t\t week-of-month\t\t\t number\t\t 4\n" + " E\t\t day-of-week\t\t\t\t text\t\t\t Tue; Tuesday; T\n"
+            + " e/c\t\t localized day-of-week\t\t number/text\t 2; 02; Tue; Tuesday; T\n"
+            + " F\t\t week-of-month\t\t\t number\t\t 3\n\n" + " p\t\t pad next\t\t\t\t\t pad modifier\t 1\n"
+            + " '\t\t escape for text\t\t\t delimiter\n" + " ''\t\t single quote\t\t\t\t literal\t\t '\n" );
+    Dtip.setStyle( MainWindow.STYLE_TOOLTIP );
+    m_Dformat.setTooltip( Dtip );
+
+    // show updated examples of formats
+    m_DTformat.textProperty().addListener( ( observable, oldValue, newValue ) -> dateTimeFormatChange() );
+    m_DTformat.setOnKeyPressed( event -> dateTimeFormatKeyPressed( event ) );
+    m_Dformat.textProperty().addListener( ( observable, oldValue, newValue ) -> dateFormatChange() );
+    m_Dformat.setOnKeyPressed( event -> dateFormatKeyPressed( event ) );
+  }
+
+  /*********************************** dateTimeFormatKeyPressed **********************************/
+  private void dateTimeFormatKeyPressed( KeyEvent event )
+  {
+    if ( event.getCode() == KeyCode.ESCAPE )
+    {
+      int pos = m_DTformat.getCaretPosition();
+      m_DTformat.setText( JPlanner.plan.datetimeFormat() );
+      m_DTformat.selectRange( pos, pos );
+    }
+
+    if ( event.getCode() == KeyCode.ENTER && m_DTformat.getId() != JPlanner.ERROR )
+    {
+      int pos = m_DTformat.getCaretPosition();
+      updatePlan();
+      m_DTformat.selectRange( pos, pos );
+    }
+  }
+
+  /************************************* dateTimeFormatChange ************************************/
+  private void dateTimeFormatChange()
+  {
+    // update display for date-time format change
+    if ( JPlanner.gui == null )
+      return;
+
+    try
+    {
+      if ( m_DTformat.getText().length() < 1 )
+        throw new NumberFormatException( "Invalid format" );
+
+      JPlanner.gui.message( "Date-time format example: " + DateTime.now().toString( m_DTformat.getText() ) );
+      m_DTformat.setStyle( MainWindow.STYLE_NORMAL );
+      m_DTformat.setId( null );
+    }
+    catch ( Exception exception )
+    {
+      String err = exception.getMessage();
+      JPlanner.gui.message( "Date-time format error '" + err + "'" );
+      m_DTformat.setStyle( MainWindow.STYLE_ERROR );
+      m_DTformat.setId( JPlanner.ERROR );
+    }
+
+    displayDateTime( m_defaultStart, JPlanner.plan.start() );
+    displayDateTime( m_actualStart, JPlanner.plan.earliest() );
+    displayDateTime( m_end, JPlanner.plan.end() );
+    displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
+  }
+
+  /************************************* dateFormatKeyPressed ************************************/
+  private void dateFormatKeyPressed( KeyEvent event )
+  {
+    if ( event.getCode() == KeyCode.ESCAPE )
+    {
+      int pos = m_Dformat.getCaretPosition();
+      m_Dformat.setText( JPlanner.plan.dateFormat() );
+      m_Dformat.selectRange( pos, pos );
+    }
+
+    if ( event.getCode() == KeyCode.ENTER && m_Dformat.getId() != JPlanner.ERROR )
+    {
+      int pos = m_Dformat.getCaretPosition();
+      updatePlan();
+      m_Dformat.selectRange( pos, pos );
+    }
+  }
+
+  /*************************************** dateFormatChange **************************************/
+  private void dateFormatChange()
+  {
+    // update display for date format change
+    if ( JPlanner.gui == null )
+      return;
+
+    try
+    {
+      JPlanner.gui.message( "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
+      m_Dformat.setStyle( MainWindow.STYLE_NORMAL );
+      m_Dformat.setId( null );
+    }
+    catch ( Exception exception )
+    {
+      String err = exception.getMessage();
+      JPlanner.gui.message( "Date format error '" + err + "'" );
+      m_Dformat.setStyle( MainWindow.STYLE_ERROR );
+      m_Dformat.setId( JPlanner.ERROR );
+    }
   }
 
   /******************************************** addRow *******************************************/
@@ -110,22 +247,35 @@ public class PlanProperties extends ScrollPane
     }
   }
 
+  /*************************************** displayDateTime ***************************************/
+  private void displayDateTime( TextField field, DateTime dt )
+  {
+    // display date-time in user specified format, or if that fails in plan format
+    if ( dt == null )
+      return;
+
+    if ( m_DTformat.getId() == JPlanner.ERROR )
+      field.setText( dt.toString( JPlanner.plan.datetimeFormat() ) );
+    else
+      field.setText( dt.toString( m_DTformat.getText() ) );
+  }
+
   /**************************************** updateFromPlan ***************************************/
   public void updateFromPlan()
   {
     // update the gui property widgets with values from plan
     m_title.setText( JPlanner.plan.title() );
-    m_defaultStart.setText( JPlanner.plan.start().toString() );
-    m_actualStart.setText( JPlanner.plan.earliest().toString() );
-    m_end.setText( JPlanner.plan.end().toString() );
     m_defaultCalendar.setText( JPlanner.plan.calendar().name() );
     m_DTformat.setText( JPlanner.plan.datetimeFormat() );
     m_Dformat.setText( JPlanner.plan.dateFormat() );
     m_fileName.setText( JPlanner.plan.filename() );
     m_fileLocation.setText( JPlanner.plan.fileLocation() );
     m_savedBy.setText( JPlanner.plan.savedBy() );
-    if ( JPlanner.plan.savedWhen() != null )
-      m_savedWhen.setText( JPlanner.plan.savedWhen().toString() );
+
+    displayDateTime( m_defaultStart, JPlanner.plan.start() );
+    displayDateTime( m_actualStart, JPlanner.plan.earliest() );
+    displayDateTime( m_end, JPlanner.plan.end() );
+    displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
 
     // update the gui "number of" pane
     m_numberOf.redraw();
@@ -138,8 +288,10 @@ public class PlanProperties extends ScrollPane
     String title = m_title.getText();
     DateTime start = JPlanner.plan.start(); // TODO 
     Calendar cal = JPlanner.plan.calendar( m_defaultCalendar.getSelectedIndex() );
-    String DTformat = m_DTformat.getText();
-    String Dformat = m_Dformat.getText();
+
+    String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.datetimeFormat() : m_DTformat.getText();
+
+    String Dformat = m_Dformat.getId() == JPlanner.ERROR ? JPlanner.plan.dateFormat() : m_Dformat.getText();
 
     // if properties not changed, return doing nothing
     if ( JPlanner.plan.title().equals( title ) && JPlanner.plan.start().equals( start )

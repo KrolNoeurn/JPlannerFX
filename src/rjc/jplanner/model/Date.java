@@ -27,13 +27,17 @@ import java.time.format.DateTimeFormatter;
 
 public class Date
 {
-  private int              m_epochday;                               // simple count of days where day 0 is 01-Jan-1970
+  private int                 m_epochday;                               // simple count of days where day 0 is 01-Jan-1970
 
   // min int=-2^31 gives minimum date of approx 5,800,000 BC
-  public static final Date MIN_VALUE = new Date( Integer.MIN_VALUE );
+  public static final Date    MIN_VALUE = new Date( Integer.MIN_VALUE );
 
   // max int=2^31-1 gives maximum date of approx 5,800,000 AD
-  public static final Date MAX_VALUE = new Date( Integer.MAX_VALUE );
+  public static final Date    MAX_VALUE = new Date( Integer.MAX_VALUE );
+
+  private static final char   QUOTE     = '\'';
+  private static final char   CHARB     = 'B';
+  private static final String CODE      = "#@B!";
 
   /**************************************** constructor ******************************************/
   public Date( int epochday )
@@ -77,7 +81,93 @@ public class Date
   {
     // convert to string in specified format
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
-    return ld.format( DateTimeFormatter.ofPattern( format ) );
+
+    // to support half-of-year using Bs, quote any unquoted Bs in format
+    StringBuilder newFormat = new StringBuilder();
+    boolean inQuote = false;
+    boolean inB = false;
+    char here;
+    for ( int i = 0; i < format.length(); i++ )
+    {
+      here = format.charAt( i );
+
+      // are we in quoted text?
+      if ( here == QUOTE )
+        inQuote = !inQuote;
+
+      // replace unquoted Bs with special code
+      if ( inB && here == CHARB )
+      {
+        newFormat.append( CODE );
+        continue;
+      }
+
+      // come to end of unquoted Bs
+      if ( inB && here != CHARB )
+      {
+        newFormat.append( QUOTE );
+        inB = false;
+        inQuote = false;
+      }
+
+      // start of unquoted Bs, start quote with special code
+      if ( !inQuote && here == CHARB )
+      {
+        // avoid creating double quotes
+        if ( newFormat.length() > 0 && newFormat.charAt( newFormat.length() - 1 ) == QUOTE )
+        {
+          newFormat.deleteCharAt( newFormat.length() - 1 );
+          newFormat.append( CODE );
+        }
+        else
+          newFormat.append( "'" + CODE );
+        inQuote = true;
+        inB = true;
+      }
+      else
+      {
+        newFormat.append( here );
+      }
+    }
+
+    // close quote if quote still open
+    if ( inQuote )
+      newFormat.append( QUOTE );
+
+    String str = ld.format( DateTimeFormatter.ofPattern( newFormat.toString() ) );
+
+    // no special code so can return string immediately
+    if ( !str.contains( CODE ) )
+      return str;
+
+    // determine half-of-year
+    String yearHalf;
+    if ( month() < 7 )
+      yearHalf = "1";
+    else
+      yearHalf = "2";
+
+    // four or more Bs is not allowed
+    String Bs = CODE + CODE + CODE + CODE;
+    if ( str.contains( Bs ) )
+      throw new IllegalArgumentException( "Too many pattern letters: B" );
+
+    // replace three Bs
+    Bs = CODE + CODE + CODE;
+    if ( yearHalf.equals( "1" ) )
+      str = str.replace( Bs, yearHalf + "st half" );
+    else
+      str = str.replace( Bs, yearHalf + "nd half" );
+
+    // replace two Bs
+    Bs = CODE + CODE;
+    str = str.replace( Bs, "H" + yearHalf );
+
+    // replace one Bs
+    Bs = CODE;
+    str = str.replace( Bs, yearHalf );
+
+    return str;
   }
 
   /********************************************* now *********************************************/

@@ -59,9 +59,12 @@ import rjc.jplanner.model.Plan;
 public class MainWindow
 {
   public static final Color        COLOR_GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
+  public static final String       STYLE_ERROR              = "-fx-text-fill: red;";
+  public static final String       STYLE_NORMAL             = "-fx-text-fill: black;";
+  public static String             STYLE_TOOLTIP;
 
   private Stage                    m_stage;
-  private MainTabWidget            m_mainTabWidget          = new MainTabWidget();       // MainTabWidget associated with MainWindow
+  private MainTabWidget            m_mainTabWidget;                                      // MainTabWidget associated with MainWindow
   private Menus                    m_menus                  = new Menus();
   private TextField                m_statusBar              = new TextField();
   private UndoStackWindow          m_undoWindow;                                         // window to show plan undo-stack
@@ -70,6 +73,13 @@ public class MainWindow
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
   {
+    // set style
+    STYLE_TOOLTIP = "-fx-text-fill: black;";
+    STYLE_TOOLTIP += "-fx-background-color: lightyellow;";
+    STYLE_TOOLTIP += "-fx-padding: 0.2em 1em 0.2em 0.5em;";
+    STYLE_TOOLTIP += "-fx-background-radius: 3px;";
+    m_mainTabWidget = new MainTabWidget();
+
     // arrange main application window layout
     GridPane grid = new GridPane();
     grid.add( m_menus, 0, 0 );
@@ -105,7 +115,6 @@ public class MainWindow
       if ( m_undoWindow != null )
         m_undoWindow.close();
     } );
-
   }
 
   /****************************************** message ********************************************/
