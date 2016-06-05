@@ -18,8 +18,8 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.Border;
 
 /*************************************************************************************************/
 /******************************* Table cell editor for simple text *******************************/
@@ -31,19 +31,10 @@ public class EditorText extends CellEditor
   /**************************************** constructor ******************************************/
   public EditorText()
   {
-    // create table cell editor
+    // create text table cell editor
     super();
     TextField textfield = new TextField();
-
-    // set appearance
-    //textfield.setPadding( new Insets( 0, Cell.CELL_PADDING - 1, 0, Cell.CELL_PADDING - 1 ) );
-    textfield.setBorder( Border.EMPTY );
-
-    // set contents
-    //textfield.setText( getData().getCellText( getColumn(), getRow() ) );
-    textfield.selectEnd();
-
-    // display and focus
+    textfield.setPadding( new Insets( 0, TableCanvas.CELL_PADDING, 0, TableCanvas.CELL_PADDING ) );
     setEditor( textfield );
   }
 
@@ -51,7 +42,18 @@ public class EditorText extends CellEditor
   @Override
   String getText()
   {
-    return ( (TextField) getPrime() ).getText();
+    // get editor text
+    return ( (TextField) getfocusControl() ).getText();
+  }
+
+  /******************************************* setValue ******************************************/
+  @Override
+  void setValue( Object value )
+  {
+    // set text editor value
+    TextField editor = (TextField) getfocusControl();
+    editor.setText( (String) value );
+    editor.selectRange( editor.getLength(), editor.getLength() );
   }
 
 }

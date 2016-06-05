@@ -18,10 +18,8 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.event.ActionEvent;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import rjc.jplanner.JPlanner;
 
@@ -33,9 +31,11 @@ public abstract class CellEditor
 {
   public static CellEditor cellEditorInProgress;
 
-  private boolean          m_error;
-  private Control          m_prime;             // prime control that has focus
-  private Region           m_editor;            // overall editor can be different to prime control that takes focus
+  private Table            m_table;
+  private int              m_columnPos;
+  private int              m_rowPos;
+  private Control          m_focusControl;      // prime control that has focus
+  private Region           m_overallEditor;     // overall editor can be different to control that takes focus
 
   public static enum MoveDirection// selection movement after committing an edit
   {
@@ -53,92 +53,97 @@ public abstract class CellEditor
   public void endEditing()
   {
     // close or commit editor depending if in error state
-    if ( m_error )
+    JPlanner.trace( "ENDING CELL EDITING ", m_focusControl.getId() );
+
+    if ( m_overallEditor.getId() == JPlanner.ERROR )
       close();
     else
       commit( MoveDirection.NONE );
   }
 
   /****************************************** setEditor ******************************************/
-  public void setEditor( Control prime )
+  public void setEditor( Control focusControl )
   {
-    // simple case where overall editor and prime control are the same
-    setEditor( prime, prime );
+    // simple case where overall editor and prime control are one and the same
+    setEditor( focusControl, focusControl );
   }
 
   /****************************************** setEditor ******************************************/
-  public void setEditor( Region editor, Control prime )
+  public void setEditor( Region overall, Control focusControl )
   {
-    // set overall editor and prime control
-    m_editor = editor;
-    m_prime = prime;
-
-    // set location
+    // set overall editor and focus control
+    m_overallEditor = overall;
+    m_focusControl = focusControl;
   }
 
-  /****************************************** getPrime *******************************************/
-  public Control getPrime()
+  /*************************************** getfocusControl ***************************************/
+  public Control getfocusControl()
   {
-    return m_prime;
-  }
-
-  /****************************************** getColumn ******************************************/
-  public int getColumn()
-  {
-    return 1;
-  }
-
-  /******************************************* getRow ********************************************/
-  public int getRow()
-  {
-    return 1;
+    return m_focusControl;
   }
 
   /******************************************* getText *******************************************/
   abstract String getText();
 
+  /******************************************* setValue ******************************************/
+  abstract void setValue( Object value );
+
   /******************************************* commit ********************************************/
   public void commit( MoveDirection move )
   {
     // update date source with new value
-    //getData().setValue( getColumn(), getRow(), getText() );
+    int columnIndex = m_table.getColumnIndexByPosition( m_columnPos );
+    int rowIndex = m_table.getRowIndexByPosition( m_rowPos );
+    m_table.getDataSource().setValue( columnIndex, rowIndex, getText() );
     close();
+
+    // TODO Move !!!!!!!!!!!!!
   }
 
   /******************************************** close ********************************************/
   public void close()
   {
-    // close editor by removing from table
-    //m_body.getChildren().remove( m_editor );
+    // close editor and set to error state so losing focus does not commit
+    m_overallEditor.setId( JPlanner.ERROR );
+    m_table.remove( m_overallEditor );
     cellEditorInProgress = null;
   }
 
-  /***************************************** keyPressed ******************************************/
-  private void keyPressed( KeyEvent event )
+  /********************************************* open ********************************************/
+  public void open( Table table, int columnPos, int rowPos, Object value )
   {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "KEYEVENT " + event );
+    // set cell editor position & size 
+    m_table = table;
+    m_columnPos = columnPos;
+    m_rowPos = rowPos;
+    int columnIndex = m_table.getColumnIndexByPosition( columnPos );
+    int rowIndex = m_table.getRowIndexByPosition( rowPos );
+    int w = m_table.getWidthByColumnIndex( columnIndex ) + 1;
+    int h = m_table.getHeightByRowIndex( rowIndex ) + 1;
+    m_overallEditor.setLayoutX( m_table.getXStartByColumnPosition( m_columnPos ) - 1 );
+    m_overallEditor.setLayoutY( m_table.getYStartByRowPosition( m_rowPos ) - 1 );
+    m_overallEditor.setMaxSize( w, h );
+    m_overallEditor.setMinSize( w, h );
 
-    if ( event.getCode() == KeyCode.TAB )
-      event.consume();
-  }
+    // set value
+    if ( value != null )
+      setValue( value );
+    else
+      setValue( m_table.getDataSource().getValue( columnIndex, rowIndex ) );
 
-  /******************************************* action ********************************************/
-  private void action( ActionEvent event )
-  {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "ACTIONEVENT " + event );
-  }
+    // display and request focus
+    table.add( m_overallEditor );
+    m_focusControl.requestFocus();
 
-  /**************************************** focusChange ******************************************/
-  private void focusChange()
-  {
-    // handle loss of focus
-    if ( getPrime().focusedProperty().get() == false )
+    // add listeners for behaviour
+    m_focusControl.focusedProperty().addListener( ( observable, oldF, newF ) -> endEditing() );
+    m_focusControl.setOnKeyPressed( event ->
     {
-      close();
-      JPlanner.trace( "CLOSING EDITOR " + getText() );
-    }
+      if ( event.getCode() == KeyCode.ESCAPE )
+        close();
+      if ( event.getCode() == KeyCode.ENTER && m_focusControl.getId() != JPlanner.ERROR )
+        commit( MoveDirection.NONE );
+    } );
   }
 
 }

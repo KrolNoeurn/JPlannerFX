@@ -20,12 +20,14 @@ package rjc.jplanner.gui.table;
 
 import java.util.ArrayList;
 
+import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -96,6 +98,7 @@ public class TableCanvas extends Canvas
     super();
     m_table = table;
 
+    // ensure cursors are setup
     if ( CURSOR_DOWNARROW == null )
     {
       CURSOR_DOWNARROW = new ImageCursor( new Image( getClass().getResourceAsStream( "arrowdown.png" ) ), 7, 16 );
@@ -113,6 +116,9 @@ public class TableCanvas extends Canvas
     setOnMouseReleased( event -> mouseReleased( event ) );
     setOnMousePressed( event -> mousePressed( event ) );
     setOnMouseClicked( event -> mouseClicked( event ) );
+
+    // when key presses
+    setOnKeyPressed( event -> keyPressed( event ) );
   }
 
   /****************************************** redrawAll ******************************************/
@@ -219,13 +225,17 @@ public class TableCanvas extends Canvas
   /*************************************** drawColumnCells ***************************************/
   private void drawColumnCells( int columnPos )
   {
+    // do not draw hidden columns
+    int w = m_table.getWidthByColumnPosition( columnPos );
+    if ( w <= 0 )
+      return;
+
     // draw column cells on canvas
     int row1 = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() );
     int row2 = m_table.getRowPositionAtY( (int) getHeight() );
 
     int x = m_table.getXStartByColumnPosition( columnPos );
     int y = m_table.getYStartByRowPosition( row1 );
-    int w = m_table.getWidthByColumnPosition( columnPos );
 
     for ( int rowPos = row1; rowPos <= row2; rowPos++ )
     {
@@ -241,13 +251,17 @@ public class TableCanvas extends Canvas
   /**************************************** drawRowCells *****************************************/
   private void drawRowCells( int rowPos )
   {
+    // do not draw hidden rows
+    int h = m_table.getHeightByRowPosition( rowPos );
+    if ( h <= 0 )
+      return;
+
     // draw row cell on canvas
     int column1 = m_table.getColumnPositionAtX( m_table.getVerticalHeaderWidth() );
     int column2 = m_table.getColumnPositionAtX( (int) getWidth() );
 
     int x = m_table.getXStartByColumnPosition( column1 );
     int y = m_table.getYStartByRowPosition( rowPos );
-    int h = m_table.getHeightByRowPosition( rowPos );
 
     for ( int columnPos = column1; columnPos <= column2; columnPos++ )
     {
@@ -301,11 +315,15 @@ public class TableCanvas extends Canvas
   /**************************************** drawRowHeader ****************************************/
   private void drawRowHeader( int rowPos )
   {
+    // do not draw hidden rows
+    int h = m_table.getHeightByRowPosition( rowPos );
+    if ( h <= 0 )
+      return;
+
     // draw row header
     GraphicsContext gc = getGraphicsContext2D();
     int y = m_table.getYStartByRowPosition( rowPos );
     int w = m_table.getVerticalHeaderWidth();
-    int h = m_table.getHeightByRowPosition( rowPos );
     int rowIndex = m_table.getRowIndexByPosition( rowPos );
     String text = m_table.getDataSource().getRowTitle( rowIndex );
     boolean selected = m_table.doesRowHaveSelection( rowPos );
@@ -343,10 +361,14 @@ public class TableCanvas extends Canvas
   /*************************************** drawColumnHeader **************************************/
   private void drawColumnHeader( int columnPos )
   {
+    // do not draw hidden columns
+    int w = m_table.getWidthByColumnPosition( columnPos );
+    if ( w <= 0 )
+      return;
+
     // draw column header
     GraphicsContext gc = getGraphicsContext2D();
     int x = m_table.getXStartByColumnPosition( columnPos );
-    int w = m_table.getWidthByColumnPosition( columnPos );
     int h = m_table.getHorizontalHeaderHeight();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
     String text = m_table.getDataSource().getColumnTitle( columnIndex );
@@ -698,13 +720,13 @@ public class TableCanvas extends Canvas
       // vertical marker
       if ( m_x < m_table.getVerticalHeaderWidth() )
       {
-        m_table.animationScrollLeft();
+        m_table.animateScrollToLeft();
         return;
       }
 
       if ( m_x > getWidth() )
       {
-        m_table.animationScrollRight();
+        m_table.animateScrollToRight();
         return;
       }
     }
@@ -713,19 +735,167 @@ public class TableCanvas extends Canvas
       // horizontal marker
       if ( m_y < m_table.getHorizontalHeaderHeight() )
       {
-        m_table.animationScrollUp();
+        m_table.animateScrollToUp();
         return;
       }
 
       if ( m_y > getHeight() )
       {
-        m_table.animationScrollDown();
+        m_table.animateScrollToBottom();
         return;
       }
     }
 
     // no scrolling needed so make sure any previous animation is stopped
-    m_table.animationStop();
+    m_table.stopAnimation();
+  }
+
+  /****************************************** keyPressed *****************************************/
+  private void keyPressed( KeyEvent event )
+  {
+    // TODO Auto-generated method stub ......................
+    JPlanner.trace( event );
+
+    boolean redraw = false;
+
+    switch ( event.getCode() )
+    {
+      case HOME:
+        // find left-most visible column
+        int leftmost = 0;
+        while ( m_table.getWidthByColumnPosition( leftmost ) <= 0 )
+          leftmost++;
+
+        if ( m_selectedColumnPos != leftmost )
+        {
+          m_selectedColumnPos = leftmost;
+          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          redraw = true;
+        }
+        if ( m_table.selectionCount() > 1 || redraw )
+        {
+          m_table.clearAllSelection();
+          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          redraw = true;
+        }
+        if ( redraw )
+          redrawAll();
+
+        break;
+
+      case END:
+        // find right-most visible column
+        int rightmost = m_table.getDataSource().getColumnCount() - 1;
+        while ( m_table.getWidthByColumnPosition( rightmost ) <= 0 )
+          rightmost--;
+
+        if ( m_selectedColumnPos != rightmost )
+        {
+          m_selectedColumnPos = rightmost;
+          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          redraw = true;
+        }
+        if ( m_table.selectionCount() > 1 || redraw )
+        {
+          m_table.clearAllSelection();
+          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          redraw = true;
+        }
+        if ( redraw )
+          redrawAll();
+
+        break;
+
+      case PAGE_UP:
+        break;
+      case PAGE_DOWN:
+        break;
+      case UP:
+      case KP_UP:
+        // find visible cell above
+        int above = m_selectedRowPos - 1;
+        while ( m_table.getHeightByRowPosition( above ) <= 0 && above >= 0 )
+          above--;
+
+        // ensure only cell visible above is selected
+        if ( above >= 0 )
+          m_selectedRowPos = above;
+        m_table.clearAllSelection();
+        m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+        m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+        redrawAll();
+        break;
+
+      case DOWN:
+      case KP_DOWN:
+        // find visible cell above
+        int rows = m_table.getDataSource().getRowCount();
+        int below = m_selectedRowPos + 1;
+        while ( m_table.getHeightByRowPosition( below ) <= 0 && below < rows )
+          below++;
+
+        // ensure only cell visible below is selected
+        if ( below < rows )
+          m_selectedRowPos = below;
+        m_table.clearAllSelection();
+        m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+        m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+        redrawAll();
+        break;
+
+      case RIGHT:
+      case KP_RIGHT:
+        // find visible cell to right
+        int columns = m_table.getDataSource().getColumnCount();
+        int right = m_selectedColumnPos + 1;
+        while ( m_table.getWidthByColumnPosition( right ) <= 0 && right < columns )
+          right++;
+
+        if ( right < columns && m_selectedColumnPos != right )
+        {
+          m_selectedColumnPos = right;
+          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          redraw = true;
+        }
+        if ( m_table.selectionCount() > 1 || redraw )
+        {
+          m_table.clearAllSelection();
+          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          redraw = true;
+        }
+        if ( redraw )
+          redrawAll();
+
+        break;
+
+      case LEFT:
+      case KP_LEFT:
+        // find visible cell to left
+        int left = m_selectedColumnPos - 1;
+        while ( m_table.getWidthByColumnPosition( left ) <= 0 && left >= 0 )
+          left--;
+
+        if ( left >= 0 && m_selectedColumnPos != left )
+        {
+          m_selectedColumnPos = left;
+          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          redraw = true;
+        }
+        if ( m_table.selectionCount() > 1 || redraw )
+        {
+          m_table.clearAllSelection();
+          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          redraw = true;
+        }
+        if ( redraw )
+          redrawAll();
+
+        break;
+
+      default:
+        JPlanner.trace( "KEY not handled ", event.getCode() );
+    }
+
   }
 
   /****************************************** mouseMoved *****************************************/
@@ -878,7 +1048,7 @@ public class TableCanvas extends Canvas
   private void mouseReleased( MouseEvent event )
   {
     // stop any animation
-    m_table.animationStop();
+    m_table.stopAnimation();
 
     // handle down arrow
     if ( getCursor() == CURSOR_DOWNARROW )
@@ -983,6 +1153,9 @@ public class TableCanvas extends Canvas
   /**************************************** mousePressed *****************************************/
   private void mousePressed( MouseEvent event )
   {
+    // request focus for the table (and so close any active cell editors)
+    Platform.runLater( () -> requestFocus() );
+
     // handle cross cursor
     if ( getCursor() == CURSOR_CROSS && event.isPrimaryButtonDown() && !event.isAltDown() )
     {
@@ -1055,6 +1228,8 @@ public class TableCanvas extends Canvas
       JPlanner.trace( "EDIT CELL " + m_columnPos + "," + m_rowPos );
 
       CellEditor editor = m_table.getDataSource().getEditor();
+      editor.open( m_table, m_columnPos, m_rowPos, null );
+
     }
 
   }

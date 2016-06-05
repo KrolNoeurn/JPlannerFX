@@ -138,26 +138,34 @@ public class PlanProperties extends ScrollPane
 
     // show updated examples of formats
     m_DTformat.textProperty().addListener( ( observable, oldValue, newValue ) -> dateTimeFormatChange() );
-    m_DTformat.setOnKeyPressed( event -> dateTimeFormatKeyPressed( event ) );
+    m_DTformat.setOnKeyPressed( event -> keyPressed( event ) );
     m_Dformat.textProperty().addListener( ( observable, oldValue, newValue ) -> dateFormatChange() );
-    m_Dformat.setOnKeyPressed( event -> dateFormatKeyPressed( event ) );
+    m_Dformat.setOnKeyPressed( event -> keyPressed( event ) );
   }
 
-  /*********************************** dateTimeFormatKeyPressed **********************************/
-  private void dateTimeFormatKeyPressed( KeyEvent event )
+  /***************************************** keyPressed ******************************************/
+  private void keyPressed( KeyEvent event )
   {
+    // event source is the text field
+    TextField source = (TextField) event.getSource();
+
+    // if escape pressed, revert back to plan format
     if ( event.getCode() == KeyCode.ESCAPE )
     {
-      int pos = m_DTformat.getCaretPosition();
-      m_DTformat.setText( JPlanner.plan.datetimeFormat() );
-      m_DTformat.selectRange( pos, pos );
+      int pos = source.getCaretPosition();
+      if ( source == m_DTformat )
+        source.setText( JPlanner.plan.datetimeFormat() );
+      if ( source == m_Dformat )
+        source.setText( JPlanner.plan.dateFormat() );
+      source.selectRange( pos, pos );
     }
 
+    // if enter pressed and not in error state, update plan with new format
     if ( event.getCode() == KeyCode.ENTER && m_DTformat.getId() != JPlanner.ERROR )
     {
-      int pos = m_DTformat.getCaretPosition();
+      int pos = source.getCaretPosition();
       updatePlan();
-      m_DTformat.selectRange( pos, pos );
+      source.selectRange( pos, pos );
     }
   }
 
@@ -191,24 +199,6 @@ public class PlanProperties extends ScrollPane
     displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
   }
 
-  /************************************* dateFormatKeyPressed ************************************/
-  private void dateFormatKeyPressed( KeyEvent event )
-  {
-    if ( event.getCode() == KeyCode.ESCAPE )
-    {
-      int pos = m_Dformat.getCaretPosition();
-      m_Dformat.setText( JPlanner.plan.dateFormat() );
-      m_Dformat.selectRange( pos, pos );
-    }
-
-    if ( event.getCode() == KeyCode.ENTER && m_Dformat.getId() != JPlanner.ERROR )
-    {
-      int pos = m_Dformat.getCaretPosition();
-      updatePlan();
-      m_Dformat.selectRange( pos, pos );
-    }
-  }
-
   /*************************************** dateFormatChange **************************************/
   private void dateFormatChange()
   {
@@ -218,6 +208,9 @@ public class PlanProperties extends ScrollPane
 
     try
     {
+      if ( m_Dformat.getText().length() < 1 )
+        throw new NumberFormatException( "Invalid format" );
+
       JPlanner.gui.message( "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
       m_Dformat.setStyle( MainWindow.STYLE_NORMAL );
       m_Dformat.setId( null );
