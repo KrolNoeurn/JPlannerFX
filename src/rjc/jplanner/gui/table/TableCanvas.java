@@ -34,6 +34,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.table.CellEditor.MoveDirection;
 import rjc.jplanner.gui.table.Table.Alignment;
 
 /*************************************************************************************************/
@@ -1227,8 +1228,11 @@ public class TableCanvas extends Canvas
       // edit cell
       JPlanner.trace( "EDIT CELL " + m_columnPos + "," + m_rowPos );
 
-      CellEditor editor = m_table.getDataSource().getEditor();
-      editor.open( m_table, m_columnPos, m_rowPos, null );
+      int columnIndex = m_table.getColumnIndexByPosition( m_columnPos );
+      int rowIndex = m_table.getRowIndexByPosition( m_rowPos );
+
+      CellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
+      editor.open( m_table, m_columnPos, m_rowPos, null, MoveDirection.DOWN );
 
     }
 

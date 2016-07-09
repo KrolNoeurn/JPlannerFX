@@ -40,7 +40,7 @@ public interface ITableDataSource
   String getRowTitle( int rowIndex );
 
   // return editor
-  CellEditor getEditor();
+  CellEditor getEditor( int columnIndex, int rowIndex );
 
   // return cell text to be displayed
   String getCellText( int columnIndex, int rowIndex );

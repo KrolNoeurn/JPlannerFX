@@ -29,13 +29,15 @@ import rjc.jplanner.JPlanner;
 
 public abstract class CellEditor
 {
-  public static CellEditor cellEditorInProgress;
+  private static CellEditor m_cellEditorInProgress;
 
-  private Table            m_table;
-  private int              m_columnPos;
-  private int              m_rowPos;
-  private Control          m_focusControl;      // prime control that has focus
-  private Region           m_overallEditor;     // overall editor can be different to control that takes focus
+  private Table             m_table;
+  private int               m_columnIndex;
+  private int               m_rowIndex;
+  private MoveDirection     m_moveDirection;
+
+  private Control           m_focusControl;        // prime control that has focus
+  private Region            m_overallEditor;       // overall editor can be different to control that takes focus
 
   public static enum MoveDirection// selection movement after committing an edit
   {
@@ -43,22 +45,25 @@ public abstract class CellEditor
   }
 
   /***************************************** constructor *****************************************/
-  public CellEditor()
+  public CellEditor( int columnIndex, int rowIndex )
   {
     // initialise private variables
-    cellEditorInProgress = this;
+    m_columnIndex = columnIndex;
+    m_rowIndex = rowIndex;
   }
 
-  /***************************************** endEditing ******************************************/
-  public void endEditing()
-  {
-    // close or commit editor depending if in error state
-    JPlanner.trace( "ENDING CELL EDITING ", m_focusControl.getId() );
+  /******************************************* getText *******************************************/
+  abstract String getText();
 
-    if ( m_overallEditor.getId() == JPlanner.ERROR )
-      close();
-    else
-      commit( MoveDirection.NONE );
+  /******************************************* setValue ******************************************/
+  abstract void setValue( Object value );
+
+  /***************************************** endEditing ******************************************/
+  public static void endEditing()
+  {
+    // if there is a currently active editor, close it
+    if ( m_cellEditorInProgress != null )
+      m_cellEditorInProgress.close( !m_cellEditorInProgress.isError() );
   }
 
   /****************************************** setEditor ******************************************/
@@ -74,76 +79,94 @@ public abstract class CellEditor
     // set overall editor and focus control
     m_overallEditor = overall;
     m_focusControl = focusControl;
+
+    // add listener to end editing if focus lost
+    m_focusControl.focusedProperty().addListener( ( observable, oldF, newF ) ->
+    {
+      if ( !newF )
+        endEditing();
+    } );
+
+    // add listener to close if escape or enter pressed
+    m_focusControl.setOnKeyPressed( event ->
+    {
+      if ( event.getCode() == KeyCode.ESCAPE )
+        close( false );
+      if ( event.getCode() == KeyCode.ENTER && m_focusControl.getId() != JPlanner.ERROR )
+        close( !isError() );
+    } );
   }
 
   /*************************************** getfocusControl ***************************************/
   public Control getfocusControl()
   {
+    // return focus control
     return m_focusControl;
   }
 
-  /******************************************* getText *******************************************/
-  abstract String getText();
-
-  /******************************************* setValue ******************************************/
-  abstract void setValue( Object value );
-
-  /******************************************* commit ********************************************/
-  public void commit( MoveDirection move )
+  /******************************************* isError *******************************************/
+  public Boolean isError()
   {
-    // update date source with new value
-    int columnIndex = m_table.getColumnIndexByPosition( m_columnPos );
-    int rowIndex = m_table.getRowIndexByPosition( m_rowPos );
-    m_table.getDataSource().setValue( columnIndex, rowIndex, getText() );
-    close();
+    // return if editor in error state
+    return m_overallEditor == null || m_overallEditor.getId() == JPlanner.ERROR;
+  }
 
-    // TODO Move !!!!!!!!!!!!!
+  /****************************************** setError *******************************************/
+  public void setError( boolean error )
+  {
+    // set if editor is error state
+    if ( error )
+      m_overallEditor.setId( JPlanner.ERROR );
+    else
+      m_overallEditor.setId( null );
   }
 
   /******************************************** close ********************************************/
-  public void close()
+  public void close( boolean commit )
   {
-    // close editor and set to error state so losing focus does not commit
-    m_overallEditor.setId( JPlanner.ERROR );
+    JPlanner.trace( "Closing editor", commit, m_overallEditor );
+
+    // if requested commit new value to table data source & move focus
+    if ( commit )
+    {
+      m_table.getDataSource().setValue( m_columnIndex, m_rowIndex, getText() );
+      //m_table.moveFocus( m_moveDirection );
+    }
+
+    // remove editor from table
     m_table.remove( m_overallEditor );
-    cellEditorInProgress = null;
+    m_overallEditor = null;
+    m_cellEditorInProgress = null;
   }
 
   /********************************************* open ********************************************/
-  public void open( Table table, int columnPos, int rowPos, Object value )
+  public void open( Table table, int columnPos, int rowPos, Object value, MoveDirection move )
   {
-    // set cell editor position & size 
+    // check editor set
+    if ( m_overallEditor == null )
+      throw new IllegalStateException( "Cell editor not set " + table + " " + columnPos + " " + rowPos );
+
+    // set editor position & size
     m_table = table;
-    m_columnPos = columnPos;
-    m_rowPos = rowPos;
-    int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    int rowIndex = m_table.getRowIndexByPosition( rowPos );
-    int w = m_table.getWidthByColumnIndex( columnIndex ) + 1;
-    int h = m_table.getHeightByRowIndex( rowIndex ) + 1;
-    m_overallEditor.setLayoutX( m_table.getXStartByColumnPosition( m_columnPos ) - 1 );
-    m_overallEditor.setLayoutY( m_table.getYStartByRowPosition( m_rowPos ) - 1 );
+    m_moveDirection = move;
+
+    int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
+    int h = m_table.getHeightByRowIndex( m_rowIndex ) + 1;
+    m_overallEditor.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
+    m_overallEditor.setLayoutY( m_table.getYStartByRowPosition( rowPos ) - 1 );
     m_overallEditor.setMaxSize( w, h );
     m_overallEditor.setMinSize( w, h );
 
-    // set value
+    // set editor value
     if ( value != null )
       setValue( value );
     else
-      setValue( m_table.getDataSource().getValue( columnIndex, rowIndex ) );
+      setValue( m_table.getDataSource().getValue( m_columnIndex, m_rowIndex ) );
 
-    // display and request focus
-    table.add( m_overallEditor );
+    // display editor and give focus
+    m_cellEditorInProgress = this;
+    m_table.add( m_overallEditor );
     m_focusControl.requestFocus();
-
-    // add listeners for behaviour
-    m_focusControl.focusedProperty().addListener( ( observable, oldF, newF ) -> endEditing() );
-    m_focusControl.setOnKeyPressed( event ->
-    {
-      if ( event.getCode() == KeyCode.ESCAPE )
-        close();
-      if ( event.getCode() == KeyCode.ENTER && m_focusControl.getId() != JPlanner.ERROR )
-        commit( MoveDirection.NONE );
-    } );
   }
 
 }

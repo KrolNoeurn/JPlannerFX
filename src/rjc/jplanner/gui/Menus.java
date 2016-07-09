@@ -62,8 +62,7 @@ public class Menus extends MenuBar
     JPlanner.gui.message( "" );
 
     // if any table cell editing in progress, end it
-    if ( CellEditor.cellEditorInProgress != null )
-      CellEditor.cellEditorInProgress.endEditing();
+    CellEditor.endEditing();
 
     // ensure plan is up-to-date
     if ( JPlanner.gui.isPlanTabSelected() )

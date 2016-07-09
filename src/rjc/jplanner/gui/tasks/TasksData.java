@@ -22,7 +22,10 @@ import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.EditorDateTime;
+import rjc.jplanner.gui.table.EditorSpin;
 import rjc.jplanner.gui.table.EditorText;
+import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.gui.table.TableCanvas;
@@ -91,10 +94,22 @@ public class TasksData implements ITableDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor()
+  public CellEditor getEditor( int columnIndex, int rowIndex )
   {
-    // return editor for the table body cell with focus
-    return new EditorText();
+    // return editor for table body cell
+    switch ( columnIndex )
+    {
+      case Task.SECTION_DURATION:
+      case Task.SECTION_WORK:
+        return new EditorTimeSpan( columnIndex, rowIndex );
+      case Task.SECTION_START:
+      case Task.SECTION_END:
+        return new EditorDateTime( columnIndex, rowIndex );
+      case Task.SECTION_PRIORITY:
+        return new EditorSpin( columnIndex, rowIndex );
+      default:
+        return new EditorText( columnIndex, rowIndex );
+    }
   }
 
   /****************************************** setValue *******************************************/

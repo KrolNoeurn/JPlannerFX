@@ -29,10 +29,10 @@ public class EditorText extends CellEditor
 {
 
   /**************************************** constructor ******************************************/
-  public EditorText()
+  public EditorText( int columnIndex, int rowIndex )
   {
     // create text table cell editor
-    super();
+    super( columnIndex, rowIndex );
     TextField textfield = new TextField();
     textfield.setPadding( new Insets( 0, TableCanvas.CELL_PADDING, 0, TableCanvas.CELL_PADDING ) );
     setEditor( textfield );

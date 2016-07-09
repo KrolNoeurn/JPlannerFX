@@ -91,10 +91,10 @@ public class ResourcesData implements ITableDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor()
+  public CellEditor getEditor( int columnIndex, int rowIndex )
   {
-    // return editor for the table body cell with focus
-    return new EditorText();
+    // return editor for table body cell
+    return new EditorText( columnIndex, rowIndex );
   }
 
   /****************************************** setValue *******************************************/
