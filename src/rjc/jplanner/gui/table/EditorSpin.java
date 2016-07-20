@@ -55,7 +55,7 @@ public class EditorSpin extends CellEditor
 
   /******************************************* getText *******************************************/
   @Override
-  String getText()
+  public String getText()
   {
     // TODO Auto-generated method stub
     //return ( (Spinner<Integer>) getfocusControl() ).getValue().toString();
@@ -71,7 +71,7 @@ public class EditorSpin extends CellEditor
 
   /******************************************* setValue ******************************************/
   @Override
-  void setValue( Object value )
+  public void setValue( Object value )
   {
     // TODO Auto-generated method stub
 

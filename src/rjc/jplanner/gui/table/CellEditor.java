@@ -53,10 +53,10 @@ public abstract class CellEditor
   }
 
   /******************************************* getText *******************************************/
-  abstract String getText();
+  abstract public String getText();
 
   /******************************************* setValue ******************************************/
-  abstract void setValue( Object value );
+  abstract public void setValue( Object value );
 
   /***************************************** endEditing ******************************************/
   public static void endEditing()

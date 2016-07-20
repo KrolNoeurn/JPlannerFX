@@ -16,21 +16,22 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui.tasks;
+
+import rjc.jplanner.gui.table.CellEditor;
 
 /*************************************************************************************************/
-/***************************** Table cell editor for DateTime fields *****************************/
+/****************************** Table cell editor for task priority ******************************/
 /*************************************************************************************************/
 
-public class EditorDateTime extends CellEditor
+public class EditorTaskPriority extends CellEditor
 {
 
   /**************************************** constructor ******************************************/
-  public EditorDateTime( int columnIndex, int rowIndex )
+  public EditorTaskPriority( int columnIndex, int rowIndex )
   {
-    // create date-time table cell editor
     super( columnIndex, rowIndex );
-
+    // TODO Auto-generated constructor stub
   }
 
   /******************************************* getText *******************************************/

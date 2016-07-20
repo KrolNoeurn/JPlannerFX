@@ -102,6 +102,11 @@ public class CalendarsData implements ITableDataSource
   @Override
   public CellEditor getEditor( int columnIndex, int rowIndex )
   {
+    // return null if cell is not editable, unused normal section cells
+    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    if ( rowIndex >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
+      return null;
+
     // return editor for table body cell
     return new EditorText( columnIndex, rowIndex );
   }

@@ -44,19 +44,25 @@ public class MainTabWidget extends TabPane
   private DaysTab      m_tabDays;
 
   /**************************************** constructor ******************************************/
-  public MainTabWidget()
+  public MainTabWidget( boolean showPlanTab )
   {
     // construct main tab widget
     super();
 
-    // create and add the five tabs
-    m_tabPlan = new PlanTab( "Plan" );
+    // create and add plan tab only if requested
+    if ( showPlanTab )
+    {
+      m_tabPlan = new PlanTab( "Plan" );
+      getTabs().add( m_tabPlan );
+    }
+
+    // create and add the other tabs
     m_tabTasks = new TasksTab( "Tasks & Gantt" );
     m_tabResources = new ResourcesTab( "Resources" );
     m_tabCalendars = new CalendarsTab( "Calendars" );
     m_tabDays = new DaysTab( "Days" );
 
-    getTabs().addAll( m_tabPlan, m_tabTasks, m_tabResources, m_tabCalendars, m_tabDays );
+    getTabs().addAll( m_tabTasks, m_tabResources, m_tabCalendars, m_tabDays );
   }
 
   /******************************************* select ********************************************/

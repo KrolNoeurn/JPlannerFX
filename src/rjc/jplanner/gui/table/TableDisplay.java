@@ -29,8 +29,8 @@ import javafx.scene.control.ScrollBar;
 
 public class TableDisplay extends TableParent
 {
-  private ScrollBar   m_vScrollBar;       // vertical scroll bar
-  private ScrollBar   m_hScrollBar;       // horizontal scroll bar
+  protected ScrollBar m_vScrollBar;       // vertical scroll bar
+  protected ScrollBar m_hScrollBar;       // horizontal scroll bar
   private TableCanvas m_canvas;           // table canvas
   private Table       m_table;            // table definition
 

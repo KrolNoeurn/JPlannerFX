@@ -120,6 +120,7 @@ public class TableCanvas extends Canvas
 
     // when key presses
     setOnKeyPressed( event -> keyPressed( event ) );
+    setOnKeyTyped( event -> keyTyped( event ) );
   }
 
   /****************************************** redrawAll ******************************************/
@@ -563,7 +564,7 @@ public class TableCanvas extends Canvas
 
     // move all lines down to vertically centre within cell
     for ( TextLine line : lines )
-      line.y += alignY - 2;
+      line.y += alignY - 3;
 
     return lines;
   }
@@ -751,12 +752,24 @@ public class TableCanvas extends Canvas
     m_table.stopAnimation();
   }
 
+  /******************************************* keyTyped ******************************************/
+  private void keyTyped( KeyEvent event )
+  {
+    // react to typed text by opening editor if appropriate
+    JPlanner.trace( event.getCharacter() );
+
+    char key = event.getCharacter().charAt( 0 );
+    if ( !Character.isWhitespace( key ) )
+    {
+      JPlanner.trace( "GOOD CHARACTER = " + key );
+      openCellEditor( event.getCharacter() );
+    }
+  }
+
   /****************************************** keyPressed *****************************************/
   private void keyPressed( KeyEvent event )
   {
-    // TODO Auto-generated method stub ......................
-    JPlanner.trace( event );
-
+    // react to cursor moving keyboard events 
     boolean redraw = false;
 
     switch ( event.getCode() )
@@ -808,9 +821,12 @@ public class TableCanvas extends Canvas
         break;
 
       case PAGE_UP:
+        JPlanner.trace( "TODO - handle PAGE_UP key press ..." );
         break;
       case PAGE_DOWN:
+        JPlanner.trace( "TODO - handle PAGE_DOWN key press ..." );
         break;
+
       case UP:
       case KP_UP:
         // find visible cell above
@@ -893,10 +909,14 @@ public class TableCanvas extends Canvas
 
         break;
 
-      default:
-        JPlanner.trace( "KEY not handled ", event.getCode() );
-    }
+      case F2:
+        // open cell editor with current cell contents
+        openCellEditor( null );
+        break;
 
+      default:
+        break;
+    }
   }
 
   /****************************************** mouseMoved *****************************************/
@@ -1217,25 +1237,33 @@ public class TableCanvas extends Canvas
   /**************************************** mouseClicked *****************************************/
   private void mouseClicked( MouseEvent event )
   {
-    // handle cross cursor
-    if ( getCursor() == CURSOR_CROSS )
-    {
-      if ( event.getClickCount() != 2 )
-        return;
-      if ( event.isAltDown() || event.isControlDown() || event.isShiftDown() )
-        return;
+    // was mouse double clicked?
+    boolean doubleClicked = event.getClickCount() == 2;
 
-      // edit cell
-      JPlanner.trace( "EDIT CELL " + m_columnPos + "," + m_rowPos );
+    // open cell editor if cross cursor and double click
+    if ( getCursor() == CURSOR_CROSS && doubleClicked )
+      openCellEditor( null );
 
-      int columnIndex = m_table.getColumnIndexByPosition( m_columnPos );
-      int rowIndex = m_table.getRowIndexByPosition( m_rowPos );
+    // auto-resize column if horizontal resize cursor and double click
+    if ( getCursor() == CURSOR_H_RESIZE && doubleClicked )
+      JPlanner.trace( "TODO - Implement auto-resize column" );
 
-      CellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
-      editor.open( m_table, m_columnPos, m_rowPos, null, MoveDirection.DOWN );
+    // auto-resize row if vertical resize cursor and double click
+    if ( getCursor() == CURSOR_V_RESIZE && doubleClicked )
+      JPlanner.trace( "TODO - Implement auto-resize row" );
+  }
 
-    }
+  /*************************************** openCellEditor ****************************************/
+  private void openCellEditor( Object value )
+  {
+    // open cell editor for currently selected table cell
+    int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumnPos );
+    int rowIndex = m_table.getRowIndexByPosition( m_selectedRowPos );
+    CellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
 
+    // open editor if one available
+    if ( editor != null )
+      editor.open( m_table, m_selectedColumnPos, m_selectedRowPos, value, MoveDirection.DOWN );
   }
 
 }

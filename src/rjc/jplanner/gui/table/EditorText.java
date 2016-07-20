@@ -40,7 +40,7 @@ public class EditorText extends CellEditor
 
   /******************************************* getText *******************************************/
   @Override
-  String getText()
+  public String getText()
   {
     // get editor text
     return ( (TextField) getfocusControl() ).getText();
@@ -48,7 +48,7 @@ public class EditorText extends CellEditor
 
   /******************************************* setValue ******************************************/
   @Override
-  void setValue( Object value )
+  public void setValue( Object value )
   {
     // set text editor value
     TextField editor = (TextField) getfocusControl();

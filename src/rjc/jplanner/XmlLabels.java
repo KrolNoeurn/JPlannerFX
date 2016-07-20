@@ -114,4 +114,5 @@ public class XmlLabels
   public static final String XML_POSITION        = "position";
   public static final String XML_UNDOSTACK       = "undostack";
   public static final String XML_VISIBLE         = "visible";
+  public static final String XML_SCROLL          = "scroll";
 }

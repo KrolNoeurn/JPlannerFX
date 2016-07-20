@@ -73,12 +73,12 @@ public class MainWindow
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
   {
-    // set style
+    // set style for tool tips
     STYLE_TOOLTIP = "-fx-text-fill: black;";
     STYLE_TOOLTIP += "-fx-background-color: lightyellow;";
     STYLE_TOOLTIP += "-fx-padding: 0.2em 1em 0.2em 0.5em;";
     STYLE_TOOLTIP += "-fx-background-radius: 3px;";
-    m_mainTabWidget = new MainTabWidget();
+    m_mainTabWidget = new MainTabWidget( true );
 
     // arrange main application window layout
     GridPane grid = new GridPane();
@@ -682,7 +682,7 @@ public class MainWindow
   {
     // create new window
     Stage stage = new Stage();
-    MainTabWidget newTabWidget = new MainTabWidget();
+    MainTabWidget newTabWidget = new MainTabWidget( false );
     stage.setScene( new Scene( newTabWidget ) );
     stage.setTitle( m_stage.getTitle() );
     stage.show();

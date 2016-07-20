@@ -42,6 +42,9 @@ public class ResourcesTab extends Tab
     m_table.setDefaultColumnWidth( 100 );
     m_table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
 
+    // by default row 0 (the special 'unassigned' resource) should be hidden
+    m_table.hideRow( 0 );
+
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
     {

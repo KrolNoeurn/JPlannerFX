@@ -18,9 +18,15 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.geometry.Insets;
+import javafx.scene.control.Spinner;
+
 /*************************************************************************************************/
 /***************************** Table cell editor for TimeSpan fields *****************************/
 /*************************************************************************************************/
+
+// NOTES
+// http://stackoverflow.com/questions/32613619/how-to-make-a-timespinner-in-javafx
 
 public class EditorTimeSpan extends CellEditor
 {
@@ -31,22 +37,29 @@ public class EditorTimeSpan extends CellEditor
     // create time-span table cell editor
     super( columnIndex, rowIndex );
 
+    Spinner<Integer> spin = new Spinner<>( 0, 100, 10 );
+    spin.setPadding( new Insets( 0, 0, 0, 0 ) );
+    setEditor( spin );
   }
 
   /******************************************* getText *******************************************/
   @Override
-  String getText()
+  public String getText()
   {
     // TODO Auto-generated method stub
-    return null;
+
+    return ( (Spinner<Integer>) getfocusControl() ).getValue().toString();
   }
 
   /******************************************* setValue ******************************************/
   @Override
-  void setValue( Object value )
+  public void setValue( Object value )
   {
     // TODO Auto-generated method stub
 
+    Spinner<Integer> editor = (Spinner<Integer>) getfocusControl();
+    int integer = 10;
+    //editor.getValueFactory().setValue( integer );
   }
 
 }

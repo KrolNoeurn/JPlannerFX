@@ -67,6 +67,7 @@ public class DaysData implements ITableDataSource
   @Override
   public String getRowTitle( int rowIndex )
   {
+    // display row number plus one, so row index zero is displayed as "1" etc
     return Integer.toString( rowIndex + 1 );
   }
 
@@ -104,6 +105,11 @@ public class DaysData implements ITableDataSource
   @Override
   public CellEditor getEditor( int columnIndex, int rowIndex )
   {
+    // return null if cell is not editable, unused start/end
+    Day day = JPlanner.plan.day( rowIndex );
+    if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
+      return null;
+
     // return editor for table body cell
     return new EditorText( columnIndex, rowIndex );
   }

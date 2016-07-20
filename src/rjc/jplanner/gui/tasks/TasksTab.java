@@ -48,6 +48,13 @@ public class TasksTab extends Tab
     m_table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
     m_table.setWidthByColumnIndex( Task.SECTION_START, 140 );
     m_table.setWidthByColumnIndex( Task.SECTION_END, 140 );
+    m_table.setWidthByColumnIndex( Task.SECTION_WORK, 60 );
+    m_table.setWidthByColumnIndex( Task.SECTION_PRIORITY, 60 );
+    m_table.setWidthByColumnIndex( Task.SECTION_DEADLINE, 140 );
+    m_table.setWidthByColumnIndex( Task.SECTION_COMMENT, 140 );
+
+    // by default row 0 (the overall project summary) should be hidden
+    m_table.hideRow( 0 );
 
     // alongside the gantt
     m_gantt = new Gantt();

@@ -600,6 +600,7 @@ public class Table extends TableDisplay
     // write column widths
     xsw.writeStartElement( XmlLabels.XML_COLUMNS );
     xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( m_defaultColumnWidth ) );
+    xsw.writeAttribute( XmlLabels.XML_SCROLL, Integer.toString( (int) m_hScrollBar.getValue() ) );
     int count = m_data.getColumnCount();
     for ( int columnIndex = 0; columnIndex < count; columnIndex++ )
     {
@@ -617,6 +618,7 @@ public class Table extends TableDisplay
     // write row heights
     xsw.writeStartElement( XmlLabels.XML_ROWS );
     xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_defaultRowHeight ) );
+    xsw.writeAttribute( XmlLabels.XML_SCROLL, Integer.toString( (int) m_vScrollBar.getValue() ) );
     count = m_data.getRowCount();
     for ( int rowIndex = 0; rowIndex < count; rowIndex++ )
     {
@@ -638,7 +640,22 @@ public class Table extends TableDisplay
   /***************************************** loadColumns *****************************************/
   public void loadColumns( XMLStreamReader xsr ) throws XMLStreamException
   {
-    // read XML columns data
+    // read XML columns attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        case XmlLabels.XML_WIDTH:
+          setDefaultColumnWidth( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        case XmlLabels.XML_SCROLL:
+          m_hScrollBar.setValue( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
+    // read XML individual columns
     while ( xsr.hasNext() )
     {
       xsr.next();
@@ -685,7 +702,22 @@ public class Table extends TableDisplay
   /****************************************** loadRows *******************************************/
   public void loadRows( XMLStreamReader xsr ) throws XMLStreamException
   {
-    // read XML rows data
+    // read XML rows attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        case XmlLabels.XML_HEIGHT:
+          setDefaultRowHeight( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        case XmlLabels.XML_SCROLL:
+          m_vScrollBar.setValue( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
+    // read XML individual rows
     while ( xsr.hasNext() )
     {
       xsr.next();

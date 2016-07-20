@@ -23,7 +23,6 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.table.CellEditor;
 import rjc.jplanner.gui.table.EditorDateTime;
-import rjc.jplanner.gui.table.EditorSpin;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.ITableDataSource;
@@ -42,6 +41,7 @@ public class TasksData implements ITableDataSource
   @Override
   public int getColumnCount()
   {
+    // return number of columns
     return Task.SECTION_MAX + 1;
   }
 
@@ -49,6 +49,7 @@ public class TasksData implements ITableDataSource
   @Override
   public int getRowCount()
   {
+    // return number of rows
     return JPlanner.plan.tasksCount();
   }
 
@@ -56,6 +57,7 @@ public class TasksData implements ITableDataSource
   @Override
   public String getColumnTitle( int columnIndex )
   {
+    // return column title
     return Task.sectionName( columnIndex );
   }
 
@@ -63,6 +65,7 @@ public class TasksData implements ITableDataSource
   @Override
   public String getRowTitle( int rowIndex )
   {
+    // return row title
     return Integer.toString( rowIndex );
   }
 
@@ -70,6 +73,7 @@ public class TasksData implements ITableDataSource
   @Override
   public String getCellText( int columnIndex, int rowIndex )
   {
+    // return cell text
     return JPlanner.plan.task( rowIndex ).toString( columnIndex );
   }
 
@@ -77,7 +81,20 @@ public class TasksData implements ITableDataSource
   @Override
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
   {
-    return Alignment.LEFT;
+    // return alignment based on column
+    switch ( columnIndex )
+    {
+      case Task.SECTION_DURATION:
+      case Task.SECTION_WORK:
+        return Alignment.RIGHT;
+      case Task.SECTION_TITLE:
+      case Task.SECTION_PRED:
+      case Task.SECTION_RES:
+      case Task.SECTION_COMMENT:
+        return Alignment.LEFT;
+      default:
+        return Alignment.MIDDLE;
+    }
   }
 
   /************************************* getCellBackground ***************************************/
@@ -96,6 +113,10 @@ public class TasksData implements ITableDataSource
   @Override
   public CellEditor getEditor( int columnIndex, int rowIndex )
   {
+    // return null if cell is not editable
+    if ( !JPlanner.plan.task( rowIndex ).isSectionEditable( columnIndex ) )
+      return null;
+
     // return editor for table body cell
     switch ( columnIndex )
     {
@@ -106,7 +127,7 @@ public class TasksData implements ITableDataSource
       case Task.SECTION_END:
         return new EditorDateTime( columnIndex, rowIndex );
       case Task.SECTION_PRIORITY:
-        return new EditorSpin( columnIndex, rowIndex );
+        return new EditorTaskPriority( columnIndex, rowIndex );
       default:
         return new EditorText( columnIndex, rowIndex );
     }
@@ -128,6 +149,7 @@ public class TasksData implements ITableDataSource
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
+    // return cell object
     return getCellText( columnIndex, rowIndex );
   }
 
