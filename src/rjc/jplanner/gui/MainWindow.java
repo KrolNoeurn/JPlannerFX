@@ -224,8 +224,8 @@ public class MainWindow
       }
 
       // load display data
-      resetGui();
       loadDisplayData( xsr );
+      resetGui();
 
       fis.close();
       xsr.close();

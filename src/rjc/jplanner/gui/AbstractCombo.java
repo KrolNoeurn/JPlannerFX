@@ -158,22 +158,11 @@ public abstract class AbstractCombo extends StackPane
   private void mousePressed( MouseEvent event )
   {
     // request focus for display text field
-    Platform.runLater( new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        m_displayText.requestFocus();
-      }
-    } );
+    Platform.runLater( () -> m_displayText.requestFocus() );
 
     // open drop-down list
     m_dropdown = new DropDown( this );
-    m_dropdown.setOnHiding( hideEvent ->
-    {
-      m_dropdown = null;
-    } );
-
+    m_dropdown.setOnHiding( hideEvent -> m_dropdown = null );
   }
 
   /****************************************** drawButton *****************************************/

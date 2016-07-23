@@ -18,13 +18,13 @@
 
 package rjc.jplanner.gui.tasks;
 
-import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.EditorSpin;
 
 /*************************************************************************************************/
 /****************************** Table cell editor for task priority ******************************/
 /*************************************************************************************************/
 
-public class EditorTaskPriority extends CellEditor
+public class EditorTaskPriority extends EditorSpin
 {
 
   /**************************************** constructor ******************************************/
@@ -32,22 +32,6 @@ public class EditorTaskPriority extends CellEditor
   {
     super( columnIndex, rowIndex );
     // TODO Auto-generated constructor stub
-  }
-
-  /******************************************* getText *******************************************/
-  @Override
-  public String getText()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // TODO Auto-generated method stub
-
   }
 
 }

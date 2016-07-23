@@ -18,24 +18,21 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.geometry.Insets;
-import javafx.scene.control.TextField;
-
 /*************************************************************************************************/
 /******************************* Table cell editor for simple text *******************************/
 /*************************************************************************************************/
 
 public class EditorText extends CellEditor
 {
+  CellTextField m_editor; // text editor
 
   /**************************************** constructor ******************************************/
   public EditorText( int columnIndex, int rowIndex )
   {
     // create text table cell editor
     super( columnIndex, rowIndex );
-    TextField textfield = new TextField();
-    textfield.setPadding( new Insets( 0, TableCanvas.CELL_PADDING, 0, TableCanvas.CELL_PADDING ) );
-    setEditor( textfield );
+    m_editor = new CellTextField();
+    setEditor( m_editor );
   }
 
   /******************************************* getText *******************************************/
@@ -43,17 +40,24 @@ public class EditorText extends CellEditor
   public String getText()
   {
     // get editor text
-    return ( (TextField) getfocusControl() ).getText();
+    return m_editor.getText();
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // set text editor value
-    TextField editor = (TextField) getfocusControl();
-    editor.setText( (String) value );
-    editor.selectRange( editor.getLength(), editor.getLength() );
+    // set editor text
+    m_editor.setValue( (String) value );
+  }
+
+  /******************************************** open *********************************************/
+  @Override
+  public void open( Table table, Object value, MoveDirection move )
+  {
+    // open editor
+    m_editor.calculateWidth( table, getColumnIndex() );
+    super.open( table, value, move );
   }
 
 }

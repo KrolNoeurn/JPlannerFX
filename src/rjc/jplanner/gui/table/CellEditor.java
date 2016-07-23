@@ -22,6 +22,7 @@ import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.MainWindow;
 
 /*************************************************************************************************/
 /********************** Abstract gui control for editing a table cell value **********************/
@@ -81,9 +82,9 @@ public abstract class CellEditor
     m_focusControl = focusControl;
 
     // add listener to end editing if focus lost
-    m_focusControl.focusedProperty().addListener( ( observable, oldF, newF ) ->
+    m_focusControl.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
     {
-      if ( !newF )
+      if ( !newFocus )
         endEditing();
     } );
 
@@ -91,9 +92,9 @@ public abstract class CellEditor
     m_focusControl.setOnKeyPressed( event ->
     {
       if ( event.getCode() == KeyCode.ESCAPE )
-        close( false );
-      if ( event.getCode() == KeyCode.ENTER && m_focusControl.getId() != JPlanner.ERROR )
-        close( !isError() );
+        close( false ); // abandon edit
+      if ( event.getCode() == KeyCode.ENTER && !isError() )
+        close( true ); // commit edit
     } );
   }
 
@@ -104,47 +105,74 @@ public abstract class CellEditor
     return m_focusControl;
   }
 
+  /*************************************** getColumnIndex ****************************************/
+  public int getColumnIndex()
+  {
+    // return column index
+    return m_columnIndex;
+  }
+
+  /***************************************** getRowIndex *****************************************/
+  public int getRowIndex()
+  {
+    // return row index
+    return m_rowIndex;
+  }
+
   /******************************************* isError *******************************************/
   public Boolean isError()
   {
     // return if editor in error state
-    return m_overallEditor == null || m_overallEditor.getId() == JPlanner.ERROR;
+    return m_focusControl == null || m_focusControl.getId() == JPlanner.ERROR;
   }
 
   /****************************************** setError *******************************************/
   public void setError( boolean error )
   {
-    // set if editor is error state
+    // update editor error state
+    setError( error, m_focusControl );
+  }
+
+  /****************************************** setError *******************************************/
+  public static void setError( boolean error, Control control )
+  {
+    // update editor error state
     if ( error )
-      m_overallEditor.setId( JPlanner.ERROR );
+    {
+      control.setId( JPlanner.ERROR );
+      control.setStyle( MainWindow.STYLE_ERROR );
+    }
     else
-      m_overallEditor.setId( null );
+    {
+      control.setId( null );
+      control.setStyle( MainWindow.STYLE_NORMAL );
+    }
   }
 
   /******************************************** close ********************************************/
   public void close( boolean commit )
   {
-    JPlanner.trace( "Closing editor", commit, m_overallEditor );
+    JPlanner.trace( "CLOSING commit=" + commit );
 
-    // if requested commit new value to table data source & move focus
+    // if commit requested, save new value to table data source & move focus
+    m_cellEditorInProgress = null;
     if ( commit )
     {
       m_table.getDataSource().setValue( m_columnIndex, m_rowIndex, getText() );
-      //m_table.moveFocus( m_moveDirection );
+      m_table.moveFocus( m_moveDirection );
     }
 
     // remove editor from table
     m_table.remove( m_overallEditor );
-    m_overallEditor = null;
-    m_cellEditorInProgress = null;
+    m_table.requestFocus();
   }
 
   /********************************************* open ********************************************/
-  public void open( Table table, int columnPos, int rowPos, Object value, MoveDirection move )
+  public void open( Table table, Object value, MoveDirection move )
   {
     // check editor set
     if ( m_overallEditor == null )
-      throw new IllegalStateException( "Cell editor not set " + table + " " + columnPos + " " + rowPos );
+      throw new IllegalStateException( "Cell editor not set" );
 
     // set editor position & size
     m_table = table;
@@ -152,10 +180,15 @@ public abstract class CellEditor
 
     int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
     int h = m_table.getHeightByRowIndex( m_rowIndex ) + 1;
+    int columnPos = m_table.getColumnPositionByIndex( m_columnIndex );
+    int rowPos = m_table.getRowPositionByIndex( m_rowIndex );
+
     m_overallEditor.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
     m_overallEditor.setLayoutY( m_table.getYStartByRowPosition( rowPos ) - 1 );
     m_overallEditor.setMaxSize( w, h );
     m_overallEditor.setMinSize( w, h );
+    m_focusControl.setMaxSize( w, h );
+    m_focusControl.setMinSize( w, h );
 
     // set editor value
     if ( value != null )

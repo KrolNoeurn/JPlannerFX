@@ -75,6 +75,14 @@ public class TableDisplay extends TableParent
     setCanvasScrollBars();
   }
 
+  /**************************************** requestFocus *****************************************/
+  @Override
+  public void requestFocus()
+  {
+    // setting focus on table should set focus on canvas
+    m_canvas.requestFocus();
+  }
+
   /************************************ setCanvasScrollBars **************************************/
   public void setCanvasScrollBars()
   {

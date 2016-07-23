@@ -135,8 +135,11 @@ public class TableCanvas extends Canvas
   /****************************************** drawWidth ******************************************/
   public void drawWidth( int oldW, int newW )
   {
+    // canvas update means something important such as scrolling or resize, therefore end editing
+    CellEditor.endEditing();
+
     // draw only if increase in width
-    if ( newW <= oldW )
+    if ( getHeight() <= 0.0 || newW <= oldW )
       return;
 
     // draw only if not beyond edge of table
@@ -181,8 +184,11 @@ public class TableCanvas extends Canvas
   /***************************************** drawHeight ******************************************/
   public void drawHeight( int oldH, int newH )
   {
+    // canvas update means something important such as scrolling or resize, therefore end editing
+    CellEditor.endEditing();
+
     // draw only if increase in height
-    if ( newH <= oldH )
+    if ( getWidth() <= 0.0 || newH <= oldH )
       return;
 
     // draw only if not below edge of table
@@ -755,15 +761,10 @@ public class TableCanvas extends Canvas
   /******************************************* keyTyped ******************************************/
   private void keyTyped( KeyEvent event )
   {
-    // react to typed text by opening editor if appropriate
-    JPlanner.trace( event.getCharacter() );
-
+    // open cell editor if key typed is suitable
     char key = event.getCharacter().charAt( 0 );
-    if ( !Character.isWhitespace( key ) )
-    {
-      JPlanner.trace( "GOOD CHARACTER = " + key );
+    if ( key >= ' ' )
       openCellEditor( event.getCharacter() );
-    }
   }
 
   /****************************************** keyPressed *****************************************/
@@ -1263,7 +1264,7 @@ public class TableCanvas extends Canvas
 
     // open editor if one available
     if ( editor != null )
-      editor.open( m_table, m_selectedColumnPos, m_selectedRowPos, value, MoveDirection.DOWN );
+      editor.open( m_table, value, MoveDirection.DOWN );
   }
 
 }
