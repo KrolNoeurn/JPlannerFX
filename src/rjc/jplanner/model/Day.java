@@ -224,44 +224,44 @@ public class Day
     return start( 0 );
   }
 
-  /****************************************** toString *******************************************/
-  public String toString( int section )
+  /****************************************** getValue *******************************************/
+  public Object getValue( int section )
   {
     // return display string for given section
     if ( section == SECTION_NAME )
       return m_name;
 
     if ( section == SECTION_WORK )
-      return String.format( "%.2f", m_work );
+      return m_work;
 
     if ( section == SECTION_PERIODS )
-      return String.format( "%d", numPeriods() );
+      return numPeriods();
 
     section -= SECTION_START1;
     try
     {
       if ( section % 2 == 0 )
-        return start( section / 2 ).toString().substring( 0, 5 );
+        return start( section / 2 );
       else
-        return end( section / 2 ).toString().substring( 0, 5 );
+        return end( section / 2 );
     }
     catch ( IndexOutOfBoundsException e )
     {
       // if no work period, return blank
-      return "";
+      return null;
     }
   }
 
-  /****************************************** setData ********************************************/
+  /****************************************** setValue ******************************************/
   @SuppressWarnings( "unchecked" )
-  public void setData( int section, Object newValue )
+  public void setValue( int section, Object newValue )
   {
     // update day with new value
     if ( section == SECTION_NAME )
       m_name = (String) newValue;
 
     else if ( section == SECTION_WORK )
-      m_work = Double.parseDouble( (String) newValue );
+      m_work = (double) newValue;
 
     else if ( section == SECTION_PERIODS )
       m_periods = (ArrayList<DayWorkPeriod>) newValue;
@@ -270,9 +270,9 @@ public class Day
     {
       section -= SECTION_START1;
       if ( section % 2 == 0 )
-        m_periods.get( section / 2 ).m_start = Time.fromString( (String) newValue );
+        m_periods.get( section / 2 ).m_start = (Time) newValue;
       else
-        m_periods.get( section / 2 ).m_end = Time.fromString( (String) newValue );
+        m_periods.get( section / 2 ).m_end = (Time) newValue;
     }
 
     else

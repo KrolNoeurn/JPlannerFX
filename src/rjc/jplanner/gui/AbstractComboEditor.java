@@ -26,24 +26,24 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 
 /*************************************************************************************************/
 /******************* Abstract JavaFX control to allow user to pick from list *********************/
 /*************************************************************************************************/
 
-public abstract class AbstractCombo extends StackPane
+public abstract class AbstractComboEditor extends StackPane
 {
-  private TextField          m_displayText     = new TextField();
-  private Canvas             m_button          = new Canvas();
-  private DropDown           m_dropdown;
-  private int                m_selectedIndex   = -1;
+  private TextField     m_displayText   = new TextField();
+  private Canvas        m_button        = new Canvas();
+  private ComboDropDown m_dropdown;
+  private int           m_selectedIndex = -1;
 
-  private static final Color BUTTON_BACKGROUND = Color.rgb( 225, 225, 225 ); // light gray
-  private static final Color BUTTON_ARROW      = Color.BLACK;
+  abstract public int getItemCount(); // return number of items user can choose from
+
+  abstract public String getItem( int num ); // return n'th item
 
   /**************************************** constructor ******************************************/
-  public AbstractCombo()
+  public AbstractComboEditor()
   {
     // construct combo box
     super();
@@ -61,12 +61,6 @@ public abstract class AbstractCombo extends StackPane
     m_displayText.setOnMousePressed( event -> mousePressed( event ) );
     m_button.setOnMousePressed( event -> mousePressed( event ) );
   }
-
-  /**************************************** getItemCount *****************************************/
-  abstract public int getItemCount();
-
-  /******************************************* getItem *******************************************/
-  abstract public String getItem( int num );
 
   /************************************** setSelectedIndex ***************************************/
   public void setSelectedIndex( int index )
@@ -161,7 +155,7 @@ public abstract class AbstractCombo extends StackPane
     Platform.runLater( () -> m_displayText.requestFocus() );
 
     // open drop-down list
-    m_dropdown = new DropDown( this );
+    m_dropdown = new ComboDropDown( this );
     m_dropdown.setOnHiding( hideEvent -> m_dropdown = null );
   }
 
@@ -179,12 +173,12 @@ public abstract class AbstractCombo extends StackPane
 
     // fill background
     gc.clearRect( 0.0, 0.0, w, h );
-    gc.setFill( BUTTON_BACKGROUND );
+    gc.setFill( MainWindow.BUTTON_BACKGROUND );
     w -= 2;
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw down arrow
-    gc.setStroke( BUTTON_ARROW );
+    gc.setStroke( MainWindow.BUTTON_ARROW );
     int x1 = (int) ( w * 0.3 + 0.5 );
     int y1 = (int) ( h * 0.3 + 0.5 );
     int y2 = (int) ( h - y1 );

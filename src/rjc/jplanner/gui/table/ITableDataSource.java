@@ -27,33 +27,30 @@ import rjc.jplanner.gui.table.Table.Alignment;
 
 public interface ITableDataSource
 {
-  // return number of columns to be displayed
+  // return number of columns to be displayed in table
   int getColumnCount();
 
-  // return number of rows to be displayed
+  // return number of rows to be displayed in table
   int getRowCount();
 
-  // return column title to be displayed
+  // return column title for specified column index
   String getColumnTitle( int columnIndex );
 
-  // return row title to be displayed
+  // return row title for specified row index
   String getRowTitle( int rowIndex );
 
-  // return editor
-  CellEditor getEditor( int columnIndex, int rowIndex );
+  // return editor to use for specified cell index
+  AbstractCellEditor getEditor( int columnIndex, int rowIndex );
 
-  // return cell text to be displayed
-  String getCellText( int columnIndex, int rowIndex );
-
-  // return cell value
+  // return cell value for specified cell index
   Object getValue( int columnIndex, int rowIndex );
 
-  // set cell value
+  // set cell value for specified cell index
   void setValue( int columnIndex, int rowIndex, Object newValue );
 
-  // return cell text alignment
+  // return cell contents alignment for specified cell index
   Alignment getCellAlignment( int columnIndex, int rowIndex );
 
-  // return cell background colour
+  // return cell background colour for specified cell index
   Paint getCellBackground( int columnIndex, int rowIndex );
 }

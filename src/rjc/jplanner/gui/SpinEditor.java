@@ -16,28 +16,26 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui;
 
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.StackPane;
-import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.MainWindow;
+import rjc.jplanner.gui.table.CellTextField;
 
 /*************************************************************************************************/
 /****************************** Table cell editor for number fields ******************************/
 /*************************************************************************************************/
 
-public class EditorSpin extends AbstractCellEditor
+public class SpinEditor
 {
   private StackPane                      m_stack;                                     // overall editor that includes buttons and text field
   private CellTextField                  m_editor;                                    // text field part of editor
@@ -57,20 +55,14 @@ public class EditorSpin extends AbstractCellEditor
   private EventHandler<? super KeyEvent> m_cellKeyHandler;
 
   /**************************************** constructor ******************************************/
-  public EditorSpin( int columnIndex, int rowIndex )
+  public SpinEditor( int columnIndex, int rowIndex )
   {
-    // create spin editor
-    super( columnIndex, rowIndex );
-
-    // stack of text editor and buttons
+    // create spin editor, stack of text editor and buttons
     m_stack = new StackPane();
     m_editor = new CellTextField();
     m_buttons = new Canvas();
     m_stack.getChildren().addAll( m_editor, m_buttons );
     StackPane.setAlignment( m_buttons, Pos.CENTER_RIGHT );
-
-    // setup cell editor
-    setEditor( m_stack, m_editor );
 
     // set default spin editor characteristics
     setRange( 50.0, 999.0, 0 );
@@ -85,28 +77,18 @@ public class EditorSpin extends AbstractCellEditor
     m_editor.setOnKeyPressed( event -> keyPressed( event ) );
     m_buttons.setOnMousePressed( event -> buttonPressed( event ) );
 
-    // add listener to ensure error status is correct
-    m_editor.textProperty().addListener( ( observable, oldText, newText ) ->
-    {
-      double num = getNumber();
-      boolean error = num < m_min || num > m_max || getValue().toString().length() < 1;
-      AbstractCellEditor.setError( error, m_editor );
-    } );
-
     // lock x-layout to 0 to prevent any shudder or incorrect placing
     m_editor.layoutXProperty().addListener( ( observable, oldValue, newValue ) -> m_editor.setLayoutX( 0.0 ) );
   }
 
-  /******************************************* getValue ******************************************/
-  @Override
-  public Object getValue()
+  /******************************************* getText *******************************************/
+  public String getText()
   {
     // get editor text (including prefix and suffix)
     return m_editor.getText();
   }
 
   /******************************************* setValue ******************************************/
-  @Override
   public void setValue( Object value )
   {
     // ensure new value starts with prefix and ends with suffix
@@ -127,27 +109,16 @@ public class EditorSpin extends AbstractCellEditor
     m_editor.setValue( m_prefix + m_numberFormat.format( value ) + m_suffix );
   }
 
-  /******************************************** open *********************************************/
-  @Override
-  public void open( Table table, Object value, MoveDirection move )
-  {
-    // open editor
-    m_editor.calculateWidth( table, getColumnIndex() );
-    setAdditionalScrollNode( table );
-    super.open( table, value, move );
-  }
-
   /****************************************** getNumber ******************************************/
   public double getNumber()
   {
-    // get editor text (less prefix + suffix) converted to number
-    String value = (String) getValue();
+    // get editor text (minus prefix and suffix) converted to number
+    String value = getText();
     if ( m_prefix != null )
       value = value.substring( m_prefix.length() );
     if ( m_suffix != null )
       value = value.substring( 0, value.length() - m_suffix.length() );
 
-    JPlanner.trace( "'" + value + "'" );
     try
     {
       return Double.parseDouble( value );
@@ -213,21 +184,6 @@ public class EditorSpin extends AbstractCellEditor
       allow.append( Pattern.quote( m_suffix ) );
 
     m_editor.setAllowed( allow.toString() );
-  }
-
-  /*********************************** setAdditionalScrollNode ***********************************/
-  private void setAdditionalScrollNode( Node node )
-  {
-    // react to scroll events on this additional node
-    EventHandler<? super ScrollEvent> previousScrollHander = node.getOnScroll();
-    node.setOnScroll( event -> scrollEvent( event ) );
-
-    // add listener to revert previous scroll handler if focus lost
-    m_editor.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
-    {
-      if ( !newFocus )
-        node.setOnScroll( previousScrollHander );
-    } );
   }
 
   /***************************************** drawButtons *****************************************/
@@ -314,7 +270,7 @@ public class EditorSpin extends AbstractCellEditor
   }
 
   /***************************************** keyPressed ******************************************/
-  private void scrollEvent( ScrollEvent event )
+  public void scrollEvent( ScrollEvent event )
   {
     // increment or decrement value depending on scroll event
     if ( event.getDeltaY() > 0 )

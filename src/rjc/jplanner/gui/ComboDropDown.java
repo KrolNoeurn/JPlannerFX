@@ -32,35 +32,36 @@ import javafx.stage.Screen;
 /********************* Pop-up window to display AbstractCombo drop-down list *********************/
 /*************************************************************************************************/
 
-public class DropDown extends Popup
+public class ComboDropDown extends Popup
 {
-  private AbstractCombo      m_parent;
-  private Canvas             m_canvas            = new Canvas();
-  private int                m_rowHeight;
-  private int                m_rowDescent;
-  private int                m_rowOffset;
+  private AbstractComboEditor m_parent;
+  private Canvas              m_canvas;
+  private int                 m_rowHeight;
+  private int                 m_rowDescent;
+  private int                 m_rowOffset;
 
-  private static final Color COLOR_NORMAL_CELL   = Color.WHITE;
-  private static final Color COLOR_NORMAL_TEXT   = Color.BLACK;
-  private static final Color COLOR_SELECTED_CELL = Color.rgb( 51, 153, 255 ); // light blue;
-  private static final Color COLOR_SELECTED_TEXT = Color.WHITE;
+  private static final Color  COLOR_NORMAL_CELL   = Color.WHITE;
+  private static final Color  COLOR_NORMAL_TEXT   = Color.BLACK;
+  private static final Color  COLOR_SELECTED_CELL = Color.rgb( 51, 153, 255 ); // light blue;
+  private static final Color  COLOR_SELECTED_TEXT = Color.WHITE;
 
-  private static final int   BORDER              = 2;
+  private static final int    BORDER              = 2;
 
   /**************************************** constructor ******************************************/
-  public DropDown( AbstractCombo parent )
+  public ComboDropDown( AbstractComboEditor parent )
   {
     // create pop-up window to display drop-down list
     super();
     setAutoHide( true );
     m_parent = parent;
+    m_canvas = new Canvas();
 
     // determine pop-up position
     Point2D point = parent.localToScreen( 0.0, parent.getHeight() );
     setX( point.getX() );
     setY( point.getY() );
 
-    // determine typical text bounds and step
+    // determine row height and row text descent
     Bounds bounds = ( new Text( "Qwerty" ) ).getLayoutBounds();
     m_rowHeight = (int) Math.ceil( bounds.getHeight() );
     m_rowDescent = (int) Math.floor( -bounds.getMinY() );

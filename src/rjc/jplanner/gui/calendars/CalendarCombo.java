@@ -16,15 +16,16 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui;
+package rjc.jplanner.gui.calendars;
 
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.AbstractComboEditor;
 
 /*************************************************************************************************/
-/******************* Extended version of AbstractCombo with list of calendars ********************/
+/**************** Extended version of AbstractComboEditor with list of calendars *****************/
 /*************************************************************************************************/
 
-public class CalendarCombo extends AbstractCombo
+public class CalendarCombo extends AbstractComboEditor
 {
 
   /**************************************** getItemCount *****************************************/

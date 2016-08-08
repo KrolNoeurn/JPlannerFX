@@ -22,7 +22,7 @@ package rjc.jplanner.gui.table;
 /***************************** Table cell editor for DateTime fields *****************************/
 /*************************************************************************************************/
 
-public class EditorDateTime extends CellEditor
+public class EditorDateTime extends AbstractCellEditor
 {
 
   /**************************************** constructor ******************************************/
@@ -33,9 +33,9 @@ public class EditorDateTime extends CellEditor
 
   }
 
-  /******************************************* getText *******************************************/
+  /******************************************* getValue ******************************************/
   @Override
-  public String getText()
+  public Object getValue()
   {
     // TODO Auto-generated method stub
     return null;

@@ -141,48 +141,43 @@ public class Task implements Comparable<Task>
     m_summaryEnd = -1;
   }
 
-  /****************************************** toString *******************************************/
-  public String toString( int section )
+  /****************************************** getValue *******************************************/
+  public Object getValue( int section )
   {
-    // return display string for given section
+    // return value for given section
     if ( section == SECTION_TITLE )
       return m_title;
 
     // if task is null return blank for all other sections
     if ( isNull() )
-      return "";
+      return null;
 
     if ( section == SECTION_DURATION )
-      return duration().toString();
+      return duration();
 
     if ( section == SECTION_START )
-      return start().toString( JPlanner.plan.datetimeFormat() );
+      return start();
 
     if ( section == SECTION_END )
-      return end().toString( JPlanner.plan.datetimeFormat() );
+      return end();
 
     if ( section == SECTION_WORK )
-      return work().toString();
+      return work();
 
     if ( section == SECTION_PRED )
-      return m_predecessors.toString();
+      return m_predecessors;
 
     if ( section == SECTION_RES )
-      return m_resources.toString();
+      return m_resources;
 
     if ( section == SECTION_TYPE )
-      return m_type.toString();
+      return m_type;
 
     if ( section == SECTION_PRIORITY )
-      return String.format( "%d", m_priority );
+      return m_priority;
 
     if ( section == SECTION_DEADLINE )
-    {
-      if ( m_deadline == null )
-        return "NA";
-
-      return m_deadline.toString( JPlanner.plan.datetimeFormat() );
-    }
+      return m_deadline;
 
     if ( section == SECTION_COST )
       return m_cost;
@@ -193,10 +188,10 @@ public class Task implements Comparable<Task>
     throw new IllegalArgumentException( "Section=" + section );
   }
 
-  /****************************************** setData ********************************************/
-  public void setData( int section, Object newValue )
+  /****************************************** setValue ******************************************/
+  public void setValue( int section, Object newValue )
   {
-    // set task data for given section
+    // set task value for given section
     if ( section == SECTION_TITLE )
     {
       if ( isNull() )

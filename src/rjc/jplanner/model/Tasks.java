@@ -82,9 +82,9 @@ public class Tasks extends ArrayList<Task>
   {
     // setup special task 0
     Task task = get( 0 );
-    task.setData( Task.SECTION_TITLE, "PROJECT" );
-    task.setData( Task.SECTION_START, DateTime.now() );
-    task.setData( Task.SECTION_END, DateTime.now() );
+    task.setValue( Task.SECTION_TITLE, "PROJECT" );
+    task.setValue( Task.SECTION_START, DateTime.now() );
+    task.setValue( Task.SECTION_END, DateTime.now() );
     task.setIndent( -1 );
     updateSummaryMarkers();
   }
@@ -145,7 +145,7 @@ public class Tasks extends ArrayList<Task>
       }
 
     // set the task predecessors, remembering array starts from zero but id from one
-    get( task ).setData( Task.SECTION_PRED, preds );
+    get( task ).setValue( Task.SECTION_PRED, preds );
   }
 
   /******************************************* writeXML ******************************************/
@@ -353,7 +353,7 @@ public class Tasks extends ArrayList<Task>
   {
     // restore cleaned predecessors
     for ( HashMap.Entry<Integer, String> entry : list.entrySet() )
-      get( entry.getKey() ).setData( Task.SECTION_PRED, entry.getValue() );
+      get( entry.getKey() ).setValue( Task.SECTION_PRED, entry.getValue() );
   }
 
 }

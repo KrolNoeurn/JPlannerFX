@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
@@ -27,16 +26,16 @@ import rjc.jplanner.model.Task;
 
 public class CommandTaskSetValue implements IUndoCommand
 {
-  private int    m_taskID;   // task number in plan
+  private Task   m_task;     // task in plan
   private int    m_section;  // section number
   private Object m_newValue; // new value after command
   private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandTaskSetValue( int taskID, int section, Object newValue, Object oldValue )
+  public CommandTaskSetValue( Task task, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_taskID = taskID;
+    m_task = task;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
@@ -47,7 +46,7 @@ public class CommandTaskSetValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.task( m_taskID ).setData( m_section, m_newValue );
+    m_task.setValue( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
@@ -55,7 +54,7 @@ public class CommandTaskSetValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.task( m_taskID ).setData( m_section, m_oldValue );
+    m_task.setValue( m_section, m_oldValue );
   }
 
   /****************************************** update *********************************************/
@@ -81,7 +80,7 @@ public class CommandTaskSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Task " + m_taskID + " " + Task.sectionName( m_section ) + " = " + m_newValue;
+    return "Task " + m_task.index() + " " + Task.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
@@ -27,16 +26,16 @@ import rjc.jplanner.model.Calendar;
 
 public class CommandCalendarSetValue implements IUndoCommand
 {
-  private int    m_calID;    // calendar number in plan
-  private int    m_section;  // section number
-  private Object m_newValue; // new value after command
-  private Object m_oldValue; // old value before command
+  private Calendar m_calendar; // calendar number in plan
+  private int      m_section;  // section number
+  private Object   m_newValue; // new value after command
+  private Object   m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandCalendarSetValue( int calendarID, int section, Object newValue, Object oldValue )
+  public CommandCalendarSetValue( Calendar cal, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_calID = calendarID;
+    m_calendar = cal;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
@@ -47,7 +46,7 @@ public class CommandCalendarSetValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.calendar( m_calID ).setData( m_section, m_newValue );
+    m_calendar.setValue( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
@@ -55,7 +54,7 @@ public class CommandCalendarSetValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.calendar( m_calID ).setData( m_section, m_oldValue );
+    m_calendar.setValue( m_section, m_oldValue );
   }
 
   /****************************************** update *********************************************/
@@ -74,7 +73,7 @@ public class CommandCalendarSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Day " + ( m_calID + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + m_newValue;
+    return "Day " + ( m_calendar.index() + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

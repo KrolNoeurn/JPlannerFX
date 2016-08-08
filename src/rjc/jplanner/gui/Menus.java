@@ -27,7 +27,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
 /****************************** Main JPlanner application menu bar *******************************/
@@ -62,7 +62,7 @@ public class Menus extends MenuBar
     JPlanner.gui.message( "" );
 
     // if any table cell editing in progress, end it
-    CellEditor.endEditing();
+    AbstractCellEditor.endEditing();
 
     // ensure plan is up-to-date
     if ( JPlanner.gui.isPlanTabSelected() )

@@ -21,13 +21,15 @@ package rjc.jplanner.gui.tasks;
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
-import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.gui.table.TableCanvas;
+import rjc.jplanner.model.Date;
+import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
@@ -69,14 +71,6 @@ public class TasksData implements ITableDataSource
     return Integer.toString( rowIndex );
   }
 
-  /**************************************** getCellText ******************************************/
-  @Override
-  public String getCellText( int columnIndex, int rowIndex )
-  {
-    // return cell text
-    return JPlanner.plan.task( rowIndex ).toString( columnIndex );
-  }
-
   /************************************* getCellAlignment ****************************************/
   @Override
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
@@ -111,7 +105,7 @@ public class TasksData implements ITableDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable
     if ( !JPlanner.plan.task( rowIndex ).isSectionEditable( columnIndex ) )
@@ -138,19 +132,28 @@ public class TasksData implements ITableDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Object oldValue = getValue( columnIndex, rowIndex );
+    Task task = JPlanner.plan.task( rowIndex );
+    Object oldValue = task.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
-    JPlanner.plan.undostack().push( new CommandTaskSetValue( rowIndex, columnIndex, newValue, oldValue ) );
+    JPlanner.plan.undostack().push( new CommandTaskSetValue( task, columnIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
+    Object value = JPlanner.plan.task( rowIndex ).getValue( columnIndex );
+
+    // convert date and date-times into strings using plan formats
+    if ( value instanceof DateTime )
+      value = ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+    if ( value instanceof Date )
+      value = ( (Date) value ).toString( JPlanner.plan.dateFormat() );
+
     // return cell object
-    return getCellText( columnIndex, rowIndex );
+    return value;
   }
 
 }

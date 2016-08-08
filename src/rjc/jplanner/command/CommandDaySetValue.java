@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
@@ -27,20 +26,20 @@ import rjc.jplanner.model.Day;
 
 public class CommandDaySetValue implements IUndoCommand
 {
-  private int    m_dayID;    // day number in plan
+  private Day    m_day;      // day in plan
   private int    m_section;  // section number
   private Object m_newValue; // new value after command
   private Object m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandDaySetValue( int dayID, int section, Object newValue, Object oldValue )
+  public CommandDaySetValue( Day day, int section, Object newValue, Object oldValue )
   {
     // check not being used for updating number of work periods
     if ( section == Day.SECTION_PERIODS )
       throw new UnsupportedOperationException( "Number of work-periods" );
 
     // initialise private variables
-    m_dayID = dayID;
+    m_day = day;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
@@ -51,7 +50,7 @@ public class CommandDaySetValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.day( m_dayID ).setData( m_section, m_newValue );
+    m_day.setValue( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
@@ -59,7 +58,7 @@ public class CommandDaySetValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.day( m_dayID ).setData( m_section, m_oldValue );
+    m_day.setValue( m_section, m_oldValue );
   }
 
   /****************************************** update *********************************************/
@@ -78,7 +77,7 @@ public class CommandDaySetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Day " + ( m_dayID + 1 ) + " " + Day.sectionName( m_section ) + " = " + m_newValue;
+    return "Day " + ( m_day.index() + 1 ) + " " + Day.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

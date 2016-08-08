@@ -34,7 +34,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.table.CellEditor.MoveDirection;
+import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 import rjc.jplanner.gui.table.Table.Alignment;
 
 /*************************************************************************************************/
@@ -136,7 +136,7 @@ public class TableCanvas extends Canvas
   public void drawWidth( int oldW, int newW )
   {
     // canvas update means something important such as scrolling or resize, therefore end editing
-    CellEditor.endEditing();
+    AbstractCellEditor.endEditing();
 
     // draw only if increase in width
     if ( getHeight() <= 0.0 || newW <= oldW )
@@ -185,7 +185,7 @@ public class TableCanvas extends Canvas
   public void drawHeight( int oldH, int newH )
   {
     // canvas update means something important such as scrolling or resize, therefore end editing
-    CellEditor.endEditing();
+    AbstractCellEditor.endEditing();
 
     // draw only if increase in height
     if ( getWidth() <= 0.0 || newH <= oldH )
@@ -307,17 +307,21 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, y + h - 0.5, x + w - 0.5, y + h - 0.5 );
 
     // text
-    String text = m_table.getDataSource().getCellText( columnIndex, rowIndex );
-    Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
-    ArrayList<TextLine> lines = getTextLines( text, alignment, w, h );
-    if ( m_selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
-    else
-      gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
+    Object value = m_table.getDataSource().getValue( columnIndex, rowIndex );
+    if ( value != null )
+    {
+      String text = value.toString();
+      Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
+      ArrayList<TextLine> lines = getTextLines( text, alignment, w, h );
+      if ( m_selected )
+        gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
+      else
+        gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
 
-    gc.setFontSmoothingType( FontSmoothingType.LCD );
-    for ( TextLine line : lines )
-      gc.fillText( line.txt, x + line.x, y + line.y );
+      gc.setFontSmoothingType( FontSmoothingType.LCD );
+      for ( TextLine line : lines )
+        gc.fillText( line.txt, x + line.x, y + line.y );
+    }
   }
 
   /**************************************** drawRowHeader ****************************************/
@@ -1260,7 +1264,7 @@ public class TableCanvas extends Canvas
     // open cell editor for currently selected table cell
     int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumnPos );
     int rowIndex = m_table.getRowIndexByPosition( m_selectedRowPos );
-    CellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
+    AbstractCellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
 
     // open editor if one available
     if ( editor != null )

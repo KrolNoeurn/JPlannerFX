@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
@@ -49,7 +50,7 @@ public class CellTextField extends TextField
 
       // ensure error status is correct
       if ( m_valid != null )
-        CellEditor.setError( !getText().matches( m_valid ), this );
+        AbstractCellEditor.setError( !getText().matches( m_valid ), this );
 
       // increase width if needed to show whole text
       Text text = new Text( getText() );
@@ -70,9 +71,11 @@ public class CellTextField extends TextField
   /****************************************** setValue *****************************************/
   public void setValue( String text )
   {
-    // set text editor value and place editor caret at end
+    // set text editor value
     setText( text );
-    selectRange( text.length(), text.length() );
+
+    // place editor caret at end (in future so not overtaken other caret moving activities)
+    Platform.runLater( () -> selectRange( text.length(), text.length() ) );
   }
 
   /****************************************** setAllowed *****************************************/

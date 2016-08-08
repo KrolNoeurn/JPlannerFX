@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
-import rjc.jplanner.gui.table.CellEditor.MoveDirection;
+import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 
 /*************************************************************************************************/
 /**************** Display gui scrollable table with horizontal & vertical header *****************/

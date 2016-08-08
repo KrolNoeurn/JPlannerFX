@@ -20,7 +20,6 @@ package rjc.jplanner.command;
 
 import java.util.ArrayList;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Day;
 import rjc.jplanner.model.DayWorkPeriod;
 import rjc.jplanner.model.Time;
@@ -31,20 +30,17 @@ import rjc.jplanner.model.Time;
 
 public class CommandDaySetNumPeriods implements IUndoCommand
 {
-  private int                      m_dayID;      // day number in plan
+  private Day                      m_day;        // day in plan
   private ArrayList<DayWorkPeriod> m_newPeriods; // new list of work-periods after command
   private ArrayList<DayWorkPeriod> m_oldPeriods; // old list of work-periods before command
 
   /**************************************** constructor ******************************************/
-  public CommandDaySetNumPeriods( int dayID, Object newValue, Object oldValue )
+  public CommandDaySetNumPeriods( Day day, int newNum, int oldNum )
   {
     // initialise private variables
-    m_dayID = dayID;
-    m_oldPeriods = new ArrayList<DayWorkPeriod>( JPlanner.plan.day( dayID ).workPeriods() );
-    m_newPeriods = new ArrayList<DayWorkPeriod>( JPlanner.plan.day( dayID ).workPeriods() );
-
-    int newNum = Integer.parseInt( (String) newValue );
-    int oldNum = Integer.parseInt( (String) oldValue );
+    m_day = day;
+    m_oldPeriods = new ArrayList<DayWorkPeriod>( day.workPeriods() );
+    m_newPeriods = new ArrayList<DayWorkPeriod>( day.workPeriods() );
 
     if ( newNum > oldNum )
     {
@@ -92,7 +88,7 @@ public class CommandDaySetNumPeriods implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.day( m_dayID ).setData( Day.SECTION_PERIODS, m_newPeriods );
+    m_day.setValue( Day.SECTION_PERIODS, m_newPeriods );
   }
 
   /******************************************* undo **********************************************/
@@ -100,7 +96,7 @@ public class CommandDaySetNumPeriods implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.day( m_dayID ).setData( Day.SECTION_PERIODS, m_oldPeriods );
+    m_day.setValue( Day.SECTION_PERIODS, m_oldPeriods );
   }
 
   /****************************************** update *********************************************/
@@ -116,7 +112,7 @@ public class CommandDaySetNumPeriods implements IUndoCommand
   public String text()
   {
     // text description of command
-    return "Day " + m_dayID + " Periods = " + m_newPeriods.size();
+    return "Day " + ( m_day.index() + 1 ) + " Periods = " + m_newPeriods.size();
   }
 
 }

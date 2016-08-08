@@ -21,7 +21,7 @@ package rjc.jplanner.gui.resources;
 import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
-import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
@@ -63,13 +63,6 @@ public class ResourcesData implements ITableDataSource
     return Integer.toString( rowIndex );
   }
 
-  /**************************************** getCellText ******************************************/
-  @Override
-  public String getCellText( int columnIndex, int rowIndex )
-  {
-    return JPlanner.plan.resource( rowIndex ).toString( columnIndex );
-  }
-
   /************************************* getCellAlignment ****************************************/
   @Override
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
@@ -91,7 +84,7 @@ public class ResourcesData implements ITableDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable
     Resource res = JPlanner.plan.resource( rowIndex );
@@ -111,14 +104,15 @@ public class ResourcesData implements ITableDataSource
     if ( newValue.equals( oldValue ) )
       return;
 
-    JPlanner.plan.undostack().push( new CommandResourceSetValue( rowIndex, columnIndex, newValue, oldValue ) );
+    Resource res = JPlanner.plan.resource( rowIndex );
+    JPlanner.plan.undostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
-    return getCellText( columnIndex, rowIndex );
+    return JPlanner.plan.resource( rowIndex ).getValue( columnIndex );
   }
 
 }

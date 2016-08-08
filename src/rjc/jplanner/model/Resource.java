@@ -136,8 +136,8 @@ public class Resource
         + m_group + ", " + m_role + ", " + m_alias + ", " + m_start + ", " + m_end + ", " + m_availability + "]";
   }
 
-  /****************************************** toString *******************************************/
-  public String toString( int section )
+  /****************************************** getValue *******************************************/
+  public Object getValue( int section )
   {
     // return display string for given section
     if ( section == SECTION_INITIALS )
@@ -145,7 +145,7 @@ public class Resource
 
     // if resource is null return blank for all other sections
     if ( isNull() )
-      return "";
+      return null;
 
     if ( section == SECTION_NAME )
       return m_name;
@@ -163,29 +163,19 @@ public class Resource
       return m_alias;
 
     if ( section == SECTION_START )
-    {
-      if ( m_start == null )
-        return "NA";
-      else
-        return m_start.toString( JPlanner.plan.dateFormat() );
-    }
+      return m_start;
 
     if ( section == SECTION_END )
-    {
-      if ( m_end == null )
-        return "NA";
-      else
-        return m_end.toString( JPlanner.plan.dateFormat() );
-    }
+      return m_end;
 
     if ( section == SECTION_AVAIL )
-      return String.format( "%.2f", m_availability );
+      return m_availability;
 
     if ( section == SECTION_COST )
-      return String.format( "%.2f", m_cost );
+      return m_cost;
 
     if ( section == SECTION_CALENDAR )
-      return m_calendar.name();
+      return m_calendar;
 
     if ( section == SECTION_COMMENT )
       return m_comment;
@@ -193,10 +183,10 @@ public class Resource
     throw new IllegalArgumentException( "Section=" + section );
   }
 
-  /****************************************** setData ********************************************/
-  public void setData( int section, Object newValue )
+  /****************************************** setValue ******************************************/
+  public void setValue( int section, Object newValue )
   {
-    // set resource data for given section
+    // update resource with new value
     if ( section == SECTION_INITIALS )
     {
       if ( isNull() )
@@ -224,7 +214,7 @@ public class Resource
       m_comment = (String) newValue;
 
     else if ( section == SECTION_CALENDAR )
-      m_calendar = JPlanner.plan.calendars.fromName( (String) newValue );
+      m_calendar = (Calendar) newValue;
 
     // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
 

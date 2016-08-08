@@ -22,7 +22,7 @@ package rjc.jplanner.gui.table;
 /******************************* Table cell editor for simple text *******************************/
 /*************************************************************************************************/
 
-public class EditorText extends CellEditor
+public class EditorText extends AbstractCellEditor
 {
   CellTextField m_editor; // text editor
 
@@ -35,9 +35,9 @@ public class EditorText extends CellEditor
     setEditor( m_editor );
   }
 
-  /******************************************* getText *******************************************/
+  /******************************************* getValue ******************************************/
   @Override
-  public String getText()
+  public Object getValue()
   {
     // get editor text
     return m_editor.getText();

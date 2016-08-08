@@ -247,21 +247,21 @@ public class Calendar
     return m_normal;
   }
 
-  /****************************************** toString *******************************************/
-  public String toString( int section )
+  /****************************************** getValue *******************************************/
+  public Object getValue( int section )
   {
-    // return display string for given section
+    // return value for given section
     if ( section == SECTION_NAME )
       return m_name;
 
     if ( section == SECTION_ANCHOR )
-      return m_cycleAnchor.toString();
+      return m_cycleAnchor;
 
     if ( section == SECTION_EXCEPTIONS )
-      return String.format( "%d", m_exceptions.size() );
+      return m_exceptions;
 
     if ( section == SECTION_CYCLE )
-      return String.format( "%d", m_normal.size() );
+      return m_normal;
 
     // if row beyond normals handle index out of bounds
     try
@@ -270,20 +270,20 @@ public class Calendar
     }
     catch ( IndexOutOfBoundsException e )
     {
-      return "";
+      return null;
     }
   }
 
-  /****************************************** setData ********************************************/
+  /****************************************** setValue ******************************************/
   @SuppressWarnings( "unchecked" )
-  public void setData( int section, Object newValue )
+  public void setValue( int section, Object newValue )
   {
-    // set calendar data for given section
+    // set calendar value for given section
     if ( section == SECTION_NAME )
       m_name = (String) newValue;
 
     else if ( section == SECTION_ANCHOR )
-      m_cycleAnchor = Date.fromString( (String) newValue );
+      m_cycleAnchor = (Date) newValue;
 
     else if ( section == SECTION_CYCLE )
       m_normal = (ArrayList<Day>) newValue;
@@ -292,7 +292,7 @@ public class Calendar
       m_exceptions = (HashMap<Date, Day>) newValue;
 
     else if ( section >= SECTION_NORMAL1 )
-      m_normal.set( section - SECTION_NORMAL1, JPlanner.plan.daytypes.fromName( (String) newValue ) );
+      m_normal.set( section - SECTION_NORMAL1, (Day) newValue );
 
     else
       throw new IllegalArgumentException( "Section=" + section );

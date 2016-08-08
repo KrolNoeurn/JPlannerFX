@@ -23,7 +23,7 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandCalendarSetCycleLength;
 import rjc.jplanner.command.CommandCalendarSetExceptions;
 import rjc.jplanner.command.CommandCalendarSetValue;
-import rjc.jplanner.gui.table.CellEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
@@ -72,13 +72,6 @@ public class CalendarsData implements ITableDataSource
     return Calendar.sectionName( rowIndex );
   }
 
-  /**************************************** getCellText ******************************************/
-  @Override
-  public String getCellText( int columnIndex, int rowIndex )
-  {
-    return JPlanner.plan.calendar( columnIndex ).toString( rowIndex );
-  }
-
   /************************************* getCellAlignment ****************************************/
   @Override
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
@@ -100,7 +93,7 @@ public class CalendarsData implements ITableDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public CellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable, unused normal section cells
     Calendar cal = JPlanner.plan.calendar( columnIndex );
@@ -121,19 +114,21 @@ public class CalendarsData implements ITableDataSource
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic
+    Calendar cal = JPlanner.plan.calendar( columnIndex );
+
     if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
-      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( columnIndex, newValue, oldValue ) );
+      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
     else if ( rowIndex == Calendar.SECTION_CYCLE )
-      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( columnIndex, newValue, oldValue ) );
+      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( cal, (int) newValue, (int) oldValue ) );
     else
-      JPlanner.plan.undostack().push( new CommandCalendarSetValue( columnIndex, rowIndex, newValue, oldValue ) );
+      JPlanner.plan.undostack().push( new CommandCalendarSetValue( cal, rowIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
-    return getCellText( columnIndex, rowIndex );
+    return JPlanner.plan.calendar( columnIndex ).getValue( rowIndex );
   }
 
 }

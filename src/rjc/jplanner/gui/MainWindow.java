@@ -58,17 +58,19 @@ import rjc.jplanner.model.Plan;
 
 public class MainWindow
 {
+  public static final Color        BUTTON_BACKGROUND        = Color.rgb( 225, 225, 225 ); // light gray
+  public static final Color        BUTTON_ARROW             = Color.BLACK;
   public static final Color        COLOR_GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
   public static final String       STYLE_ERROR              = "-fx-text-fill: red;";
   public static final String       STYLE_NORMAL             = "-fx-text-fill: black;";
   public static String             STYLE_TOOLTIP;
 
   private Stage                    m_stage;
-  private MainTabWidget            m_mainTabWidget;                                      // MainTabWidget associated with MainWindow
+  private MainTabWidget            m_mainTabWidget;                                       // MainTabWidget associated with MainWindow
   private Menus                    m_menus                  = new Menus();
   private TextField                m_statusBar              = new TextField();
-  private UndoStackWindow          m_undoWindow;                                         // window to show plan undo-stack
-  private ArrayList<MainTabWidget> m_tabWidgets;                                         // list of MainTabWidgets including one in MainWindow
+  private UndoStackWindow          m_undoWindow;                                          // window to show plan undo-stack
+  private ArrayList<MainTabWidget> m_tabWidgets;                                          // list of MainTabWidgets including one in MainWindow
 
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )

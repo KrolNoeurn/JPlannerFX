@@ -28,36 +28,34 @@ import rjc.jplanner.gui.MainWindow;
 /********************** Abstract gui control for editing a table cell value **********************/
 /*************************************************************************************************/
 
-public abstract class CellEditor
+abstract public class AbstractCellEditor
 {
-  private static CellEditor m_cellEditorInProgress;
+  private static AbstractCellEditor m_cellEditorInProgress;
 
-  private Table             m_table;
-  private int               m_columnIndex;
-  private int               m_rowIndex;
-  private MoveDirection     m_moveDirection;
+  private Table                     m_table;
+  private int                       m_columnIndex;
+  private int                       m_rowIndex;
+  private MoveDirection             m_moveDirection;
 
-  private Control           m_focusControl;        // prime control that has focus
-  private Region            m_overallEditor;       // overall editor can be different to control that takes focus
+  private Control                   m_focusControl;        // prime control that has focus
+  private Region                    m_overallEditor;       // overall editor can be different to control that takes focus
 
   public static enum MoveDirection// selection movement after committing an edit
   {
     LEFT, RIGHT, UP, DOWN, NONE
   }
 
+  abstract public Object getValue(); // return cell editor value
+
+  abstract public void setValue( Object value ); // set cell editor value 
+
   /***************************************** constructor *****************************************/
-  public CellEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor( int columnIndex, int rowIndex )
   {
     // initialise private variables
     m_columnIndex = columnIndex;
     m_rowIndex = rowIndex;
   }
-
-  /******************************************* getText *******************************************/
-  abstract public String getText();
-
-  /******************************************* setValue ******************************************/
-  abstract public void setValue( Object value );
 
   /***************************************** endEditing ******************************************/
   public static void endEditing()
@@ -158,7 +156,7 @@ public abstract class CellEditor
     m_cellEditorInProgress = null;
     if ( commit )
     {
-      m_table.getDataSource().setValue( m_columnIndex, m_rowIndex, getText() );
+      m_table.getDataSource().setValue( m_columnIndex, m_rowIndex, getValue() );
       m_table.moveFocus( m_moveDirection );
     }
 

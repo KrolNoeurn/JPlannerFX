@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
@@ -27,16 +26,16 @@ import rjc.jplanner.model.Resource;
 
 public class CommandResourceSetValue implements IUndoCommand
 {
-  private int    m_resID;    // resource number in plan
-  private int    m_section;  // section number
-  private Object m_newValue; // new value after command
-  private Object m_oldValue; // old value before command
+  private Resource m_res;      // resource in plan
+  private int      m_section;  // section number
+  private Object   m_newValue; // new value after command
+  private Object   m_oldValue; // old value before command
 
   /**************************************** constructor ******************************************/
-  public CommandResourceSetValue( int resourceID, int section, Object newValue, Object oldValue )
+  public CommandResourceSetValue( Resource res, int section, Object newValue, Object oldValue )
   {
     // initialise private variables
-    m_resID = resourceID;
+    m_res = res;
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
@@ -47,7 +46,7 @@ public class CommandResourceSetValue implements IUndoCommand
   public void redo()
   {
     // action command
-    JPlanner.plan.resource( m_resID ).setData( m_section, m_newValue );
+    m_res.setValue( m_section, m_newValue );
   }
 
   /******************************************* undo **********************************************/
@@ -55,7 +54,7 @@ public class CommandResourceSetValue implements IUndoCommand
   public void undo()
   {
     // revert command
-    JPlanner.plan.resource( m_resID ).setData( m_section, m_oldValue );
+    m_res.setValue( m_section, m_oldValue );
   }
 
   /****************************************** update *********************************************/
@@ -81,7 +80,7 @@ public class CommandResourceSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Resource " + ( m_resID + 1 ) + " " + Resource.sectionName( m_section ) + " = " + m_newValue;
+    return "Resource " + ( m_res.index() + 1 ) + " " + Resource.sectionName( m_section ) + " = " + m_newValue;
   }
 
 }

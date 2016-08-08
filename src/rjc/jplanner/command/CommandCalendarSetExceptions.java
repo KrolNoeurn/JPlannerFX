@@ -18,6 +18,8 @@
 
 package rjc.jplanner.command;
 
+import rjc.jplanner.model.Calendar;
+
 /*************************************************************************************************/
 /************************* UndoCommand for updating calendar exceptions **************************/
 /*************************************************************************************************/
@@ -26,7 +28,7 @@ public class CommandCalendarSetExceptions implements IUndoCommand
 {
 
   /**************************************** constructor ******************************************/
-  public CommandCalendarSetExceptions( int calID, Object newValue, Object oldValue )
+  public CommandCalendarSetExceptions( Calendar cal, Object newValue, Object oldValue )
   {
     // TODO Auto-generated constructor stub
   }
