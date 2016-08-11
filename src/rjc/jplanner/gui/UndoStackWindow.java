@@ -57,6 +57,7 @@ public class UndoStackWindow extends Stage
     setTitle( "Undostack" );
     setWidth( 250.0 );
     setHeight( 200.0 );
+    getIcons().add( MainWindow.JPLANNER_ICON );
 
     // setup scroll bar
     m_scrollbar.setOrientation( Orientation.VERTICAL );

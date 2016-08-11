@@ -201,7 +201,7 @@ public class Task implements Comparable<Task>
     }
 
     else if ( section == SECTION_DURATION )
-      m_duration = new TimeSpan( (String) newValue );
+      m_duration = (TimeSpan) newValue;
 
     else if ( section == SECTION_START )
       m_start = (DateTime) newValue;
@@ -210,19 +210,19 @@ public class Task implements Comparable<Task>
       m_end = (DateTime) newValue;
 
     else if ( section == SECTION_WORK )
-      m_work = new TimeSpan( (String) newValue );
+      m_work = (TimeSpan) newValue;
 
     else if ( section == SECTION_PRED )
-      m_predecessors = new Predecessors( (String) newValue );
+      m_predecessors = (Predecessors) newValue;
 
     else if ( section == SECTION_RES )
-      m_resources = new TaskResources( (String) newValue );
+      m_resources = (TaskResources) newValue;
 
     else if ( section == SECTION_TYPE )
-      m_type = new TaskType( (String) newValue );
+      m_type = (TaskType) newValue;
 
     else if ( section == SECTION_PRIORITY )
-      m_priority = Integer.parseInt( (String) newValue );
+      m_priority = (int) newValue;
 
     else if ( section == SECTION_DEADLINE )
       m_deadline = (DateTime) newValue;

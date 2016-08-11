@@ -20,7 +20,6 @@ package rjc.jplanner.gui.table;
 
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Region;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.MainWindow;
 
@@ -37,8 +36,7 @@ abstract public class AbstractCellEditor
   private int                       m_rowIndex;
   private MoveDirection             m_moveDirection;
 
-  private Control                   m_focusControl;        // prime control that has focus
-  private Region                    m_overallEditor;       // overall editor can be different to control that takes focus
+  private Control                   m_control;             // prime control that has focus
 
   public static enum MoveDirection// selection movement after committing an edit
   {
@@ -66,28 +64,20 @@ abstract public class AbstractCellEditor
   }
 
   /****************************************** setEditor ******************************************/
-  public void setEditor( Control focusControl )
+  public void setEditor( Control control )
   {
-    // simple case where overall editor and prime control are one and the same
-    setEditor( focusControl, focusControl );
-  }
-
-  /****************************************** setEditor ******************************************/
-  public void setEditor( Region overall, Control focusControl )
-  {
-    // set overall editor and focus control
-    m_overallEditor = overall;
-    m_focusControl = focusControl;
+    // set focus control
+    m_control = control;
 
     // add listener to end editing if focus lost
-    m_focusControl.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+    m_control.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
     {
       if ( !newFocus )
         endEditing();
     } );
 
     // add listener to close if escape or enter pressed
-    m_focusControl.setOnKeyPressed( event ->
+    m_control.setOnKeyPressed( event ->
     {
       if ( event.getCode() == KeyCode.ESCAPE )
         close( false ); // abandon edit
@@ -100,7 +90,7 @@ abstract public class AbstractCellEditor
   public Control getfocusControl()
   {
     // return focus control
-    return m_focusControl;
+    return m_control;
   }
 
   /*************************************** getColumnIndex ****************************************/
@@ -121,14 +111,14 @@ abstract public class AbstractCellEditor
   public Boolean isError()
   {
     // return if editor in error state
-    return m_focusControl == null || m_focusControl.getId() == JPlanner.ERROR;
+    return m_control == null || m_control.getId() == JPlanner.ERROR;
   }
 
   /****************************************** setError *******************************************/
   public void setError( boolean error )
   {
     // update editor error state
-    setError( error, m_focusControl );
+    setError( error, m_control );
   }
 
   /****************************************** setError *******************************************/
@@ -161,15 +151,15 @@ abstract public class AbstractCellEditor
     }
 
     // remove editor from table
-    m_table.remove( m_overallEditor );
+    m_table.remove( m_control );
     m_table.requestFocus();
   }
 
   /********************************************* open ********************************************/
   public void open( Table table, Object value, MoveDirection move )
   {
-    // check editor set
-    if ( m_overallEditor == null )
+    // check editor is set
+    if ( m_control == null )
       throw new IllegalStateException( "Cell editor not set" );
 
     // set editor position & size
@@ -181,12 +171,10 @@ abstract public class AbstractCellEditor
     int columnPos = m_table.getColumnPositionByIndex( m_columnIndex );
     int rowPos = m_table.getRowPositionByIndex( m_rowIndex );
 
-    m_overallEditor.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
-    m_overallEditor.setLayoutY( m_table.getYStartByRowPosition( rowPos ) - 1 );
-    m_overallEditor.setMaxSize( w, h );
-    m_overallEditor.setMinSize( w, h );
-    m_focusControl.setMaxSize( w, h );
-    m_focusControl.setMinSize( w, h );
+    m_control.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
+    m_control.setLayoutY( m_table.getYStartByRowPosition( rowPos ) - 1 );
+    m_control.setMaxSize( w, h );
+    m_control.setMinSize( w, h );
 
     // set editor value
     if ( value != null )
@@ -196,8 +184,8 @@ abstract public class AbstractCellEditor
 
     // display editor and give focus
     m_cellEditorInProgress = this;
-    m_table.add( m_overallEditor );
-    m_focusControl.requestFocus();
+    m_table.add( m_control );
+    m_control.requestFocus();
   }
 
 }

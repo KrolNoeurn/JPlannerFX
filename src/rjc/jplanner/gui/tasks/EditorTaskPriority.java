@@ -30,8 +30,27 @@ public class EditorTaskPriority extends EditorSpin
   /**************************************** constructor ******************************************/
   public EditorTaskPriority( int columnIndex, int rowIndex )
   {
+    // default spin editor is fine
     super( columnIndex, rowIndex );
-    // TODO Auto-generated constructor stub
+  }
+
+  /******************************************* getValue ******************************************/
+  @Override
+  public Object getValue()
+  {
+    // return priority value as integer
+    return getInteger();
+  }
+
+  /******************************************* setValue ******************************************/
+  @Override
+  public void setValue( Object value )
+  {
+    // set value depending on type
+    if ( value instanceof Integer )
+      setInteger( (int) value );
+    else
+      super.setValue( value );
   }
 
 }

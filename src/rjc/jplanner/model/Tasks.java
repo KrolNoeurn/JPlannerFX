@@ -145,7 +145,7 @@ public class Tasks extends ArrayList<Task>
       }
 
     // set the task predecessors, remembering array starts from zero but id from one
-    get( task ).setValue( Task.SECTION_PRED, preds );
+    get( task ).setValue( Task.SECTION_PRED, new Predecessors( preds ) );
   }
 
   /******************************************* writeXML ******************************************/

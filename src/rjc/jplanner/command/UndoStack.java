@@ -58,6 +58,20 @@ public class UndoStack
     return m_index == m_cleanIndex;
   }
 
+  /************************************ getPreviousCleanState ************************************/
+  public boolean getPreviousCleanState()
+  {
+    // return previous clean state
+    return m_previousCleanState;
+  }
+
+  /************************************ setPreviousCleanState ************************************/
+  public void setPreviousCleanState( boolean previous )
+  {
+    // set previous clean state
+    m_previousCleanState = previous;
+  }
+
   /******************************************** update *********************************************/
   public void update( int updates )
   {

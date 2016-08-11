@@ -22,15 +22,12 @@ import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
+import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.StackPane;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.MainWindow;
 
 /*************************************************************************************************/
@@ -39,9 +36,8 @@ import rjc.jplanner.gui.MainWindow;
 
 public class EditorSpin extends AbstractCellEditor
 {
-  private StackPane                      m_stack;                                     // overall editor that includes buttons and text field
-  private CellTextField                  m_editor;                                    // text field part of editor
-  private Canvas                         m_buttons;                                   // buttons part of editor
+  private CellTextField                  m_editor          = new CellTextField();     // text field part of editor
+  private Canvas                         m_buttons         = new Canvas();            // buttons part of editor
 
   private double                         m_min;                                       // minimum number allowed
   private double                         m_max;                                       // maximum number allowed
@@ -52,79 +48,37 @@ public class EditorSpin extends AbstractCellEditor
   private String                         m_prefix;
   private String                         m_suffix;
 
-  private static final int               MAX_BUTTONS_WIDTH = 24;
+  private static final int               BUTTONS_WIDTH_MAX = 24;
+  private static final int               BUTTONS_PADDING   = 2;
   private DecimalFormat                  m_numberFormat    = new DecimalFormat( "0" );
-  private EventHandler<? super KeyEvent> m_cellKeyHandler;
+  private EventHandler<? super KeyEvent> m_defaultKeyHandler;
 
   /**************************************** constructor ******************************************/
   public EditorSpin( int columnIndex, int rowIndex )
   {
     // create spin editor
     super( columnIndex, rowIndex );
-
-    // stack of text editor and buttons
-    m_stack = new StackPane();
-    m_editor = new CellTextField();
-    m_buttons = new Canvas();
-    m_stack.getChildren().addAll( m_editor, m_buttons );
-    StackPane.setAlignment( m_buttons, Pos.CENTER_RIGHT );
-
-    // setup cell editor
-    setEditor( m_stack, m_editor );
+    setEditor( m_editor );
 
     // set default spin editor characteristics
-    setRange( 50.0, 999.0, 0 );
+    setRange( 0.0, 999.0, 0 );
     setStepPage( 1.0, 10.0 );
 
-    // when stack pane changes size re-draw buttons
-    m_stack.heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButtons() );
-    m_stack.widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
+    // when editor changes size re-draw buttons
+    m_editor.heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButtons() );
+    m_editor.widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
 
-    // react to key presses and mouse clicks & wheel scrolls
-    m_cellKeyHandler = m_editor.getOnKeyPressed();
+    // react to key presses and button mouse clicks
+    m_defaultKeyHandler = m_editor.getOnKeyPressed();
     m_editor.setOnKeyPressed( event -> keyPressed( event ) );
     m_buttons.setOnMousePressed( event -> buttonPressed( event ) );
 
     // add listener to ensure error status is correct
     m_editor.textProperty().addListener( ( observable, oldText, newText ) ->
     {
-      double num = getNumber();
-      boolean error = num < m_min || num > m_max || getValue().toString().length() < 1;
-      AbstractCellEditor.setError( error, m_editor );
+      double num = getDouble();
+      setError( num < m_min || num > m_max || getText().length() < 1 );
     } );
-
-    // lock x-layout to 0 to prevent any shudder or incorrect placing
-    m_editor.layoutXProperty().addListener( ( observable, oldValue, newValue ) -> m_editor.setLayoutX( 0.0 ) );
-  }
-
-  /******************************************* getValue ******************************************/
-  @Override
-  public Object getValue()
-  {
-    // get editor text (including prefix and suffix)
-    return m_editor.getText();
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // ensure new value starts with prefix and ends with suffix
-    String str = (String) value;
-    if ( m_prefix != null && !str.startsWith( m_prefix ) )
-      str = m_prefix + str;
-    if ( m_suffix != null && !str.endsWith( m_suffix ) )
-      str = str + m_suffix;
-
-    // set editor text
-    m_editor.setValue( str );
-  }
-
-  /******************************************* setValue ******************************************/
-  public void setValue( double value )
-  {
-    // set editor text
-    m_editor.setValue( m_prefix + m_numberFormat.format( value ) + m_suffix );
   }
 
   /******************************************** open *********************************************/
@@ -133,28 +87,99 @@ public class EditorSpin extends AbstractCellEditor
   {
     // open editor
     m_editor.calculateWidth( table, getColumnIndex() );
-    setAdditionalScrollNode( table );
     super.open( table, value, move );
+
+    // add buttons and include table scroll events 
+    table.add( m_buttons );
+    EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
+    table.setOnScroll( event -> scrollEvent( event ) );
+
+    // when focus lost, remove buttons and reset table scroll handler
+    m_editor.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+    {
+      if ( !newFocus )
+      {
+        table.remove( m_buttons );
+        table.setOnScroll( previousScrollHander );
+      }
+    } );
   }
 
-  /****************************************** getNumber ******************************************/
-  public double getNumber()
+  /******************************************* getValue ******************************************/
+  @Override
+  public Object getValue()
   {
-    // get editor text (less prefix + suffix) converted to number
-    String value = (String) getValue();
-    if ( m_prefix != null )
-      value = value.substring( m_prefix.length() );
-    if ( m_suffix != null )
-      value = value.substring( 0, value.length() - m_suffix.length() );
+    // return editor text (less prefix + suffix)
+    return getText();
+  }
 
-    JPlanner.trace( "'" + value + "'" );
+  /******************************************* getText *******************************************/
+  public String getText()
+  {
+    // return editor text less prefix + suffix
+    String str = m_editor.getText();
+    if ( m_prefix != null )
+      str = str.substring( m_prefix.length() );
+    if ( m_suffix != null )
+      str = str.substring( 0, str.length() - m_suffix.length() );
+
+    return str;
+  }
+
+  /******************************************* setValue ******************************************/
+  @Override
+  public void setValue( Object value )
+  {
+    // set editor text adding prefix and suffix if necessary
+    String str = (String) value;
+    if ( m_prefix != null && !str.startsWith( m_prefix ) )
+      str = m_prefix + str;
+    if ( m_suffix != null && !str.endsWith( m_suffix ) )
+      str = str + m_suffix;
+
+    // use setValue instead of setText so caret put at end
+    m_editor.setValue( str );
+  }
+
+  /****************************************** setDouble ******************************************/
+  public void setDouble( double value )
+  {
+    // set editor text (adding prefix and suffix)
+    setValue( m_numberFormat.format( value ) );
+  }
+
+  /****************************************** getDouble ******************************************/
+  public double getDouble()
+  {
+    // return editor text (less prefix + suffix) converted to double number
     try
     {
-      return Double.parseDouble( value );
+      return Double.parseDouble( getText() );
     }
     catch ( Exception exception )
     {
       return 0.0;
+    }
+  }
+
+  /***************************************** setInteger ******************************************/
+  public void setInteger( int value )
+  {
+    // set editor text (adding prefix and suffix)
+    setValue( String.valueOf( value ) );
+  }
+
+  /***************************************** getInteger ******************************************/
+  public int getInteger()
+  {
+    // return editor text (less prefix + suffix) converted to integer number
+    try
+    {
+      return Integer.parseInt( getText() );
+    }
+    catch ( Exception exception )
+    {
+      return 0;
     }
   }
 
@@ -215,37 +240,25 @@ public class EditorSpin extends AbstractCellEditor
     m_editor.setAllowed( allow.toString() );
   }
 
-  /*********************************** setAdditionalScrollNode ***********************************/
-  private void setAdditionalScrollNode( Node node )
-  {
-    // react to scroll events on this additional node
-    EventHandler<? super ScrollEvent> previousScrollHander = node.getOnScroll();
-    node.setOnScroll( event -> scrollEvent( event ) );
-
-    // add listener to revert previous scroll handler if focus lost
-    m_editor.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
-    {
-      if ( !newFocus )
-        node.setOnScroll( previousScrollHander );
-    } );
-  }
-
   /***************************************** drawButtons *****************************************/
   private void drawButtons()
   {
     // determine size and draw button
     GraphicsContext gc = m_buttons.getGraphicsContext2D();
-    double h = m_stack.getHeight() - 4;
-    double w = m_stack.getWidth() / 2;
-    if ( w > MAX_BUTTONS_WIDTH )
-      w = MAX_BUTTONS_WIDTH;
+    double h = m_editor.getHeight() - 2 * BUTTONS_PADDING;
+    double w = m_editor.getWidth() / 2;
+    if ( w > BUTTONS_WIDTH_MAX )
+      w = BUTTONS_WIDTH_MAX;
     m_buttons.setHeight( h );
     m_buttons.setWidth( w );
 
+    // set editor insets and buttons position
+    m_editor.setPadding( new Insets( 0, w + TableCanvas.CELL_PADDING, 0, TableCanvas.CELL_PADDING ) );
+    m_buttons.setLayoutX( m_editor.getLayoutX() + m_editor.getWidth() - w - BUTTONS_PADDING );
+    m_buttons.setLayoutY( m_editor.getLayoutY() + BUTTONS_PADDING );
+
     // fill background
-    gc.clearRect( 0.0, 0.0, w, h );
     gc.setFill( MainWindow.BUTTON_BACKGROUND );
-    w -= 2;
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw arrows
@@ -275,12 +288,12 @@ public class EditorSpin extends AbstractCellEditor
   private void changeNumber( double delta )
   {
     // modify number, ensuring it is between min and max
-    double num = getNumber() + delta;
+    double num = getDouble() + delta;
     if ( num < m_min )
       num = m_min;
     if ( num > m_max )
       num = m_max;
-    setValue( num );
+    setDouble( num );
   }
 
   /***************************************** keyPressed ******************************************/
@@ -302,21 +315,21 @@ public class EditorSpin extends AbstractCellEditor
         changeNumber( m_page );
         break;
       case HOME:
-        setValue( m_min );
+        setDouble( m_min );
         break;
       case END:
-        setValue( m_max );
+        setDouble( m_max );
         break;
       default:
-        // call CellEditor key pressed event handler (handles escape + return etc)
-        m_cellKeyHandler.handle( event );
+        // call default key pressed event handler (handles escape + return etc)
+        m_defaultKeyHandler.handle( event );
     }
   }
 
-  /***************************************** keyPressed ******************************************/
+  /***************************************** scrollEvent *****************************************/
   private void scrollEvent( ScrollEvent event )
   {
-    // increment or decrement value depending on scroll event
+    // increment or decrement value depending on mouse wheel scroll event
     if ( event.getDeltaY() > 0 )
       changeNumber( m_step );
     else

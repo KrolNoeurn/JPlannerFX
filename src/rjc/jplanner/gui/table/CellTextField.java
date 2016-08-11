@@ -22,6 +22,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /*********************** JavaFX TextField enhanced for table cell editing ************************/
@@ -54,7 +55,8 @@ public class CellTextField extends TextField
 
       // increase width if needed to show whole text
       Text text = new Text( getText() );
-      double width = text.getLayoutBounds().getWidth() + TableCanvas.CELL_PADDING * 3;
+      double width = text.getLayoutBounds().getWidth() + getPadding().getLeft() + getPadding().getRight()
+          + TableCanvas.CELL_PADDING;
       if ( width < m_minWidth )
         width = m_minWidth;
       if ( width > m_maxWidth )
@@ -71,7 +73,7 @@ public class CellTextField extends TextField
   /****************************************** setValue *****************************************/
   public void setValue( String text )
   {
-    // set text editor value
+    // set editor text value (cannot override final TextField setText method)
     setText( text );
 
     // place editor caret at end (in future so not overtaken other caret moving activities)

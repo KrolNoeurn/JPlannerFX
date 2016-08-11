@@ -37,6 +37,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
@@ -47,6 +48,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
+import rjc.jplanner.command.UndoStack;
 import rjc.jplanner.gui.plan.PlanNotes;
 import rjc.jplanner.gui.plan.PlanProperties;
 import rjc.jplanner.model.DateTime;
@@ -64,11 +66,12 @@ public class MainWindow
   public static final String       STYLE_ERROR              = "-fx-text-fill: red;";
   public static final String       STYLE_NORMAL             = "-fx-text-fill: black;";
   public static String             STYLE_TOOLTIP;
+  public static Image              JPLANNER_ICON;                                         // icon for all JPlanner Windows
 
-  private Stage                    m_stage;
+  private Stage                    m_stage;                                               // operating system window holding MainWindow
   private MainTabWidget            m_mainTabWidget;                                       // MainTabWidget associated with MainWindow
-  private Menus                    m_menus                  = new Menus();
-  private TextField                m_statusBar              = new TextField();
+  private Menus                    m_menus                  = new Menus();                // menus at top of MainWindow
+  private TextField                m_statusBar              = new TextField();            // status bar at bottom of MainWindow
   private UndoStackWindow          m_undoWindow;                                          // window to show plan undo-stack
   private ArrayList<MainTabWidget> m_tabWidgets;                                          // list of MainTabWidgets including one in MainWindow
 
@@ -96,16 +99,28 @@ public class MainWindow
     m_statusBar.setText( "JPlanner started" );
 
     // construct main application window
+    JPLANNER_ICON = new Image( getClass().getResourceAsStream( "jplanner.png" ) );
     Scene scene = new Scene( grid, 800, 500, COLOR_GENERAL_BACKGROUND );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();
+    stage.getIcons().add( JPLANNER_ICON );
 
     // initialise private variables
     m_stage = stage;
     m_tabWidgets = new ArrayList<MainTabWidget>();
     m_tabWidgets.add( m_mainTabWidget );
     properties().updateFromPlan();
+
+    // on minimising to icon, minimise other windows
+    stage.iconifiedProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
+        ( (Stage) tabs.getScene().getWindow() ).setIconified( newValue );
+
+      if ( m_undoWindow != null )
+        m_undoWindow.setIconified( newValue );
+    } );
 
     // on close request also close (via hide) other windows
     stage.setOnCloseRequest( event ->
@@ -636,8 +651,20 @@ public class MainWindow
   /************************************* updateWindowTitles **************************************/
   private void updateWindowTitles()
   {
-    // TODO Auto-generated method stub
+    // refresh title on each JPlanner window
+    String title;
+    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().equals( "" ) )
+      title = "JPlannerFX";
+    else
+    {
+      if ( JPlanner.plan.undostack().isClean() )
+        title = JPlanner.plan.filename() + " - JPlannerFX";
+      else
+        title = JPlanner.plan.filename() + "* - JPlannerFX";
+    }
 
+    for ( MainTabWidget tabs : m_tabWidgets )
+      ( (Stage) tabs.getScene().getWindow() ).setTitle( title );
   }
 
   /*************************************** saveDisplayData ***************************************/
@@ -688,6 +715,7 @@ public class MainWindow
     stage.setScene( new Scene( newTabWidget ) );
     stage.setTitle( m_stage.getTitle() );
     stage.show();
+    stage.getIcons().add( JPLANNER_ICON );
 
     // add new MainTabWidget to tracking list
     m_tabWidgets.add( newTabWidget );
@@ -727,6 +755,14 @@ public class MainWindow
     if ( m_undoWindow != null )
       m_undoWindow.updateScrollBarAndCanvas();
 
+    // if clean state changed, update window titles
+    UndoStack stack = JPlanner.plan.undostack();
+    if ( stack.getPreviousCleanState() != stack.isClean() )
+    {
+      updateWindowTitles();
+      stack.setPreviousCleanState( stack.isClean() );
+    }
+
     // update undo menu-item
     /*
     MenuItem undo = JPlanner.gui.actionUndo;
@@ -757,11 +793,6 @@ public class MainWindow
     // also update undo-stack window selected item if exists
     if ( JPlanner.gui.undoWindow != null )
       JPlanner.gui.undoWindow.updateSelection();
-    
-    // if clean state changed, update window titles
-    if ( m_previousCleanState != isClean() )
-      JPlanner.gui.updateWindowTitles();
-    m_previousCleanState = isClean();
     */
   }
 
