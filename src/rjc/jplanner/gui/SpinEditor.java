@@ -22,24 +22,20 @@ import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.StackPane;
-import rjc.jplanner.gui.table.CellTextField;
 
 /*************************************************************************************************/
-/****************************** Table cell editor for number fields ******************************/
+/***************************** Generic spin editor for number fields *****************************/
 /*************************************************************************************************/
 
-public class SpinEditor
+public class SpinEditor extends XTextField
 {
-  private StackPane                      m_stack;                                     // overall editor that includes buttons and text field
-  private CellTextField                  m_editor;                                    // text field part of editor
-  private Canvas                         m_buttons;                                   // buttons part of editor
+  private Canvas                         m_buttons         = new Canvas();            // buttons part of editor
 
   private double                         m_min;                                       // minimum number allowed
   private double                         m_max;                                       // maximum number allowed
@@ -50,82 +46,104 @@ public class SpinEditor
   private String                         m_prefix;
   private String                         m_suffix;
 
-  private static final int               MAX_BUTTONS_WIDTH = 24;
+  private static final int               BUTTONS_WIDTH_MAX = 16;
+  private static final int               BUTTONS_PADDING   = 2;
   private DecimalFormat                  m_numberFormat    = new DecimalFormat( "0" );
-  private EventHandler<? super KeyEvent> m_cellKeyHandler;
+  private EventHandler<? super KeyEvent> m_defaultKeyHandler;
 
   /**************************************** constructor ******************************************/
-  public SpinEditor( int columnIndex, int rowIndex )
+  public SpinEditor()
   {
-    // create spin editor, stack of text editor and buttons
-    m_stack = new StackPane();
-    m_editor = new CellTextField();
-    m_buttons = new Canvas();
-    m_stack.getChildren().addAll( m_editor, m_buttons );
-    StackPane.setAlignment( m_buttons, Pos.CENTER_RIGHT );
-
     // set default spin editor characteristics
-    setRange( 50.0, 999.0, 0 );
+    setRange( 0.0, 999.0, 0 );
     setStepPage( 1.0, 10.0 );
 
-    // when stack pane changes size re-draw buttons
-    m_stack.heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButtons() );
-    m_stack.widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
+    // when editor changes size re-draw buttons
+    heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButtons() );
+    widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
 
-    // react to key presses and mouse clicks & wheel scrolls
-    m_cellKeyHandler = m_editor.getOnKeyPressed();
-    m_editor.setOnKeyPressed( event -> keyPressed( event ) );
+    // react to key presses and button mouse clicks
+    m_defaultKeyHandler = getOnKeyPressed();
+    setOnKeyPressed( event -> keyPressed( event ) );
     m_buttons.setOnMousePressed( event -> buttonPressed( event ) );
 
-    // lock x-layout to 0 to prevent any shudder or incorrect placing
-    m_editor.layoutXProperty().addListener( ( observable, oldValue, newValue ) -> m_editor.setLayoutX( 0.0 ) );
+    // add listener to ensure error status is correct
+    textProperty().addListener( ( observable, oldText, newText ) ->
+    {
+      double num = getDouble();
+      MainWindow.setError( num < m_min || num > m_max || getText().length() < 1, this );
+    } );
   }
 
-  /******************************************* getText *******************************************/
-  public String getText()
+  /***************************************** getTextCore *****************************************/
+  public String getTextCore()
   {
-    // get editor text (including prefix and suffix)
-    return m_editor.getText();
-  }
-
-  /******************************************* setValue ******************************************/
-  public void setValue( Object value )
-  {
-    // ensure new value starts with prefix and ends with suffix
-    String str = (String) value;
-    if ( m_prefix != null && !str.startsWith( m_prefix ) )
-      str = m_prefix + str;
-    if ( m_suffix != null && !str.endsWith( m_suffix ) )
-      str = str + m_suffix;
-
-    // set editor text
-    m_editor.setValue( str );
-  }
-
-  /******************************************* setValue ******************************************/
-  public void setValue( double value )
-  {
-    // set editor text
-    m_editor.setValue( m_prefix + m_numberFormat.format( value ) + m_suffix );
-  }
-
-  /****************************************** getNumber ******************************************/
-  public double getNumber()
-  {
-    // get editor text (minus prefix and suffix) converted to number
-    String value = getText();
+    // return editor text less prefix + suffix
+    String text = getText();
     if ( m_prefix != null )
-      value = value.substring( m_prefix.length() );
+      text = text.substring( m_prefix.length() );
     if ( m_suffix != null )
-      value = value.substring( 0, value.length() - m_suffix.length() );
+      text = text.substring( 0, text.length() - m_suffix.length() );
 
+    return text;
+  }
+
+  /***************************************** setTextCore *****************************************/
+  public void setTextCore( String text )
+  {
+    // set editor text adding prefix and suffix
+    if ( m_prefix != null && !text.startsWith( m_prefix ) )
+      text = m_prefix + text;
+    if ( m_suffix != null && !text.endsWith( m_suffix ) )
+      text = text + m_suffix;
+
+    // set caret position before suffix 
+    int caretPos = text.length();
+    if ( m_suffix != null )
+      caretPos -= m_suffix.length();
+
+    setTextCaret( text, caretPos );
+  }
+
+  /****************************************** setDouble ******************************************/
+  public void setDouble( double value )
+  {
+    // set editor text (adding prefix and suffix)
+    setTextCore( m_numberFormat.format( value ) );
+  }
+
+  /****************************************** getDouble ******************************************/
+  public double getDouble()
+  {
+    // return editor text (less prefix + suffix) converted to double number
     try
     {
-      return Double.parseDouble( value );
+      return Double.parseDouble( getTextCore() );
     }
     catch ( Exception exception )
     {
       return 0.0;
+    }
+  }
+
+  /***************************************** setInteger ******************************************/
+  public void setInteger( int value )
+  {
+    // set editor text (adding prefix and suffix)
+    setTextCore( String.valueOf( value ) );
+  }
+
+  /***************************************** getInteger ******************************************/
+  public int getInteger()
+  {
+    // return editor text (less prefix + suffix) converted to integer number
+    try
+    {
+      return Integer.parseInt( getTextCore() );
+    }
+    catch ( Exception exception )
+    {
+      return 0;
     }
   }
 
@@ -183,7 +201,14 @@ public class SpinEditor
     if ( m_suffix != null )
       allow.append( Pattern.quote( m_suffix ) );
 
-    m_editor.setAllowed( allow.toString() );
+    setAllowed( allow.toString() );
+  }
+
+  /***************************************** getButtons ******************************************/
+  public Canvas getButtons()
+  {
+    // return buttons
+    return m_buttons;
   }
 
   /***************************************** drawButtons *****************************************/
@@ -191,17 +216,20 @@ public class SpinEditor
   {
     // determine size and draw button
     GraphicsContext gc = m_buttons.getGraphicsContext2D();
-    double h = m_stack.getHeight() - 4;
-    double w = m_stack.getWidth() / 2;
-    if ( w > MAX_BUTTONS_WIDTH )
-      w = MAX_BUTTONS_WIDTH;
+    double h = getHeight() - 2 * BUTTONS_PADDING;
+    double w = getWidth() / 2;
+    if ( w > BUTTONS_WIDTH_MAX )
+      w = BUTTONS_WIDTH_MAX;
     m_buttons.setHeight( h );
     m_buttons.setWidth( w );
 
+    // set editor insets and buttons position
+    setPadding( new Insets( 0, w + PADDING, 0, PADDING ) );
+    m_buttons.setLayoutX( getLayoutX() + getWidth() - w - BUTTONS_PADDING );
+    m_buttons.setLayoutY( getLayoutY() + BUTTONS_PADDING );
+
     // fill background
-    gc.clearRect( 0.0, 0.0, w, h );
     gc.setFill( MainWindow.BUTTON_BACKGROUND );
-    w -= 2;
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw arrows
@@ -231,12 +259,12 @@ public class SpinEditor
   private void changeNumber( double delta )
   {
     // modify number, ensuring it is between min and max
-    double num = getNumber() + delta;
+    double num = getDouble() + delta;
     if ( num < m_min )
       num = m_min;
     if ( num > m_max )
       num = m_max;
-    setValue( num );
+    setDouble( num );
   }
 
   /***************************************** keyPressed ******************************************/
@@ -258,21 +286,21 @@ public class SpinEditor
         changeNumber( m_page );
         break;
       case HOME:
-        setValue( m_min );
+        setDouble( m_min );
         break;
       case END:
-        setValue( m_max );
+        setDouble( m_max );
         break;
       default:
-        // call CellEditor key pressed event handler (handles escape + return etc)
-        m_cellKeyHandler.handle( event );
+        // call default key pressed event handler (handles escape + return etc)
+        m_defaultKeyHandler.handle( event );
     }
   }
 
-  /***************************************** keyPressed ******************************************/
+  /***************************************** scrollEvent *****************************************/
   public void scrollEvent( ScrollEvent event )
   {
-    // increment or decrement value depending on scroll event
+    // increment or decrement value depending on mouse wheel scroll event
     if ( event.getDeltaY() > 0 )
       changeNumber( m_step );
     else

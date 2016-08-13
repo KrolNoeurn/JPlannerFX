@@ -18,21 +18,21 @@
 
 package rjc.jplanner.gui.table;
 
+import rjc.jplanner.gui.XTextField;
+
 /*************************************************************************************************/
 /******************************* Table cell editor for simple text *******************************/
 /*************************************************************************************************/
 
 public class EditorText extends AbstractCellEditor
 {
-  CellTextField m_editor; // text editor
 
   /**************************************** constructor ******************************************/
   public EditorText( int columnIndex, int rowIndex )
   {
     // create text table cell editor
     super( columnIndex, rowIndex );
-    m_editor = new CellTextField();
-    setEditor( m_editor );
+    setControl( new XTextField() );
   }
 
   /******************************************* getValue ******************************************/
@@ -40,7 +40,7 @@ public class EditorText extends AbstractCellEditor
   public Object getValue()
   {
     // get editor text
-    return m_editor.getText();
+    return ( (XTextField) getControl() ).getText();
   }
 
   /******************************************* setValue ******************************************/
@@ -48,15 +48,25 @@ public class EditorText extends AbstractCellEditor
   public void setValue( Object value )
   {
     // set editor text
-    m_editor.setValue( (String) value );
+    String str = (String) value;
+    ( (XTextField) getControl() ).setTextCaret( str, str.length() );
   }
 
   /******************************************** open *********************************************/
   @Override
   public void open( Table table, Object value, MoveDirection move )
   {
+    // determine editor maximum width
+    int columnPos = table.getColumnPositionByIndex( getColumnIndex() );
+    double max = table.getWidth() - table.getXStartByColumnPosition( columnPos ) + 1;
+
+    // determine editor minimum width
+    double min = table.getWidthByColumnIndex( getColumnIndex() ) + 1;
+    if ( min > max )
+      min = max;
+
     // open editor
-    m_editor.calculateWidth( table, getColumnIndex() );
+    ( (XTextField) getControl() ).setWidths( min, max );
     super.open( table, value, move );
   }
 

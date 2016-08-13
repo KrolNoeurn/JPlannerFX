@@ -20,7 +20,6 @@ package rjc.jplanner.gui.table;
 
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.MainWindow;
 
 /*************************************************************************************************/
@@ -63,8 +62,8 @@ abstract public class AbstractCellEditor
       m_cellEditorInProgress.close( !m_cellEditorInProgress.isError() );
   }
 
-  /****************************************** setEditor ******************************************/
-  public void setEditor( Control control )
+  /***************************************** setControl ******************************************/
+  public void setControl( Control control )
   {
     // set focus control
     m_control = control;
@@ -86,8 +85,8 @@ abstract public class AbstractCellEditor
     } );
   }
 
-  /*************************************** getfocusControl ***************************************/
-  public Control getfocusControl()
+  /***************************************** getControl ******************************************/
+  public Control getControl()
   {
     // return focus control
     return m_control;
@@ -111,37 +110,12 @@ abstract public class AbstractCellEditor
   public Boolean isError()
   {
     // return if editor in error state
-    return m_control == null || m_control.getId() == JPlanner.ERROR;
-  }
-
-  /****************************************** setError *******************************************/
-  public void setError( boolean error )
-  {
-    // update editor error state
-    setError( error, m_control );
-  }
-
-  /****************************************** setError *******************************************/
-  public static void setError( boolean error, Control control )
-  {
-    // update editor error state
-    if ( error )
-    {
-      control.setId( JPlanner.ERROR );
-      control.setStyle( MainWindow.STYLE_ERROR );
-    }
-    else
-    {
-      control.setId( null );
-      control.setStyle( MainWindow.STYLE_NORMAL );
-    }
+    return MainWindow.isError( m_control );
   }
 
   /******************************************** close ********************************************/
   public void close( boolean commit )
   {
-    JPlanner.trace( "CLOSING commit=" + commit );
-
     // if commit requested, save new value to table data source & move focus
     m_cellEditorInProgress = null;
     if ( commit )
@@ -160,7 +134,7 @@ abstract public class AbstractCellEditor
   {
     // check editor is set
     if ( m_control == null )
-      throw new IllegalStateException( "Cell editor not set" );
+      throw new IllegalStateException( "Editor control not set" );
 
     // set editor position & size
     m_table = table;

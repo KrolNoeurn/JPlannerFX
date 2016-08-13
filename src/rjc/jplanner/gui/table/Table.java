@@ -770,7 +770,7 @@ public class Table extends TableDisplay
   public void moveFocus( MoveDirection direction )
   {
     // TODO Auto-generated method stub
-
+    JPlanner.trace( "NOT YET IMPLEMENTED!" );
   }
 
 }

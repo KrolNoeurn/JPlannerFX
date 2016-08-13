@@ -84,7 +84,6 @@ public class JPlanner extends Application
       else
         str.append( obj.toString() + " " );
     }
-    //trace( str.toString() );
 
     StackTraceElement[] stack = new Throwable().getStackTrace();
     String method = stack[1].getMethodName() + "()";
@@ -131,7 +130,7 @@ public class JPlanner extends Application
     }
     catch ( Exception exception )
     {
-      trace( "" + exception );
+      trace( exception );
     }
   }
 }

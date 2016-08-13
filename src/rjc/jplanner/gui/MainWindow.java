@@ -36,6 +36,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
@@ -122,57 +123,75 @@ public class MainWindow
         m_undoWindow.setIconified( newValue );
     } );
 
-    // on close request also close (via hide) other windows
+    // on close request if undo-stack not clean check if user wants to save
     stage.setOnCloseRequest( event ->
     {
-      for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
-        if ( tabs != m_mainTabWidget )
-          tabs.getScene().getWindow().hide();
+      if ( okToProceed( "Do you want to save before closing?" ) )
+      {
+        // close other windows
+        for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
+          if ( tabs != m_mainTabWidget )
+            tabs.getScene().getWindow().hide();
 
-      if ( m_undoWindow != null )
-        m_undoWindow.close();
+        if ( m_undoWindow != null )
+          m_undoWindow.close();
+      }
+      else
+        // not okay to proceed, therefore consume event to prevent closing
+        event.consume();
     } );
   }
 
   /****************************************** message ********************************************/
-  public void message( String msg )
+  public void message( String... msg )
   {
     // display message on status-bar
     if ( m_statusBar == null )
-      JPlanner.trace( "MESSAGE BUT NO STATUS-BAR: " + msg );
+      JPlanner.trace( "MESSAGE BUT NO STATUS-BAR: ", msg );
     else
-      m_statusBar.setText( msg );
+      m_statusBar.setText( String.join( "", msg ) );
+  }
+
+  /***************************************** okToProceed *****************************************/
+  public boolean okToProceed( String msg )
+  {
+    // if undo-stack not clean, ask user what to do, true to proceed
+    checkPlanUpToDate();
+    if ( !JPlanner.plan.undostack().isClean() )
+    {
+      ButtonType save = new ButtonType( "Save", ButtonData.YES );
+      ButtonType discard = new ButtonType( "Discard", ButtonData.NO );
+      ButtonType cancel = new ButtonType( "Cancel", ButtonData.CANCEL_CLOSE );
+
+      Alert dialog = new Alert( AlertType.CONFIRMATION );
+      dialog.initOwner( m_stage );
+      dialog.setHeaderText( msg );
+      dialog.getButtonTypes().setAll( save, discard, cancel );
+
+      while ( true )
+      {
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if ( result.get() == save && saveAs() ) // save
+          return true;
+
+        if ( result.get() == discard ) // discard
+          return true;
+
+        if ( result.get() == cancel ) // cancel
+          return false;
+      }
+    }
+
+    return true;
   }
 
   /******************************************** load *********************************************/
   public boolean load()
   {
     // if undo-stack not clean, ask user what to do
-    if ( !JPlanner.plan.undostack().isClean() )
-    {
-      boolean ask = true;
-      while ( ask )
-      {
-        ButtonType save = new ButtonType( "Save", ButtonData.YES );
-        ButtonType discard = new ButtonType( "Discard", ButtonData.NO );
-        ButtonType cancel = new ButtonType( "Cancel", ButtonData.CANCEL_CLOSE );
-
-        Alert dialog = new Alert( AlertType.CONFIRMATION );
-        dialog.setTitle( "Open plan" );
-        dialog.setHeaderText( "Do you want to save before opening new?" );
-        dialog.getButtonTypes().setAll( save, discard, cancel );
-        Optional<ButtonType> result = dialog.showAndWait();
-
-        if ( result.get() == save ) // save
-          ask = !saveAs();
-
-        if ( result.get() == discard ) // discard
-          ask = false;
-
-        if ( result.get() == cancel ) // cancel
-          return false;
-      }
-    }
+    if ( !okToProceed( "Do you want to save before opening new?" ) )
+      return false;
 
     // use file-chooser defaulting if available to current directory
     FileChooser fc = new FileChooser();
@@ -563,8 +582,8 @@ public class MainWindow
     resetDayTypeTables();
 
     // update undo-stack window if exists
-    //if ( undoWindow != null )
-    //  undoWindow.setList();
+    if ( m_undoWindow != null )
+      m_undoWindow.updateScrollBarAndCanvas();
   }
 
   /*************************************** resetTaskTables ***************************************/
@@ -630,10 +649,15 @@ public class MainWindow
     JPlanner.trace( "NOT YET IMPLEMENTED !!!" );
   }
 
-  /************************************** isPlanTabSelected **************************************/
-  public boolean isPlanTabSelected()
+  /************************************** checkPlanUpToDate **************************************/
+  public void checkPlanUpToDate()
   {
-    return m_mainTabWidget.getPlanTab().isSelected();
+    // ensure plan is up-to-date
+    if ( m_mainTabWidget.getPlanTab().isSelected() )
+    {
+      properties().updatePlan();
+      notes().updatePlan();
+    }
   }
 
   /***************************************** properties ******************************************/
@@ -789,11 +813,30 @@ public class MainWindow
       redo.setText( "Redo\tCtrl+Y" );
       redo.setEnabled( false );
     }
-    
-    // also update undo-stack window selected item if exists
-    if ( JPlanner.gui.undoWindow != null )
-      JPlanner.gui.undoWindow.updateSelection();
     */
+  }
+
+  /****************************************** setError *******************************************/
+  public static void setError( boolean error, Control control )
+  {
+    // update control error state
+    if ( error )
+    {
+      control.setId( JPlanner.ERROR );
+      control.setStyle( STYLE_ERROR );
+    }
+    else
+    {
+      control.setId( null );
+      control.setStyle( STYLE_NORMAL );
+    }
+  }
+
+  /******************************************* isError *******************************************/
+  public static Boolean isError( Control control )
+  {
+    // return if control in error state
+    return control == null || control.getId() == JPlanner.ERROR;
   }
 
 }

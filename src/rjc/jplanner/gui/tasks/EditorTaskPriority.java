@@ -18,20 +18,27 @@
 
 package rjc.jplanner.gui.tasks;
 
-import rjc.jplanner.gui.table.EditorSpin;
+import javafx.event.EventHandler;
+import javafx.scene.input.ScrollEvent;
+import rjc.jplanner.gui.SpinEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
 /****************************** Table cell editor for task priority ******************************/
 /*************************************************************************************************/
 
-public class EditorTaskPriority extends EditorSpin
+public class EditorTaskPriority extends AbstractCellEditor
 {
+  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
   public EditorTaskPriority( int columnIndex, int rowIndex )
   {
     // default spin editor is fine
     super( columnIndex, rowIndex );
+    m_spin = new SpinEditor();
+    setControl( m_spin );
   }
 
   /******************************************* getValue ******************************************/
@@ -39,7 +46,7 @@ public class EditorTaskPriority extends EditorSpin
   public Object getValue()
   {
     // return priority value as integer
-    return getInteger();
+    return m_spin.getInteger();
   }
 
   /******************************************* setValue ******************************************/
@@ -48,9 +55,42 @@ public class EditorTaskPriority extends EditorSpin
   {
     // set value depending on type
     if ( value instanceof Integer )
-      setInteger( (int) value );
+      m_spin.setInteger( (int) value );
     else
-      super.setValue( value );
+      m_spin.setText( (String) value );
+  }
+
+  /******************************************** open *********************************************/
+  @Override
+  public void open( Table table, Object value, MoveDirection move )
+  {
+    // determine editor maximum width
+    int columnPos = table.getColumnPositionByIndex( getColumnIndex() );
+    double max = table.getWidth() - table.getXStartByColumnPosition( columnPos ) + 1;
+
+    // determine editor minimum width
+    double min = table.getWidthByColumnIndex( getColumnIndex() ) + 1;
+    if ( min > max )
+      min = max;
+
+    // open editor
+    m_spin.setWidths( min, max );
+    super.open( table, value, move );
+
+    // add buttons and include table scroll events 
+    table.add( m_spin.getButtons() );
+    EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
+    table.setOnScroll( event -> m_spin.scrollEvent( event ) );
+
+    // when focus lost, remove buttons and reset table scroll handler
+    m_spin.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+    {
+      if ( !newFocus )
+      {
+        table.remove( m_spin.getButtons() );
+        table.setOnScroll( previousScrollHander );
+      }
+    } );
   }
 
 }

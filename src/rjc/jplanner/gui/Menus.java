@@ -59,17 +59,13 @@ public class Menus extends MenuBar
   private void onMenuShow()
   {
     // clear status bar message
-    JPlanner.gui.message( "" );
+    JPlanner.gui.message();
 
     // if any table cell editing in progress, end it
     AbstractCellEditor.endEditing();
 
     // ensure plan is up-to-date
-    if ( JPlanner.gui.isPlanTabSelected() )
-    {
-      JPlanner.gui.properties().updatePlan();
-      JPlanner.gui.notes().updatePlan();
-    }
+    JPlanner.gui.checkPlanUpToDate();
   }
 
   /****************************************** fileMenu *******************************************/
