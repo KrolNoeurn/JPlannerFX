@@ -18,9 +18,14 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.gui.MainWindow;
+import rjc.jplanner.gui.SpinEditor;
+import rjc.jplanner.gui.XTextField;
 
 /*************************************************************************************************/
 /********************** Abstract gui control for editing a table cell value **********************/
@@ -76,12 +81,15 @@ abstract public class AbstractCellEditor
     } );
 
     // add listener to close if escape or enter pressed
+    EventHandler<? super KeyEvent> previousKeyPressedHandler = m_control.getOnKeyPressed();
     m_control.setOnKeyPressed( event ->
     {
       if ( event.getCode() == KeyCode.ESCAPE )
         close( false ); // abandon edit
       if ( event.getCode() == KeyCode.ENTER && !isError() )
         close( true ); // commit edit
+
+      previousKeyPressedHandler.handle( event );
     } );
   }
 
@@ -150,16 +158,51 @@ abstract public class AbstractCellEditor
     m_control.setMaxSize( w, h );
     m_control.setMinSize( w, h );
 
+    // if control derived from XTextField then set min & max width
+    if ( m_control instanceof XTextField )
+    {
+      double max = table.getWidth() - table.getXStartByColumnPosition( columnPos ) + 1;
+      double min = table.getWidthByColumnIndex( m_columnIndex ) + 1;
+      if ( min > max )
+        min = max;
+      ( (XTextField) m_control ).setWidths( min, max );
+    }
+
     // set editor value
     if ( value != null )
       setValue( value );
     else
-      setValue( m_table.getDataSource().getValue( m_columnIndex, m_rowIndex ) );
+      setValue( getDataSourceValue() );
 
     // display editor and give focus
     m_cellEditorInProgress = this;
     m_table.add( m_control );
     m_control.requestFocus();
+
+    // if control derived from SpinEditor add buttons and wheel scroll
+    if ( m_control instanceof SpinEditor )
+    {
+      table.add( ( (SpinEditor) m_control ).getButtons() );
+      EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
+      table.setOnScroll( event -> ( (SpinEditor) m_control ).scrollEvent( event ) );
+
+      // when focus lost, remove buttons and reset table scroll handler
+      m_control.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+      {
+        if ( !newFocus )
+        {
+          table.remove( ( (SpinEditor) m_control ).getButtons() );
+          table.setOnScroll( previousScrollHander );
+        }
+      } );
+    }
+  }
+
+  /************************************* getDataSourceValue **************************************/
+  public Object getDataSourceValue()
+  {
+    // return value for table cell from table data source
+    return m_table.getDataSource().getValue( m_columnIndex, m_rowIndex );
   }
 
 }

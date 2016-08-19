@@ -21,7 +21,6 @@ package rjc.jplanner.gui;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -35,21 +34,20 @@ import javafx.scene.input.ScrollEvent;
 
 public class SpinEditor extends XTextField
 {
-  private Canvas                         m_buttons         = new Canvas();            // buttons part of editor
+  private Canvas           m_buttons         = new Canvas();            // buttons part of editor
 
-  private double                         m_min;                                       // minimum number allowed
-  private double                         m_max;                                       // maximum number allowed
-  private int                            m_dp;                                        // number of digits after decimal point
+  private double           m_min;                                       // minimum number allowed
+  private double           m_max;                                       // maximum number allowed
+  private int              m_dp;                                        // number of digits after decimal point
 
-  private double                         m_page;
-  private double                         m_step;
-  private String                         m_prefix;
-  private String                         m_suffix;
+  private double           m_page;
+  private double           m_step;
+  private String           m_prefix;
+  private String           m_suffix;
 
-  private static final int               BUTTONS_WIDTH_MAX = 16;
-  private static final int               BUTTONS_PADDING   = 2;
-  private DecimalFormat                  m_numberFormat    = new DecimalFormat( "0" );
-  private EventHandler<? super KeyEvent> m_defaultKeyHandler;
+  private static final int BUTTONS_WIDTH_MAX = 16;
+  private static final int BUTTONS_PADDING   = 2;
+  private DecimalFormat    m_numberFormat    = new DecimalFormat( "0" );
 
   /**************************************** constructor ******************************************/
   public SpinEditor()
@@ -63,7 +61,6 @@ public class SpinEditor extends XTextField
     widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
 
     // react to key presses and button mouse clicks
-    m_defaultKeyHandler = getOnKeyPressed();
     setOnKeyPressed( event -> keyPressed( event ) );
     m_buttons.setOnMousePressed( event -> buttonPressed( event ) );
 
@@ -72,6 +69,13 @@ public class SpinEditor extends XTextField
     {
       double num = getDouble();
       MainWindow.setError( num < m_min || num > m_max || getText().length() < 1, this );
+
+      // remove any excess zero at start of number
+      String str = getTextCore();
+      if ( str.length() > 1 && str.charAt( 0 ) == '0' && str.charAt( 1 ) != '.' )
+        setText( newText.substring( 1 ) );
+      if ( str.length() > 2 && str.charAt( 0 ) == '-' && str.charAt( 1 ) == '0' && str.charAt( 2 ) != '.' )
+        setText( "-" + newText.substring( 2 ) );
     } );
   }
 
@@ -292,8 +296,7 @@ public class SpinEditor extends XTextField
         setDouble( m_max );
         break;
       default:
-        // call default key pressed event handler (handles escape + return etc)
-        m_defaultKeyHandler.handle( event );
+        break;
     }
   }
 

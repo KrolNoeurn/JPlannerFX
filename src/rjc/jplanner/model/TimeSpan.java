@@ -83,9 +83,12 @@ public class TimeSpan
   /**************************************** constructor ******************************************/
   public TimeSpan( double num, char units )
   {
-    // construct time-span from parameters
-    m_num = num;
+    // construct time-span from parameters, rounding number based on units
     m_units = units;
+    if ( units == UNIT_SECONDS )
+      m_num = Math.rint( num );
+    else
+      m_num = Math.rint( num * 100.0 ) / 100.0;
   }
 
   /***************************************** toString ********************************************/

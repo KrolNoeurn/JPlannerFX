@@ -52,22 +52,4 @@ public class EditorText extends AbstractCellEditor
     ( (XTextField) getControl() ).setTextCaret( str, str.length() );
   }
 
-  /******************************************** open *********************************************/
-  @Override
-  public void open( Table table, Object value, MoveDirection move )
-  {
-    // determine editor maximum width
-    int columnPos = table.getColumnPositionByIndex( getColumnIndex() );
-    double max = table.getWidth() - table.getXStartByColumnPosition( columnPos ) + 1;
-
-    // determine editor minimum width
-    double min = table.getWidthByColumnIndex( getColumnIndex() ) + 1;
-    if ( min > max )
-      min = max;
-
-    // open editor
-    ( (XTextField) getControl() ).setWidths( min, max );
-    super.open( table, value, move );
-  }
-
 }

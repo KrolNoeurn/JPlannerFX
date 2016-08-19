@@ -18,9 +18,6 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.event.EventHandler;
-import javafx.scene.input.ScrollEvent;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.model.TimeSpan;
 
@@ -53,53 +50,68 @@ public class EditorTimeSpan extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
-    JPlanner.trace( value.getClass(), value );
-
     // set value depending on type
     if ( value instanceof TimeSpan )
       setTimeSpan( (TimeSpan) value );
+    else if ( value instanceof String )
+    {
+      String str = (String) value;
+
+      // if value is just decimal point then get time-span from data source and overwrite number
+      if ( str.equals( "." ) )
+      {
+        setTimeSpan( (TimeSpan) getDataSourceValue() );
+        m_spin.setTextCore( str );
+        return;
+      }
+
+      try
+      {
+        // if value just number then add units from data source
+        Double.parseDouble( str );
+        char units = ( (TimeSpan) getDataSourceValue() ).units();
+        setTimeSpan( new TimeSpan( str + units ) );
+      }
+      catch ( Exception exception )
+      {
+        // if value just units then add number from data source
+        char unit = str.charAt( 0 );
+        if ( TimeSpan.UNITS.indexOf( unit ) >= 0 )
+        {
+          double num = ( (TimeSpan) getDataSourceValue() ).number();
+          setTimeSpan( new TimeSpan( num, unit ) );
+        }
+        else
+          // else use full time-span from data source
+          setTimeSpan( (TimeSpan) getDataSourceValue() );
+      }
+    }
     else
-      setTimeSpan( new TimeSpan( (String) value ) );
+      throw new IllegalArgumentException( "Invalid value type " + value.getClass() );
   }
 
-  /******************************************** open *********************************************/
+  /********************************************* open ********************************************/
   @Override
   public void open( Table table, Object value, MoveDirection move )
   {
-    // determine editor maximum width
-    int columnPos = table.getColumnPositionByIndex( getColumnIndex() );
-    double max = table.getWidth() - table.getXStartByColumnPosition( columnPos ) + 1;
-
-    // determine editor minimum width
-    double min = table.getWidthByColumnIndex( getColumnIndex() ) + 1;
-    if ( min > max )
-      min = max;
-
-    // open editor
-    m_spin.setWidths( min, max );
+    // open cell editor
     super.open( table, value, move );
 
-    // add buttons and include table scroll events 
-    table.add( m_spin.getButtons() );
-    EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
-    table.setOnScroll( event -> m_spin.scrollEvent( event ) );
-
-    // when focus lost, remove buttons and reset table scroll handler
-    m_spin.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+    // add listener to react to user typing new TimeSpan units
+    m_spin.setOnKeyTyped( event ->
     {
-      if ( !newFocus )
-      {
-        table.remove( m_spin.getButtons() );
-        table.setOnScroll( previousScrollHander );
-      }
+      char unit = event.getCharacter().charAt( 0 );
+      if ( TimeSpan.UNITS.indexOf( unit ) >= 0 )
+        setTimeSpan( new TimeSpan( m_spin.getDouble(), unit ) );
     } );
   }
 
   /******************************************* getUnits ******************************************/
   private char getUnits()
   {
-    // ???????????????????
-    return TimeSpan.UNIT_HOURS;
+    // return units which is last character of suffix (= last character of displayed text)
+    String text = m_spin.getText();
+    return text.charAt( text.length() - 1 );
   }
 
   /***************************************** setTimeSpan *****************************************/
