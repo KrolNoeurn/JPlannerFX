@@ -22,6 +22,7 @@ import static java.lang.Math.min;
 
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
+import rjc.jplanner.gui.XScrollBar;
 
 /*************************************************************************************************/
 /*********************** JavaFX table display with canvas and scroll bars ************************/
@@ -44,12 +45,12 @@ public class TableDisplay extends TableParent
     m_canvas = new TableCanvas( m_table );
 
     // vertical scroll bar
-    m_vScrollBar = new ScrollBar();
+    m_vScrollBar = new XScrollBar( table );
     m_vScrollBar.setOrientation( Orientation.VERTICAL );
     m_vScrollBar.setMinWidth( SCROLLBAR_SIZE );
 
     // horizontal scroll bar
-    m_hScrollBar = new ScrollBar();
+    m_hScrollBar = new XScrollBar( table );
     m_hScrollBar.setMinHeight( SCROLLBAR_SIZE );
 
     // add canvas and scroll bars as parent displayed children

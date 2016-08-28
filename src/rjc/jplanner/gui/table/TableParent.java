@@ -25,7 +25,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.util.Duration;
-import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /************************* JavaFX parent node for JPlanner custom tables *************************/
@@ -117,8 +116,8 @@ public class TableParent extends Parent
   /******************************************* animate *******************************************/
   public void animate( DoubleProperty property, int endValue, int duration_ms )
   {
-    // create animation stopping any current animation first
-    stopAnimation();
+    // create animation finishing any current animation first
+    finishAnimation();
 
     KeyValue kv = new KeyValue( property, endValue );
     KeyFrame kf = new KeyFrame( Duration.millis( duration_ms ), kv );
@@ -126,11 +125,7 @@ public class TableParent extends Parent
     m_animation.play();
 
     // when animation finished clear pointer
-    m_animation.setOnFinished( event ->
-    {
-      JPlanner.trace( "ANIMATION FINISHED ", m_animation );
-      m_animation = null;
-    } );
+    m_animation.setOnFinished( event -> m_animation = null );
   }
 
   /*************************************** finishAnimation ***************************************/

@@ -24,18 +24,20 @@ package rjc.jplanner.model;
 
 public class TaskType
 {
-  public static final String ASAP_FDUR    = "ASAP - duration";     // Early as possible - fixed duration
-  public static final String ASAP_FWORK   = "ASAP - work";         // Early as possible - fixed work
-  public static final String SON_FDUR     = "Start on - duration"; // Start on - fixed duration
-  public static final String SON_FWORK    = "Start on - work";     // Start on - fixed work
-  public static final String FIXED_PERIOD = "Fixed period";        // Fixed period
+  private static final int   TYPES_COUNT  = 5;                     // number of different task types
+
+  public static final String ASAP_FDUR    = "ASAP - duration";     // early as possible - fixed duration
+  public static final String ASAP_FWORK   = "ASAP - work";         // early as possible - fixed work
+  public static final String SON_FDUR     = "Start on - duration"; // start on - fixed duration
+  public static final String SON_FWORK    = "Start on - work";     // start on - fixed work
+  public static final String FIXED_PERIOD = "Fixed period";        // fixed period
 
   private String             m_type;
 
   /***************************************** constructor *****************************************/
   public TaskType( String str )
   {
-    // create type type, don't assume string-pointer is correct even if string is valid
+    // create task type, don't assume string-pointer is correct even if string is valid
     if ( str.equals( ASAP_FDUR ) )
       m_type = ASAP_FDUR;
 
@@ -52,7 +54,14 @@ public class TaskType
       m_type = FIXED_PERIOD;
 
     else
-      throw new IllegalArgumentException( str );
+      throw new IllegalArgumentException( "str=" + str );
+  }
+
+  /***************************************** constructor *****************************************/
+  public TaskType( int num )
+  {
+    // create task type based on number
+    m_type = TaskType.toString( num );
   }
 
   /****************************************** toString *******************************************/
@@ -61,6 +70,34 @@ public class TaskType
   {
     // returns string representation
     return m_type;
+  }
+
+  /******************************************** toString *********************************************/
+  public static String toString( int num )
+  {
+    // return task type string for n'th task type
+    switch ( num )
+    {
+      case 0:
+        return ASAP_FDUR;
+      case 1:
+        return ASAP_FWORK;
+      case 2:
+        return SON_FDUR;
+      case 3:
+        return SON_FWORK;
+      case 4:
+        return FIXED_PERIOD;
+      default:
+        throw new IllegalArgumentException( "num=" + num );
+    }
+  }
+
+  /******************************************** count *********************************************/
+  public static int count()
+  {
+    // return number of valid task types (used for drop-down lists etc)
+    return TYPES_COUNT;
   }
 
   /************************************** isSectionEditable **************************************/
@@ -86,17 +123,19 @@ public class TaskType
     return true;
   }
 
-  /******************************************** list *********************************************/
-  public static String[] list()
+  /****************************************** hashCode *******************************************/
+  @Override
+  public int hashCode()
   {
-    // return String array of task types
-    String[] items = new String[5];
-    items[0] = ASAP_FDUR;
-    items[1] = ASAP_FWORK;
-    items[2] = SON_FDUR;
-    items[3] = SON_FWORK;
-    items[4] = FIXED_PERIOD;
-
-    return items;
+    // return hash code which is hash code of type string
+    return m_type.hashCode();
   }
+
+  /******************************************* equals ********************************************/
+  public boolean equals( TaskType other )
+  {
+    // return true if this type and specified type are same
+    return m_type == other.m_type;
+  }
+
 }

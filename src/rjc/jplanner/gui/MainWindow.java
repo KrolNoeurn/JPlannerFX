@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -160,22 +162,26 @@ public class MainWindow
     if ( !JPlanner.plan.undostack().isClean() )
     {
       ButtonType save = new ButtonType( "Save", ButtonData.YES );
+      ButtonType saveAs = new ButtonType( "Save As", ButtonData.NO );
       ButtonType discard = new ButtonType( "Discard", ButtonData.NO );
       ButtonType cancel = new ButtonType( "Cancel", ButtonData.CANCEL_CLOSE );
 
       Alert dialog = new Alert( AlertType.CONFIRMATION );
       dialog.initOwner( m_stage );
       dialog.setHeaderText( msg );
-      dialog.getButtonTypes().setAll( save, discard, cancel );
+      dialog.getButtonTypes().setAll( save, saveAs, discard, cancel );
 
       while ( true )
       {
         Optional<ButtonType> result = dialog.showAndWait();
 
-        if ( result.get() == save && saveAs() ) // save
+        if ( result.get() == save && save() ) // save
           return true;
 
-        if ( result.get() == discard ) // discard
+        if ( result.get() == saveAs && saveAs() ) // save as
+          return true;
+
+        if ( result.get() == discard && discard() ) // discard
           return true;
 
         if ( result.get() == cancel ) // cancel
@@ -184,6 +190,18 @@ public class MainWindow
     }
 
     return true;
+  }
+
+  /******************************************* discard *******************************************/
+  private boolean discard()
+  {
+    // if no existing file location set or not writable, use default temporary file path
+    String path = JPlanner.plan.fileLocation();
+    if ( path == null || path.length() < 1 || !Files.isWritable( Paths.get( path ) ) )
+      path = System.getProperty( "java.io.tmpdir" );
+
+    // attempt to save this path and using existing filename & location
+    return save( new File( path, "discarded.xml" ) );
   }
 
   /******************************************** load *********************************************/
@@ -307,7 +325,7 @@ public class MainWindow
   public boolean save()
   {
     // if no existing filename set, use save-as
-    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().equals( "" ) )
+    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().length() < 1 )
       return saveAs();
 
     // attempt to save using existing filename & location
@@ -677,7 +695,7 @@ public class MainWindow
   {
     // refresh title on each JPlanner window
     String title;
-    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().equals( "" ) )
+    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().length() < 1 )
       title = "JPlannerFX";
     else
     {

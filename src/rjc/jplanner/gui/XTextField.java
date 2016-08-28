@@ -41,7 +41,6 @@ public class XTextField extends TextField
   {
     // create enhanced text field control
     super();
-    setPadding( new Insets( 0, PADDING, 0, PADDING ) );
 
     // add listener to check new values
     textProperty().addListener( ( observable, oldText, newText ) ->
@@ -53,6 +52,10 @@ public class XTextField extends TextField
       // ensure error status is correct
       if ( m_valid != null )
         MainWindow.setError( !getText().matches( m_valid ), this );
+
+      // if min or max width not set, don't do anything more
+      if ( m_minWidth <= 0.0 || m_maxWidth <= 0.0 )
+        return;
 
       // increase width if needed to show whole text
       Text text = new Text( getText() );
@@ -100,6 +103,7 @@ public class XTextField extends TextField
     // set editor minimum and maximum width
     m_minWidth = min;
     m_maxWidth = max;
+    setPadding( new Insets( 0, PADDING, 0, PADDING ) );
   }
 
 }

@@ -122,6 +122,8 @@ public class TasksData implements ITableDataSource
         return new EditorDateTime( columnIndex, rowIndex );
       case Task.SECTION_PRIORITY:
         return new EditorTaskPriority( columnIndex, rowIndex );
+      case Task.SECTION_TYPE:
+        return new EditorTaskType( columnIndex, rowIndex );
       default:
         return new EditorText( columnIndex, rowIndex );
     }

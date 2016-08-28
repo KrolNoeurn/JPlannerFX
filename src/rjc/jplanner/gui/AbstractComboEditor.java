@@ -19,24 +19,24 @@
 package rjc.jplanner.gui;
 
 import javafx.application.Platform;
-import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
 
 /*************************************************************************************************/
 /******************* Abstract JavaFX control to allow user to pick from list *********************/
 /*************************************************************************************************/
 
-public abstract class AbstractComboEditor extends StackPane
+public abstract class AbstractComboEditor extends XTextField
 {
-  private TextField     m_displayText   = new TextField();
-  private Canvas        m_button        = new Canvas();
-  private ComboDropDown m_dropdown;
-  private int           m_selectedIndex = -1;
+  private Canvas           m_button          = new Canvas();
+  private ComboDropDown    m_dropdown;
+  private int              m_selectedIndex   = -1;
+
+  private static final int BUTTONS_WIDTH_MAX = 16;
+  private static final int BUTTONS_PADDING   = 2;
 
   abstract public int getItemCount(); // return number of items user can choose from
 
@@ -47,18 +47,16 @@ public abstract class AbstractComboEditor extends StackPane
   {
     // construct combo box
     super();
-    m_displayText.setEditable( false );
-    getChildren().addAll( m_displayText, m_button );
-    StackPane.setAlignment( m_button, Pos.CENTER_RIGHT );
+    setEditable( false );
 
     // when combo box changes size re-draw button
     heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButton() );
     widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButton() );
 
     // react to key presses and mouse clicks
-    m_displayText.setOnKeyPressed( event -> keyPressed( event ) );
-    m_displayText.setOnKeyTyped( event -> keyTyped( event ) );
-    m_displayText.setOnMousePressed( event -> mousePressed( event ) );
+    setOnKeyPressed( event -> keyPressed( event ) );
+    setOnKeyTyped( event -> keyTyped( event ) );
+    setOnMousePressed( event -> mousePressed( event ) );
     m_button.setOnMousePressed( event -> mousePressed( event ) );
   }
 
@@ -67,7 +65,7 @@ public abstract class AbstractComboEditor extends StackPane
   {
     // set selected index and update displayed text to match
     m_selectedIndex = index;
-    m_displayText.setText( getItem( index ) );
+    setText( getItem( index ) );
     if ( m_dropdown != null )
       m_dropdown.redrawCanvas();
   }
@@ -79,11 +77,11 @@ public abstract class AbstractComboEditor extends StackPane
     return m_selectedIndex;
   }
 
-  /******************************************* setText *******************************************/
-  public void setText( String text )
+  /************************************** setSelectionText ***************************************/
+  public void setSelectionText( String text )
   {
-    // set displayed text and set selected index to found match
-    m_displayText.setText( text );
+    // set displayed selection text and set selected index to found match
+    setText( text );
 
     m_selectedIndex = -1;
     int size = getItemCount();
@@ -95,13 +93,6 @@ public abstract class AbstractComboEditor extends StackPane
           m_dropdown.redrawCanvas();
         break;
       }
-  }
-
-  /******************************************* getText *******************************************/
-  public String getText()
-  {
-    // return displayed text
-    return m_displayText.getText();
   }
 
   /****************************************** keyTyped *******************************************/
@@ -152,7 +143,7 @@ public abstract class AbstractComboEditor extends StackPane
   private void mousePressed( MouseEvent event )
   {
     // request focus for display text field
-    Platform.runLater( () -> m_displayText.requestFocus() );
+    Platform.runLater( () -> requestFocus() );
 
     // open drop-down list
     m_dropdown = new ComboDropDown( this );
@@ -164,17 +155,20 @@ public abstract class AbstractComboEditor extends StackPane
   {
     // determine size and draw button
     GraphicsContext gc = m_button.getGraphicsContext2D();
-    double h = getHeight() - 4;
+    double h = getHeight() - 2 * BUTTONS_PADDING;
     double w = getWidth() / 2;
-    if ( w > h )
-      w = h;
+    if ( w > BUTTONS_WIDTH_MAX )
+      w = BUTTONS_WIDTH_MAX;
     m_button.setHeight( h );
     m_button.setWidth( w );
 
+    // set editor insets and buttons position
+    setPadding( new Insets( 0, w + PADDING, 0, PADDING ) );
+    m_button.setLayoutX( getLayoutX() + getWidth() - w - BUTTONS_PADDING );
+    m_button.setLayoutY( getLayoutY() + BUTTONS_PADDING );
+
     // fill background
-    gc.clearRect( 0.0, 0.0, w, h );
     gc.setFill( MainWindow.BUTTON_BACKGROUND );
-    w -= 2;
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw down arrow

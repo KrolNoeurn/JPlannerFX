@@ -183,7 +183,10 @@ public class Table extends TableDisplay
     int last = m_data.getColumnCount() - 1;
     for ( int columnPos = 0; columnPos <= last; columnPos++ )
     {
-      x -= getWidthByColumnPosition( columnPos );
+      int width = m_columnWidths.getOrDefault( m_columnIndexes.get( columnPos ), m_defaultColumnWidth );
+      if ( width <= 0 )
+        continue;
+      x -= width;
       if ( x <= 0 )
         return columnPos;
     }
@@ -199,7 +202,10 @@ public class Table extends TableDisplay
     int last = m_data.getColumnCount() - 1;
     for ( int columnPos = 0; columnPos <= last; columnPos++ )
     {
-      x -= getWidthByColumnPosition( columnPos );
+      int width = m_columnWidths.getOrDefault( m_columnIndexes.get( columnPos ), m_defaultColumnWidth );
+      if ( width <= 0 )
+        continue;
+      x -= width;
       if ( x <= 0 )
         return columnPos;
     }
@@ -260,7 +266,10 @@ public class Table extends TableDisplay
     int last = m_data.getRowCount() - 1;
     for ( int rowPos = 0; rowPos <= last; rowPos++ )
     {
-      y -= getHeightByRowPosition( rowPos );
+      int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+      if ( height <= 0 )
+        continue;
+      y -= height;
       if ( y <= 0 )
         return rowPos;
     }
@@ -276,7 +285,10 @@ public class Table extends TableDisplay
     int last = m_data.getRowCount() - 1;
     for ( int rowPos = 0; rowPos <= last; rowPos++ )
     {
-      y -= getHeightByRowPosition( rowPos );
+      int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+      if ( height <= 0 )
+        continue;
+      y -= height;
       if ( y <= 0 )
         return rowPos;
     }
