@@ -21,9 +21,6 @@ package rjc.jplanner.gui;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
-import javafx.geometry.Insets;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -34,20 +31,16 @@ import javafx.scene.input.ScrollEvent;
 
 public class SpinEditor extends XTextField
 {
-  private Canvas           m_buttons         = new Canvas();            // buttons part of editor
+  private double        m_min;                                    // minimum number allowed
+  private double        m_max;                                    // maximum number allowed
+  private int           m_dp;                                     // number of digits after decimal point
 
-  private double           m_min;                                       // minimum number allowed
-  private double           m_max;                                       // maximum number allowed
-  private int              m_dp;                                        // number of digits after decimal point
+  private double        m_page;
+  private double        m_step;
+  private String        m_prefix;
+  private String        m_suffix;
 
-  private double           m_page;
-  private double           m_step;
-  private String           m_prefix;
-  private String           m_suffix;
-
-  private static final int BUTTONS_WIDTH_MAX = 16;
-  private static final int BUTTONS_PADDING   = 2;
-  private DecimalFormat    m_numberFormat    = new DecimalFormat( "0" );
+  private DecimalFormat m_numberFormat = new DecimalFormat( "0" );
 
   /**************************************** constructor ******************************************/
   public SpinEditor()
@@ -55,14 +48,11 @@ public class SpinEditor extends XTextField
     // set default spin editor characteristics
     setRange( 0.0, 999.0, 0 );
     setStepPage( 1.0, 10.0 );
-
-    // when editor changes size re-draw buttons
-    heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButtons() );
-    widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButtons() );
+    setButtonType( ButtonType.UP_DOWN );
 
     // react to key presses and button mouse clicks
     setOnKeyPressed( event -> keyPressed( event ) );
-    m_buttons.setOnMousePressed( event -> buttonPressed( event ) );
+    getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
     // add listener to ensure error status is correct
     textProperty().addListener( ( observable, oldText, newText ) ->
@@ -208,52 +198,11 @@ public class SpinEditor extends XTextField
     setAllowed( allow.toString() );
   }
 
-  /***************************************** getButtons ******************************************/
-  public Canvas getButtons()
-  {
-    // return buttons
-    return m_buttons;
-  }
-
-  /***************************************** drawButtons *****************************************/
-  private void drawButtons()
-  {
-    // determine size and draw button
-    GraphicsContext gc = m_buttons.getGraphicsContext2D();
-    double h = getHeight() - 2 * BUTTONS_PADDING;
-    double w = getWidth() / 2;
-    if ( w > BUTTONS_WIDTH_MAX )
-      w = BUTTONS_WIDTH_MAX;
-    m_buttons.setHeight( h );
-    m_buttons.setWidth( w );
-
-    // set editor insets and buttons position
-    setPadding( new Insets( 0, w + PADDING, 0, PADDING ) );
-    m_buttons.setLayoutX( getLayoutX() + getWidth() - w - BUTTONS_PADDING );
-    m_buttons.setLayoutY( getLayoutY() + BUTTONS_PADDING );
-
-    // fill background
-    gc.setFill( MainWindow.BUTTON_BACKGROUND );
-    gc.fillRect( 0.0, 0.0, w, h );
-
-    // draw arrows
-    gc.setStroke( MainWindow.BUTTON_ARROW );
-    int x1 = (int) ( w * 0.2 + 0.5 );
-    int y1 = (int) ( h * 0.1 + 0.6 );
-    int y2 = (int) ( h * 0.5 - y1 );
-    for ( int y = y1; y <= y2; y++ )
-    {
-      double x = x1 + ( w * 0.5 - x1 ) / ( y2 - y1 ) * ( y2 - y );
-      gc.strokeLine( x, y + .5, w - x, y + .5 );
-      gc.strokeLine( x, h - ( y + .5 ), w - x, h - ( y + .5 ) );
-    }
-  }
-
-  /**************************************** mousePressed ****************************************/
+  /**************************************** buttonPressed ****************************************/
   private void buttonPressed( MouseEvent event )
   {
     // if user clicked top half of buttons, step up, else step down
-    if ( event.getY() < m_buttons.getHeight() / 2 )
+    if ( event.getY() < getButton().getHeight() / 2 )
       changeNumber( m_step );
     else
       changeNumber( -m_step );

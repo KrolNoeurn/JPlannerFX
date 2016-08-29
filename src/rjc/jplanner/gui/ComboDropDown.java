@@ -39,6 +39,7 @@ public class ComboDropDown extends Popup
   private int                 m_rowHeight;
   private int                 m_rowDescent;
   private int                 m_rowOffset;
+  private int                 m_highlighed        = -1;
 
   private static final Color  COLOR_NORMAL_CELL   = Color.WHITE;
   private static final Color  COLOR_NORMAL_TEXT   = Color.BLACK;
@@ -95,6 +96,11 @@ public class ComboDropDown extends Popup
   /**************************************** redrawCanvas *****************************************/
   public void redrawCanvas( int highlightedItem )
   {
+    // if highlighted item not changed, don't redraw
+    if ( m_highlighed == highlightedItem )
+      return;
+    m_highlighed = highlightedItem;
+
     // redraw drop-down list contents onto canvas with specified item highlighted
     GraphicsContext gc = m_canvas.getGraphicsContext2D();
     double w = m_canvas.getWidth();
@@ -146,8 +152,8 @@ public class ComboDropDown extends Popup
   /************************************** setSelectedIndex ***************************************/
   private void setSelectedIndex( int item )
   {
-    m_parent.setSelectedIndex( item );
     hide();
+    m_parent.setSelectedIndex( item );
   }
 
   /******************************************* getItem *******************************************/

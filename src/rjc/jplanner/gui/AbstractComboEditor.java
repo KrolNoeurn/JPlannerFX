@@ -18,10 +18,6 @@
 
 package rjc.jplanner.gui;
 
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 
@@ -31,12 +27,8 @@ import javafx.scene.input.MouseEvent;
 
 public abstract class AbstractComboEditor extends XTextField
 {
-  private Canvas           m_button          = new Canvas();
-  private ComboDropDown    m_dropdown;
-  private int              m_selectedIndex   = -1;
-
-  private static final int BUTTONS_WIDTH_MAX = 16;
-  private static final int BUTTONS_PADDING   = 2;
+  private ComboDropDown m_dropdown;
+  private int           m_selectedIndex = -1;
 
   abstract public int getItemCount(); // return number of items user can choose from
 
@@ -48,16 +40,32 @@ public abstract class AbstractComboEditor extends XTextField
     // construct combo box
     super();
     setEditable( false );
-
-    // when combo box changes size re-draw button
-    heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButton() );
-    widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButton() );
+    setButtonType( ButtonType.DOWN );
 
     // react to key presses and mouse clicks
     setOnKeyPressed( event -> keyPressed( event ) );
     setOnKeyTyped( event -> keyTyped( event ) );
-    setOnMousePressed( event -> mousePressed( event ) );
-    m_button.setOnMousePressed( event -> mousePressed( event ) );
+    setOnMousePressed( event -> buttonPressed( event ) );
+    getButton().setOnMousePressed( event -> buttonPressed( event ) );
+
+    // react to text changes to set selected index
+    textProperty().addListener( ( property, oldValue, newValue ) ->
+    {
+      // if index not correct, search for new index
+      int size = getItemCount();
+      if ( m_selectedIndex < 0 || m_selectedIndex >= size || !newValue.equals( getItem( m_selectedIndex ) ) )
+      {
+        m_selectedIndex = -1;
+        for ( int i = 0; i < size; i++ )
+          if ( newValue.equals( getItem( i ) ) )
+          {
+            m_selectedIndex = i;
+            if ( m_dropdown != null )
+              m_dropdown.redrawCanvas();
+            break;
+          }
+      }
+    } );
   }
 
   /************************************** setSelectedIndex ***************************************/
@@ -75,24 +83,6 @@ public abstract class AbstractComboEditor extends XTextField
   {
     // return currently selected index
     return m_selectedIndex;
-  }
-
-  /************************************** setSelectionText ***************************************/
-  public void setSelectionText( String text )
-  {
-    // set displayed selection text and set selected index to found match
-    setText( text );
-
-    m_selectedIndex = -1;
-    int size = getItemCount();
-    for ( int i = 0; i < size; i++ )
-      if ( text.equals( getItem( i ) ) )
-      {
-        m_selectedIndex = i;
-        if ( m_dropdown != null )
-          m_dropdown.redrawCanvas();
-        break;
-      }
   }
 
   /****************************************** keyTyped *******************************************/
@@ -139,48 +129,17 @@ public abstract class AbstractComboEditor extends XTextField
     }
   }
 
-  /**************************************** mousePressed ****************************************/
-  private void mousePressed( MouseEvent event )
+  /**************************************** buttonPressed ****************************************/
+  private void buttonPressed( MouseEvent event )
   {
-    // request focus for display text field
-    Platform.runLater( () -> requestFocus() );
+    // on button press ensure editor has focus
+    event.consume();
+    requestFocus();
+    deselect();
 
     // open drop-down list
     m_dropdown = new ComboDropDown( this );
     m_dropdown.setOnHiding( hideEvent -> m_dropdown = null );
-  }
-
-  /****************************************** drawButton *****************************************/
-  private void drawButton()
-  {
-    // determine size and draw button
-    GraphicsContext gc = m_button.getGraphicsContext2D();
-    double h = getHeight() - 2 * BUTTONS_PADDING;
-    double w = getWidth() / 2;
-    if ( w > BUTTONS_WIDTH_MAX )
-      w = BUTTONS_WIDTH_MAX;
-    m_button.setHeight( h );
-    m_button.setWidth( w );
-
-    // set editor insets and buttons position
-    setPadding( new Insets( 0, w + PADDING, 0, PADDING ) );
-    m_button.setLayoutX( getLayoutX() + getWidth() - w - BUTTONS_PADDING );
-    m_button.setLayoutY( getLayoutY() + BUTTONS_PADDING );
-
-    // fill background
-    gc.setFill( MainWindow.BUTTON_BACKGROUND );
-    gc.fillRect( 0.0, 0.0, w, h );
-
-    // draw down arrow
-    gc.setStroke( MainWindow.BUTTON_ARROW );
-    int x1 = (int) ( w * 0.3 + 0.5 );
-    int y1 = (int) ( h * 0.3 + 0.5 );
-    int y2 = (int) ( h - y1 );
-    for ( int y = y1; y <= y2; y++ )
-    {
-      double x = x1 + ( w * 0.5 - x1 ) / ( y2 - y1 ) * ( y - y1 );
-      gc.strokeLine( x, y + .5, w - x, y + .5 );
-    }
   }
 
 }

@@ -118,4 +118,18 @@ public class TimeSpan
     return new TimeSpan( -m_num, m_units );
   }
 
+  /******************************************* equals ********************************************/
+  @Override
+  public boolean equals( Object other )
+  {
+    // return true if this time-span and other time-span are same
+    if ( other != null && other instanceof TimeSpan )
+    {
+      TimeSpan ts = (TimeSpan) other;
+      return m_units == ts.m_units && Math.abs( m_num - ts.m_num ) < 0.01;
+    }
+    else
+      return false;
+  }
+
 }

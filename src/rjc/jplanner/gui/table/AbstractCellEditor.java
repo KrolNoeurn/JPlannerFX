@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -89,7 +90,8 @@ abstract public class AbstractCellEditor
       if ( event.getCode() == KeyCode.ENTER && !isError() )
         close( true ); // commit edit
 
-      previousKeyPressedHandler.handle( event );
+      if ( previousKeyPressedHandler != null )
+        previousKeyPressedHandler.handle( event );
     } );
   }
 
@@ -158,6 +160,12 @@ abstract public class AbstractCellEditor
     m_control.setMaxSize( w, h );
     m_control.setMinSize( w, h );
 
+    // display editor and give focus
+    m_cellEditorInProgress = this;
+    m_table.add( m_control );
+    m_table.layout();
+    m_control.requestFocus();
+
     // if control derived from XTextField then set min & max width
     if ( m_control instanceof XTextField )
     {
@@ -165,24 +173,13 @@ abstract public class AbstractCellEditor
       double min = table.getWidthByColumnIndex( m_columnIndex ) + 1;
       if ( min > max )
         min = max;
+      ( (XTextField) m_control ).setPadding( new Insets( 0, TableCanvas.CELL_PADDING, 0, TableCanvas.CELL_PADDING ) );
       ( (XTextField) m_control ).setWidths( min, max );
     }
 
-    // set editor value
-    if ( value != null )
-      setValue( value );
-    else
-      setValue( getDataSourceValue() );
-
-    // display editor and give focus
-    m_cellEditorInProgress = this;
-    m_table.add( m_control );
-    m_control.requestFocus();
-
-    // if control derived from SpinEditor add buttons and wheel scroll
+    // if control derived from SpinEditor add wheel scroll listener
     if ( m_control instanceof SpinEditor )
     {
-      table.add( ( (SpinEditor) m_control ).getButtons() );
       EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
       table.setOnScroll( event -> ( (SpinEditor) m_control ).scrollEvent( event ) );
 
@@ -190,12 +187,15 @@ abstract public class AbstractCellEditor
       m_control.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
       {
         if ( !newFocus )
-        {
-          table.remove( ( (SpinEditor) m_control ).getButtons() );
           table.setOnScroll( previousScrollHander );
-        }
       } );
     }
+
+    // set editor value
+    if ( value != null )
+      setValue( value );
+    else
+      setValue( getDataSourceValue() );
   }
 
   /************************************* getDataSourceValue **************************************/

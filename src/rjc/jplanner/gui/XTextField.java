@@ -20,6 +20,9 @@ package rjc.jplanner.gui;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 
@@ -29,12 +32,20 @@ import javafx.scene.text.Text;
 
 public class XTextField extends TextField
 {
-  private String          m_allowed;   // regular expression defining text allowed to be entered
-  private String          m_valid;     // regular expression defining text not error
-  private double          m_minWidth;  // minimum width for editor
-  private double          m_maxWidth;  // maximum width for editor
+  private String           m_allowed;             // regular expression defining text allowed to be entered
+  private String           m_valid;               // regular expression defining text not error
+  private double           m_minWidth;            // minimum width for editor
+  private double           m_maxWidth;            // maximum width for editor
+  private ButtonType       m_buttonType;          // button type, null means none
+  private Canvas           m_button;              // canvas so show buttons
 
-  public static final int PADDING = 4; // padding for text left & right edges
+  private static final int BUTTONS_WIDTH_MAX = 16;
+  private static final int BUTTONS_PADDING   = 2;
+
+  public enum ButtonType
+  {
+    DOWN, UP_DOWN
+  }
 
   /**************************************** constructor ******************************************/
   public XTextField()
@@ -51,23 +62,23 @@ public class XTextField extends TextField
 
       // ensure error status is correct
       if ( m_valid != null )
-        MainWindow.setError( !getText().matches( m_valid ), this );
+        MainWindow.setError( !newText.matches( m_valid ), this );
 
-      // if min or max width not set, don't do anything more
-      if ( m_minWidth <= 0.0 || m_maxWidth <= 0.0 )
-        return;
-
-      // increase width if needed to show whole text
-      Text text = new Text( getText() );
-      double width = text.getLayoutBounds().getWidth() + getPadding().getLeft() + getPadding().getRight() + PADDING;
-      if ( width < m_minWidth )
-        width = m_minWidth;
-      if ( width > m_maxWidth )
-        width = m_maxWidth;
-      if ( getWidth() != width )
+      // if min & max width set, increase width if needed to show whole text
+      if ( m_minWidth > 0.0 && m_maxWidth >= m_minWidth )
       {
-        setMinWidth( width );
-        setMaxWidth( width );
+        Text text = new Text( newText );
+        double width = text.getLayoutBounds().getWidth() + getPadding().getLeft() + getPadding().getRight()
+            + BUTTONS_PADDING;
+        if ( width < m_minWidth )
+          width = m_minWidth;
+        if ( width > m_maxWidth )
+          width = m_maxWidth;
+        if ( getWidth() != width )
+        {
+          setMinWidth( width );
+          setMaxWidth( width );
+        }
       }
     } );
 
@@ -100,10 +111,97 @@ public class XTextField extends TextField
   /****************************************** setWidths ******************************************/
   public void setWidths( double min, double max )
   {
-    // set editor minimum and maximum width
+    // set editor minimum and maximum width (only used for table cell editors)
     m_minWidth = min;
     m_maxWidth = max;
-    setPadding( new Insets( 0, PADDING, 0, PADDING ) );
+
+    // redraw button trigger editor padding calculation
+    if ( m_buttonType != null )
+      drawButton();
+  }
+
+  /****************************************** getButton ******************************************/
+  public Canvas getButton()
+  {
+    // return button canvas
+    return m_button;
+  }
+
+  /**************************************** setButtonType ****************************************/
+  public void setButtonType( ButtonType type )
+  {
+    // set button type for this editor
+    m_buttonType = type;
+    m_button = new Canvas();
+    m_button.setManaged( false );
+    m_button.setCursor( Cursor.DEFAULT );
+    getChildren().add( m_button );
+
+    // add listeners to (re)draw button every time editor changes size
+    heightProperty().addListener( ( property, oldHeight, newHeight ) -> drawButton() );
+    widthProperty().addListener( ( property, oldWidth, newWidth ) -> drawButton() );
+  }
+
+  /***************************************** drawButton ******************************************/
+  private void drawButton()
+  {
+    // determine size and draw button
+    double h = getHeight() - 2 * BUTTONS_PADDING;
+    double w = getWidth() / 2;
+    if ( w > BUTTONS_WIDTH_MAX )
+      w = BUTTONS_WIDTH_MAX;
+
+    // set editor insets and button position
+    double pad = getPadding().getLeft();
+    setPadding( new Insets( getPadding().getTop(), w + pad, getPadding().getBottom(), pad ) );
+    m_button.setLayoutX( getWidth() - w - BUTTONS_PADDING );
+    m_button.setLayoutY( BUTTONS_PADDING );
+
+    // if size has not changed, no need to re-draw
+    if ( m_button.getHeight() == h && m_button.getWidth() == w )
+      return;
+
+    // set size and fill background
+    m_button.setHeight( h );
+    m_button.setWidth( w );
+    GraphicsContext gc = m_button.getGraphicsContext2D();
+    gc.setFill( MainWindow.BUTTON_BACKGROUND );
+    gc.fillRect( 0.0, 0.0, w, h );
+
+    // draw correct button depending on button type
+    int x1, y1, y2;
+    gc.setStroke( MainWindow.BUTTON_ARROW );
+    switch ( m_buttonType )
+    {
+      case DOWN:
+        // draw down arrow
+        x1 = (int) ( w * 0.3 + 0.5 );
+        y1 = (int) ( h * 0.3 + 0.5 );
+        y2 = (int) ( h - y1 );
+        for ( int y = y1; y <= y2; y++ )
+        {
+          double x = x1 + ( w * 0.5 - x1 ) / ( y2 - y1 ) * ( y - y1 );
+          gc.strokeLine( x, y + .5, w - x, y + .5 );
+        }
+        break;
+
+      case UP_DOWN:
+        // draw up+down arrows
+        x1 = (int) ( w * 0.2 + 0.5 );
+        y1 = (int) ( h * 0.1 + 0.6 );
+        y2 = (int) ( h * 0.5 - y1 );
+        for ( int y = y1; y <= y2; y++ )
+        {
+          double x = x1 + ( w * 0.5 - x1 ) / ( y2 - y1 ) * ( y2 - y );
+          gc.strokeLine( x, y + .5, w - x, y + .5 );
+          gc.strokeLine( x, h - ( y + .5 ), w - x, h - ( y + .5 ) );
+        }
+        break;
+
+      default:
+        throw new IllegalArgumentException( "Type=" + m_buttonType );
+    }
+
   }
 
 }

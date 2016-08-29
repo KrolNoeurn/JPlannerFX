@@ -72,7 +72,7 @@ public class TaskType
     return m_type;
   }
 
-  /******************************************** toString *********************************************/
+  /****************************************** toString *******************************************/
   public static String toString( int num )
   {
     // return task type string for n'th task type
@@ -132,10 +132,14 @@ public class TaskType
   }
 
   /******************************************* equals ********************************************/
-  public boolean equals( TaskType other )
+  @Override
+  public boolean equals( Object other )
   {
-    // return true if this type and specified type are same
-    return m_type == other.m_type;
+    // return true if this task-type and other task-type are same
+    if ( other != null && other instanceof TaskType )
+      return m_type == ( (TaskType) other ).m_type;
+    else
+      return false;
   }
 
 }
