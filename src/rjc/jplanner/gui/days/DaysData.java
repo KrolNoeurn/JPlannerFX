@@ -19,15 +19,16 @@
 package rjc.jplanner.gui.days;
 
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandDaySetNumPeriods;
 import rjc.jplanner.command.CommandDaySetValue;
 import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Day;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /**************************** Table data source for showing day-types ****************************/
@@ -104,7 +105,17 @@ public class DaysData implements ITableDataSource
       return null;
 
     // return editor for table body cell
-    return new EditorText( columnIndex, rowIndex );
+    switch ( columnIndex )
+    {
+      case Day.SECTION_NAME:
+        return new EditorDayName( columnIndex, rowIndex );
+      case Day.SECTION_WORK:
+        return new EditorDayWork( columnIndex, rowIndex );
+      case Day.SECTION_PERIODS:
+        return new EditorDayPeriods( columnIndex, rowIndex );
+      default:
+        return new EditorDayTime( columnIndex, rowIndex );
+    }
   }
 
   /****************************************** setValue *******************************************/
@@ -130,6 +141,29 @@ public class DaysData implements ITableDataSource
   public Object getValue( int columnIndex, int rowIndex )
   {
     return JPlanner.plan.day( rowIndex ).getValue( columnIndex );
+  }
+
+  /***************************************** getCellText *****************************************/
+  @Override
+  public String getCellText( int columnIndex, int rowIndex )
+  {
+    // get value to be displayed
+    Object value = getValue( columnIndex, rowIndex );
+
+    // convert times into string using "HH:MM" formats
+    if ( value instanceof Time )
+      return ( (Time) value ).toStringShort();
+
+    // return cell display text
+    return ( value == null ? null : value.toString() );
+  }
+
+  /***************************************** getCellFont *****************************************/
+  @Override
+  public Font getCellFont( int columnIndex, int rowIndex )
+  {
+    // return cell display font
+    return null;
   }
 
 }

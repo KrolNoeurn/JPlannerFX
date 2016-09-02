@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.resources;
 
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
 import rjc.jplanner.gui.table.AbstractCellEditor;
@@ -26,6 +27,8 @@ import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.gui.table.TableCanvas;
+import rjc.jplanner.model.Date;
+import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
@@ -113,6 +116,31 @@ public class ResourcesData implements ITableDataSource
   public Object getValue( int columnIndex, int rowIndex )
   {
     return JPlanner.plan.resource( rowIndex ).getValue( columnIndex );
+  }
+
+  /***************************************** getCellText *****************************************/
+  @Override
+  public String getCellText( int columnIndex, int rowIndex )
+  {
+    // get value to be displayed
+    Object value = getValue( columnIndex, rowIndex );
+
+    // convert date and date-times into strings using plan formats
+    if ( value instanceof DateTime )
+      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+    if ( value instanceof Date )
+      return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
+
+    // return cell display text
+    return ( value == null ? null : value.toString() );
+  }
+
+  /***************************************** getCellFont *****************************************/
+  @Override
+  public Font getCellFont( int columnIndex, int rowIndex )
+  {
+    // return cell display font
+    return null;
   }
 
 }

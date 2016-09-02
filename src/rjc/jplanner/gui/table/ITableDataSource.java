@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import rjc.jplanner.gui.table.Table.Alignment;
 
 /*************************************************************************************************/
@@ -53,4 +54,10 @@ public interface ITableDataSource
 
   // return cell background colour for specified cell index
   Paint getCellBackground( int columnIndex, int rowIndex );
+
+  // return cell display text for specified cell index
+  String getCellText( int columnIndex, int rowIndex );
+
+  // return cell display font for specified cell index
+  Font getCellFont( int columnIndex, int rowIndex );
 }

@@ -16,71 +16,38 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui.days;
 
-import rjc.jplanner.gui.AbstractComboEditor;
 import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.model.TaskType;
 
 /*************************************************************************************************/
-/******************************** Table cell editor for task type ********************************/
+/****************************** Table cell editor for day-type work ******************************/
 /*************************************************************************************************/
 
-public class EditorTaskType extends AbstractCellEditor
+public class EditorDayWork extends AbstractCellEditor
 {
-  // extended version of AbstractComboEditor with list of calendars
-  public class TaskTypeCombo extends AbstractComboEditor
-  {
-    /**************************************** getItemCount *****************************************/
-    @Override
-    public int getItemCount()
-    {
-      // return number of task types
-      return TaskType.count();
-    }
-
-    /******************************************* getItem *******************************************/
-    @Override
-    public String getItem( int num )
-    {
-      // return task type name
-      return TaskType.toString( num );
-    }
-  }
-
-  TaskTypeCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskType( int columnIndex, int rowIndex )
+  public EditorDayWork( int columnIndex, int rowIndex )
   {
-    // create task type editor
     super( columnIndex, rowIndex );
-    m_combo = new TaskTypeCombo();
-    setControl( m_combo );
+    // TODO Auto-generated constructor stub
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // return selected task type
-    return new TaskType( m_combo.getText() );
+    // TODO Auto-generated method stub
+    return null;
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // set editor display to value if valid task-type, otherwise task-type from data source
-    try
-    {
-      TaskType type = new TaskType( value.toString() );
-      m_combo.setText( type.toString() );
-    }
-    catch ( Exception exception )
-    {
-      m_combo.setText( getDataSourceValue().toString() );
-    }
+    // TODO Auto-generated method stub
+
   }
 
 }

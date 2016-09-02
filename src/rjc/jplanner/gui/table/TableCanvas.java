@@ -31,6 +31,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
@@ -307,12 +308,15 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, y + h - 0.5, x + w - 0.5, y + h - 0.5 );
 
     // text
-    Object value = m_table.getDataSource().getValue( columnIndex, rowIndex );
-    if ( value != null )
+    String text = m_table.getDataSource().getCellText( columnIndex, rowIndex );
+    Font font = m_table.getDataSource().getCellFont( columnIndex, rowIndex );
+    if ( text != null )
     {
-      String text = value.toString();
+      if ( font != null )
+        gc.setFont( font );
+
       Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
-      ArrayList<TextLine> lines = getTextLines( text, alignment, w, h );
+      ArrayList<TextLine> lines = getTextLines( text, font, alignment, w, h );
       if ( m_selected )
         gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
       else
@@ -359,7 +363,7 @@ public class TableCanvas extends Canvas
     gc.strokeLine( 0.5, y + h - 0.5, w - 0.5, y + h - 0.5 );
 
     // label
-    ArrayList<TextLine> lines = getTextLines( text, Alignment.MIDDLE, w, h );
+    ArrayList<TextLine> lines = getTextLines( text, null, Alignment.MIDDLE, w, h );
     if ( selected )
       gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
     else
@@ -405,7 +409,7 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, h - 0.5, x + w - 0.5, h - 0.5 );
 
     // label
-    ArrayList<TextLine> lines = getTextLines( text, Alignment.MIDDLE, w, h );
+    ArrayList<TextLine> lines = getTextLines( text, null, Alignment.MIDDLE, w, h );
     if ( selected )
       gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
     else
@@ -435,7 +439,7 @@ public class TableCanvas extends Canvas
   }
 
   /**************************************** getTextLines *****************************************/
-  private ArrayList<TextLine> getTextLines( String text, Alignment alignment, double w, double h )
+  private ArrayList<TextLine> getTextLines( String text, Font font, Alignment alignment, double w, double h )
   {
     // initialise variables
     ArrayList<TextLine> lines = new ArrayList<TextLine>();
@@ -452,6 +456,8 @@ public class TableCanvas extends Canvas
     {
       TextLine line = new TextLine();
       bounds = new Text( text ).getLayoutBounds();
+
+      // NEED TO DO SOMETHING WITH FONT - TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       if ( bounds.getWidth() <= width )
       {

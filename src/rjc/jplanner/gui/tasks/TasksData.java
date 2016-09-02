@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.tasks;
 
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.table.AbstractCellEditor;
@@ -146,16 +147,32 @@ public class TasksData implements ITableDataSource
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
-    Object value = JPlanner.plan.task( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.task( rowIndex ).getValue( columnIndex );
+  }
+
+  /***************************************** getCellText *****************************************/
+  @Override
+  public String getCellText( int columnIndex, int rowIndex )
+  {
+    // get value to be displayed
+    Object value = getValue( columnIndex, rowIndex );
 
     // convert date and date-times into strings using plan formats
     if ( value instanceof DateTime )
-      value = ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
     if ( value instanceof Date )
-      value = ( (Date) value ).toString( JPlanner.plan.dateFormat() );
+      return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
 
-    // return cell object
-    return value;
+    // return cell display text
+    return ( value == null ? null : value.toString() );
+  }
+
+  /***************************************** getCellFont *****************************************/
+  @Override
+  public Font getCellFont( int columnIndex, int rowIndex )
+  {
+    // return cell display font
+    return null;
   }
 
 }

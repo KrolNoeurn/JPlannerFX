@@ -16,45 +16,36 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui;
 
-import rjc.jplanner.gui.DateTimeEditor;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
-/***************************** Table cell editor for DateTime fields *****************************/
+/*********************************** Generic date-time editor ************************************/
 /*************************************************************************************************/
 
-public class EditorDateTime extends AbstractCellEditor
+public class DateTimeEditor extends XTextField
 {
-  DateTimeEditor m_editor; // date-time editor
 
   /**************************************** constructor ******************************************/
-  public EditorDateTime( int columnIndex, int rowIndex )
+  public DateTimeEditor()
   {
-    // create date-time table cell editor
-    super( columnIndex, rowIndex );
-    m_editor = new DateTimeEditor();
-    setControl( m_editor );
+    // TODO Auto-generated constructor stub
+    super();
   }
 
-  /******************************************* getValue ******************************************/
-  @Override
-  public Object getValue()
+  /**************************************** getDateTime ******************************************/
+  public Object getDateTime()
   {
-    // return value date-time
-    return m_editor.getDateTime();
+    // TODO Auto-generated method stub
+    return null;
   }
 
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
+  /**************************************** setDateTime ******************************************/
+  public void setDateTime( DateTime value )
   {
-    // set value depending on type
-    if ( value instanceof DateTime )
-      m_editor.setDateTime( (DateTime) value );
-    else
-      throw new IllegalArgumentException( "Don't know how to handle " + value.getClass() + " " + value );
+    // TODO Auto-generated method stub
+
   }
 
 }
