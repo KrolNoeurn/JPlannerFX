@@ -80,6 +80,19 @@ public class Time
   /***************************************** fromString ******************************************/
   public static Time fromString( String str )
   {
+    // if simple integer, treats as hours or hours+minutes depending on length
+    try
+    {
+      int num = Integer.valueOf( str );
+      if ( num < 100 )
+        return new Time( num, 0, 0, 0 );
+      else
+        return new Time( num / 100, num % 100, 0, 0 );
+    }
+    catch ( Exception exception )
+    {
+    }
+
     // split the time hours:mins:secs by colon separator
     String[] parts = str.split( ":" );
     if ( parts.length < 2 )

@@ -147,11 +147,14 @@ public class MainWindow
   /****************************************** message ********************************************/
   public void message( String... msg )
   {
-    // display message on status-bar
+    // display message on status-bar in normal style
     if ( m_statusBar == null )
       JPlanner.trace( "MESSAGE BUT NO STATUS-BAR: ", msg );
     else
+    {
+      m_statusBar.setStyle( STYLE_NORMAL );
       m_statusBar.setText( String.join( "", msg ) );
+    }
   }
 
   /***************************************** okToProceed *****************************************/
@@ -835,19 +838,23 @@ public class MainWindow
   }
 
   /****************************************** setError *******************************************/
-  public static void setError( boolean error, Control control )
+  public void setError( Control control, String errorMessage )
   {
     // update control error state
-    if ( error )
-    {
-      control.setId( JPlanner.ERROR );
-      control.setStyle( STYLE_ERROR );
-    }
-    else
+    if ( errorMessage == null )
     {
       control.setId( null );
       control.setStyle( STYLE_NORMAL );
+      message();
     }
+    else
+    {
+      control.setId( JPlanner.ERROR );
+      control.setStyle( STYLE_ERROR );
+      m_statusBar.setText( errorMessage );
+      m_statusBar.setStyle( STYLE_ERROR );
+    }
+
   }
 
   /******************************************* isError *******************************************/

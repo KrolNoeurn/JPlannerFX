@@ -19,6 +19,7 @@
 package rjc.jplanner.command;
 
 import rjc.jplanner.model.Day;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /****************** UndoCommand for updating day-types (except num of periods) *******************/
@@ -77,7 +78,11 @@ public class CommandDaySetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Day " + ( m_day.index() + 1 ) + " " + Day.sectionName( m_section ) + " = " + m_newValue;
+    String str = "Day " + ( m_day.index() + 1 ) + " " + Day.sectionName( m_section ) + " = ";
+    if ( m_newValue instanceof Time )
+      return str + ( (Time) m_newValue ).toStringShort();
+    else
+      return str + m_newValue;
   }
 
 }

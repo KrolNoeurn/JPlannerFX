@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /***************************** Generic spin editor for number fields *****************************/
@@ -35,12 +36,13 @@ public class SpinEditor extends XTextField
   private double        m_max;                                    // maximum number allowed
   private int           m_dp;                                     // number of digits after decimal point
 
-  private double        m_page;
-  private double        m_step;
-  private String        m_prefix;
-  private String        m_suffix;
+  private double        m_page;                                   // value increment or decrement on page-up or page-down
+  private double        m_step;                                   // value increment or decrement on arrow-up or arrow-down
+  private String        m_prefix;                                 // prefix shown before value
+  private String        m_suffix;                                 // suffix shown after value
 
   private DecimalFormat m_numberFormat = new DecimalFormat( "0" );
+  private String        m_rangeError;                             // error message when value out of range
 
   /**************************************** constructor ******************************************/
   public SpinEditor()
@@ -58,14 +60,22 @@ public class SpinEditor extends XTextField
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
       double num = getDouble();
-      MainWindow.setError( num < m_min || num > m_max || getText().length() < 1, this );
+      JPlanner.gui.setError( this, num < m_min || num > m_max || getText().length() < 1 ? m_rangeError : null );
 
       // remove any excess zero at start of number
-      String str = getTextCore();
-      if ( str.length() > 1 && str.charAt( 0 ) == '0' && str.charAt( 1 ) != '.' )
-        setText( newText.substring( 1 ) );
-      if ( str.length() > 2 && str.charAt( 0 ) == '-' && str.charAt( 1 ) == '0' && str.charAt( 2 ) != '.' )
-        setText( "-" + newText.substring( 2 ) );
+      if ( m_numberFormat.getMinimumIntegerDigits() <= 1 )
+      {
+        String str = newText;
+        if ( m_prefix != null )
+          str = str.substring( m_prefix.length() );
+        if ( m_suffix != null )
+          str = str.substring( 0, str.length() - m_suffix.length() );
+
+        if ( str.length() > 1 && str.charAt( 0 ) == '0' && str.charAt( 1 ) != '.' )
+          setTextCore( str.substring( 1 ) );
+        if ( str.length() > 2 && str.charAt( 0 ) == '-' && str.charAt( 1 ) == '0' && str.charAt( 2 ) != '.' )
+          setTextCore( "-" + str.substring( 2 ) );
+      }
     } );
   }
 
@@ -124,7 +134,7 @@ public class SpinEditor extends XTextField
   public void setInteger( int value )
   {
     // set editor text (adding prefix and suffix)
-    setTextCore( String.valueOf( value ) );
+    setTextCore( m_numberFormat.format( value ) );
   }
 
   /***************************************** getInteger ******************************************/
@@ -139,6 +149,13 @@ public class SpinEditor extends XTextField
     {
       return 0;
     }
+  }
+
+  /****************************************** setFormat ******************************************/
+  public void setFormat( String format )
+  {
+    // set number format
+    m_numberFormat = new DecimalFormat( format );
   }
 
   /******************************************* setRange ******************************************/
@@ -158,6 +175,7 @@ public class SpinEditor extends XTextField
     // sets the max number of digits after decimal point when displayed as text
     m_numberFormat.setMaximumFractionDigits( dp );
     setAllowed();
+    m_rangeError = "Value not between " + m_numberFormat.format( m_min ) + " and " + m_numberFormat.format( m_max );
   }
 
   /***************************************** setStepPage *****************************************/

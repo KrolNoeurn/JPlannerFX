@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.days;
 
+import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
@@ -26,28 +27,37 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 
 public class EditorDayWork extends AbstractCellEditor
 {
+  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
   public EditorDayWork( int columnIndex, int rowIndex )
   {
+    // use spin editor
     super( columnIndex, rowIndex );
-    // TODO Auto-generated constructor stub
+    m_spin = new SpinEditor();
+    m_spin.setFormat( "0.00" );
+    m_spin.setRange( 0.0, 9.99, 2 );
+    m_spin.setStepPage( 0.1, 1.0 );
+    setControl( m_spin );
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // TODO Auto-generated method stub
-    return null;
+    // return work value as double
+    return m_spin.getDouble();
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // TODO Auto-generated method stub
-
+    // set value depending on type
+    if ( value instanceof Double )
+      m_spin.setDouble( (double) value );
+    else
+      m_spin.setTextCore( (String) value );
   }
 
 }

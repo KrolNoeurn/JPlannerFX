@@ -18,36 +18,57 @@
 
 package rjc.jplanner.gui.days;
 
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /********************* Table cell editor for day-type number of work periods *********************/
 /*************************************************************************************************/
 
-public class EditorDayPeriods extends AbstractCellEditor
+public class EditorDayNumPeriods extends AbstractCellEditor
 {
+  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorDayPeriods( int columnIndex, int rowIndex )
+  public EditorDayNumPeriods( int columnIndex, int rowIndex )
   {
+    // use spin editor
     super( columnIndex, rowIndex );
-    // TODO Auto-generated constructor stub
+    m_spin = new SpinEditor();
+
+    // determine max count of number of work periods
+    if ( JPlanner.plan.day( rowIndex ).numPeriods() > 0 )
+    {
+      Time end = JPlanner.plan.day( rowIndex ).end();
+      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.milliseconds() ) / 60000;
+      int max = JPlanner.plan.day( rowIndex ).numPeriods() + minutesToMidnight / 2;
+      m_spin.setRange( 0, max > 8 ? 8 : max, 0 );
+    }
+    else
+      m_spin.setRange( 0, 8, 0 );
+
+    m_spin.setStepPage( 1, 1 );
+    setControl( m_spin );
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // TODO Auto-generated method stub
-    return null;
+    // return number of work periods value as integer
+    return m_spin.getInteger();
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // TODO Auto-generated method stub
-
+    // set value depending on type
+    if ( value instanceof Integer )
+      m_spin.setInteger( (int) value );
+    else
+      m_spin.setTextCore( (String) value );
   }
-
 }

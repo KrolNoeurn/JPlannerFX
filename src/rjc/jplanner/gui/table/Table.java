@@ -465,6 +465,19 @@ public class Table extends TableDisplay
   /******************************************** reset ********************************************/
   public void reset()
   {
+    // ensure arrays with mapping from position to index are correct size
+    int count = m_data.getColumnCount();
+    while ( m_columnIndexes.size() < count )
+      m_columnIndexes.add( m_columnIndexes.size() );
+    while ( m_columnIndexes.size() > count )
+      m_columnIndexes.remove( Integer.valueOf( m_columnIndexes.size() - 1 ) );
+
+    count = m_data.getRowCount();
+    while ( m_rowIndexes.size() < count )
+      m_rowIndexes.add( m_rowIndexes.size() );
+    while ( m_rowIndexes.size() > count )
+      m_rowIndexes.remove( Integer.valueOf( m_rowIndexes.size() - 1 ) );
+
     // reset table canvas for example after change in number of columns or rows
     calculateBodyHeight();
     calculateBodyWidth();

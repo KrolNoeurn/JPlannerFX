@@ -33,7 +33,6 @@ import javafx.scene.text.Text;
 public class XTextField extends TextField
 {
   private String           m_allowed;             // regular expression defining text allowed to be entered
-  private String           m_valid;               // regular expression defining text not error
   private double           m_minWidth;            // minimum width for editor
   private double           m_maxWidth;            // maximum width for editor
   private ButtonType       m_buttonType;          // button type, null means none
@@ -59,10 +58,6 @@ public class XTextField extends TextField
       // ensure text is always allowed
       if ( m_allowed != null && !newText.matches( m_allowed ) )
         setText( oldText );
-
-      // ensure error status is correct
-      if ( m_valid != null )
-        MainWindow.setError( !newText.matches( m_valid ), this );
 
       // if min & max width set, increase width if needed to show whole text
       if ( m_minWidth > 0.0 && m_maxWidth >= m_minWidth )
@@ -90,7 +85,8 @@ public class XTextField extends TextField
     // set editor text value (cannot override final TextField setText method)
     setText( text );
 
-    // place editor caret (in future so not overtaken other caret moving activities)
+    // place editor caret (and in future so not overtaken other caret moving activities)
+    selectRange( caretPos, caretPos );
     Platform.runLater( () -> selectRange( caretPos, caretPos ) );
   }
 
@@ -99,13 +95,6 @@ public class XTextField extends TextField
   {
     // regular expression that limits what can be entered into editor
     m_allowed = allowed;
-  }
-
-  /****************************************** setValid *******************************************/
-  public void setValid( String valid )
-  {
-    // if text match this regular expression, then not in error
-    m_valid = valid;
   }
 
   /****************************************** setWidths ******************************************/

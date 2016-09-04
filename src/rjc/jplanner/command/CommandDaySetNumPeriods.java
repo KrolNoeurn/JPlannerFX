@@ -64,7 +64,7 @@ public class CommandDaySetNumPeriods implements IUndoCommand
         increment = 10.0 / 60.0;
       else if ( increment >= 5.0 / 60.0 )
         increment = 5.0 / 60.0;
-      else if ( increment >= 1.0 / 60.0 )
+      else
         increment = 1.0 / 60.0;
 
       double start = 24.0 - remainingHours + increment;

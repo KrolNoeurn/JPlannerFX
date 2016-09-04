@@ -112,7 +112,7 @@ public class DaysData implements ITableDataSource
       case Day.SECTION_WORK:
         return new EditorDayWork( columnIndex, rowIndex );
       case Day.SECTION_PERIODS:
-        return new EditorDayPeriods( columnIndex, rowIndex );
+        return new EditorDayNumPeriods( columnIndex, rowIndex );
       default:
         return new EditorDayTime( columnIndex, rowIndex );
     }
@@ -153,6 +153,10 @@ public class DaysData implements ITableDataSource
     // convert times into string using "HH:MM" formats
     if ( value instanceof Time )
       return ( (Time) value ).toStringShort();
+
+    // display work with two decimal places
+    if ( columnIndex == Day.SECTION_WORK )
+      return String.format( "%.2f", value );
 
     // return cell display text
     return ( value == null ? null : value.toString() );

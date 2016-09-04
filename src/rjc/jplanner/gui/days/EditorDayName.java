@@ -18,36 +18,49 @@
 
 package rjc.jplanner.gui.days;
 
-import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.XTextField;
+import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
 /****************************** Table cell editor for day-type name ******************************/
 /*************************************************************************************************/
 
-public class EditorDayName extends AbstractCellEditor
+public class EditorDayName extends EditorText
 {
 
   /**************************************** constructor ******************************************/
   public EditorDayName( int columnIndex, int rowIndex )
   {
+    // create editor
     super( columnIndex, rowIndex );
-    // TODO Auto-generated constructor stub
+
+    // add listener to set error status
+    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    {
+      // length must be between 1 and 40 characters long
+      String error = null;
+      String tidy = JPlanner.clean( newText ).trim();
+      int len = tidy.length();
+      if ( len < 1 || len > 40 )
+        error = "Name length not between 1 and 40 characters";
+
+      // name should be unique
+      if ( JPlanner.plan.daytypes.isDuplicateDayName( tidy, rowIndex ) )
+        error = "Name not unique";
+
+      // display error message and set editor error status
+      JPlanner.gui.setError( getControl(), error );
+    } );
+
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // TODO Auto-generated method stub
-
+    // return editor text cleaned and trimmed
+    return JPlanner.clean( (String) super.getValue() ).trim();
   }
 
 }

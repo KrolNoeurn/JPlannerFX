@@ -18,7 +18,12 @@
 
 package rjc.jplanner.gui.days;
 
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.SpinEditor;
+import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.model.Day;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /******************* Table cell editor for day-type period start-or-end time *********************/
@@ -26,28 +31,85 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 
 public class EditorDayTime extends AbstractCellEditor
 {
+  SpinEditor m_spin; // spin editor
+  int        m_min;  // minimum valid time in milliseconds
+  int        m_max;  // maximum valid time in milliseconds
 
   /**************************************** constructor ******************************************/
   public EditorDayTime( int columnIndex, int rowIndex )
   {
+    // use spin editor
     super( columnIndex, rowIndex );
-    // TODO Auto-generated constructor stub
+    m_spin = new SpinEditor();
+    m_spin.setFormat( "00" );
+    setControl( m_spin );
+
+    // determine min & max valid times
+    m_min = 0;
+    m_max = Time.MILLISECONDS_IN_DAY;
+    Day day = JPlanner.plan.daytypes.get( rowIndex );
+    if ( columnIndex > Day.SECTION_START1 )
+    {
+      m_min = ( (Time) day.getValue( columnIndex - 1 ) ).milliseconds();
+      m_min += 60000;
+    }
+    int num = day.numPeriods();
+    if ( columnIndex < Day.SECTION_START1 + 2 * num - 1 )
+    {
+      m_max = ( (Time) day.getValue( columnIndex + 1 ) ).milliseconds();
+      m_max -= 60000;
+    }
+
+    // add listener to set error status
+    ( (XTextField) getControl() ).textProperty()
+        .addListener( ( observable, oldText, newText ) -> JPlanner.gui.setError( getControl(), check( newText ) ) );
+
+  }
+
+  /******************************************* check ******************************************/
+  private String check( String text )
+  {
+    // check text is a valid time
+    Time time;
+    try
+    {
+      time = Time.fromString( text );
+    }
+    catch ( Exception exception )
+    {
+      return "Time is not valid";
+    }
+
+    // check time is between min & max
+    if ( time.milliseconds() < m_min || time.milliseconds() > m_max )
+      return "Time not between " + Time.fromMilliseconds( m_min ).toStringShort() + " and "
+          + Time.fromMilliseconds( m_max ).toStringShort();
+
+    return null;
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // TODO Auto-generated method stub
-    return null;
+    // return priority value as Time
+    return Time.fromString( m_spin.getText() );
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // TODO Auto-generated method stub
-
+    // set value depending on type
+    if ( value instanceof Time )
+    {
+      Time time = (Time) value;
+      String prefix = time.hours() + ":";
+      m_spin.setPrefixSuffix( prefix, null );
+      m_spin.setInteger( time.minutes() );
+    }
+    else
+      m_spin.setTextCore( (String) value );
   }
 
 }
