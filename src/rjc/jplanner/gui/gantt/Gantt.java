@@ -18,85 +18,96 @@
 
 package rjc.jplanner.gui.gantt;
 
+import java.util.ArrayList;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import javafx.scene.layout.Pane;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.DateTime.Interval;
 
 /*************************************************************************************************/
-/*************** Gantt shows tasks in a gantt plot with upper & lower gantt scales ***************/
+/********************** Gantt shows tasks in a gantt plot with gantt scales **********************/
 /*************************************************************************************************/
 
-public class Gantt extends Pane
+public class Gantt extends Region
 {
-  private DateTime   m_start;
-  private DateTime   m_end;
-  private long       m_millisecondsPP;
+  private ArrayList<GanttScale> m_scales;              // list of gantt-scales
+  private GanttPlot             m_plot;                // gantt plot
+  private ScrollBar             m_scrollBar;           // horizontal scroll bar
 
-  private GanttScale m_upperScale;
-  private GanttScale m_lowerScale;
-  private GanttPlot  m_plot;
+  private DateTime              m_start;               // gantt start date-time
+  private DateTime              m_end;                 // gantt end date-time for determining scroll bar
+  private long                  m_millisecondsPP;      // milliseconds per pixel
+
+  final public static int       SCROLLBAR_SIZE    = 18;
+  final public static int       GANTTSCALE_HEIGHT = 15;
 
   /**************************************** constructor ******************************************/
   public Gantt()
   {
-    super();
-
-    m_upperScale = new GanttScale();
-    m_lowerScale = new GanttScale();
+    // create default gantt 
     m_plot = new GanttPlot();
-
-    // set default gantt parameters
+    m_scales = new ArrayList<GanttScale>();
+    m_scrollBar = new ScrollBar();
     setDefault();
+
+    // add nodes to region
+    for ( GanttScale scale : m_scales )
+      getChildren().add( scale );
+    getChildren().add( m_plot );
+    getChildren().add( m_scrollBar );
+
+    // add listeners to react to size changes
+    widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
+    heightProperty().addListener( ( observable, oldH, newH ) -> heightChange( oldH.intValue(), newH.intValue() ) );
+
+    m_scrollBar.visibleProperty().addListener( ( observable, oldV, newV ) -> heightChange( 0, (int) getHeight() ) );
   }
 
-  /****************************************** writeXML *******************************************/
-  public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
+  /***************************************** setDefault ******************************************/
+  public void setDefault()
   {
-    // write gantt display data to XML stream
-    xsw.writeStartElement( XmlLabels.XML_GANTT );
-    xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
-    xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
-    xsw.writeAttribute( XmlLabels.XML_MSPP, Long.toString( m_millisecondsPP ) );
-    xsw.writeAttribute( XmlLabels.XML_NONWORKING, "???" );
-    xsw.writeAttribute( XmlLabels.XML_CURRENT, "???" );
-    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( GanttPlot.ganttStretch ) );
+    // default gantt has two scales
+    m_scales.add( new GanttScale( Interval.MONTH, "MMM-YYYY" ) );
+    m_scales.add( new GanttScale( Interval.WEEK, "dd" ) );
 
-    // write upper-scale display data
-    xsw.writeStartElement( XmlLabels.XML_UPPER_SCALE );
-    m_upperScale.writeXML( xsw );
-    xsw.writeEndElement(); // XML_UPPER_SCALE
+    // set sensible start, mspp and end
+    setStart( new DateTime( JPlanner.plan.start().milliseconds() - 300000000L ) );
+    setMsPP( 3600 * 6000 );
+    setEnd( new DateTime( m_start.milliseconds() + m_millisecondsPP * (long) getWidth() ) );
 
-    // write lower-scale display data
-    xsw.writeStartElement( XmlLabels.XML_LOWER_SCALE );
-    m_lowerScale.writeXML( xsw );
-    xsw.writeEndElement(); // XML_LOWER_SCALE
-
-    // close gantt element
-    xsw.writeEndElement(); // XML_GANTT
+    // set scroll-bar height
+    m_scrollBar.setMinHeight( SCROLLBAR_SIZE );
   }
 
   /******************************************* loadXML *******************************************/
   public void loadXML( XMLStreamReader xsr ) throws XMLStreamException
   {
-    // adopt gantt display data from XML stream, starting with the attributes
+    // start with default gantt and no scales
     setDefault();
+    for ( GanttScale scale : m_scales )
+      getChildren().remove( scale );
+    m_scales.clear();
+
+    // adopt gantt display data from XML stream, starting with the attributes
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
         case XmlLabels.XML_START:
-          setStart( new DateTime( xsr.getAttributeValue( i ) ) );
+          m_start = new DateTime( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_END:
-          setEnd( new DateTime( xsr.getAttributeValue( i ) ) );
+          m_end = new DateTime( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_MSPP:
-          setMsPP( Long.parseLong( xsr.getAttributeValue( i ) ) );
+          m_millisecondsPP = Long.parseLong( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_NONWORKING:
           // TODO ..................
@@ -112,23 +123,20 @@ public class Gantt extends Pane
           break;
       }
 
-    // read XML gantt data
+    // read XML gantt data elements (for example gantt-scales)
     while ( xsr.hasNext() )
     {
       xsr.next();
 
-      // if reached end of gantt data, return
+      // if reached end of gantt data, exit
       if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_GANTT ) )
-        return;
+        break;
 
       if ( xsr.isStartElement() )
         switch ( xsr.getLocalName() )
         {
-          case XmlLabels.XML_UPPER_SCALE:
-            m_upperScale.loadXML( xsr );
-            break;
-          case XmlLabels.XML_LOWER_SCALE:
-            m_lowerScale.loadXML( xsr );
+          case XmlLabels.XML_SCALE:
+            m_scales.add( new GanttScale( xsr ) );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
@@ -136,17 +144,37 @@ public class Gantt extends Pane
         }
     }
 
+    // ensure all plot and scales have same start & mspp set correctly, and are children of gantt region
+    setStart( m_start );
+    setMsPP( m_millisecondsPP );
+    for ( GanttScale scale : m_scales )
+      getChildren().add( scale );
   }
 
-  /***************************************** setDefault ******************************************/
-  public void setDefault()
+  /****************************************** writeXML *******************************************/
+  public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
-    // set gantt to default parameters and trigger redraw
-    setStart( new DateTime( JPlanner.plan.start().milliseconds() - 300000000L ) );
-    setMsPP( 3600 * 6000 );
-    setEnd( new DateTime( m_start.milliseconds() + m_millisecondsPP * (long) getWidth() ) );
-    m_upperScale.setInterval( Interval.MONTH, "MMM-YYYY" );
-    m_lowerScale.setInterval( Interval.WEEK, "dd" );
+    // write gantt display data to XML stream
+    xsw.writeStartElement( XmlLabels.XML_GANTT );
+    xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
+    xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
+    xsw.writeAttribute( XmlLabels.XML_MSPP, Long.toString( m_millisecondsPP ) );
+    xsw.writeAttribute( XmlLabels.XML_NONWORKING, "???" );
+    xsw.writeAttribute( XmlLabels.XML_CURRENT, "???" );
+    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( GanttPlot.ganttStretch ) );
+
+    // write gantt-scale display data to XML stream
+    int id = 0;
+    for ( GanttScale scale : m_scales )
+    {
+      xsw.writeStartElement( XmlLabels.XML_SCALE );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( ++id ) );
+      scale.writeXML( xsw );
+      xsw.writeEndElement(); // XML_SCALE
+    }
+
+    // close gantt element
+    xsw.writeEndElement(); // XML_GANTT
   }
 
   /****************************************** setStart *******************************************/
@@ -154,9 +182,9 @@ public class Gantt extends Pane
   {
     // set start for gantt and scale/plot components
     m_start = start;
-    m_upperScale.setStart( start );
-    m_lowerScale.setStart( start );
     m_plot.setStart( start );
+    for ( GanttScale scale : m_scales )
+      scale.setStart( start );
   }
 
   /******************************************* setEnd ********************************************/
@@ -171,9 +199,74 @@ public class Gantt extends Pane
   {
     // set milliseconds-per-pixel for gantt and scale/plot components
     m_millisecondsPP = mspp;
-    m_upperScale.setMsPP( mspp );
-    m_lowerScale.setMsPP( mspp );
     m_plot.setMsPP( mspp );
+    for ( GanttScale scale : m_scales )
+      scale.setMsPP( mspp );
+  }
+
+  /**************************************** heightChange *****************************************/
+  private void heightChange( int oldHeight, int newHeight )
+  {
+    JPlanner.trace( "HEIGHT", this, oldHeight, newHeight );
+
+    // if new height is over large, do nothing
+    if ( newHeight > Screen.getPrimary().getVisualBounds().getHeight() * 10 )
+      return;
+
+    // set gantt-scales vertical positions
+    double y = 0.0;
+    for ( GanttScale scale : m_scales )
+    {
+      scale.setLayoutY( y );
+      y += scale.getHeight();
+    }
+
+    // set gantt-plot vertical position & height
+    m_plot.setLayoutY( y );
+    double height = newHeight - y;
+    if ( m_scrollBar.isVisible() )
+      height -= m_scrollBar.getHeight();
+    m_plot.setHeight( height );
+
+    // set scroll-bar vertical position
+    m_scrollBar.setLayoutY( newHeight - m_scrollBar.getHeight() );
+  }
+
+  /***************************************** widthChange *****************************************/
+  private void widthChange( int oldWidth, int newWidth )
+  {
+    // if new width is over large, do nothing
+    if ( newWidth > Screen.getPrimary().getVisualBounds().getWidth() * 10 )
+      return;
+
+    // set gantt-scales width
+    for ( GanttScale scale : m_scales )
+      scale.setWidth( newWidth );
+
+    // set gantt-plot width
+    m_plot.setWidth( newWidth );
+
+    // set scroll-bar width
+    int ganttWidth = (int) ( ( m_end.milliseconds() - m_start.milliseconds() ) / m_millisecondsPP );
+    if ( ganttWidth > newWidth )
+    {
+      m_scrollBar.setVisible( true );
+      m_scrollBar.setMinWidth( newWidth );
+
+      double max = ganttWidth - newWidth;
+      m_scrollBar.setMax( max );
+      m_scrollBar.setVisibleAmount( max * newWidth / ganttWidth );
+
+      if ( m_scrollBar.getValue() > max )
+        m_scrollBar.setValue( max );
+      if ( m_scrollBar.getValue() < 0.0 )
+        m_scrollBar.setValue( 0.0 );
+    }
+    else
+    {
+      m_scrollBar.setVisible( false );
+      m_scrollBar.setValue( 0.0 );
+    }
   }
 
 }

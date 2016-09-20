@@ -24,6 +24,7 @@ import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.gui.XTextField;
@@ -137,6 +138,9 @@ abstract public class AbstractCellEditor
     // remove editor from table
     m_table.remove( m_control );
     m_table.requestFocus();
+
+    // clear status-bar (e.g. error message if control was in error state)
+    JPlanner.gui.message();
   }
 
   /********************************************* open ********************************************/

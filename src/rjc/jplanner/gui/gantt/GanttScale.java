@@ -22,6 +22,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.model.DateTime;
@@ -31,50 +34,34 @@ import rjc.jplanner.model.DateTime.Interval;
 /************************* GanttScale provides a scale for the gantt plot ************************/
 /*************************************************************************************************/
 
-public class GanttScale
+public class GanttScale extends Canvas
 {
-  private DateTime        m_start;
-  private long            m_millisecondsPP;
-  private Interval        m_interval;
-  private String          m_format;
+  private DateTime m_start;
+  private long     m_millisecondsPP;
+  private Interval m_interval;
+  private String   m_format;
 
-  final public static int GANTTSCALE_HEIGHT = 15;
-
-  /****************************************** writeXML *******************************************/
-  public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
+  /**************************************** constructor ******************************************/
+  public GanttScale( Interval interval, String format )
   {
-    // write gantt-scale display data to XML stream
-    xsw.writeAttribute( XmlLabels.XML_INTERVAL, m_interval.toString() );
-    xsw.writeAttribute( XmlLabels.XML_FORMAT, m_format );
-  }
-
-  /****************************************** setConfig ******************************************/
-  public void setInterval( Interval interval, String format )
-  {
-    // set gantt-scale configuration
+    // construct gantt-scale
+    super( 0.0, Gantt.GANTTSCALE_HEIGHT );
     m_interval = interval;
     m_format = format;
+
+    widthProperty().addListener( ( observable, oldW, newW ) -> redraw( oldW.intValue(), newW.intValue() ) );
   }
 
-  /****************************************** setStart *******************************************/
-  public void setStart( DateTime start )
-  {
-    m_start = start;
-  }
-
-  /****************************************** setMsPP ********************************************/
-  public void setMsPP( long mspp )
-  {
-    m_millisecondsPP = mspp;
-  }
-
-  /******************************************* loadXML *******************************************/
-  public void loadXML( XMLStreamReader xsr )
+  /**************************************** constructor ******************************************/
+  public GanttScale( XMLStreamReader xsr )
   {
     // adopt gantt-scale display data from XML stream
+    super( 0.0, Gantt.GANTTSCALE_HEIGHT );
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
+        case XmlLabels.XML_ID:
+          break;
         case XmlLabels.XML_INTERVAL:
           m_interval = Interval.valueOf( xsr.getAttributeValue( i ) );
           break;
@@ -85,5 +72,51 @@ public class GanttScale
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
           break;
       }
+
+    widthProperty().addListener( ( observable, oldW, newW ) -> redraw( oldW.intValue(), newW.intValue() ) );
   }
+
+  /****************************************** writeXML *******************************************/
+  public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
+  {
+    // write gantt-scale display data to XML stream
+    xsw.writeAttribute( XmlLabels.XML_INTERVAL, m_interval.toString() );
+    xsw.writeAttribute( XmlLabels.XML_FORMAT, m_format );
+  }
+
+  /****************************************** setConfig ******************************************/
+  public void setConfig( Interval interval, String format )
+  {
+    // set gantt-scale configuration
+    m_interval = interval;
+    m_format = format;
+  }
+
+  /****************************************** setStart *******************************************/
+  public void setStart( DateTime start )
+  {
+    // set gantt-scale start date-time
+    m_start = start;
+  }
+
+  /****************************************** setMsPP ********************************************/
+  public void setMsPP( long mspp )
+  {
+    // set gantt-scale milliseconds per pixel
+    m_millisecondsPP = mspp;
+  }
+
+  /******************************************* redraw ********************************************/
+  private void redraw( int oldW, int newW )
+  {
+    // draw only if increase in width
+    if ( getHeight() <= 0.0 || newW <= oldW )
+      return;
+
+    // TODO ...............
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
+    gc.fillRect( oldW, 0.0, newW - oldW, getHeight() );
+  }
+
 }

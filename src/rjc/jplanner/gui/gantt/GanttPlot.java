@@ -18,13 +18,17 @@
 
 package rjc.jplanner.gui.gantt;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
 /***************** GanttPlot provides a view of the plan tasks and dependencies ******************/
 /*************************************************************************************************/
 
-public class GanttPlot
+public class GanttPlot extends Canvas
 {
   private DateTime      m_start;
   private long          m_millisecondsPP;
@@ -34,16 +38,54 @@ public class GanttPlot
 
   public static boolean ganttStretch;
 
+  /**************************************** constructor ******************************************/
+  public GanttPlot()
+  {
+    // construct gantt-plot
+    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( oldW.intValue(), newW.intValue() ) );
+    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( oldH.intValue(), newH.intValue() ) );
+  }
+
   /****************************************** setStart *******************************************/
   public void setStart( DateTime start )
   {
+    // set gantt-plot start date-time
     m_start = start;
   }
 
   /****************************************** setMsPP ********************************************/
   public void setMsPP( long mspp )
   {
+    // set gantt-plot milliseconds per pixel
     m_millisecondsPP = mspp;
+  }
+
+  /****************************************** drawWidth ******************************************/
+  private void drawWidth( int oldW, int newW )
+  {
+    // draw only if increase in width
+    if ( getHeight() <= 0.0 || newW <= oldW )
+      return;
+
+    // TODO ...............
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
+    gc.fillRect( oldW, 0.0, newW - oldW, getHeight() );
+  }
+
+  /****************************************** drawHeight *****************************************/
+  private void drawHeight( int oldH, int newH )
+  {
+    JPlanner.trace( "PLOT", this, oldH, newH, getHeight() );
+
+    // draw only if increase in height
+    if ( getWidth() <= 0.0 || newH <= oldH )
+      return;
+
+    // TODO ...............
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
+    gc.fillRect( 0.0, oldH, getWidth(), newH - oldH );
   }
 
 }
