@@ -25,7 +25,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -37,17 +36,12 @@ import rjc.jplanner.JPlanner;
 
 public class UndoStackWindow extends Stage
 {
-  private Canvas             m_canvas            = new Canvas();
-  private ScrollBar          m_scrollbar         = new ScrollBar();
-  private int                m_rowDescent;
-  private int                m_rowHeight;
+  private Canvas     m_canvas       = new Canvas();
+  private ScrollBar  m_scrollbar    = new ScrollBar();
+  private int        m_rowDescent;
+  private int        m_rowHeight;
 
-  private static final Color COLOR_NORMAL_CELL   = Color.WHITE;
-  private static final Color COLOR_NORMAL_TEXT   = Color.BLACK;
-  private static final Color COLOR_SELECTED_CELL = Color.rgb( 51, 153, 255 ); // light blue;
-  private static final Color COLOR_SELECTED_TEXT = Color.WHITE;
-
-  private static int         SCROLLBAR_SIZE      = 18;
+  private static int SCROLLBAR_SIZE = 18;
 
   /**************************************** constructor ******************************************/
   public UndoStackWindow()
@@ -230,7 +224,7 @@ public class UndoStackWindow extends Stage
     gc.setFontSmoothingType( FontSmoothingType.LCD );
 
     // fill background
-    gc.setFill( COLOR_NORMAL_CELL );
+    gc.setFill( Colors.NORMAL_CELL );
     gc.fillRect( 0.0, 0.0, getWidth(), getHeight() );
 
     // determine undo-stack visible range
@@ -250,12 +244,12 @@ public class UndoStackWindow extends Stage
       int y = getYStartByIndex( item );
       if ( item == index() - 1 )
       {
-        gc.setFill( COLOR_SELECTED_CELL );
+        gc.setFill( Colors.SELECTED_CELL );
         gc.fillRect( 0.0, y, getWidth(), m_rowHeight );
-        gc.setFill( COLOR_SELECTED_TEXT );
+        gc.setFill( Colors.SELECTED_TEXT );
       }
       else
-        gc.setFill( COLOR_NORMAL_TEXT );
+        gc.setFill( Colors.NORMAL_TEXT );
 
       gc.fillText( text, 3.0, y + m_rowDescent );
     }

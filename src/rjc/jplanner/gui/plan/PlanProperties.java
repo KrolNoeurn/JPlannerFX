@@ -31,9 +31,9 @@ import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandPlanSetProperties;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.gui.calendars.CalendarCombo;
 import rjc.jplanner.model.Calendar;
@@ -60,8 +60,7 @@ public class PlanProperties extends ScrollPane
   private TextField         m_savedWhen       = new TextField();
   private NumberOf          m_numberOf        = new NumberOf();
 
-  private static Color      LIGHTGRAY         = Color.rgb( 225, 225, 225 );
-  private static Background READONLY          = new Background( new BackgroundFill( LIGHTGRAY, null, null ) );
+  private static Background READONLY          = new Background( new BackgroundFill( Colors.LIGHTERGRAY, null, null ) );
 
   /**************************************** constructor ******************************************/
   public PlanProperties()

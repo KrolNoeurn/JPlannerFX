@@ -22,11 +22,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.DateTime.Interval;
 
@@ -36,27 +38,29 @@ import rjc.jplanner.model.DateTime.Interval;
 
 public class GanttScale extends Canvas
 {
-  private DateTime m_start;
-  private long     m_millisecondsPP;
+  private Gantt    m_gantt;
   private Interval m_interval;
   private String   m_format;
 
   /**************************************** constructor ******************************************/
-  public GanttScale( Interval interval, String format )
+  public GanttScale( Gantt gantt, Interval interval, String format )
   {
     // construct gantt-scale
     super( 0.0, Gantt.GANTTSCALE_HEIGHT );
+    m_gantt = gantt;
     m_interval = interval;
     m_format = format;
 
-    widthProperty().addListener( ( observable, oldW, newW ) -> redraw( oldW.intValue(), newW.intValue() ) );
+    widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
   }
 
   /**************************************** constructor ******************************************/
-  public GanttScale( XMLStreamReader xsr )
+  public GanttScale( Gantt gantt, XMLStreamReader xsr )
   {
     // adopt gantt-scale display data from XML stream
     super( 0.0, Gantt.GANTTSCALE_HEIGHT );
+    m_gantt = gantt;
+
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
@@ -73,7 +77,7 @@ public class GanttScale extends Canvas
           break;
       }
 
-    widthProperty().addListener( ( observable, oldW, newW ) -> redraw( oldW.intValue(), newW.intValue() ) );
+    widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
   }
 
   /****************************************** writeXML *******************************************/
@@ -84,39 +88,67 @@ public class GanttScale extends Canvas
     xsw.writeAttribute( XmlLabels.XML_FORMAT, m_format );
   }
 
-  /****************************************** setConfig ******************************************/
-  public void setConfig( Interval interval, String format )
+  /****************************************** setScale *******************************************/
+  public void setScale( Interval interval, String format )
   {
     // set gantt-scale configuration
     m_interval = interval;
     m_format = format;
   }
 
-  /****************************************** setStart *******************************************/
-  public void setStart( DateTime start )
-  {
-    // set gantt-scale start date-time
-    m_start = start;
-  }
-
-  /****************************************** setMsPP ********************************************/
-  public void setMsPP( long mspp )
-  {
-    // set gantt-scale milliseconds per pixel
-    m_millisecondsPP = mspp;
-  }
-
   /******************************************* redraw ********************************************/
-  private void redraw( int oldW, int newW )
+  public void redraw()
+  {
+    // redraw whole gantt-scale
+    widthChange( 0, (int) getWidth() );
+  }
+
+  /***************************************** widthChange *****************************************/
+  private void widthChange( int oldW, int newW )
   {
     // draw only if increase in width
     if ( getHeight() <= 0.0 || newW <= oldW )
       return;
 
-    // TODO ...............
+    // draw gantt scale between old-width and new-width
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
-    gc.fillRect( oldW, 0.0, newW - oldW, getHeight() );
+    double y = getHeight() - 0.5;
+    gc.setStroke( Colors.TABLE_GRID );
+    gc.strokeLine( oldW, y, newW, y );
+
+    // determine first interval
+    DateTime start = m_gantt.datetime( oldW ).trunc( m_interval );
+    DateTime end = start.plusInterval( m_interval );
+    int xs = m_gantt.x( start );
+    int xe = m_gantt.x( end );
+
+    // draw intervals until past new-width
+    do
+    {
+      // draw interval divider
+      gc.clearRect( xs + 1.0, 0, xe - xs, getHeight() - 1.0 );
+      gc.strokeLine( xe - 0.5, 0, xe - 0.5, y );
+
+      // if enough width, add label
+      double ww = xe - xs - 3.0;
+      if ( ww > 1.0 )
+      {
+        String label = start.toString( m_format );
+        Bounds bounds = new Text( label ).getLayoutBounds();
+        double yy = ( getHeight() - bounds.getHeight() ) / 2.0 - bounds.getMinY() - 1.0;
+        double xx = xs + 1.0;
+        if ( ww > bounds.getWidth() )
+          xx += ( ww - bounds.getWidth() ) / 2.0;
+        gc.fillText( label, xx, yy, ww );
+      }
+
+      // move on to next interval
+      start = end;
+      xs = xe;
+      end = end.plusInterval( m_interval );
+      xe = m_gantt.x( end );
+    }
+    while ( xs < newW );
   }
 
 }

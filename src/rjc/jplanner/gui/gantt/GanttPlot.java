@@ -22,6 +22,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.Colors;
+import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
@@ -30,8 +33,7 @@ import rjc.jplanner.model.DateTime;
 
 public class GanttPlot extends Canvas
 {
-  private DateTime      m_start;
-  private long          m_millisecondsPP;
+  private Gantt         m_gantt;
 
   private static int    m_taskHeight = 6;
   private static int    m_arrowSize  = 4;
@@ -39,29 +41,23 @@ public class GanttPlot extends Canvas
   public static boolean ganttStretch;
 
   /**************************************** constructor ******************************************/
-  public GanttPlot()
+  public GanttPlot( Gantt gantt )
   {
     // construct gantt-plot
-    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( oldW.intValue(), newW.intValue() ) );
-    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( oldH.intValue(), newH.intValue() ) );
+    m_gantt = gantt;
+
+    widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
+    heightProperty().addListener( ( observable, oldH, newH ) -> heightChange( oldH.intValue(), newH.intValue() ) );
   }
 
-  /****************************************** setStart *******************************************/
-  public void setStart( DateTime start )
+  /******************************************* redraw ********************************************/
+  public void redraw()
   {
-    // set gantt-plot start date-time
-    m_start = start;
+    widthChange( 0, (int) getWidth() );
   }
 
-  /****************************************** setMsPP ********************************************/
-  public void setMsPP( long mspp )
-  {
-    // set gantt-plot milliseconds per pixel
-    m_millisecondsPP = mspp;
-  }
-
-  /****************************************** drawWidth ******************************************/
-  private void drawWidth( int oldW, int newW )
+  /***************************************** widthChange *****************************************/
+  private void widthChange( int oldW, int newW )
   {
     // draw only if increase in width
     if ( getHeight() <= 0.0 || newW <= oldW )
@@ -69,12 +65,13 @@ public class GanttPlot extends Canvas
 
     // TODO ...............
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
+    gc.setFill( Color.WHITE );
     gc.fillRect( oldW, 0.0, newW - oldW, getHeight() );
+    shadeNonWorking( oldW, 0, newW - oldW, (int) getHeight() );
   }
 
-  /****************************************** drawHeight *****************************************/
-  private void drawHeight( int oldH, int newH )
+  /***************************************** heightChange ****************************************/
+  private void heightChange( int oldH, int newH )
   {
     JPlanner.trace( "PLOT", this, oldH, newH, getHeight() );
 
@@ -84,8 +81,46 @@ public class GanttPlot extends Canvas
 
     // TODO ...............
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setFill( Color.rgb( hashCode() % 256, hashCode() / 256 % 256, hashCode() / 65536 % 256 ) );
+    gc.setFill( Color.WHITE );
     gc.fillRect( 0.0, oldH, getWidth(), newH - oldH );
+    shadeNonWorking( 0, oldH, (int) getWidth(), newH - oldH );
+  }
+
+  /*************************************** shadeNonWorking ****************************************/
+  private void shadeNonWorking( int x, int y, int w, int h )
+  {
+    // shade non-working time on gantt-plot
+    Calendar calendar = JPlanner.plan.calendar();
+    Date date = m_gantt.datetime( x - 1 ).date();
+    int endEpoch = m_gantt.datetime( x + w ).date().epochday();
+    int startShadeEpoch;
+
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setFill( Colors.DISABLED_CELL );
+    do
+    {
+      // find start of non-working period
+      if ( !calendar.isWorking( date ) )
+      {
+        startShadeEpoch = date.epochday();
+
+        // find end of non-working period
+        do
+          date.increment();
+        while ( date.epochday() <= endEpoch && !calendar.isWorking( date ) );
+
+        // if width at least 1 pixel shade non-working period
+        long width = ( date.epochday() - startShadeEpoch ) * DateTime.MILLISECONDS_IN_DAY / m_gantt.getMsPP();
+        if ( width > 0L )
+        {
+          long xe = m_gantt.x( new DateTime( date.epochday() * DateTime.MILLISECONDS_IN_DAY ) );
+          gc.fillRect( xe - width, y, width, h );
+        }
+      }
+
+      date.increment();
+    }
+    while ( date.epochday() <= endEpoch );
   }
 
 }

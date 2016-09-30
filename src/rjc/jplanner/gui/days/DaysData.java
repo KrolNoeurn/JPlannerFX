@@ -23,10 +23,10 @@ import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandDaySetNumPeriods;
 import rjc.jplanner.command.CommandDaySetValue;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
-import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Day;
 import rjc.jplanner.model.Time;
 
@@ -90,9 +90,9 @@ public class DaysData implements ITableDataSource
     // all cells are normal coloured except unused start/end
     Day day = JPlanner.plan.day( rowIndex );
     if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
-      return TableCanvas.COLOR_DISABLED_CELL;
+      return Colors.DISABLED_CELL;
 
-    return TableCanvas.COLOR_NORMAL_CELL;
+    return Colors.NORMAL_CELL;
   }
 
   /***************************************** getEditor *******************************************/

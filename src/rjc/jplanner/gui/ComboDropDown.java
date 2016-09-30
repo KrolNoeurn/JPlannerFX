@@ -22,7 +22,6 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
@@ -39,14 +38,9 @@ public class ComboDropDown extends Popup
   private int                 m_rowHeight;
   private int                 m_rowDescent;
   private int                 m_rowOffset;
-  private int                 m_highlighed        = -1;
+  private int                 m_highlighed = -1;
 
-  private static final Color  COLOR_NORMAL_CELL   = Color.WHITE;
-  private static final Color  COLOR_NORMAL_TEXT   = Color.BLACK;
-  private static final Color  COLOR_SELECTED_CELL = Color.rgb( 51, 153, 255 ); // light blue;
-  private static final Color  COLOR_SELECTED_TEXT = Color.WHITE;
-
-  private static final int    BORDER              = 2;
+  private static final int    BORDER       = 2;
 
   /**************************************** constructor ******************************************/
   public ComboDropDown( AbstractComboEditor parent )
@@ -108,9 +102,9 @@ public class ComboDropDown extends Popup
     gc.setFontSmoothingType( FontSmoothingType.LCD );
 
     // fill background and draw border
-    gc.setFill( COLOR_NORMAL_CELL );
+    gc.setFill( Colors.NORMAL_CELL );
     gc.fillRect( 0.0, 0.0, w, h );
-    gc.setStroke( COLOR_SELECTED_CELL );
+    gc.setStroke( Colors.SELECTED_CELL );
     gc.strokeRect( 0.5, 0.5, w - 1.0, h - 1.0 );
 
     // determine list visible range
@@ -124,12 +118,12 @@ public class ComboDropDown extends Popup
       // colour current selected index item differently
       if ( item == highlightedItem )
       {
-        gc.setFill( COLOR_SELECTED_CELL );
+        gc.setFill( Colors.SELECTED_CELL );
         gc.fillRect( BORDER, y, w - BORDER * 2, m_rowHeight );
-        gc.setFill( COLOR_SELECTED_TEXT );
+        gc.setFill( Colors.SELECTED_TEXT );
       }
       else
-        gc.setFill( COLOR_NORMAL_TEXT );
+        gc.setFill( Colors.NORMAL_TEXT );
 
       gc.fillText( getItem( item ), BORDER + 3, y + m_rowDescent );
       y += m_rowHeight;

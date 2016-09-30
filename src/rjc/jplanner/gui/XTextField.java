@@ -154,12 +154,12 @@ public class XTextField extends TextField
     m_button.setHeight( h );
     m_button.setWidth( w );
     GraphicsContext gc = m_button.getGraphicsContext2D();
-    gc.setFill( MainWindow.BUTTON_BACKGROUND );
+    gc.setFill( Colors.BUTTON_BACKGROUND );
     gc.fillRect( 0.0, 0.0, w, h );
 
     // draw correct button depending on button type
     int x1, y1, y2;
-    gc.setStroke( MainWindow.BUTTON_ARROW );
+    gc.setStroke( Colors.BUTTON_ARROW );
     switch ( m_buttonType )
     {
       case DOWN:

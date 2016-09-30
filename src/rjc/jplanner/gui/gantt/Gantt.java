@@ -53,7 +53,7 @@ public class Gantt extends Region
   public Gantt()
   {
     // create default gantt 
-    m_plot = new GanttPlot();
+    m_plot = new GanttPlot( this );
     m_scales = new ArrayList<GanttScale>();
     m_scrollBar = new ScrollBar();
     setDefault();
@@ -69,14 +69,15 @@ public class Gantt extends Region
     heightProperty().addListener( ( observable, oldH, newH ) -> heightChange( oldH.intValue(), newH.intValue() ) );
 
     m_scrollBar.visibleProperty().addListener( ( observable, oldV, newV ) -> heightChange( 0, (int) getHeight() ) );
+    m_scrollBar.valueProperty().addListener( ( observable, oldV, newV ) -> redraw() );
   }
 
   /***************************************** setDefault ******************************************/
   public void setDefault()
   {
     // default gantt has two scales
-    m_scales.add( new GanttScale( Interval.MONTH, "MMM-YYYY" ) );
-    m_scales.add( new GanttScale( Interval.WEEK, "dd" ) );
+    m_scales.add( new GanttScale( this, Interval.MONTH, "MMM-YYYY" ) );
+    m_scales.add( new GanttScale( this, Interval.WEEK, "dd" ) );
 
     // set sensible start, mspp and end
     setStart( new DateTime( JPlanner.plan.start().milliseconds() - 300000000L ) );
@@ -136,7 +137,7 @@ public class Gantt extends Region
         switch ( xsr.getLocalName() )
         {
           case XmlLabels.XML_SCALE:
-            m_scales.add( new GanttScale( xsr ) );
+            m_scales.add( new GanttScale( this, xsr ) );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
@@ -144,9 +145,7 @@ public class Gantt extends Region
         }
     }
 
-    // ensure all plot and scales have same start & mspp set correctly, and are children of gantt region
-    setStart( m_start );
-    setMsPP( m_millisecondsPP );
+    // ensure gantt-scales are children of gantt region
     for ( GanttScale scale : m_scales )
       getChildren().add( scale );
   }
@@ -168,7 +167,7 @@ public class Gantt extends Region
     for ( GanttScale scale : m_scales )
     {
       xsw.writeStartElement( XmlLabels.XML_SCALE );
-      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( ++id ) );
+      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( id++ ) );
       scale.writeXML( xsw );
       xsw.writeEndElement(); // XML_SCALE
     }
@@ -180,35 +179,43 @@ public class Gantt extends Region
   /****************************************** setStart *******************************************/
   public void setStart( DateTime start )
   {
-    // set start for gantt and scale/plot components
+    // set start for gantt
     m_start = start;
-    m_plot.setStart( start );
-    for ( GanttScale scale : m_scales )
-      scale.setStart( start );
   }
 
   /******************************************* setEnd ********************************************/
   public void setEnd( DateTime end )
   {
-    // set end for gantt, scale/plot components don't have end
+    // set end for gantt
     m_end = end;
   }
 
   /******************************************* setMsPP *******************************************/
   public void setMsPP( long mspp )
   {
-    // set milliseconds-per-pixel for gantt and scale/plot components
+    // set milliseconds-per-pixel for gantt
     m_millisecondsPP = mspp;
-    m_plot.setMsPP( mspp );
+  }
+
+  /******************************************* getMsPP *******************************************/
+  public long getMsPP()
+  {
+    // return milliseconds-per-pixel for gantt
+    return m_millisecondsPP;
+  }
+
+  /******************************************* redraw ********************************************/
+  public void redraw()
+  {
+    // redraw whole gantt
     for ( GanttScale scale : m_scales )
-      scale.setMsPP( mspp );
+      scale.redraw();
+    m_plot.redraw();
   }
 
   /**************************************** heightChange *****************************************/
   private void heightChange( int oldHeight, int newHeight )
   {
-    JPlanner.trace( "HEIGHT", this, oldHeight, newHeight );
-
     // if new height is over large, do nothing
     if ( newHeight > Screen.getPrimary().getVisualBounds().getHeight() * 10 )
       return;
@@ -267,6 +274,20 @@ public class Gantt extends Region
       m_scrollBar.setVisible( false );
       m_scrollBar.setValue( 0.0 );
     }
+  }
+
+  /********************************************** x **********************************************/
+  public int x( DateTime dt )
+  {
+    // return x-coordinate for specified date-time
+    return (int) ( ( dt.milliseconds() - m_start.milliseconds() ) / m_millisecondsPP - m_scrollBar.getValue() );
+  }
+
+  /****************************************** datetime *******************************************/
+  public DateTime datetime( int x )
+  {
+    // return date-time for specified x-coordinate
+    return m_start.plusMilliseconds( (long) ( x + m_scrollBar.getValue() ) * m_millisecondsPP );
   }
 
 }

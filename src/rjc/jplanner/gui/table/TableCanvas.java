@@ -35,6 +35,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 import rjc.jplanner.gui.table.Table.Alignment;
 
@@ -59,39 +60,30 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static final String ELLIPSIS              = "...";                      // ellipsis to show text has been truncated
-  public static final int    CELL_PADDING          = 4;                          // cell padding for text left & right edges
-  private static final int   PROXIMITY             = 4;                          // used to distinguish resize from reorder
+  public static final String ELLIPSIS            = "...";          // ellipsis to show text has been truncated
+  public static final int    CELL_PADDING        = 4;              // cell padding for text left & right edges
+  private static final int   PROXIMITY           = 4;              // used to distinguish resize from reorder
 
-  public static final Color  COLOR_GRID            = Color.SILVER;
-  public static final Color  COLOR_DISABLED_CELL   = Color.rgb( 227, 227, 227 ); // medium grey
-  public static final Color  COLOR_NORMAL_CELL     = Color.WHITE;
-  public static final Color  COLOR_NORMAL_HEADER   = Color.rgb( 240, 240, 240 ); // light grey
-  public static final Color  COLOR_NORMAL_TEXT     = Color.BLACK;
-  public static final Color  COLOR_SELECTED_CELL   = Color.rgb( 51, 153, 255 );  // light blue;
-  public static final Color  COLOR_SELECTED_HEADER = Color.rgb( 192, 192, 192 ); // medium dark grey
-  public static final Color  COLOR_SELECTED_TEXT   = Color.WHITE;
-
-  public static final Cursor CURSOR_H_RESIZE       = Cursor.H_RESIZE;
-  public static final Cursor CURSOR_V_RESIZE       = Cursor.V_RESIZE;
-  public static final Cursor CURSOR_DEFAULT        = Cursor.DEFAULT;
+  public static final Cursor CURSOR_H_RESIZE     = Cursor.H_RESIZE;
+  public static final Cursor CURSOR_V_RESIZE     = Cursor.V_RESIZE;
+  public static final Cursor CURSOR_DEFAULT      = Cursor.DEFAULT;
   public static Cursor       CURSOR_DOWNARROW;
   public static Cursor       CURSOR_RIGHTARROW;
   public static Cursor       CURSOR_CROSS;
 
-  private Table              m_table;                                            // table defining this table canvas
-  private int                m_x;                                                // last mouse move/drag x
-  private int                m_y;                                                // last mouse move/drag y
-  private int                m_columnPos;                                        // last mouse move or reorder column position
-  private int                m_rowPos;                                           // last mouse move or reorder row position
-  private int                m_offset;                                           // x or y resize/reorder offset
-  private int                m_selectedColumnPos   = -1;                         // column of last single cell selected
-  private int                m_selectedRowPos      = -1;                         // row of last single cell selected
-  private int                m_index               = -1;                         // column or row index for resize or reorder
-  private Canvas             m_reorderSlider;                                    // visual slider for when reordering
-  private Canvas             m_reorderMarker;                                    // visual marker for new position when reordering
+  private Table              m_table;                              // table defining this table canvas
+  private int                m_x;                                  // last mouse move/drag x
+  private int                m_y;                                  // last mouse move/drag y
+  private int                m_columnPos;                          // last mouse move or reorder column position
+  private int                m_rowPos;                             // last mouse move or reorder row position
+  private int                m_offset;                             // x or y resize/reorder offset
+  private int                m_selectedColumnPos = -1;             // column of last single cell selected
+  private int                m_selectedRowPos    = -1;             // row of last single cell selected
+  private int                m_index             = -1;             // column or row index for resize or reorder
+  private Canvas             m_reorderSlider;                      // visual slider for when reordering
+  private Canvas             m_reorderMarker;                      // visual marker for new position when reordering
 
-  public boolean             redrawn;                                            // set true if has table be totally redrawn recently
+  public boolean             redrawn;                              // set true if has table be totally redrawn recently
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -294,16 +286,16 @@ public class TableCanvas extends Canvas
     // fill
     boolean m_selected = m_table.isSelected( columnPos, rowPos );
     Paint color = m_table.getDataSource().getCellBackground( columnIndex, rowIndex );
-    if ( m_selected && color == TableCanvas.COLOR_NORMAL_HEADER )
-      gc.setFill( TableCanvas.COLOR_SELECTED_HEADER );
+    if ( m_selected && color == Colors.NORMAL_HEADER )
+      gc.setFill( Colors.SELECTED_HEADER );
     else if ( m_selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_CELL );
+      gc.setFill( Colors.SELECTED_CELL );
     else
       gc.setFill( color );
     gc.fillRect( x, y, w - 1, h - 1 );
 
     // grid
-    gc.setStroke( TableCanvas.COLOR_GRID );
+    gc.setStroke( Colors.TABLE_GRID );
     gc.strokeLine( x + w - 0.5, y + 0.5, x + w - 0.5, y + h - 0.5 );
     gc.strokeLine( x + 0.5, y + h - 0.5, x + w - 0.5, y + h - 0.5 );
 
@@ -318,9 +310,9 @@ public class TableCanvas extends Canvas
       Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
       ArrayList<TextLine> lines = getTextLines( text, font, alignment, w, h );
       if ( m_selected )
-        gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
+        gc.setFill( Colors.SELECTED_TEXT );
       else
-        gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
+        gc.setFill( Colors.NORMAL_TEXT );
 
       gc.setFontSmoothingType( FontSmoothingType.LCD );
       for ( TextLine line : lines )
@@ -352,22 +344,22 @@ public class TableCanvas extends Canvas
   {
     // draw row header - fill
     if ( selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_HEADER );
+      gc.setFill( Colors.SELECTED_HEADER );
     else
-      gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
+      gc.setFill( Colors.NORMAL_HEADER );
     gc.fillRect( 0, y, w - 1.0, h - 1.0 );
 
     // grid
-    gc.setStroke( TableCanvas.COLOR_GRID );
+    gc.setStroke( Colors.TABLE_GRID );
     gc.strokeLine( w - 0.5, y + 0.5, w - 0.5, y + h - 0.5 );
     gc.strokeLine( 0.5, y + h - 0.5, w - 0.5, y + h - 0.5 );
 
     // label
     ArrayList<TextLine> lines = getTextLines( text, null, Alignment.MIDDLE, w, h );
     if ( selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
+      gc.setFill( Colors.SELECTED_TEXT );
     else
-      gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
+      gc.setFill( Colors.NORMAL_TEXT );
 
     gc.setFontSmoothingType( FontSmoothingType.LCD );
     for ( TextLine line : lines )
@@ -398,22 +390,22 @@ public class TableCanvas extends Canvas
   {
     // draw column header - fill
     if ( selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_HEADER );
+      gc.setFill( Colors.SELECTED_HEADER );
     else
-      gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
+      gc.setFill( Colors.NORMAL_HEADER );
     gc.fillRect( x, 0, w - 1.0, h - 1.0 );
 
     // grid
-    gc.setStroke( TableCanvas.COLOR_GRID );
+    gc.setStroke( Colors.TABLE_GRID );
     gc.strokeLine( x + w - 0.5, 0.5, x + w - 0.5, h - 0.5 );
     gc.strokeLine( x + 0.5, h - 0.5, x + w - 0.5, h - 0.5 );
 
     // label
     ArrayList<TextLine> lines = getTextLines( text, null, Alignment.MIDDLE, w, h );
     if ( selected )
-      gc.setFill( TableCanvas.COLOR_SELECTED_TEXT );
+      gc.setFill( Colors.SELECTED_TEXT );
     else
-      gc.setFill( TableCanvas.COLOR_NORMAL_TEXT );
+      gc.setFill( Colors.NORMAL_TEXT );
 
     gc.setFontSmoothingType( FontSmoothingType.LCD );
     for ( TextLine line : lines )
@@ -429,11 +421,11 @@ public class TableCanvas extends Canvas
     double h = m_table.getHorizontalHeaderHeight();
 
     // fill
-    gc.setFill( TableCanvas.COLOR_NORMAL_HEADER );
+    gc.setFill( Colors.NORMAL_HEADER );
     gc.fillRect( 0, 0, w - 1.0, h - 1.0 );
 
     // grid
-    gc.setStroke( TableCanvas.COLOR_GRID );
+    gc.setStroke( Colors.TABLE_GRID );
     gc.strokeLine( w - 0.5, 0.5, w - 0.5, h - 0.5 );
     gc.strokeLine( 0.5, h - 0.5, w - 0.5, h - 0.5 );
   }

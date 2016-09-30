@@ -22,11 +22,11 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
-import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Resource;
@@ -80,9 +80,9 @@ public class ResourcesData implements ITableDataSource
     // all cells are normal coloured except if null resource
     Resource res = JPlanner.plan.resource( rowIndex );
     if ( columnIndex != Resource.SECTION_INITIALS && res.isNull() )
-      return TableCanvas.COLOR_DISABLED_CELL;
+      return Colors.DISABLED_CELL;
 
-    return TableCanvas.COLOR_NORMAL_CELL;
+    return Colors.NORMAL_CELL;
   }
 
   /***************************************** getEditor *******************************************/

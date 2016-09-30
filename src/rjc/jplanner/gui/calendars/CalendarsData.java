@@ -24,11 +24,11 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandCalendarSetCycleLength;
 import rjc.jplanner.command.CommandCalendarSetExceptions;
 import rjc.jplanner.command.CommandCalendarSetValue;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
-import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
@@ -89,9 +89,9 @@ public class CalendarsData implements ITableDataSource
     // all cells are normal coloured except unused normal section cells
     Calendar cal = JPlanner.plan.calendar( columnIndex );
     if ( rowIndex >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
-      return TableCanvas.COLOR_DISABLED_CELL;
+      return Colors.DISABLED_CELL;
 
-    return TableCanvas.COLOR_NORMAL_CELL;
+    return Colors.NORMAL_CELL;
   }
 
   /***************************************** getEditor *******************************************/

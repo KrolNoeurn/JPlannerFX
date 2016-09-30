@@ -22,13 +22,13 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
+import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
-import rjc.jplanner.gui.table.TableCanvas;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
@@ -98,9 +98,9 @@ public class TasksData implements ITableDataSource
   {
     // cell colour determined by if editable
     if ( JPlanner.plan.task( rowIndex ).isSectionEditable( columnIndex ) )
-      return TableCanvas.COLOR_NORMAL_CELL;
+      return Colors.NORMAL_CELL;
 
-    return TableCanvas.COLOR_DISABLED_CELL;
+    return Colors.DISABLED_CELL;
 
   }
 

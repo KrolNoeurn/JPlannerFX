@@ -45,7 +45,6 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -63,20 +62,17 @@ import rjc.jplanner.model.Plan;
 
 public class MainWindow
 {
-  public static final Color        BUTTON_BACKGROUND        = Color.rgb( 225, 225, 225 ); // light gray
-  public static final Color        BUTTON_ARROW             = Color.BLACK;
-  public static final Color        COLOR_GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
-  public static final String       STYLE_ERROR              = "-fx-text-fill: red;";
-  public static final String       STYLE_NORMAL             = "-fx-text-fill: black;";
+  public static final String       STYLE_ERROR  = "-fx-text-fill: red;";
+  public static final String       STYLE_NORMAL = "-fx-text-fill: black;";
   public static String             STYLE_TOOLTIP;
-  public static Image              JPLANNER_ICON;                                         // icon for all JPlanner Windows
+  public static Image              JPLANNER_ICON;                         // icon for all JPlanner Windows
 
-  private Stage                    m_stage;                                               // operating system window holding MainWindow
-  private MainTabWidget            m_mainTabWidget;                                       // MainTabWidget associated with MainWindow
-  private Menus                    m_menus                  = new Menus();                // menus at top of MainWindow
-  private TextField                m_statusBar              = new TextField();            // status bar at bottom of MainWindow
-  private UndoStackWindow          m_undoWindow;                                          // window to show plan undo-stack
-  private ArrayList<MainTabWidget> m_tabWidgets;                                          // list of MainTabWidgets including one in MainWindow
+  private Stage                    m_stage;                               // operating system window holding MainWindow
+  private MainTabWidget            m_mainTabWidget;                       // MainTabWidget associated with MainWindow
+  private Menus                    m_menus      = new Menus();            // menus at top of MainWindow
+  private TextField                m_statusBar  = new TextField();        // status bar at bottom of MainWindow
+  private UndoStackWindow          m_undoWindow;                          // window to show plan undo-stack
+  private ArrayList<MainTabWidget> m_tabWidgets;                          // list of MainTabWidgets including one in MainWindow
 
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
@@ -98,12 +94,12 @@ public class MainWindow
 
     // configure status bar
     m_statusBar.setEditable( false );
-    m_statusBar.setBackground( new Background( new BackgroundFill( COLOR_GENERAL_BACKGROUND, null, null ) ) );
+    m_statusBar.setBackground( new Background( new BackgroundFill( Colors.GENERAL_BACKGROUND, null, null ) ) );
     m_statusBar.setText( "JPlanner started" );
 
     // construct main application window
     JPLANNER_ICON = new Image( getClass().getResourceAsStream( "jplanner.png" ) );
-    Scene scene = new Scene( grid, 800, 500, COLOR_GENERAL_BACKGROUND );
+    Scene scene = new Scene( grid, 800, 500, Colors.GENERAL_BACKGROUND );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();
