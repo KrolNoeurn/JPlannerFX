@@ -26,12 +26,12 @@ import rjc.jplanner.command.CommandCalendarSetExceptions;
 import rjc.jplanner.command.CommandCalendarSetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.gui.table.EditorText;
+import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
-import rjc.jplanner.model.DateTime;
+import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /**************************** Table data source for showing calendars ****************************/
@@ -55,8 +55,8 @@ public class CalendarsData implements ITableDataSource
     // table row count is max number of normals + SECTION_NORMAL1
     int max = 0;
     for ( int i = 0; i < getColumnCount(); i++ )
-      if ( JPlanner.plan.calendar( i ).numNormals() > max )
-        max = JPlanner.plan.calendar( i ).numNormals();
+      if ( JPlanner.plan.calendar( i ).getNormals().size() > max )
+        max = JPlanner.plan.calendar( i ).getNormals().size();
 
     return max + Calendar.SECTION_NORMAL1;
   }
@@ -88,7 +88,7 @@ public class CalendarsData implements ITableDataSource
   {
     // all cells are normal coloured except unused normal section cells
     Calendar cal = JPlanner.plan.calendar( columnIndex );
-    if ( rowIndex >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
+    if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return Colors.DISABLED_CELL;
 
     return Colors.NORMAL_CELL;
@@ -100,11 +100,23 @@ public class CalendarsData implements ITableDataSource
   {
     // return null if cell is not editable, unused normal section cells
     Calendar cal = JPlanner.plan.calendar( columnIndex );
-    if ( rowIndex >= cal.numNormals() + Calendar.SECTION_NORMAL1 )
+    if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return null;
 
     // return editor for table body cell
-    return new EditorText( columnIndex, rowIndex );
+    switch ( rowIndex )
+    {
+      case Calendar.SECTION_NAME:
+        return new EditorCalendarName( columnIndex, rowIndex );
+      case Calendar.SECTION_ANCHOR:
+        return new EditorDateTime( columnIndex, rowIndex );
+      case Calendar.SECTION_EXCEPTIONS:
+        return new EditorCalendarExceptions( columnIndex, rowIndex );
+      case Calendar.SECTION_CYCLE_LEN:
+        return new EditorCalendarCycleLength( columnIndex, rowIndex );
+      default:
+        return new EditorDayType( columnIndex, rowIndex );
+    }
   }
 
   /****************************************** setValue *******************************************/
@@ -121,7 +133,7 @@ public class CalendarsData implements ITableDataSource
 
     if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
       JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
-    else if ( rowIndex == Calendar.SECTION_CYCLE )
+    else if ( rowIndex == Calendar.SECTION_CYCLE_LEN )
       JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( cal, (int) newValue, (int) oldValue ) );
     else
       JPlanner.plan.undostack().push( new CommandCalendarSetValue( cal, rowIndex, newValue, oldValue ) );
@@ -141,11 +153,13 @@ public class CalendarsData implements ITableDataSource
     // get value to be displayed
     Object value = getValue( columnIndex, rowIndex );
 
-    // convert date and date-times into strings using plan formats
-    if ( value instanceof DateTime )
-      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+    // convert dates into strings using plan format
     if ( value instanceof Date )
       return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
+
+    // for day-types display name
+    if ( value instanceof Day )
+      return ( (Day) value ).name();
 
     // return cell display text
     return ( value == null ? null : value.toString() );

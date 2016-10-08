@@ -19,29 +19,48 @@
 package rjc.jplanner.gui.calendars;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.AbstractComboEditor;
+import rjc.jplanner.gui.XTextField;
+import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
-/**************** Extended version of AbstractComboEditor with list of calendars *****************/
+/****************************** Table cell editor for calendar name ******************************/
 /*************************************************************************************************/
 
-public class CalendarCombo extends AbstractComboEditor
+public class EditorCalendarName extends EditorText
 {
 
-  /**************************************** getItemCount *****************************************/
-  @Override
-  public int getItemCount()
+  /**************************************** constructor ******************************************/
+  public EditorCalendarName( int columnIndex, int rowIndex )
   {
-    // return number of calendars
-    return JPlanner.plan.calendarsCount();
+    // create editor
+    super( columnIndex, rowIndex );
+
+    // add listener to set error status
+    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    {
+      // length must be between 1 and 40 characters long
+      String error = null;
+      String tidy = JPlanner.clean( newText ).trim();
+      int len = tidy.length();
+      if ( len < 1 || len > 40 )
+        error = "Name length not between 1 and 40 characters";
+
+      // name should be unique
+      if ( JPlanner.plan.calendars.isDuplicateName( tidy, columnIndex ) )
+        error = "Name not unique";
+
+      // display error message and set editor error status
+      JPlanner.gui.setError( getControl(), error );
+    } );
+
   }
 
-  /******************************************* getItem *******************************************/
+  /******************************************* getValue ******************************************/
   @Override
-  public String getItem( int num )
+  public Object getValue()
   {
-    // return calendar name
-    return JPlanner.plan.calendar( num ).getName();
+    // return editor text cleaned and trimmed
+    return JPlanner.clean( (String) super.getValue() ).trim();
   }
 
 }

@@ -87,11 +87,26 @@ public class Calendars extends ArrayList<Calendar>
   {
     // return calendar with matching name
     for ( Calendar cal : this )
-      if ( cal.name().equals( name ) )
+      if ( cal.getName().equals( name ) )
         return cal;
 
     // no calendar found with matching name, so return null
     return null;
+  }
+
+  /*************************************** isDuplicateName ***************************************/
+  public boolean isDuplicateName( String txt, int skip )
+  {
+    // return true if txt is a duplicate another calendar name
+    for ( int i = 0; i < size(); i++ )
+    {
+      if ( i == skip )
+        continue;
+      if ( txt.equals( get( i ).getName() ) )
+        return true;
+    }
+
+    return false;
   }
 
 }

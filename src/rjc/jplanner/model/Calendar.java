@@ -49,7 +49,7 @@ public class Calendar
   public static final int SECTION_NAME       = 0;
   public static final int SECTION_ANCHOR     = 1;
   public static final int SECTION_EXCEPTIONS = 2;
-  public static final int SECTION_CYCLE      = 3;
+  public static final int SECTION_CYCLE_LEN  = 3;
   public static final int SECTION_NORMAL1    = 4;
 
   /**************************************** constructor ******************************************/
@@ -204,47 +204,47 @@ public class Calendar
     }
   }
 
-  /***************************************** toString ********************************************/
+  /****************************************** toString *******************************************/
   @Override
   public String toString()
   {
     return "Calendar[" + m_name + ", " + m_cycleAnchor + ", " + m_normal + "]";
   }
 
-  /******************************************* name **********************************************/
-  public String name()
+  /******************************************* getName *******************************************/
+  public String getName()
   {
     return m_name;
   }
 
-  /****************************************** anchor *********************************************/
-  public Date anchor()
+  /****************************************** getAnchor ******************************************/
+  public Date getAnchor()
   {
     return m_cycleAnchor;
   }
 
-  /**************************************** numNormals *******************************************/
-  public int numNormals()
-  {
-    return m_normal.size();
-  }
-
-  /*************************************** numExceptions *****************************************/
-  public int numExceptions()
-  {
-    return m_exceptions.size();
-  }
-
-  /****************************************** normal *********************************************/
-  public Day normal( int index )
+  /******************************************* normal ********************************************/
+  public Day getNormal( int index )
   {
     return m_normal.get( index );
   }
 
-  /******************************************* normals *******************************************/
-  public ArrayList<Day> normals()
+  /***************************************** getNormals ******************************************/
+  public ArrayList<Day> getNormals()
   {
     return m_normal;
+  }
+
+  /***************************************** setNormals ******************************************/
+  public void setNormals( ArrayList<Day> normals )
+  {
+    m_normal = normals;
+  }
+
+  /**************************************** getExceptions ****************************************/
+  public HashMap<Date, Day> getExceptions()
+  {
+    return m_exceptions;
   }
 
   /****************************************** getValue *******************************************/
@@ -258,38 +258,31 @@ public class Calendar
       return m_cycleAnchor;
 
     if ( section == SECTION_EXCEPTIONS )
-      return m_exceptions;
+      return m_exceptions.size();
 
-    if ( section == SECTION_CYCLE )
-      return m_normal;
+    if ( section == SECTION_CYCLE_LEN )
+      return m_normal.size();
 
     // if row beyond normals handle index out of bounds
     try
     {
-      return normal( section - SECTION_NORMAL1 ).name();
+      return getNormal( section - SECTION_NORMAL1 );
     }
-    catch ( IndexOutOfBoundsException e )
+    catch ( IndexOutOfBoundsException exception )
     {
       return null;
     }
   }
 
   /****************************************** setValue ******************************************/
-  @SuppressWarnings( "unchecked" )
   public void setValue( int section, Object newValue )
   {
-    // set calendar value for given section
+    // set calendar value for given section (except cycle-length + exceptions-count)
     if ( section == SECTION_NAME )
       m_name = (String) newValue;
 
     else if ( section == SECTION_ANCHOR )
       m_cycleAnchor = (Date) newValue;
-
-    else if ( section == SECTION_CYCLE )
-      m_normal = (ArrayList<Day>) newValue;
-
-    else if ( section == SECTION_EXCEPTIONS )
-      m_exceptions = (HashMap<Date, Day>) newValue;
 
     else if ( section >= SECTION_NORMAL1 )
       m_normal.set( section - SECTION_NORMAL1, (Day) newValue );
@@ -332,7 +325,7 @@ public class Calendar
     if ( num == SECTION_EXCEPTIONS )
       return "Exceptions";
 
-    if ( num == SECTION_CYCLE )
+    if ( num == SECTION_CYCLE_LEN )
       return "Cycle";
 
     return "Normal " + ( num + 1 - SECTION_NORMAL1 );
@@ -341,7 +334,7 @@ public class Calendar
   /***************************************** roundDown *******************************************/
   public DateTime roundDown( DateTime dt )
   {
-    // return date-time if working, otherwise next future working date-time
+    // return date-time if working, otherwise last past working date-time
     Date date = dt.date();
     Time time = dt.time();
     Day day = day( date );
@@ -362,7 +355,7 @@ public class Calendar
   /******************************************* roundUp *******************************************/
   public DateTime roundUp( DateTime dt )
   {
-    // return date-time if working, otherwise last past working date-time
+    // return date-time if working, otherwise next future working date-time
     Date date = dt.date();
     Time time = dt.time();
     Day day = day( date );

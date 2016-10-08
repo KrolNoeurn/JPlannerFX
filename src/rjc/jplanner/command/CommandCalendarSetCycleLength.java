@@ -39,8 +39,8 @@ public class CommandCalendarSetCycleLength implements IUndoCommand
   {
     // initialise private variables
     m_calendar = cal;
-    m_oldNormals = new ArrayList<Day>( cal.normals() );
-    m_newNormals = new ArrayList<Day>( cal.normals() );
+    m_oldNormals = new ArrayList<Day>( cal.getNormals() );
+    m_newNormals = new ArrayList<Day>( cal.getNormals() );
 
     if ( newLength > oldLength )
     {
@@ -62,7 +62,7 @@ public class CommandCalendarSetCycleLength implements IUndoCommand
   public void redo()
   {
     // action command
-    m_calendar.setValue( Calendar.SECTION_CYCLE, m_newNormals );
+    m_calendar.setNormals( m_newNormals );
   }
 
   /******************************************* undo **********************************************/
@@ -70,7 +70,7 @@ public class CommandCalendarSetCycleLength implements IUndoCommand
   public void undo()
   {
     // revert command
-    m_calendar.setValue( Calendar.SECTION_CYCLE, m_oldNormals );
+    m_calendar.setNormals( m_oldNormals );
   }
 
   /****************************************** update *********************************************/

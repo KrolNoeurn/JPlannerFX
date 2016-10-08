@@ -86,7 +86,7 @@ public abstract class AbstractComboEditor extends XTextField
   }
 
   /****************************************** keyTyped *******************************************/
-  private void keyTyped( KeyEvent event )
+  protected void keyTyped( KeyEvent event )
   {
     // find next item that starts with typed key (case-insensitive)
     String key = event.getCharacter().substring( 0, 1 ).toLowerCase();
@@ -103,7 +103,7 @@ public abstract class AbstractComboEditor extends XTextField
   }
 
   /***************************************** keyPressed ******************************************/
-  private void keyPressed( KeyEvent event )
+  protected void keyPressed( KeyEvent event )
   {
     // action key press to change current selected item
     switch ( event.getCode() )
@@ -130,7 +130,7 @@ public abstract class AbstractComboEditor extends XTextField
   }
 
   /**************************************** buttonPressed ****************************************/
-  private void buttonPressed( MouseEvent event )
+  protected void buttonPressed( MouseEvent event )
   {
     // on button press ensure editor has focus
     event.consume();

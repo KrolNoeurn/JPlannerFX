@@ -257,7 +257,7 @@ public class PlanProperties extends ScrollPane
   {
     // update the gui property widgets with values from plan
     m_title.setText( JPlanner.plan.title() );
-    m_defaultCalendar.setText( JPlanner.plan.calendar().name() );
+    m_defaultCalendar.setText( JPlanner.plan.calendar().getName() );
     m_DTformat.setText( JPlanner.plan.datetimeFormat() );
     m_Dformat.setText( JPlanner.plan.dateFormat() );
     m_fileName.setText( JPlanner.plan.filename() );

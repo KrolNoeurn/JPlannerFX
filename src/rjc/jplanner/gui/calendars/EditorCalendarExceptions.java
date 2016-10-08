@@ -18,30 +18,22 @@
 
 package rjc.jplanner.gui.calendars;
 
-import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.AbstractComboEditor;
+import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
-/**************** Extended version of AbstractComboEditor with list of calendars *****************/
+/*************************** Table cell editor for calendar exceptions ***************************/
 /*************************************************************************************************/
 
-public class CalendarCombo extends AbstractComboEditor
+public class EditorCalendarExceptions extends EditorText
 {
 
-  /**************************************** getItemCount *****************************************/
-  @Override
-  public int getItemCount()
+  /**************************************** constructor ******************************************/
+  public EditorCalendarExceptions( int columnIndex, int rowIndex )
   {
-    // return number of calendars
-    return JPlanner.plan.calendarsCount();
-  }
+    // create editor
+    super( columnIndex, rowIndex );
 
-  /******************************************* getItem *******************************************/
-  @Override
-  public String getItem( int num )
-  {
-    // return calendar name
-    return JPlanner.plan.calendar( num ).getName();
+    // TODO ..............
   }
 
 }

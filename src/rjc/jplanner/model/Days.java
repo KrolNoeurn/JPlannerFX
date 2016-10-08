@@ -49,7 +49,6 @@ public class Days extends ArrayList<Day>
   public boolean isDuplicateDayName( String txt, int skip )
   {
     // return true if txt is a duplicate another day-type name
-    txt = JPlanner.clean( txt );
     for ( int i = 0; i < size(); i++ )
     {
       if ( i == skip )

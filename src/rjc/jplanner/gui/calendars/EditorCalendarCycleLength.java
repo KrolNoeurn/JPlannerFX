@@ -18,30 +18,47 @@
 
 package rjc.jplanner.gui.calendars;
 
-import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.AbstractComboEditor;
+import rjc.jplanner.gui.SpinEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
-/**************** Extended version of AbstractComboEditor with list of calendars *****************/
+/************************** Table cell editor for calendar cycle length **************************/
 /*************************************************************************************************/
 
-public class CalendarCombo extends AbstractComboEditor
+public class EditorCalendarCycleLength extends AbstractCellEditor
 {
+  SpinEditor m_spin; // spin editor
 
-  /**************************************** getItemCount *****************************************/
-  @Override
-  public int getItemCount()
+  /**************************************** constructor ******************************************/
+  public EditorCalendarCycleLength( int columnIndex, int rowIndex )
   {
-    // return number of calendars
-    return JPlanner.plan.calendarsCount();
+    // use spin editor
+    super( columnIndex, rowIndex );
+    m_spin = new SpinEditor();
+
+    m_spin.setRange( 1, 99, 0 );
+    m_spin.setStepPage( 1, 1 );
+    setControl( m_spin );
   }
 
-  /******************************************* getItem *******************************************/
+  /******************************************* getValue ******************************************/
   @Override
-  public String getItem( int num )
+  public Object getValue()
   {
-    // return calendar name
-    return JPlanner.plan.calendar( num ).getName();
+    // return cycle length value as integer
+    return m_spin.getInteger();
   }
 
+  /******************************************* setValue ******************************************/
+  @Override
+  public void setValue( Object value )
+  {
+    // set value depending on type
+    if ( value instanceof Integer )
+      m_spin.setInteger( (int) value );
+    else if ( value instanceof String )
+      m_spin.setInteger( Integer.valueOf( (String) value ) );
+    else
+      throw new IllegalArgumentException( "Unhandled " + value.getClass().getName() );
+  }
 }

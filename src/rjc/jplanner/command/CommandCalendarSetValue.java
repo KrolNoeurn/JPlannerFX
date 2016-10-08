@@ -19,6 +19,7 @@
 package rjc.jplanner.command;
 
 import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /************* UndoCommand for updating calendars (except cycle-length & exceptions) *************/
@@ -73,7 +74,11 @@ public class CommandCalendarSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Day " + ( m_calendar.index() + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + m_newValue;
+    String description = "Day " + ( m_calendar.index() + 1 ) + " " + Calendar.sectionName( m_section ) + " = ";
+    if ( m_newValue instanceof Day )
+      return description + ( (Day) m_newValue ).name();
+    else
+      return description + m_newValue;
   }
 
 }

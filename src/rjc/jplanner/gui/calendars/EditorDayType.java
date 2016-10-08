@@ -16,56 +16,58 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui.calendars;
 
 import javafx.scene.input.KeyEvent;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.AbstractComboEditor;
 import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.model.TaskType;
+import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
-/******************************** Table cell editor for task type ********************************/
+/**************** Table cell editor for selecting a day-type from drop-down list *****************/
 /*************************************************************************************************/
 
-public class EditorTaskType extends AbstractCellEditor
+public class EditorDayType extends AbstractCellEditor
 {
-  // extended version of AbstractComboEditor with list of calendars
-  public class TaskTypeCombo extends AbstractComboEditor
+  public class DayCombo extends AbstractComboEditor
   {
+
     /**************************************** getItemCount *****************************************/
     @Override
     public int getItemCount()
     {
-      // return number of task types
-      return TaskType.count();
+      // return number of day-types
+      return JPlanner.plan.daysCount();
     }
 
     /******************************************* getItem *******************************************/
     @Override
     public String getItem( int num )
     {
-      // return task type name
-      return TaskType.toString( num );
+      // return day-type name
+      return JPlanner.plan.day( num ).name();
     }
 
     /****************************************** setString ******************************************/
     public void setString( String str )
     {
       // set editor to data source value, then react to string as if typed
-      setText( getDataSourceValue().toString() );
+      Day day = (Day) getDataSourceValue();
+      setSelectedIndex( JPlanner.plan.index( day ) );
       keyTyped( new KeyEvent( KeyEvent.KEY_TYPED, str, str, null, false, false, false, false ) );
     }
 
   }
 
-  TaskTypeCombo m_combo; // combo editor
+  DayCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskType( int columnIndex, int rowIndex )
+  public EditorDayType( int columnIndex, int rowIndex )
   {
-    // create task type editor
+    // create day-type editor
     super( columnIndex, rowIndex );
-    m_combo = new TaskTypeCombo();
+    m_combo = new DayCombo();
     setControl( m_combo );
   }
 
@@ -73,17 +75,17 @@ public class EditorTaskType extends AbstractCellEditor
   @Override
   public Object getValue()
   {
-    // return selected task type
-    return new TaskType( m_combo.getText() );
+    // return selected plan day-type
+    return JPlanner.plan.day( m_combo.getSelectedIndex() );
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // set editor display to value if valid task-type, otherwise react to string as if typed
-    if ( value instanceof TaskType )
-      m_combo.setText( value.toString() );
+    // set editor display to value if valid day-type, otherwise day-type from data source
+    if ( value instanceof Day )
+      m_combo.setSelectedIndex( JPlanner.plan.index( (Day) value ) );
     else if ( value instanceof String )
       m_combo.setString( (String) value );
     else
