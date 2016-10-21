@@ -28,6 +28,7 @@ import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
@@ -173,6 +174,25 @@ public class TasksData implements ITableDataSource
   {
     // return cell display font
     return null;
+  }
+
+  /********************************** defaultTableModifications **********************************/
+  @Override
+  public void defaultTableModifications( Table table )
+  {
+    // default table modifications
+    table.setDefaultColumnWidth( 110 );
+
+    table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );
+    table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
+    table.setWidthByColumnIndex( Task.SECTION_START, 140 );
+    table.setWidthByColumnIndex( Task.SECTION_END, 140 );
+    table.setWidthByColumnIndex( Task.SECTION_WORK, 60 );
+    table.setWidthByColumnIndex( Task.SECTION_PRIORITY, 60 );
+    table.setWidthByColumnIndex( Task.SECTION_DEADLINE, 140 );
+    table.setWidthByColumnIndex( Task.SECTION_COMMENT, 140 );
+
+    table.hideRow( 0 ); // hide row 0 (the overall project summary)
   }
 
 }

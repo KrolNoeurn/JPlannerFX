@@ -88,13 +88,13 @@ public class UndoStack
         JPlanner.gui.redrawDayTypeTables();
 
       if ( ( updates & IUndoCommand.RESET_TASKS ) > 0 )
-        JPlanner.gui.resetTaskTables();
+        JPlanner.gui.relayoutTaskTables();
       if ( ( updates & IUndoCommand.RESET_RESOURCES ) > 0 )
-        JPlanner.gui.resetResourceTables();
+        JPlanner.gui.relayoutResourceTables();
       if ( ( updates & IUndoCommand.RESET_CALENDARS ) > 0 )
-        JPlanner.gui.resetCalendarTables();
+        JPlanner.gui.relayoutCalendarTables();
       if ( ( updates & IUndoCommand.RESET_DAYS ) > 0 )
-        JPlanner.gui.resetDayTypeTables();
+        JPlanner.gui.relayoutDayTypeTables();
 
       if ( ( updates & IUndoCommand.UPDATE_PROPERTIES ) > 0 )
         JPlanner.gui.properties().updateFromPlan();

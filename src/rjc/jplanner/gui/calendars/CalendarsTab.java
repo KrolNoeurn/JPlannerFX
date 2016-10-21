@@ -38,8 +38,6 @@ public class CalendarsTab extends Tab
 
     // showing table of available plan calendars
     m_table = new Table( text, new CalendarsData() );
-    m_table.setVerticalHeaderWidth( 80 );
-    m_table.setDefaultColumnWidth( 140 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->

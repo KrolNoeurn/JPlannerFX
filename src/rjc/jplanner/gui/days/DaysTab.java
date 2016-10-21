@@ -20,7 +20,6 @@ package rjc.jplanner.gui.days;
 
 import javafx.scene.control.Tab;
 import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /************************* Tab showing table of available plan day-types *************************/
@@ -39,8 +38,6 @@ public class DaysTab extends Tab
 
     // showing table of available plan day-types
     m_table = new Table( text, new DaysData() );
-    m_table.setDefaultColumnWidth( 60 );
-    m_table.setWidthByColumnIndex( Day.SECTION_NAME, 150 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->

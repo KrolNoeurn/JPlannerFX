@@ -22,7 +22,6 @@ import javafx.scene.control.Tab;
 import rjc.jplanner.gui.XSplitPane;
 import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
 /******************** Tab showing table of the plan tasks alongside the gantt ********************/
@@ -43,18 +42,6 @@ public class TasksTab extends Tab
 
     // showing table of the plan tasks
     m_table = new Table( "Tasks", new TasksData() );
-    m_table.setDefaultColumnWidth( 110 );
-    m_table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );
-    m_table.setWidthByColumnIndex( Task.SECTION_DURATION, 60 );
-    m_table.setWidthByColumnIndex( Task.SECTION_START, 140 );
-    m_table.setWidthByColumnIndex( Task.SECTION_END, 140 );
-    m_table.setWidthByColumnIndex( Task.SECTION_WORK, 60 );
-    m_table.setWidthByColumnIndex( Task.SECTION_PRIORITY, 60 );
-    m_table.setWidthByColumnIndex( Task.SECTION_DEADLINE, 140 );
-    m_table.setWidthByColumnIndex( Task.SECTION_COMMENT, 140 );
-
-    // by default row 0 (the overall project summary) should be hidden
-    m_table.hideRow( 0 );
 
     // alongside the gantt
     m_gantt = new Gantt();

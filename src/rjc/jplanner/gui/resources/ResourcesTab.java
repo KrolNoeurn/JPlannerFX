@@ -20,7 +20,6 @@ package rjc.jplanner.gui.resources;
 
 import javafx.scene.control.Tab;
 import rjc.jplanner.gui.table.Table;
-import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
 /************************* Tab showing table of available plan resources *************************/
@@ -39,11 +38,6 @@ public class ResourcesTab extends Tab
 
     //  showing table of available plan resources
     m_table = new Table( text, new ResourcesData() );
-    m_table.setDefaultColumnWidth( 100 );
-    m_table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
-
-    // by default row 0 (the special 'unassigned' resource) should be hidden
-    m_table.hideRow( 0 );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->

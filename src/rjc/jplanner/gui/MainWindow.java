@@ -203,6 +203,28 @@ public class MainWindow
     return save( new File( path, "discarded.xml" ) );
   }
 
+  /******************************************* newPlan *******************************************/
+  public boolean newPlan()
+  {
+    // if undo-stack not clean, ask user what to do
+    if ( !okToProceed( "Do you want to save before starting new?" ) )
+      return false;
+
+    // create new plan
+    JPlanner.plan = new Plan();
+    JPlanner.plan.initialise();
+
+    // update gui
+    resetGui();
+    relayoutTaskTables();
+    relayoutResourceTables();
+    relayoutCalendarTables();
+    relayoutDayTypeTables();
+    redrawGantts();
+    message( "New plan" );
+    return true;
+  }
+
   /******************************************** load *********************************************/
   public boolean load()
   {
@@ -277,8 +299,13 @@ public class MainWindow
       }
 
       // load display data
-      loadDisplayData( xsr );
       resetGui();
+      loadDisplayData( xsr );
+      relayoutTaskTables();
+      relayoutResourceTables();
+      relayoutCalendarTables();
+      relayoutDayTypeTables();
+      redrawGantts();
 
       fis.close();
       xsr.close();
@@ -399,12 +426,16 @@ public class MainWindow
     return true;
   }
 
-  /**************************************** temporaryFile ****************************************/
+  /*************************************** prettyPrintXML ****************************************/
   private void prettyPrintXML( File unformatted, File formatted )
   {
     // take XML contents of unindented unformatted file and write out indented to formatted file
     try
     {
+      final int SPACE_CHAR = 32;
+      final int LINE_FEED = 10;
+      final int EOF = -1;
+
       FileInputStream fis = new FileInputStream( unformatted );
       FileOutputStream fos = new FileOutputStream( formatted );
       int content = fis.read();
@@ -412,17 +443,18 @@ public class MainWindow
       int indent = -1;
       boolean inQuotes = false;
       boolean inSeq = false;
-      while ( ( next = fis.read() ) != -1 )
+
+      while ( ( next = fis.read() ) != EOF )
       {
         if ( content == '<' && next != '?' && ( next != '/' || inSeq ) )
         {
           if ( next != '/' )
             indent++;
-          fos.write( 10 );
+          fos.write( LINE_FEED );
           for ( int count = 0; count < indent; count++ )
           {
-            fos.write( 32 );
-            fos.write( 32 );
+            fos.write( SPACE_CHAR );
+            fos.write( SPACE_CHAR );
           }
           inSeq = false;
         }
@@ -581,54 +613,53 @@ public class MainWindow
     properties().updateFromPlan();
     notes().updateFromPlan();
 
-    // if reset set all table row heights to default
-    //m_tabWidgets.forEach( tabs -> tabs.tasks().setRowsHeightToDefault() );
-    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().hideRow( 0 ) );
-    //m_tabWidgets.forEach( tabs -> tabs.gantt().setDefault() );
-    //m_tabWidgets.forEach( tabs -> tabs.gantt().updateAll() );
-    resetTaskTables();
+    // reset set all tables
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().reset() );
+    m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().reset() );
+    m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().reset() );
+    m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().reset() );
 
-    //m_tabWidgets.forEach( tabs -> tabs.resources().setRowsHeightToDefault() );
-    //m_tabWidgets.forEach( tabs -> tabs.resources().hideRow( 0 ) );
-    resetResourceTables();
-
-    //m_tabWidgets.forEach( tabs -> tabs.calendars().setRowsHeightToDefault() );
-    resetCalendarTables();
-
-    //m_tabWidgets.forEach( tabs -> tabs.days().setRowsHeightToDefault() );
-    resetDayTypeTables();
+    // reset all gantts to default settings  
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getGantt().setDefault() );
 
     // update undo-stack window if exists
     if ( m_undoWindow != null )
       m_undoWindow.updateScrollBarAndCanvas();
   }
 
-  /*************************************** resetTaskTables ***************************************/
-  public void resetTaskTables()
+  /************************************* relayoutTaskTables **************************************/
+  public void relayoutTaskTables()
   {
-    // reset all tasks tables, needed if number of columns or rows changing etc
-    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().reset() );
+    // re-layout all tasks tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().relayout() );
   }
 
-  /************************************* resetResourceTables *************************************/
-  public void resetResourceTables()
+  /*********************************** relayoutResourceTables ************************************/
+  public void relayoutResourceTables()
   {
-    // reset all resources tables, needed if number of columns or rows changing etc
-    m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().reset() );
+    // re-layout all resources tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().relayout() );
   }
 
-  /************************************* resetCalendarTables *************************************/
-  public void resetCalendarTables()
+  /*********************************** relayoutCalendarTables ************************************/
+  public void relayoutCalendarTables()
   {
-    // reset all calendars tables, needed if number of columns or rows changing etc
-    m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().reset() );
+    // re-layout all calendars tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().relayout() );
   }
 
-  /************************************** resetDayTypeTables *************************************/
-  public void resetDayTypeTables()
+  /************************************ relayoutDayTypeTables ************************************/
+  public void relayoutDayTypeTables()
   {
-    // reset all day-type tables, needed if number of columns or rows changing etc
-    m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().reset() );
+    // re-layout all day-type tables, needed if number of columns or rows changing etc
+    m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().relayout() );
+  }
+
+  /**************************************** redrawGantts *****************************************/
+  public void redrawGantts()
+  {
+    // redraw all plan gantts
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getGantt().redraw() );
   }
 
   /************************************** redrawTaskTables ***************************************/
@@ -662,8 +693,10 @@ public class MainWindow
   /****************************************** schedule *******************************************/
   public void schedule()
   {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "NOT YET IMPLEMENTED !!!" );
+    // schedule the plan, then redraw task tables and gantt to show result
+    JPlanner.plan.schedule();
+    redrawTaskTables();
+    redrawGantts();
   }
 
   /************************************** checkPlanUpToDate **************************************/

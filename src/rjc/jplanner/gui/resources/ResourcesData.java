@@ -26,6 +26,7 @@ import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
@@ -141,6 +142,16 @@ public class ResourcesData implements ITableDataSource
   {
     // return cell display font
     return null;
+  }
+
+  /********************************** defaultTableModifications **********************************/
+  @Override
+  public void defaultTableModifications( Table table )
+  {
+    // default table modifications
+    table.setDefaultColumnWidth( 100 );
+    table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
+    table.hideRow( 0 ); // hide row 0 (the special 'unassigned' resource)
   }
 
 }

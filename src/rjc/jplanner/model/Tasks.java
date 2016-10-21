@@ -324,6 +324,10 @@ public class Tasks extends ArrayList<Task>
         }
       }
     }
+
+    // ensure special task 0 is marked as summary
+    if ( get( 0 ).summaryEnd() < 0 )
+      get( 0 ).setSummaryEnd( size() - 1 );
   }
 
   /************************************** cleanPredecessors **************************************/

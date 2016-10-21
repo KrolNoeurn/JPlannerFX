@@ -77,7 +77,7 @@ public class Menus extends MenuBar
 
     MenuItem fileNew = new MenuItem( "New" );
     fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, KeyCombination.CONTROL_DOWN ) );
-    fileNew.setDisable( true );
+    fileNew.setOnAction( event -> JPlanner.gui.newPlan() );
 
     MenuItem fileOpen = new MenuItem( "Open..." );
     fileOpen.setAccelerator( new KeyCodeCombination( KeyCode.O, KeyCombination.CONTROL_DOWN ) );

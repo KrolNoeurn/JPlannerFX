@@ -89,16 +89,16 @@ public class Calendar
           m_normal.add( working );
       }
 
-      m_exceptions.put( new Date( 2015, 12, 25 ), nonWorking );
-      m_exceptions.put( new Date( 2015, 12, 28 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 1, 1 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 3, 25 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 3, 28 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 5, 2 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 5, 30 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 8, 29 ), nonWorking );
       m_exceptions.put( new Date( 2016, 12, 26 ), nonWorking );
       m_exceptions.put( new Date( 2016, 12, 27 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 1, 2 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 4, 14 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 4, 17 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 5, 1 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 5, 29 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 8, 28 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 12, 25 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 12, 26 ), nonWorking );
     }
     else if ( type == DefaultCalendarTypes.FULLTIME )
     {

@@ -423,7 +423,59 @@ public class Task implements Comparable<Task>
       return;
     }
 
+    if ( m_type.toString() == TaskType.ASAP_FWORK )
+    {
+      schedule_ASAP_FWORK();
+      return;
+    }
+
+    if ( m_type.toString() == TaskType.FIXED_PERIOD )
+    {
+      schedule_FIXED_PERIOD();
+      return;
+    }
+
+    if ( m_type.toString() == TaskType.SON_FDUR )
+    {
+      schedule_SON_FDUR();
+      return;
+    }
+
+    if ( m_type.toString() == TaskType.SON_FWORK )
+    {
+      schedule_SON_FWORK();
+      return;
+    }
+
     throw new UnsupportedOperationException( "Task type = " + m_type );
+  }
+
+  /************************************* schedule_SON_FWORK **************************************/
+  private void schedule_SON_FWORK()
+  {
+    // TODO Auto-generated method stub
+    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
+  }
+
+  /************************************* schedule_SON_FDUR ***************************************/
+  private void schedule_SON_FDUR()
+  {
+    // TODO Auto-generated method stub
+    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
+  }
+
+  /*********************************** schedule_FIXED_PERIOD *************************************/
+  private void schedule_FIXED_PERIOD()
+  {
+    // TODO Auto-generated method stub
+    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
+  }
+
+  /************************************* schedule_ASAP_FWORK *************************************/
+  private void schedule_ASAP_FWORK()
+  {
+    // TODO Auto-generated method stub
+    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
   }
 
   /************************************* schedule_ASAP_FDUR **************************************/

@@ -26,6 +26,7 @@ import rjc.jplanner.command.CommandDaySetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Day;
 import rjc.jplanner.model.Time;
@@ -168,6 +169,15 @@ public class DaysData implements ITableDataSource
   {
     // return cell display font
     return null;
+  }
+
+  /********************************** defaultTableModifications **********************************/
+  @Override
+  public void defaultTableModifications( Table table )
+  {
+    // default table modifications
+    table.setDefaultColumnWidth( 60 );
+    table.setWidthByColumnIndex( Day.SECTION_NAME, 150 );
   }
 
 }

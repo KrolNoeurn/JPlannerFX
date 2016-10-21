@@ -28,6 +28,7 @@ import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
@@ -171,6 +172,15 @@ public class CalendarsData implements ITableDataSource
   {
     // return cell display font
     return null;
+  }
+
+  /********************************** defaultTableModifications **********************************/
+  @Override
+  public void defaultTableModifications( Table table )
+  {
+    // default table modifications
+    table.setVerticalHeaderWidth( 80 );
+    table.setDefaultColumnWidth( 140 );
   }
 
 }

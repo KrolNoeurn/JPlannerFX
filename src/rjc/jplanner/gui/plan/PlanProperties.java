@@ -244,9 +244,8 @@ public class PlanProperties extends ScrollPane
   {
     // display date-time in user specified format, or if that fails in plan format
     if ( dt == null )
-      return;
-
-    if ( m_DTformat.getId() == JPlanner.ERROR )
+      field.setText( null );
+    else if ( m_DTformat.getId() == JPlanner.ERROR )
       field.setText( dt.toString( JPlanner.plan.datetimeFormat() ) );
     else
       field.setText( dt.toString( m_DTformat.getText() ) );

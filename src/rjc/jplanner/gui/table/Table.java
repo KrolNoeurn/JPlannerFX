@@ -36,32 +36,32 @@ import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 
 public class Table extends TableDisplay
 {
-  private ITableDataSource          m_data;                                                // data source for the table
+  private ITableDataSource          m_data;                                           // data source for the table
 
-  private int                       m_defaultRowHeight   = 20;
-  private int                       m_defaultColumnWidth = 100;
-  private int                       m_minimumRowHeight   = 17;
-  private int                       m_minimumColumnWidth = 40;
-  private int                       m_hHeaderHeight      = 20;
-  private int                       m_vHeaderWidth       = 30;
+  private int                       m_defaultRowHeight;
+  private int                       m_defaultColumnWidth;
+  private int                       m_minimumRowHeight;
+  private int                       m_minimumColumnWidth;
+  private int                       m_hHeaderHeight;
+  private int                       m_vHeaderWidth;
 
-  private int                       m_bodyWidth          = 0;                              // body cells total width (excludes header)
-  private int                       m_bodyHeight         = 0;                              // body cells total height (excludes header)
+  private int                       m_bodyWidth;                                      // body cells total width (excludes header)
+  private int                       m_bodyHeight;                                     // body cells total height (excludes header)
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private HashMap<Integer, Integer> m_columnWidths       = new HashMap<Integer, Integer>();
-  private HashMap<Integer, Integer> m_rowHeights         = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_columnWidths  = new HashMap<Integer, Integer>();
+  private HashMap<Integer, Integer> m_rowHeights    = new HashMap<Integer, Integer>();
 
   // set of collapsed rows (only used for collapsed tasks)
-  private HashSet<Integer>          m_rowCollapsed       = new HashSet<Integer>();
+  private HashSet<Integer>          m_rowCollapsed  = new HashSet<Integer>();
 
   // array with mapping from position to index
-  private ArrayList<Integer>        m_columnIndexes      = new ArrayList<Integer>();
-  private ArrayList<Integer>        m_rowIndexes         = new ArrayList<Integer>();
+  private ArrayList<Integer>        m_columnIndexes = new ArrayList<Integer>();
+  private ArrayList<Integer>        m_rowIndexes    = new ArrayList<Integer>();
 
   // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + rowPos
-  private static final int          SELECT_HASH          = 9999;
-  private HashSet<Integer>          m_selected           = new HashSet<Integer>();
+  private static final int          SELECT_HASH     = 9999;
+  private HashSet<Integer>          m_selected      = new HashSet<Integer>();
 
   public static enum Alignment// alignment of text to be drawn in cell
   {
@@ -77,6 +77,26 @@ public class Table extends TableDisplay
     m_data = data;
     this.name = name;
     initialiseDisplay( this );
+    reset();
+  }
+
+  /******************************************** reset ********************************************/
+  public void reset()
+  {
+    // set all table parameters to default
+    m_defaultRowHeight = 20;
+    m_defaultColumnWidth = 100;
+    m_minimumRowHeight = 17;
+    m_minimumColumnWidth = 40;
+    m_hHeaderHeight = 20;
+    m_vHeaderWidth = 30;
+
+    m_columnWidths.clear();
+    m_rowHeights.clear();
+    m_rowCollapsed.clear();
+    m_selected.clear();
+    m_columnIndexes.clear();
+    m_rowIndexes.clear();
 
     // initialise column & row position to index mapping
     int count = m_data.getColumnCount();
@@ -89,41 +109,36 @@ public class Table extends TableDisplay
     // calculate body width & height
     calculateBodyWidth();
     calculateBodyHeight();
+
+    // adopt table data source default table modifications
+    m_data.defaultTableModifications( this );
+
+    // set scroll bar
+    m_vScrollBar.setValue( 0.0 );
+    m_hScrollBar.setValue( 0.0 );
   }
 
-  /*************************************** getDataSource *****************************************/
-  public ITableDataSource getDataSource()
+  /****************************************** relayout *******************************************/
+  public void relayout()
   {
-    // return data source for this table
-    return m_data;
-  }
+    // ensure arrays with mapping from position to index are correct size
+    int count = m_data.getColumnCount();
+    while ( m_columnIndexes.size() < count )
+      m_columnIndexes.add( m_columnIndexes.size() );
+    while ( m_columnIndexes.size() > count )
+      m_columnIndexes.remove( Integer.valueOf( m_columnIndexes.size() - 1 ) );
 
-  /**************************************** getTableWidth ****************************************/
-  public int getTableWidth()
-  {
-    // return table width (might be smaller or larger than display node)
-    return m_bodyWidth + m_vHeaderWidth;
-  }
+    count = m_data.getRowCount();
+    while ( m_rowIndexes.size() < count )
+      m_rowIndexes.add( m_rowIndexes.size() );
+    while ( m_rowIndexes.size() > count )
+      m_rowIndexes.remove( Integer.valueOf( m_rowIndexes.size() - 1 ) );
 
-  /*************************************** getTableHeight ****************************************/
-  public int getTableHeight()
-  {
-    // return table height (might be smaller or larger than display node)
-    return m_bodyHeight + m_hHeaderHeight;
-  }
-
-  /**************************************** getBodyHeight ****************************************/
-  public int getBodyHeight()
-  {
-    // return table body height (i.e. sum of height of cells without header)
-    return m_bodyHeight;
-  }
-
-  /**************************************** getBodyWidth *****************************************/
-  public int getBodyWidth()
-  {
-    // return table body height (i.e. sum of width of cells without header)
-    return m_bodyWidth;
+    // re-calculate table size canvas for example after change in number of columns or rows
+    calculateBodyHeight();
+    calculateBodyWidth();
+    setCanvasScrollBars();
+    redraw();
   }
 
   /************************************ calculateBodyHeight **************************************/
@@ -170,6 +185,41 @@ public class Table extends TableDisplay
     }
 
     m_bodyWidth += ( columnCount - exceptionsCount ) * m_defaultColumnWidth;
+  }
+
+  /*************************************** getDataSource *****************************************/
+  public ITableDataSource getDataSource()
+  {
+    // return data source for this table
+    return m_data;
+  }
+
+  /**************************************** getTableWidth ****************************************/
+  public int getTableWidth()
+  {
+    // return table width (might be smaller or larger than display node)
+    return m_bodyWidth + m_vHeaderWidth;
+  }
+
+  /*************************************** getTableHeight ****************************************/
+  public int getTableHeight()
+  {
+    // return table height (might be smaller or larger than display node)
+    return m_bodyHeight + m_hHeaderHeight;
+  }
+
+  /**************************************** getBodyHeight ****************************************/
+  public int getBodyHeight()
+  {
+    // return table body height (i.e. sum of height of cells without header)
+    return m_bodyHeight;
+  }
+
+  /**************************************** getBodyWidth *****************************************/
+  public int getBodyWidth()
+  {
+    // return table body height (i.e. sum of width of cells without header)
+    return m_bodyWidth;
   }
 
   /********************************** getColumnPositionExactAtX **********************************/
@@ -460,29 +510,6 @@ public class Table extends TableDisplay
         animateToVOffset( getVOffset() + bottomEdge - getCanvasHeight() );
       }
     }
-  }
-
-  /******************************************** reset ********************************************/
-  public void reset()
-  {
-    // ensure arrays with mapping from position to index are correct size
-    int count = m_data.getColumnCount();
-    while ( m_columnIndexes.size() < count )
-      m_columnIndexes.add( m_columnIndexes.size() );
-    while ( m_columnIndexes.size() > count )
-      m_columnIndexes.remove( Integer.valueOf( m_columnIndexes.size() - 1 ) );
-
-    count = m_data.getRowCount();
-    while ( m_rowIndexes.size() < count )
-      m_rowIndexes.add( m_rowIndexes.size() );
-    while ( m_rowIndexes.size() > count )
-      m_rowIndexes.remove( Integer.valueOf( m_rowIndexes.size() - 1 ) );
-
-    // reset table canvas for example after change in number of columns or rows
-    calculateBodyHeight();
-    calculateBodyWidth();
-    setCanvasScrollBars();
-    redraw();
   }
 
   /******************************************* hideRow *******************************************/

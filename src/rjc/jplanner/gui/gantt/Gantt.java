@@ -59,8 +59,6 @@ public class Gantt extends Region
     setDefault();
 
     // add nodes to region
-    for ( GanttScale scale : m_scales )
-      getChildren().add( scale );
     getChildren().add( m_plot );
     getChildren().add( m_scrollBar );
 
@@ -76,16 +74,26 @@ public class Gantt extends Region
   public void setDefault()
   {
     // default gantt has two scales
+    for ( GanttScale scale : m_scales )
+      getChildren().remove( scale );
+    m_scales.clear();
     m_scales.add( new GanttScale( this, Interval.MONTH, "MMM-YYYY" ) );
     m_scales.add( new GanttScale( this, Interval.WEEK, "dd" ) );
+    for ( GanttScale scale : m_scales )
+      getChildren().add( scale );
 
     // set sensible start, mspp and end
     setStart( new DateTime( JPlanner.plan.start().milliseconds() - 300000000L ) );
     setMsPP( 3600 * 6000 );
     setEnd( new DateTime( m_start.milliseconds() + m_millisecondsPP * (long) getWidth() ) );
 
-    // set scroll-bar height
+    // set scroll-bar height & value
     m_scrollBar.setMinHeight( SCROLLBAR_SIZE );
+    m_scrollBar.setValue( 0.0 );
+
+    // trigger correct positioning and sizing of gantt children
+    heightChange( (int) getHeight(), (int) getHeight() );
+    widthChange( (int) getWidth(), (int) getWidth() );
   }
 
   /******************************************* loadXML *******************************************/
@@ -102,13 +110,13 @@ public class Gantt extends Region
       switch ( xsr.getAttributeLocalName( i ) )
       {
         case XmlLabels.XML_START:
-          m_start = new DateTime( xsr.getAttributeValue( i ) );
+          setStart( new DateTime( xsr.getAttributeValue( i ) ) );
           break;
         case XmlLabels.XML_END:
-          m_end = new DateTime( xsr.getAttributeValue( i ) );
+          setEnd( new DateTime( xsr.getAttributeValue( i ) ) );
           break;
         case XmlLabels.XML_MSPP:
-          m_millisecondsPP = Long.parseLong( xsr.getAttributeValue( i ) );
+          setMsPP( Long.parseLong( xsr.getAttributeValue( i ) ) );
           break;
         case XmlLabels.XML_NONWORKING:
           // TODO ..................
@@ -137,17 +145,15 @@ public class Gantt extends Region
         switch ( xsr.getLocalName() )
         {
           case XmlLabels.XML_SCALE:
-            m_scales.add( new GanttScale( this, xsr ) );
+            GanttScale scale = new GanttScale( this, xsr );
+            m_scales.add( scale );
+            getChildren().add( scale );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
             break;
         }
     }
-
-    // ensure gantt-scales are children of gantt region
-    for ( GanttScale scale : m_scales )
-      getChildren().add( scale );
   }
 
   /****************************************** writeXML *******************************************/
