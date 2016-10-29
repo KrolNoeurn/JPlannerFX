@@ -71,4 +71,23 @@ public class EditorDayNumPeriods extends AbstractCellEditor
     else
       m_spin.setTextCore( (String) value );
   }
+
+  /****************************************** validValue *****************************************/
+  @Override
+  public boolean validValue( Object value )
+  {
+    // value is valid if null or converts to an integer
+    if ( value == null )
+      return true;
+
+    try
+    {
+      Integer.parseInt( (String) value );
+      return true;
+    }
+    catch ( Exception exception )
+    {
+      return false; // not valid integer
+    }
+  }
 }

@@ -48,7 +48,7 @@ public class EditorText extends AbstractCellEditor
   public void setValue( Object value )
   {
     // set editor text
-    String str = (String) value;
+    String str = value.toString();
     ( (XTextField) getControl() ).setTextCaret( str, str.length() );
   }
 

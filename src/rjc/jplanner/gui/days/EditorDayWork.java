@@ -60,4 +60,27 @@ public class EditorDayWork extends AbstractCellEditor
       m_spin.setTextCore( (String) value );
   }
 
+  /****************************************** validValue *****************************************/
+  @Override
+  public boolean validValue( Object value )
+  {
+    // value is valid if null or converts to a double or is decimal point
+    if ( value == null )
+      return true;
+
+    try
+    {
+      String str = (String) value;
+
+      if ( str.equals( "." ) )
+        return true; // is decimal point
+
+      Double.parseDouble( str );
+      return true; // converts to a double
+    }
+    catch ( Exception exception )
+    {
+      return false; // not valid double
+    }
+  }
 }

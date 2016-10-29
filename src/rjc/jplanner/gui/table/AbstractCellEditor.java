@@ -51,7 +51,7 @@ abstract public class AbstractCellEditor
 
   abstract public Object getValue(); // return cell editor value
 
-  abstract public void setValue( Object value ); // set cell editor value 
+  abstract public void setValue( Object value ); // set cell editor value
 
   /***************************************** constructor *****************************************/
   public AbstractCellEditor( int columnIndex, int rowIndex )
@@ -207,6 +207,13 @@ abstract public class AbstractCellEditor
   {
     // return value for table cell from table data source
     return m_table.getDataSource().getValue( m_columnIndex, m_rowIndex );
+  }
+
+  /****************************************** validValue *****************************************/
+  protected boolean validValue( Object value )
+  {
+    // return true only if value valid for editor - default true
+    return true;
   }
 
 }

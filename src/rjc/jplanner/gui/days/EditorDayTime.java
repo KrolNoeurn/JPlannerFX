@@ -112,4 +112,27 @@ public class EditorDayTime extends AbstractCellEditor
       m_spin.setTextCore( (String) value );
   }
 
+  /****************************************** validValue *****************************************/
+  @Override
+  public boolean validValue( Object value )
+  {
+    // value is valid if null or converts to a integer or is colon punctuation
+    if ( value == null )
+      return true;
+
+    try
+    {
+      String str = (String) value;
+
+      if ( str.equals( ":" ) )
+        return true; // is colon punctuation
+
+      Integer.parseInt( (String) value );
+      return true; // converts to a integer
+    }
+    catch ( Exception exception )
+    {
+      return false; // not valid integer
+    }
+  }
 }

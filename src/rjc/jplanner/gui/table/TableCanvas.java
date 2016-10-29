@@ -1265,7 +1265,7 @@ public class TableCanvas extends Canvas
     AbstractCellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
 
     // open editor if one available
-    if ( editor != null )
+    if ( editor != null && editor.validValue( value ) )
       editor.open( m_table, value, MoveDirection.DOWN );
   }
 

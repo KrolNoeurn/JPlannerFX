@@ -57,8 +57,30 @@ public class EditorCalendarCycleLength extends AbstractCellEditor
     if ( value instanceof Integer )
       m_spin.setInteger( (int) value );
     else if ( value instanceof String )
-      m_spin.setInteger( Integer.valueOf( (String) value ) );
+      m_spin.setInteger( Integer.parseInt( (String) value ) );
     else
       throw new IllegalArgumentException( "Unhandled " + value.getClass().getName() );
+  }
+
+  /****************************************** validValue *****************************************/
+  @Override
+  public boolean validValue( Object value )
+  {
+    // value is valid if null or converts to an integer greater than zero
+    if ( value == null )
+      return true;
+
+    try
+    {
+      int num = Integer.parseInt( (String) value );
+      if ( num > 0 )
+        return true; // greater than zero
+    }
+    catch ( Exception exception )
+    {
+      return false; // not valid integer
+    }
+
+    return false; // not greater than zero
   }
 }

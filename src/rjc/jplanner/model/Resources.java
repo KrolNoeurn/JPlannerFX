@@ -112,4 +112,19 @@ public class Resources extends ArrayList<Resource>
     return list;
   }
 
+  /************************************* isDuplicateInitials *************************************/
+  public boolean isDuplicateInitials( String txt, int skip )
+  {
+    // return true if txt is a duplicate another resource initials
+    for ( int i = 0; i < size(); i++ )
+    {
+      if ( i == skip )
+        continue;
+      if ( txt.equals( get( i ).getInitials() ) )
+        return true;
+    }
+
+    return false;
+  }
+
 }

@@ -16,63 +16,43 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui.resources;
 
-import rjc.jplanner.gui.SpinEditor;
-import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.XTextField;
+import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
-/****************************** Table cell editor for task priority ******************************/
+/**************************** Table cell editor for resource initials ****************************/
 /*************************************************************************************************/
 
-public class EditorTaskPriority extends AbstractCellEditor
+public class EditorResourceInitials extends EditorText
 {
-  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskPriority( int columnIndex, int rowIndex )
+  public EditorResourceInitials( int columnIndex, int rowIndex )
   {
-    // default spin editor is fine
+    // create editor
     super( columnIndex, rowIndex );
-    m_spin = new SpinEditor();
-    setControl( m_spin );
-  }
+    ( (XTextField) getControl() ).setAllowed( "\\S*" ); // only allow non-whitespace characters
 
-  /******************************************* getValue ******************************************/
-  @Override
-  public Object getValue()
-  {
-    // return priority value as integer
-    return m_spin.getInteger();
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // set value depending on type
-    if ( value instanceof Integer )
-      m_spin.setInteger( (int) value );
-    else
-      m_spin.setTextCore( (String) value );
-  }
-
-  /****************************************** validValue *****************************************/
-  @Override
-  public boolean validValue( Object value )
-  {
-    // value is valid if null or converts to an integer
-    if ( value == null )
-      return true;
-
-    try
+    // add listener to set error status
+    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
     {
-      Integer.parseInt( (String) value );
-      return true;
-    }
-    catch ( Exception exception )
-    {
-      return false; // not valid integer
-    }
+      // length must be between 1 and 20 characters long
+      String error = null;
+      int len = newText.length();
+      if ( len < 1 || len > 20 )
+        error = "Name length not between 1 and 20 characters";
+
+      // initials should be unique
+      if ( JPlanner.plan.resources.isDuplicateInitials( newText, rowIndex ) )
+        error = "Name not unique";
+
+      // display error message and set editor error status
+      JPlanner.gui.setError( getControl(), error );
+    } );
+
   }
+
 }

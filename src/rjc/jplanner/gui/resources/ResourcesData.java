@@ -23,13 +23,14 @@ import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
 import rjc.jplanner.gui.Colors;
+import rjc.jplanner.gui.calendars.EditorSelectCalendar;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
-import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
@@ -96,7 +97,15 @@ public class ResourcesData implements ITableDataSource
       return null;
 
     // return editor for table body cell
-    return new EditorText( columnIndex, rowIndex );
+    switch ( columnIndex )
+    {
+      case Resource.SECTION_INITIALS:
+        return new EditorResourceInitials( columnIndex, rowIndex );
+      case Resource.SECTION_CALENDAR:
+        return new EditorSelectCalendar( columnIndex, rowIndex );
+      default:
+        return new EditorText( columnIndex, rowIndex );
+    }
   }
 
   /****************************************** setValue *******************************************/
@@ -126,9 +135,9 @@ public class ResourcesData implements ITableDataSource
     // get value to be displayed
     Object value = getValue( columnIndex, rowIndex );
 
-    // convert date and date-times into strings using plan formats
-    if ( value instanceof DateTime )
-      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+    // convert dates and calendars into strings using plan formats
+    if ( value instanceof Calendar )
+      return ( (Calendar) value ).getName();
     if ( value instanceof Date )
       return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
 
@@ -150,7 +159,10 @@ public class ResourcesData implements ITableDataSource
   {
     // default table modifications
     table.setDefaultColumnWidth( 100 );
-    table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 50 );
+    table.setWidthByColumnIndex( Resource.SECTION_INITIALS, 100 );
+    table.setWidthByColumnIndex( Resource.SECTION_AVAIL, 70 );
+    table.setWidthByColumnIndex( Resource.SECTION_COST, 70 );
+    table.setWidthByColumnIndex( Resource.SECTION_COMMENT, 250 );
     table.hideRow( 0 ); // hide row 0 (the special 'unassigned' resource)
   }
 

@@ -18,6 +18,7 @@
 
 package rjc.jplanner.command;
 
+import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
@@ -80,7 +81,11 @@ public class CommandResourceSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Resource " + ( m_res.index() + 1 ) + " " + Resource.sectionName( m_section ) + " = " + m_newValue;
+    String newValue = m_newValue.toString();
+    if ( m_newValue instanceof Calendar )
+      newValue = ( (Calendar) m_newValue ).getName();
+
+    return "Resource " + m_res.index() + " " + Resource.sectionName( m_section ) + " = " + newValue;
   }
 
 }

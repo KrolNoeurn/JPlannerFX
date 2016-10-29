@@ -86,7 +86,7 @@ public abstract class AbstractComboEditor extends XTextField
   }
 
   /****************************************** keyTyped *******************************************/
-  protected void keyTyped( KeyEvent event )
+  public void keyTyped( KeyEvent event )
   {
     // find next item that starts with typed key (case-insensitive)
     String key = event.getCharacter().substring( 0, 1 ).toLowerCase();

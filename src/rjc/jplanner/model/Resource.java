@@ -345,4 +345,10 @@ public class Resource
     return m_availability;
   }
 
+  /***************************************** getInitials *****************************************/
+  public String getInitials()
+  {
+    return m_initials;
+  }
+
 }

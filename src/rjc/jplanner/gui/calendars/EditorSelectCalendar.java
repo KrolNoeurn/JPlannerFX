@@ -16,63 +16,55 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.tasks;
+package rjc.jplanner.gui.calendars;
 
-import rjc.jplanner.gui.SpinEditor;
+import javafx.scene.input.KeyEvent;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
-/****************************** Table cell editor for task priority ******************************/
+/**************** Table cell editor for selecting a calendar from drop-down list *****************/
 /*************************************************************************************************/
 
-public class EditorTaskPriority extends AbstractCellEditor
+public class EditorSelectCalendar extends AbstractCellEditor
 {
-  SpinEditor m_spin; // spin editor
+  CalendarCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskPriority( int columnIndex, int rowIndex )
+  public EditorSelectCalendar( int columnIndex, int rowIndex )
   {
-    // default spin editor is fine
+    // create calendar editor
     super( columnIndex, rowIndex );
-    m_spin = new SpinEditor();
-    setControl( m_spin );
+    m_combo = new CalendarCombo();
+    setControl( m_combo );
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // return priority value as integer
-    return m_spin.getInteger();
+    // return selected plan calendar
+    return JPlanner.plan.calendar( m_combo.getSelectedIndex() );
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // set value depending on type
-    if ( value instanceof Integer )
-      m_spin.setInteger( (int) value );
+    // set editor display to value if valid calendar, otherwise calendar from data source
+    if ( value instanceof Calendar )
+      m_combo.setSelectedIndex( JPlanner.plan.index( (Calendar) value ) );
+    else if ( value instanceof String )
+    {
+      // set editor to data source value, then react to string as if typed
+      String str = (String) value;
+      Calendar cal = (Calendar) getDataSourceValue();
+      m_combo.setSelectedIndex( JPlanner.plan.index( cal ) );
+      m_combo.keyTyped( new KeyEvent( KeyEvent.KEY_TYPED, str, str, null, false, false, false, false ) );
+    }
     else
-      m_spin.setTextCore( (String) value );
+      throw new IllegalArgumentException( value.getClass() + " '" + value + "'" );
   }
 
-  /****************************************** validValue *****************************************/
-  @Override
-  public boolean validValue( Object value )
-  {
-    // value is valid if null or converts to an integer
-    if ( value == null )
-      return true;
-
-    try
-    {
-      Integer.parseInt( (String) value );
-      return true;
-    }
-    catch ( Exception exception )
-    {
-      return false; // not valid integer
-    }
-  }
 }

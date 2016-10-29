@@ -16,7 +16,7 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.calendars;
+package rjc.jplanner.gui.days;
 
 import javafx.scene.input.KeyEvent;
 import rjc.jplanner.JPlanner;
@@ -28,7 +28,7 @@ import rjc.jplanner.model.Day;
 /**************** Table cell editor for selecting a day-type from drop-down list *****************/
 /*************************************************************************************************/
 
-public class EditorDayType extends AbstractCellEditor
+public class EditorSelectDay extends AbstractCellEditor
 {
   public class DayCombo extends AbstractComboEditor
   {
@@ -63,7 +63,7 @@ public class EditorDayType extends AbstractCellEditor
   DayCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorDayType( int columnIndex, int rowIndex )
+  public EditorSelectDay( int columnIndex, int rowIndex )
   {
     // create day-type editor
     super( columnIndex, rowIndex );

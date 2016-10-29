@@ -74,11 +74,11 @@ public class CommandCalendarSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    String description = "Day " + ( m_calendar.index() + 1 ) + " " + Calendar.sectionName( m_section ) + " = ";
+    String newValue = m_newValue.toString();
     if ( m_newValue instanceof Day )
-      return description + ( (Day) m_newValue ).name();
-    else
-      return description + m_newValue;
+      newValue = ( (Day) m_newValue ).name();
+
+    return "Calendar " + ( m_calendar.index() + 1 ) + " " + Calendar.sectionName( m_section ) + " = " + newValue;
   }
 
 }

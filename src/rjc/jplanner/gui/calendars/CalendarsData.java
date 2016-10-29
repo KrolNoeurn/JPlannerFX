@@ -25,6 +25,7 @@ import rjc.jplanner.command.CommandCalendarSetCycleLength;
 import rjc.jplanner.command.CommandCalendarSetExceptions;
 import rjc.jplanner.command.CommandCalendarSetValue;
 import rjc.jplanner.gui.Colors;
+import rjc.jplanner.gui.days.EditorSelectDay;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.ITableDataSource;
@@ -116,7 +117,7 @@ public class CalendarsData implements ITableDataSource
       case Calendar.SECTION_CYCLE_LEN:
         return new EditorCalendarCycleLength( columnIndex, rowIndex );
       default:
-        return new EditorDayType( columnIndex, rowIndex );
+        return new EditorSelectDay( columnIndex, rowIndex );
     }
   }
 
