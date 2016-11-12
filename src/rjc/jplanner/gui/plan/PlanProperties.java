@@ -34,6 +34,7 @@ import javafx.scene.layout.Region;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandPlanSetProperties;
 import rjc.jplanner.gui.Colors;
+import rjc.jplanner.gui.DateTimeEditor;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.gui.calendars.CalendarCombo;
 import rjc.jplanner.model.Calendar;
@@ -48,7 +49,7 @@ public class PlanProperties extends ScrollPane
 {
   private GridPane          m_grid            = new GridPane();
   private TextField         m_title           = new TextField();
-  private TextField         m_defaultStart    = new TextField();
+  private DateTimeEditor    m_defaultStart    = new DateTimeEditor();
   private TextField         m_actualStart     = new TextField();
   private TextField         m_end             = new TextField();
   private CalendarCombo     m_defaultCalendar = new CalendarCombo();
@@ -256,14 +257,14 @@ public class PlanProperties extends ScrollPane
   {
     // update the gui property widgets with values from plan
     m_title.setText( JPlanner.plan.title() );
-    m_defaultCalendar.setText( JPlanner.plan.calendar().getName() );
+    m_defaultCalendar.setCalendar( JPlanner.plan.calendar() );
     m_DTformat.setText( JPlanner.plan.datetimeFormat() );
     m_Dformat.setText( JPlanner.plan.dateFormat() );
     m_fileName.setText( JPlanner.plan.filename() );
     m_fileLocation.setText( JPlanner.plan.fileLocation() );
     m_savedBy.setText( JPlanner.plan.savedBy() );
 
-    displayDateTime( m_defaultStart, JPlanner.plan.start() );
+    m_defaultStart.setDateTime( JPlanner.plan.start() );
     displayDateTime( m_actualStart, JPlanner.plan.earliest() );
     displayDateTime( m_end, JPlanner.plan.end() );
     displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
@@ -277,8 +278,8 @@ public class PlanProperties extends ScrollPane
   {
     // get values from gui editors
     String title = m_title.getText();
-    DateTime start = JPlanner.plan.start(); // TODO 
-    Calendar cal = JPlanner.plan.calendar( m_defaultCalendar.getSelectedIndex() );
+    DateTime start = m_defaultStart.getDateTime();
+    Calendar cal = m_defaultCalendar.getCalendar();
 
     String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.datetimeFormat() : m_DTformat.getText();
 

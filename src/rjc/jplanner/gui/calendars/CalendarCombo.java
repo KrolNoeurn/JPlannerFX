@@ -20,6 +20,7 @@ package rjc.jplanner.gui.calendars;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.AbstractComboEditor;
+import rjc.jplanner.model.Calendar;
 
 /*************************************************************************************************/
 /**************** Extended version of AbstractComboEditor with list of calendars *****************/
@@ -40,8 +41,22 @@ public class CalendarCombo extends AbstractComboEditor
   @Override
   public String getItem( int num )
   {
-    // return calendar name
+    // return calendar name item for list
     return JPlanner.plan.calendar( num ).getName();
+  }
+
+  /***************************************** getCalendar *****************************************/
+  public Calendar getCalendar()
+  {
+    // return plan calendar which is currently selected
+    return JPlanner.plan.calendar( getSelectedIndex() );
+  }
+
+  /***************************************** setCalendar *****************************************/
+  public void setCalendar( Calendar calendar )
+  {
+    // set editor to specified plan calendar
+    setText( JPlanner.plan.calendar().getName() );
   }
 
 }

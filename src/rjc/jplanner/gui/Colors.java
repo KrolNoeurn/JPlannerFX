@@ -30,6 +30,7 @@ public class Colors
   public static final Color BUTTON_BACKGROUND  = LIGHTERGRAY;
   public static final Color BUTTON_ARROW       = Color.BLACK;
   public static final Color GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
+  public static final Color FOCUSED_BLUE       = Color.rgb( 3, 158, 211 );   // light blue;
 
   public static final Color NORMAL_CELL        = Color.WHITE;
   public static final Color SELECTED_CELL      = Color.rgb( 51, 153, 255 );  // light blue;

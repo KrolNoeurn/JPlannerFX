@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui;
 
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
@@ -26,26 +27,40 @@ import rjc.jplanner.model.DateTime;
 
 public class DateTimeEditor extends XTextField
 {
+  private DateTime m_datetime;
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
   {
-    // TODO Auto-generated constructor stub
+    // construct editor
     super();
+    setButtonType( ButtonType.DOWN );
+
+    // when button pressed open date-time selector
+    getButton().setOnMousePressed( event -> new DateTimeSelector( this ) );
+
+    // react to changes to editor text
+    textProperty().addListener( ( property, oldText, newText ) ->
+    {
+      JPlanner.trace( "'" + oldText + "' -> '" + newText + "'" );
+      // TODO
+    } );
+
   }
 
   /**************************************** getDateTime ******************************************/
-  public Object getDateTime()
+  public DateTime getDateTime()
   {
-    // TODO Auto-generated method stub
-    return null;
+    // return editor current date-time (null if invalid)
+    return m_datetime;
   }
 
   /**************************************** setDateTime ******************************************/
-  public void setDateTime( DateTime value )
+  public void setDateTime( DateTime dt )
   {
-    // TODO Auto-generated method stub
-
+    // set editor current date-time
+    m_datetime = dt;
+    setText( dt.toString( JPlanner.plan.datetimeFormat() ) );
   }
 
 }

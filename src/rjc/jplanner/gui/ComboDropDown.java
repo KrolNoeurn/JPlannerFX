@@ -48,6 +48,7 @@ public class ComboDropDown extends Popup
     // create pop-up window to display drop-down list
     super();
     setAutoHide( true );
+    setConsumeAutoHidingEvents( false );
     m_parent = parent;
     m_canvas = new Canvas();
 
