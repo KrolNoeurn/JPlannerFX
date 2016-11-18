@@ -19,7 +19,6 @@
 package rjc.jplanner.gui;
 
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 
 /*************************************************************************************************/
 /******************* Abstract JavaFX control to allow user to pick from list *********************/
@@ -41,12 +40,11 @@ public abstract class AbstractComboEditor extends XTextField
     super();
     setEditable( false );
     setButtonType( ButtonType.DOWN );
+    m_dropdown = new ComboDropDown( this );
 
-    // react to key presses and mouse clicks
+    // react to key presses
     setOnKeyPressed( event -> keyPressed( event ) );
     setOnKeyTyped( event -> keyTyped( event ) );
-    setOnMousePressed( event -> buttonPressed( event ) );
-    getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
     // react to text changes to set selected index
     textProperty().addListener( ( property, oldValue, newValue ) ->
@@ -60,8 +58,7 @@ public abstract class AbstractComboEditor extends XTextField
           if ( newValue.equals( getItem( i ) ) )
           {
             m_selectedIndex = i;
-            if ( m_dropdown != null )
-              m_dropdown.redrawCanvas();
+            m_dropdown.redrawCanvas();
             break;
           }
       }
@@ -74,8 +71,7 @@ public abstract class AbstractComboEditor extends XTextField
     // set selected index and update displayed text to match
     m_selectedIndex = index;
     setText( getItem( index ) );
-    if ( m_dropdown != null )
-      m_dropdown.redrawCanvas();
+    m_dropdown.redrawCanvas();
   }
 
   /************************************** getSelectedIndex ***************************************/
@@ -127,19 +123,6 @@ public abstract class AbstractComboEditor extends XTextField
       default:
         break;
     }
-  }
-
-  /**************************************** buttonPressed ****************************************/
-  protected void buttonPressed( MouseEvent event )
-  {
-    // on button press ensure editor has focus
-    event.consume();
-    requestFocus();
-    deselect();
-
-    // open drop-down list
-    m_dropdown = new ComboDropDown( this );
-    m_dropdown.setOnHiding( hideEvent -> m_dropdown = null );
   }
 
 }

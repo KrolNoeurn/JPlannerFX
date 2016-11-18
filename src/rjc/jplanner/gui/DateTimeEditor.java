@@ -27,7 +27,8 @@ import rjc.jplanner.model.DateTime;
 
 public class DateTimeEditor extends XTextField
 {
-  private DateTime m_datetime;
+  private DateTime         m_datetime;
+  private DateTimeSelector m_selector;
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
@@ -35,9 +36,7 @@ public class DateTimeEditor extends XTextField
     // construct editor
     super();
     setButtonType( ButtonType.DOWN );
-
-    // when button pressed open date-time selector
-    getButton().setOnMousePressed( event -> new DateTimeSelector( this ) );
+    m_selector = new DateTimeSelector( this );
 
     // react to changes to editor text
     textProperty().addListener( ( property, oldText, newText ) ->

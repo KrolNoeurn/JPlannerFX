@@ -22,6 +22,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
@@ -38,53 +39,70 @@ public class ComboDropDown extends Popup
   private int                 m_rowHeight;
   private int                 m_rowDescent;
   private int                 m_rowOffset;
-  private int                 m_highlighed = -1;
+  private int                 m_highlighed;
 
-  private static final int    BORDER       = 2;
+  private static final int    BORDER = 2;
 
   /**************************************** constructor ******************************************/
   public ComboDropDown( AbstractComboEditor parent )
   {
     // create pop-up window to display drop-down list
     super();
-    setAutoHide( true );
-    setConsumeAutoHidingEvents( false );
     m_parent = parent;
     m_canvas = new Canvas();
+    setAutoHide( true );
+    setConsumeAutoHidingEvents( false );
+    getContent().add( m_canvas );
 
-    // determine pop-up position
-    Point2D point = parent.localToScreen( 0.0, parent.getHeight() );
-    setX( point.getX() );
-    setY( point.getY() );
+    // add shadow
+    DropShadow shadow = new DropShadow();
+    shadow.setColor( Colors.FOCUSED_BLUE );
+    shadow.setRadius( 4.0 );
+    getScene().getRoot().setEffect( shadow );
 
     // determine row height and row text descent
     Bounds bounds = ( new Text( "Qwerty" ) ).getLayoutBounds();
     m_rowHeight = (int) Math.ceil( bounds.getHeight() );
     m_rowDescent = (int) Math.floor( -bounds.getMinY() );
 
-    // determine canvas size
-    m_canvas.setWidth( parent.getWidth() );
-    int height = count() * m_rowHeight + BORDER * 2;
-    Screen screen = Screen.getScreensForRectangle( getX(), getY(), 0.0, 0.0 ).get( 0 );
-    double maxY = screen.getVisualBounds().getMaxY();
-    if ( getY() + height > maxY )
-      height = (int) ( maxY - getY() - BORDER * 2 );
-    m_canvas.setHeight( height );
-    redrawCanvas();
-
     // react to mouse movement and mouse pressed
     m_canvas.setOnMouseMoved( event -> redrawCanvas( getIndexAtY( (int) event.getY() ) ) );
     m_canvas.setOnMousePressed( event -> setSelectedIndex( getIndexAtY( (int) event.getY() ) ) );
 
-    // set canvas as pop-up contents and show
-    getContent().add( m_canvas );
-    show( parent.getScene().getWindow() );
+    // toggle pop-up when parent is pressed
+    parent.setOnMousePressed( event ->
+    {
+      if ( isShowing() )
+        hide();
+      else
+      {
+        // set pop-up position and show 
+        Point2D point = parent.localToScreen( 0.0, parent.getHeight() );
+        double x = point.getX() - shadow.getRadius() + 1.0;
+        double y = point.getY() - shadow.getRadius() + 1.0;
+
+        // determine canvas size
+        m_canvas.setWidth( parent.getWidth() );
+        int height = count() * m_rowHeight + BORDER * 2;
+        Screen screen = Screen.getScreensForRectangle( x, y, 0.0, 0.0 ).get( 0 );
+        double maxY = screen.getVisualBounds().getMaxY();
+        if ( y + height > maxY )
+          height = (int) ( maxY - y - BORDER * 2 );
+        m_canvas.setHeight( height );
+        redrawCanvas();
+        show( parent, x, y );
+      }
+    } );
+
+    // hide pop-up when parent loses focus (e.g. when TAB pressed)
+    parent.focusedProperty().addListener( ( observable, oldFocus, newFocus ) -> hide() );
   }
 
   /**************************************** redrawCanvas *****************************************/
   public void redrawCanvas()
   {
     // redraw drop-down list contents onto canvas with selected item highlighted
+    m_highlighed = -2;
     redrawCanvas( getSelectedIndex() );
   }
 
@@ -105,7 +123,7 @@ public class ComboDropDown extends Popup
     // fill background and draw border
     gc.setFill( Colors.NORMAL_CELL );
     gc.fillRect( 0.0, 0.0, w, h );
-    gc.setStroke( Colors.SELECTED_CELL );
+    gc.setStroke( Colors.FOCUSED_BLUE );
     gc.strokeRect( 0.5, 0.5, w - 1.0, h - 1.0 );
 
     // determine list visible range
@@ -147,7 +165,6 @@ public class ComboDropDown extends Popup
   /************************************** setSelectedIndex ***************************************/
   private void setSelectedIndex( int item )
   {
-    hide();
     m_parent.setSelectedIndex( item );
   }
 

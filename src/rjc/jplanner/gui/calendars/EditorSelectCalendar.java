@@ -19,7 +19,6 @@
 package rjc.jplanner.gui.calendars;
 
 import javafx.scene.input.KeyEvent;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.model.Calendar;
 
@@ -45,22 +44,21 @@ public class EditorSelectCalendar extends AbstractCellEditor
   public Object getValue()
   {
     // return selected plan calendar
-    return JPlanner.plan.calendar( m_combo.getSelectedIndex() );
+    return m_combo.getCalendar();
   }
 
   /******************************************* setValue ******************************************/
   @Override
   public void setValue( Object value )
   {
-    // set editor display to value if valid calendar, otherwise calendar from data source
+    // set editor value if valid calendar, otherwise calendar from data source
     if ( value instanceof Calendar )
-      m_combo.setSelectedIndex( JPlanner.plan.index( (Calendar) value ) );
+      m_combo.setCalendar( (Calendar) value );
     else if ( value instanceof String )
     {
       // set editor to data source value, then react to string as if typed
       String str = (String) value;
-      Calendar cal = (Calendar) getDataSourceValue();
-      m_combo.setSelectedIndex( JPlanner.plan.index( cal ) );
+      m_combo.setCalendar( (Calendar) getDataSourceValue() );
       m_combo.keyTyped( new KeyEvent( KeyEvent.KEY_TYPED, str, str, null, false, false, false, false ) );
     }
     else

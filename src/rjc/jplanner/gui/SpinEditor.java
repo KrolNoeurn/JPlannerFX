@@ -60,7 +60,8 @@ public class SpinEditor extends XTextField
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
       double num = getDouble();
-      JPlanner.gui.setError( this, num < m_min || num > m_max || getText().length() < 1 ? m_rangeError : null );
+      if ( JPlanner.gui != null )
+        JPlanner.gui.setError( this, num < m_min || num > m_max || getText().length() < 1 ? m_rangeError : null );
 
       // remove any excess zero at start of number
       if ( m_numberFormat.getMinimumIntegerDigits() <= 1 )
