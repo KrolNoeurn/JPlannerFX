@@ -63,6 +63,7 @@ public class TableCanvas extends Canvas
   public static final String ELLIPSIS            = "...";          // ellipsis to show text has been truncated
   public static final int    CELL_PADDING        = 4;              // cell padding for text left & right edges
   private static final int   PROXIMITY           = 4;              // used to distinguish resize from reorder
+  private static final int   INDENT              = 14;             // cell left padding per indent level 
 
   public static final Cursor CURSOR_H_RESIZE     = Cursor.H_RESIZE;
   public static final Cursor CURSOR_V_RESIZE     = Cursor.V_RESIZE;
@@ -302,21 +303,34 @@ public class TableCanvas extends Canvas
     // text
     String text = m_table.getDataSource().getCellText( columnIndex, rowIndex );
     Font font = m_table.getDataSource().getCellFont( columnIndex, rowIndex );
+    int indent = m_table.getDataSource().getCellIndent( columnIndex, rowIndex );
+
     if ( text != null )
     {
       if ( font != null )
         gc.setFont( font );
 
       Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
-      ArrayList<TextLine> lines = getTextLines( text, font, alignment, w, h );
+      ArrayList<TextLine> lines = getTextLines( text, font, alignment, w - indent * INDENT, h );
       if ( m_selected )
         gc.setFill( Colors.SELECTED_TEXT );
       else
         gc.setFill( Colors.NORMAL_TEXT );
 
       gc.setFontSmoothingType( FontSmoothingType.LCD );
+      x += indent * INDENT;
       for ( TextLine line : lines )
         gc.fillText( line.txt, x + line.x, y + line.y );
+
+      if ( indent > 0 )
+      {
+        gc.setStroke( gc.getFill() );
+        double xx = x - 5.0;
+        double yy = y + h / 2 - 1.0;
+        gc.strokeRect( xx - 4.5, yy - 4.5, 9.0, 9.0 );
+        gc.strokeRect( xx - 2.5, yy - 0.5, 5.0, 1.0 );
+        gc.strokeRect( xx - 0.5, yy - 2.5, 1.0, 5.0 );
+      }
     }
   }
 
@@ -1052,6 +1066,7 @@ public class TableCanvas extends Canvas
     {
       int columnPos = m_table.getColumnPositionAtX( m_x );
       int rowPos = m_table.getRowPositionAtY( m_y );
+      m_table.scrollTo( columnPos, rowPos );
 
       m_table.clearAllSelection();
       int column1 = Math.min( columnPos, m_selectedColumnPos );
@@ -1071,15 +1086,13 @@ public class TableCanvas extends Canvas
   /**************************************** mouseReleased ****************************************/
   private void mouseReleased( MouseEvent event )
   {
-    // stop any animation
-    m_table.stopAnimation();
-
     // handle down arrow
     if ( getCursor() == CURSOR_DOWNARROW )
     {
       if ( m_reorderMarker != null )
       {
         // handle column reorder completion
+        m_table.stopAnimation();
         m_table.remove( m_reorderSlider );
         m_table.remove( m_reorderMarker );
         m_reorderSlider = null;
@@ -1128,6 +1141,7 @@ public class TableCanvas extends Canvas
       if ( m_reorderMarker != null )
       {
         // handle row reorder completion
+        m_table.stopAnimation();
         m_table.remove( m_reorderSlider );
         m_table.remove( m_reorderMarker );
         m_reorderSlider = null;
@@ -1183,6 +1197,9 @@ public class TableCanvas extends Canvas
     // handle cross cursor
     if ( getCursor() == CURSOR_CROSS && event.isPrimaryButtonDown() && !event.isAltDown() )
     {
+      // scroll to cell
+      m_table.scrollTo( m_columnPos, m_rowPos );
+
       // no shift + no control = select single cell
       if ( !event.isControlDown() && !event.isShiftDown() )
       {
@@ -1259,6 +1276,10 @@ public class TableCanvas extends Canvas
   /*************************************** openCellEditor ****************************************/
   private void openCellEditor( Object value )
   {
+    // scroll to cell
+    m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+    m_table.finishAnimation();
+
     // open cell editor for currently selected table cell
     int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumnPos );
     int rowIndex = m_table.getRowIndexByPosition( m_selectedRowPos );

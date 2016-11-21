@@ -153,6 +153,14 @@ public class ResourcesData implements ITableDataSource
     return null;
   }
 
+  /**************************************** getCellIndent ****************************************/
+  @Override
+  public int getCellIndent( int columnIndex, int rowIndex )
+  {
+    // return cell indent level (0 = no indent)
+    return 0;
+  }
+
   /********************************** defaultTableModifications **********************************/
   @Override
   public void defaultTableModifications( Table table )

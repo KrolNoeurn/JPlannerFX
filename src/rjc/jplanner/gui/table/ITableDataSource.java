@@ -61,6 +61,9 @@ public interface ITableDataSource
   // return cell display font for specified cell index
   Font getCellFont( int columnIndex, int rowIndex );
 
+  // return cell display indent level for specified cell index
+  int getCellIndent( int columnIndex, int rowIndex );
+
   // adopt table data source default table modifications
   void defaultTableModifications( Table table );
 }

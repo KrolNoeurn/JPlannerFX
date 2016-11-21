@@ -175,6 +175,9 @@ public class MainTabWidget extends TabPane
           case XmlLabels.XML_ROWS:
             m_tabTasks.getTable().loadRows( xsr );
             break;
+          case XmlLabels.XML_SELECTED:
+            m_tabTasks.getTable().loadSelected( xsr );
+            break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
             break;
@@ -204,6 +207,9 @@ public class MainTabWidget extends TabPane
           case XmlLabels.XML_ROWS:
             m_tabResources.getTable().loadRows( xsr );
             break;
+          case XmlLabels.XML_SELECTED:
+            m_tabResources.getTable().loadSelected( xsr );
+            break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
             break;
@@ -232,6 +238,9 @@ public class MainTabWidget extends TabPane
           case XmlLabels.XML_ROWS:
             m_tabCalendars.getTable().loadRows( xsr );
             break;
+          case XmlLabels.XML_SELECTED:
+            m_tabCalendars.getTable().loadSelected( xsr );
+            break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
             break;
@@ -259,6 +268,9 @@ public class MainTabWidget extends TabPane
             break;
           case XmlLabels.XML_ROWS:
             m_tabDays.getTable().loadRows( xsr );
+            break;
+          case XmlLabels.XML_SELECTED:
+            m_tabDays.getTable().loadSelected( xsr );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );

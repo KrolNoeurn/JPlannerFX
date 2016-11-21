@@ -191,14 +191,22 @@ public class TableDisplay extends TableParent
   public void animateToVOffset( int endValue )
   {
     // create scroll vertical animation
-    animate( m_vScrollBar.valueProperty(), endValue, 100 );
+    if ( endValue < m_vScrollBar.getMin() )
+      endValue = (int) m_vScrollBar.getMin();
+    if ( endValue > m_vScrollBar.getMax() )
+      endValue = (int) m_vScrollBar.getMax();
+    animate( m_vScrollBar.valueProperty(), endValue, 200 );
   }
 
   /********************************** animationScrollHorizontal **********************************/
   public void animateToHOffset( int endValue )
   {
     // create scroll horizontal animation
-    animate( m_hScrollBar.valueProperty(), endValue, 100 );
+    if ( endValue < m_hScrollBar.getMin() )
+      endValue = (int) m_vScrollBar.getMin();
+    if ( endValue > m_hScrollBar.getMax() )
+      endValue = (int) m_vScrollBar.getMax();
+    animate( m_hScrollBar.valueProperty(), endValue, 200 );
   }
 
   /************************************** animateScrollToUp **************************************/

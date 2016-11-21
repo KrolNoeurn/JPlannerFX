@@ -116,8 +116,8 @@ public class TableParent extends Parent
   /******************************************* animate *******************************************/
   public void animate( DoubleProperty property, int endValue, int duration_ms )
   {
-    // create animation finishing any current animation first
-    finishAnimation();
+    // create animation stopping any current animation first
+    stopAnimation();
 
     KeyValue kv = new KeyValue( property, endValue );
     KeyFrame kf = new KeyFrame( Duration.millis( duration_ms ), kv );

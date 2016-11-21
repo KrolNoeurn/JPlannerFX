@@ -39,6 +39,7 @@ import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
 
@@ -234,6 +235,7 @@ public class DateTimeSelector extends Popup
     // clear the calendar
     m_gc = m_calendar.getGraphicsContext2D();
     m_gc.clearRect( 0.0, 0.0, m_calendar.getWidth(), m_calendar.getHeight() );
+    m_gc.setFontSmoothingType( FontSmoothingType.LCD );
 
     // draw the calendar day labels and day-of-month numbers
     for ( int row = 0; row < 6; row++ )

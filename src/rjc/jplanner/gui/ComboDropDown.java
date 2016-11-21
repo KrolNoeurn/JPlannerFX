@@ -65,9 +65,11 @@ public class ComboDropDown extends Popup
     m_rowHeight = (int) Math.ceil( bounds.getHeight() );
     m_rowDescent = (int) Math.floor( -bounds.getMinY() );
 
-    // react to mouse movement and mouse pressed
+    // react to mouse events
     m_canvas.setOnMouseMoved( event -> redrawCanvas( getIndexAtY( (int) event.getY() ) ) );
     m_canvas.setOnMousePressed( event -> setSelectedIndex( getIndexAtY( (int) event.getY() ) ) );
+    m_canvas.setOnMouseDragged( event -> setSelectedIndex( getIndexAtY( (int) event.getY() ) ) );
+    m_canvas.setOnMouseReleased( event -> hide() );
 
     // toggle pop-up when parent is pressed
     parent.setOnMousePressed( event ->

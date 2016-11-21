@@ -688,6 +688,17 @@ public class Table extends TableDisplay
       xsw.writeEndElement(); // XML_ROW
     }
     xsw.writeEndElement(); // XML_ROWS
+
+    // write selected cells
+    xsw.writeStartElement( XmlLabels.XML_SELECTED );
+    for ( int hash : m_selected )
+    {
+      xsw.writeStartElement( XmlLabels.XML_POSITION );
+      xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( hash / SELECT_HASH ) );
+      xsw.writeAttribute( XmlLabels.XML_ROW, Integer.toString( hash % SELECT_HASH ) );
+      xsw.writeEndElement(); // XML_POSITION
+    }
+    xsw.writeEndElement(); // XML_SELECTED
   }
 
   /***************************************** loadColumns *****************************************/
@@ -816,6 +827,59 @@ public class Table extends TableDisplay
 
     // refresh calculated body height
     calculateBodyHeight();
+  }
+
+  /**************************************** loadSelected *****************************************/
+  public void loadSelected( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // read XML selected attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
+    // read XML individual rows
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      // if reached end of rows data, exit loop
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_SELECTED ) )
+        break;
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_POSITION:
+
+            // get attributes from position for selected cells
+            int column = -1;
+            int row = -1;
+            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+              switch ( xsr.getAttributeLocalName( i ) )
+              {
+                case XmlLabels.XML_COLUMN:
+                  column = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                case XmlLabels.XML_ROW:
+                  row = Integer.parseInt( xsr.getAttributeValue( i ) );
+                  break;
+                default:
+                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+                  break;
+              }
+            if ( column >= 0 && row >= 0 )
+              setSelection( column, row, true );
+            break;
+
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
   }
 
   /****************************************** moveFocus ******************************************/
