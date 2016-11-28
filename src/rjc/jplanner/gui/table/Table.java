@@ -57,9 +57,8 @@ public class Table extends TableDisplay
 
   // array with mapping from position to index
   private ArrayList<Integer>        m_columnIndexes = new ArrayList<Integer>();
-  private ArrayList<Integer>        m_rowIndexes    = new ArrayList<Integer>();
 
-  // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + rowPos
+  // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + row
   private static final int          SELECT_HASH     = 9999;
   private HashSet<Integer>          m_selected      = new HashSet<Integer>();
 
@@ -96,15 +95,11 @@ public class Table extends TableDisplay
     m_rowCollapsed.clear();
     m_selected.clear();
     m_columnIndexes.clear();
-    m_rowIndexes.clear();
 
-    // initialise column & row position to index mapping
+    // initialise column position to index mapping
     int count = m_data.getColumnCount();
     for ( int column = 0; column < count; column++ )
       m_columnIndexes.add( column );
-    count = m_data.getRowCount();
-    for ( int row = 0; row < count; row++ )
-      m_rowIndexes.add( row );
 
     // calculate body width & height
     calculateBodyWidth();
@@ -121,18 +116,12 @@ public class Table extends TableDisplay
   /****************************************** relayout *******************************************/
   public void relayout()
   {
-    // ensure arrays with mapping from position to index are correct size
+    // ensure array with mapping column position to index is correct size
     int count = m_data.getColumnCount();
     while ( m_columnIndexes.size() < count )
       m_columnIndexes.add( m_columnIndexes.size() );
     while ( m_columnIndexes.size() > count )
       m_columnIndexes.remove( Integer.valueOf( m_columnIndexes.size() - 1 ) );
-
-    count = m_data.getRowCount();
-    while ( m_rowIndexes.size() < count )
-      m_rowIndexes.add( m_rowIndexes.size() );
-    while ( m_rowIndexes.size() > count )
-      m_rowIndexes.remove( Integer.valueOf( m_rowIndexes.size() - 1 ) );
 
     // re-calculate table size canvas for example after change in number of columns or rows
     calculateBodyHeight();
@@ -305,8 +294,8 @@ public class Table extends TableDisplay
     return width;
   }
 
-  /*********************************** getRowPositionExactAtY ************************************/
-  public int getRowPositionExactAtY( int y )
+  /*************************************** getRowExactAtY ****************************************/
+  public int getRowExactAtY( int y )
   {
     // return row position at specified y-coordinate, or -1 if before, MAX_INT if after
     y += getVOffset() - m_hHeaderHeight;
@@ -314,60 +303,60 @@ public class Table extends TableDisplay
       return -1;
 
     int last = m_data.getRowCount() - 1;
-    for ( int rowPos = 0; rowPos <= last; rowPos++ )
+    for ( int row = 0; row <= last; row++ )
     {
-      int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+      int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
       if ( height <= 0 )
         continue;
       y -= height;
       if ( y <= 0 )
-        return rowPos;
+        return row;
     }
 
     return Integer.MAX_VALUE;
   }
 
-  /************************************* getRowPositionAtY ***************************************/
-  public int getRowPositionAtY( int y )
+  /***************************************** getRowAtY *******************************************/
+  public int getRowAtY( int y )
   {
     // return row position at specified y-coordinate, or nearest
     y += getVOffset() - m_hHeaderHeight;
     int last = m_data.getRowCount() - 1;
-    for ( int rowPos = 0; rowPos <= last; rowPos++ )
+    for ( int row = 0; row <= last; row++ )
     {
-      int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+      int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
       if ( height <= 0 )
         continue;
       y -= height;
       if ( y <= 0 )
-        return rowPos;
+        return row;
     }
 
     return last;
   }
 
-  /*********************************** getYStartByRowPosition ************************************/
-  public int getYStartByRowPosition( int rowPos )
+  /*************************************** getYStartByRow ****************************************/
+  public int getYStartByRow( int row )
   {
     // return start-y of specified row position
-    if ( rowPos > m_data.getRowCount() )
-      rowPos = m_data.getRowCount();
+    if ( row > m_data.getRowCount() )
+      row = m_data.getRowCount();
 
     int startY = m_hHeaderHeight - getVOffset();
-    for ( int row = 0; row < rowPos; row++ )
-      startY += getHeightByRowPosition( row );
+    for ( int r = 0; r < row; r++ )
+      startY += getHeightByRow( r );
 
     return startY;
   }
 
-  /*********************************** getHeightByRowPosition ************************************/
-  public int getHeightByRowPosition( int rowPos )
+  /*************************************** getHeightByRow ****************************************/
+  public int getHeightByRow( int row )
   {
     // return height from row position - bit slower
-    if ( rowPos < 0 || rowPos >= m_data.getRowCount() )
+    if ( row < 0 || row >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
-    int height = m_rowHeights.getOrDefault( m_rowIndexes.get( rowPos ), m_defaultRowHeight );
+    int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
     if ( height < 0 )
       return 0; // -ve means row hidden, so return zero
 
@@ -466,22 +455,8 @@ public class Table extends TableDisplay
     return m_columnIndexes.indexOf( columnIndex );
   }
 
-  /************************************ getRowIndexByPosition ************************************/
-  public int getRowIndexByPosition( int rowPos )
-  {
-    // return row index from position
-    return m_rowIndexes.get( rowPos );
-  }
-
-  /************************************ getRowPositionByIndex ************************************/
-  public int getRowPositionByIndex( int rowIndex )
-  {
-    // return row position from index
-    return m_rowIndexes.indexOf( rowIndex );
-  }
-
   /****************************************** scrollTo *******************************************/
-  public void scrollTo( int columnPos, int rowPos )
+  public void scrollTo( int columnPos, int row )
   {
     // determine if any horizontal scrolling needed
     int leftEdge = getXStartByColumnPosition( columnPos ) - m_vHeaderWidth;
@@ -495,7 +470,7 @@ public class Table extends TableDisplay
     }
 
     // determine if any vertical scrolling needed, finishing any horizontal scrolling first
-    int topEdge = getYStartByRowPosition( rowPos ) - m_hHeaderHeight;
+    int topEdge = getYStartByRow( row ) - m_hHeaderHeight;
     if ( topEdge < 0 )
     {
       finishAnimation();
@@ -503,7 +478,7 @@ public class Table extends TableDisplay
     }
     else
     {
-      int bottomEdge = topEdge + getHeightByRowPosition( rowPos ) + m_hHeaderHeight;
+      int bottomEdge = topEdge + getHeightByRow( row ) + m_hHeaderHeight;
       if ( bottomEdge > getCanvasHeight() )
       {
         finishAnimation();
@@ -515,13 +490,21 @@ public class Table extends TableDisplay
   /******************************************* hideRow *******************************************/
   public void hideRow( int rowIndex )
   {
-    // get old height
-    int oldHeight = m_defaultRowHeight;
-    if ( m_rowHeights.containsKey( rowIndex ) )
-      oldHeight = m_rowHeights.get( rowIndex );
-
     // if already hidden do nothing
+    int oldHeight = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
     if ( oldHeight < 0 )
+      return;
+
+    m_rowHeights.put( rowIndex, -oldHeight );
+    m_bodyHeight = m_bodyHeight - oldHeight;
+  }
+
+  /******************************************* showRow *******************************************/
+  public void showRow( int rowIndex )
+  {
+    // if already shown do nothing
+    int oldHeight = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
+    if ( oldHeight > 0 )
       return;
 
     m_rowHeights.put( rowIndex, -oldHeight );
@@ -539,9 +522,9 @@ public class Table extends TableDisplay
   /******************************************* moveRow *******************************************/
   public void moveRow( int oldPos, int newPos )
   {
-    // move row index from old position to new position
-    int index = m_rowIndexes.remove( oldPos );
-    m_rowIndexes.add( newPos, index );
+    // move row from old position to new position
+
+    // TODO
   }
 
   /************************************** clearAllSelection **************************************/
@@ -559,30 +542,30 @@ public class Table extends TableDisplay
   }
 
   /***************************************** isSelected ******************************************/
-  public boolean isSelected( int columnPos, int rowPos )
+  public boolean isSelected( int columnPos, int row )
   {
     // return true if specified body cell is selected
-    return m_selected.contains( columnPos * SELECT_HASH + rowPos );
+    return m_selected.contains( columnPos * SELECT_HASH + row );
   }
 
   /************************************ doesRowHaveSelection *************************************/
-  public boolean doesRowHaveSelection( int rowPos )
+  public boolean doesRowHaveSelection( int row )
   {
     // return true if any selected body cells on specified row
     for ( int hash : m_selected )
-      if ( hash % SELECT_HASH == rowPos )
+      if ( hash % SELECT_HASH == row )
         return true;
 
     return false;
   }
 
   /************************************** isRowAllSelected ***************************************/
-  public boolean isRowAllSelected( int rowPos )
+  public boolean isRowAllSelected( int row )
   {
     // return true if every body cell in row is selected
     int num = getDataSource().getColumnCount();
     for ( int columnPos = 0; columnPos < num; columnPos++ )
-      if ( !isSelected( columnPos, rowPos ) )
+      if ( !isSelected( columnPos, row ) )
         return false;
 
     return true;
@@ -604,34 +587,34 @@ public class Table extends TableDisplay
   {
     // return true if every body cell in column is selected
     int num = getDataSource().getRowCount();
-    for ( int rowPos = 0; rowPos < num; rowPos++ )
-      if ( !isSelected( columnPos, rowPos ) )
+    for ( int row = 0; row < num; row++ )
+      if ( !isSelected( columnPos, row ) )
         return false;
 
     return true;
   }
 
   /**************************************** setSelection *****************************************/
-  public void setSelection( int columnPos, int rowPos, boolean selected )
+  public void setSelection( int columnPos, int row, boolean selected )
   {
     // set whether specified body cell is selected
     if ( selected )
-      m_selected.add( columnPos * SELECT_HASH + rowPos );
+      m_selected.add( columnPos * SELECT_HASH + row );
     else
-      m_selected.remove( columnPos * SELECT_HASH + rowPos );
+      m_selected.remove( columnPos * SELECT_HASH + row );
   }
 
   /*************************************** setRowSelection ***************************************/
-  public void setRowSelection( int rowPos, boolean selected )
+  public void setRowSelection( int row, boolean selected )
   {
     // set whether specified table row is selected
     int num = getDataSource().getColumnCount();
     if ( selected )
       for ( int columnPos = 0; columnPos < num; columnPos++ )
-        m_selected.add( columnPos * SELECT_HASH + rowPos );
+        m_selected.add( columnPos * SELECT_HASH + row );
     else
       for ( int columnPos = 0; columnPos < num; columnPos++ )
-        m_selected.remove( columnPos * SELECT_HASH + rowPos );
+        m_selected.remove( columnPos * SELECT_HASH + row );
   }
 
   /************************************* setColumnSelection **************************************/
@@ -640,11 +623,11 @@ public class Table extends TableDisplay
     // set whether specified table column is selected
     int num = getDataSource().getRowCount();
     if ( selected )
-      for ( int rowPos = 0; rowPos < num; rowPos++ )
-        m_selected.add( columnPos * SELECT_HASH + rowPos );
+      for ( int row = 0; row < num; row++ )
+        m_selected.add( columnPos * SELECT_HASH + row );
     else
-      for ( int rowPos = 0; rowPos < num; rowPos++ )
-        m_selected.remove( columnPos * SELECT_HASH + rowPos );
+      for ( int row = 0; row < num; row++ )
+        m_selected.remove( columnPos * SELECT_HASH + row );
   }
 
   /****************************************** writeXML *******************************************/
@@ -684,7 +667,6 @@ public class Table extends TableDisplay
       if ( m_rowCollapsed.contains( rowIndex ) )
         xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
 
-      xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getRowPositionByIndex( rowIndex ) ) );
       xsw.writeEndElement(); // XML_ROW
     }
     xsw.writeEndElement(); // XML_ROWS
@@ -810,9 +792,6 @@ public class Table extends TableDisplay
                   if ( Boolean.parseBoolean( xsr.getAttributeValue( i ) ) )
                     m_rowCollapsed.add( id );
                   break;
-                case XmlLabels.XML_POSITION:
-                  m_rowIndexes.set( Integer.parseInt( xsr.getAttributeValue( i ) ), id );
-                  break;
                 default:
                   JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
                   break;
@@ -887,6 +866,78 @@ public class Table extends TableDisplay
   {
     // TODO Auto-generated method stub
     JPlanner.trace( "NOT YET IMPLEMENTED!" );
+  }
+
+  /*************************************** isRowCollapsed ****************************************/
+  public boolean isRowCollapsed( int row )
+  {
+    // return true if the summary on specified row is collapsed
+    return m_rowCollapsed.contains( row );
+  }
+
+  /************************************* getNonNullRowBelow **************************************/
+  public int getNonNullRowBelow( int row )
+  {
+    // return row number below specified row which has a non-null column 0 value, or -1
+    int rowCount = m_data.getRowCount();
+    while ( ++row < rowCount && m_data.getCellText( 0, row ) == null )
+      ;
+
+    if ( row < rowCount )
+      return row;
+
+    return -1;
+  }
+
+  /**************************************** collapsedRow *****************************************/
+  public void collapsedRow( int summaryRow )
+  {
+    // collapse summary on specified row
+    int indent = m_data.getCellIndent( 0, summaryRow );
+    int endRow = summaryRow;
+
+    while ( true )
+    {
+      int rowBelow = getNonNullRowBelow( endRow );
+      if ( rowBelow < 0 || m_data.getCellIndent( 0, rowBelow ) <= indent )
+        break;
+      endRow = rowBelow;
+    }
+
+    // hide all rows below start until end
+    for ( int row = summaryRow + 1; row <= endRow; row++ )
+      hideRow( row );
+
+    // mark summary as collapsed
+    m_rowCollapsed.add( summaryRow );
+  }
+
+  /****************************************** expandRow ******************************************/
+  public void expandRow( int summaryRow )
+  {
+    // expand summary on specified row
+    int indent = m_data.getCellIndent( 0, summaryRow );
+    int endRow = summaryRow;
+
+    while ( true )
+    {
+      int rowBelow = getNonNullRowBelow( endRow );
+      if ( rowBelow < 0 || m_data.getCellIndent( 0, rowBelow ) <= indent )
+        break;
+      endRow = rowBelow;
+    }
+
+    // expand all rows below start until end
+    for ( int row = summaryRow + 1; row <= endRow; row++ )
+      showRow( row );
+
+    // collapse any sub-summaries which were previously collapsed
+    for ( int row = summaryRow + 1; row <= endRow; row++ )
+      if ( isRowCollapsed( row ) )
+        collapsedRow( row );
+
+    // remove summary collapsed mark
+    m_rowCollapsed.remove( summaryRow );
   }
 
 }

@@ -55,10 +55,10 @@ public class XScrollBar extends ScrollBar
     }
     else
     {
-      int rowPos = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() );
-      int newy = m_table.getYStartByRowPosition( rowPos );
+      int row = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() );
+      int newy = m_table.getYStartByRow( row );
       while ( newy <= m_table.getHorizontalHeaderHeight() )
-        newy += m_table.getHeightByRowPosition( rowPos++ );
+        newy += m_table.getHeightByRow( row++ );
 
       double value = getValue() + newy - m_table.getHorizontalHeaderHeight();
       m_table.animate( valueProperty(), (int) ( value < getMax() ? value : getMax() ), 100 );
@@ -80,8 +80,8 @@ public class XScrollBar extends ScrollBar
     }
     else
     {
-      int rowPos = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() - 1 );
-      int newy = m_table.getYStartByRowPosition( rowPos );
+      int row = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() - 1 );
+      int newy = m_table.getYStartByRow( row );
 
       double value = getValue() + newy - m_table.getHorizontalHeaderHeight();
       m_table.animate( valueProperty(), (int) ( value > 0.0 ? value : 0 ), 100 );

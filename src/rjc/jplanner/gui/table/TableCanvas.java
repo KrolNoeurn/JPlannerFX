@@ -60,31 +60,31 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static final String ELLIPSIS            = "...";          // ellipsis to show text has been truncated
-  public static final int    CELL_PADDING        = 4;              // cell padding for text left & right edges
-  private static final int   PROXIMITY           = 4;              // used to distinguish resize from reorder
-  private static final int   INDENT              = 14;             // cell left padding per indent level 
+  public static final String ELLIPSIS         = "...";          // ellipsis to show text has been truncated
+  public static final int    CELL_PADDING     = 4;              // cell padding for text left & right edges
+  private static final int   PROXIMITY        = 4;              // used to distinguish resize from reorder
+  private static final int   INDENT           = 14;             // cell left padding per indent level 
 
-  public static final Cursor CURSOR_H_RESIZE     = Cursor.H_RESIZE;
-  public static final Cursor CURSOR_V_RESIZE     = Cursor.V_RESIZE;
-  public static final Cursor CURSOR_DEFAULT      = Cursor.DEFAULT;
+  public static final Cursor CURSOR_H_RESIZE  = Cursor.H_RESIZE;
+  public static final Cursor CURSOR_V_RESIZE  = Cursor.V_RESIZE;
+  public static final Cursor CURSOR_DEFAULT   = Cursor.DEFAULT;
   public static Cursor       CURSOR_DOWNARROW;
   public static Cursor       CURSOR_RIGHTARROW;
   public static Cursor       CURSOR_CROSS;
 
-  private Table              m_table;                              // table defining this table canvas
-  private int                m_x;                                  // last mouse move/drag x
-  private int                m_y;                                  // last mouse move/drag y
-  private int                m_columnPos;                          // last mouse move or reorder column position
-  private int                m_rowPos;                             // last mouse move or reorder row position
-  private int                m_offset;                             // x or y resize/reorder offset
-  private int                m_selectedColumnPos = -1;             // column of last single cell selected
-  private int                m_selectedRowPos    = -1;             // row of last single cell selected
-  private int                m_index             = -1;             // column or row index for resize or reorder
-  private Canvas             m_reorderSlider;                      // visual slider for when reordering
-  private Canvas             m_reorderMarker;                      // visual marker for new position when reordering
+  private Table              m_table;                           // table defining this table canvas
+  private int                m_x;                               // last mouse move/drag x
+  private int                m_y;                               // last mouse move/drag y
+  private int                m_column;                          // last mouse move or reorder column position
+  private int                m_row;                             // last mouse move or reorder row position
+  private int                m_offset;                          // x or y resize/reorder offset
+  private int                m_selectedColumn = -1;             // column of last single cell selected
+  private int                m_selectedRow    = -1;             // row of last single cell selected
+  private int                m_index          = -1;             // column or row index for resize or reorder
+  private Canvas             m_reorderSlider;                   // visual slider for when reordering
+  private Canvas             m_reorderMarker;                   // visual marker for new position when reordering
 
-  public boolean             redrawn;                              // set true if has table be totally redrawn recently
+  public boolean             redrawn;                           // set true if has table be totally redrawn recently
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -165,11 +165,11 @@ public class TableCanvas extends Canvas
     // check if any vertical header needs to be drawn
     if ( oldW <= headerWidth )
     {
-      int row1 = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() );
-      int row2 = m_table.getRowPositionAtY( (int) getHeight() );
+      int row1 = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() );
+      int row2 = m_table.getRowAtY( (int) getHeight() );
 
-      for ( int rowPos = row1; rowPos <= row2; rowPos++ )
-        drawRowHeader( rowPos );
+      for ( int row = row1; row <= row2; row++ )
+        drawRowHeader( row );
 
       drawHeaderCorner();
     }
@@ -197,18 +197,18 @@ public class TableCanvas extends Canvas
     // check if any rows need to be drawn 
     if ( newH > headerHeight )
     {
-      int row1 = m_table.getRowPositionAtY( oldH < headerHeight ? headerHeight : oldH );
-      int row2 = m_table.getRowPositionAtY( newH );
-      oldH = m_table.getYStartByRowPosition( row1 );
+      int row1 = m_table.getRowAtY( oldH < headerHeight ? headerHeight : oldH );
+      int row2 = m_table.getRowAtY( newH );
+      oldH = m_table.getYStartByRow( row1 );
 
       // draw column cells
       if ( getWidth() > m_table.getVerticalHeaderWidth() )
-        for ( int rowPos = row1; rowPos <= row2; rowPos++ )
-          drawRowCells( rowPos );
+        for ( int row = row1; row <= row2; row++ )
+          drawRowCells( row );
 
       // draw vertical header
-      for ( int rowPos = row1; rowPos <= row2; rowPos++ )
-        drawRowHeader( rowPos );
+      for ( int row = row1; row <= row2; row++ )
+        drawRowHeader( row );
     }
 
     // check if any horizontal header needs to be drawn
@@ -233,28 +233,28 @@ public class TableCanvas extends Canvas
       return;
 
     // draw column cells on canvas
-    int row1 = m_table.getRowPositionAtY( m_table.getHorizontalHeaderHeight() );
-    int row2 = m_table.getRowPositionAtY( (int) getHeight() );
+    int row1 = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() );
+    int row2 = m_table.getRowAtY( (int) getHeight() );
 
     int x = m_table.getXStartByColumnPosition( columnPos );
-    int y = m_table.getYStartByRowPosition( row1 );
+    int y = m_table.getYStartByRow( row1 );
 
-    for ( int rowPos = row1; rowPos <= row2; rowPos++ )
+    for ( int row = row1; row <= row2; row++ )
     {
-      int h = m_table.getHeightByRowPosition( rowPos );
+      int h = m_table.getHeightByRow( row );
       if ( h > 0 )
       {
-        drawCell( x, y, w, h, columnPos, rowPos );
+        drawCell( x, y, w, h, columnPos, row );
         y += h;
       }
     }
   }
 
   /**************************************** drawRowCells *****************************************/
-  private void drawRowCells( int rowPos )
+  private void drawRowCells( int row )
   {
     // do not draw hidden rows
-    int h = m_table.getHeightByRowPosition( rowPos );
+    int h = m_table.getHeightByRow( row );
     if ( h <= 0 )
       return;
 
@@ -263,30 +263,29 @@ public class TableCanvas extends Canvas
     int column2 = m_table.getColumnPositionAtX( (int) getWidth() );
 
     int x = m_table.getXStartByColumnPosition( column1 );
-    int y = m_table.getYStartByRowPosition( rowPos );
+    int y = m_table.getYStartByRow( row );
 
     for ( int columnPos = column1; columnPos <= column2; columnPos++ )
     {
       int w = m_table.getWidthByColumnPosition( columnPos );
       if ( w > 0 )
       {
-        drawCell( x, y, w, h, columnPos, rowPos );
+        drawCell( x, y, w, h, columnPos, row );
         x += w;
       }
     }
   }
 
   /****************************************** drawCell *******************************************/
-  private void drawCell( int x, int y, int w, int h, int columnPos, int rowPos )
+  private void drawCell( int x, int y, int w, int h, int columnPos, int row )
   {
     // draw body cell
     GraphicsContext gc = getGraphicsContext2D();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    int rowIndex = m_table.getRowIndexByPosition( rowPos );
 
     // fill
-    boolean m_selected = m_table.isSelected( columnPos, rowPos );
-    Paint color = m_table.getDataSource().getCellBackground( columnIndex, rowIndex );
+    boolean m_selected = m_table.isSelected( columnPos, row );
+    Paint color = m_table.getDataSource().getCellBackground( columnIndex, row );
     if ( m_selected && color == Colors.NORMAL_HEADER )
       gc.setFill( Colors.SELECTED_HEADER );
     else if ( m_selected )
@@ -301,54 +300,60 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, y + h - 0.5, x + w - 0.5, y + h - 0.5 );
 
     // text
-    String text = m_table.getDataSource().getCellText( columnIndex, rowIndex );
-    Font font = m_table.getDataSource().getCellFont( columnIndex, rowIndex );
-    int indent = m_table.getDataSource().getCellIndent( columnIndex, rowIndex );
-
+    String text = m_table.getDataSource().getCellText( columnIndex, row );
     if ( text != null )
     {
+      Font font = m_table.getDataSource().getCellFont( columnIndex, row );
       if ( font != null )
         gc.setFont( font );
 
-      Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, rowIndex );
+      // text alignment and colour
+      int indent = m_table.getDataSource().getCellIndent( columnIndex, row );
+      Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, row );
       ArrayList<TextLine> lines = getTextLines( text, font, alignment, w - indent * INDENT, h );
       if ( m_selected )
         gc.setFill( Colors.SELECTED_TEXT );
       else
         gc.setFill( Colors.NORMAL_TEXT );
 
+      // draw text
       gc.setFontSmoothingType( FontSmoothingType.LCD );
       x += indent * INDENT;
       for ( TextLine line : lines )
         gc.fillText( line.txt, x + line.x, y + line.y );
 
+      // draw expand-hide marker
       if ( indent > 0 )
       {
-        gc.setStroke( gc.getFill() );
-        double xx = x - 5.0;
-        double yy = y + h / 2 - 1.0;
-        gc.strokeRect( xx - 4.5, yy - 4.5, 9.0, 9.0 );
-        gc.strokeRect( xx - 2.5, yy - 0.5, 5.0, 1.0 );
-        gc.strokeRect( xx - 0.5, yy - 2.5, 1.0, 5.0 );
+        int rowBelow = m_table.getNonNullRowBelow( row );
+        if ( rowBelow > 0 && m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
+        {
+          gc.setStroke( gc.getFill() );
+          double xx = x - 5.0;
+          double yy = y + h / 2 - 1.0;
+          gc.strokeRect( xx - 4.5, yy - 4.5, 9.0, 9.0 );
+          gc.strokeRect( xx - 2.5, yy - 0.5, 5.0, 1.0 );
+          if ( m_table.isRowCollapsed( row ) )
+            gc.strokeRect( xx - 0.5, yy - 2.5, 1.0, 5.0 );
+        }
       }
     }
   }
 
   /**************************************** drawRowHeader ****************************************/
-  private void drawRowHeader( int rowPos )
+  private void drawRowHeader( int rowIndex )
   {
     // do not draw hidden rows
-    int h = m_table.getHeightByRowPosition( rowPos );
+    int h = m_table.getHeightByRow( rowIndex );
     if ( h <= 0 )
       return;
 
     // draw row header
     GraphicsContext gc = getGraphicsContext2D();
-    int y = m_table.getYStartByRowPosition( rowPos );
+    int y = m_table.getYStartByRow( rowIndex );
     int w = m_table.getVerticalHeaderWidth();
-    int rowIndex = m_table.getRowIndexByPosition( rowPos );
     String text = m_table.getDataSource().getRowTitle( rowIndex );
-    boolean selected = m_table.doesRowHaveSelection( rowPos );
+    boolean selected = m_table.doesRowHaveSelection( rowIndex );
 
     drawRowHeaderCell( gc, y, w, h, text, selected );
   }
@@ -625,12 +630,12 @@ public class TableCanvas extends Canvas
     if ( m_reorderMarker != null )
       if ( getCursor() == CURSOR_DOWNARROW )
       {
-        m_columnPos = m_table.getColumnPositionAtX( m_x );
-        int x = m_table.getXStartByColumnPosition( m_columnPos );
-        int w = m_table.getWidthByColumnPosition( m_columnPos );
+        m_column = m_table.getColumnPositionAtX( m_x );
+        int x = m_table.getXStartByColumnPosition( m_column );
+        int w = m_table.getWidthByColumnPosition( m_column );
         if ( m_x > x + w / 2 )
         {
-          m_columnPos++;
+          m_column++;
           x += w;
         }
         m_reorderMarker.setTranslateX( x - m_reorderMarker.getWidth() / 2.0 );
@@ -642,12 +647,12 @@ public class TableCanvas extends Canvas
       }
       else
       {
-        m_rowPos = m_table.getRowPositionAtY( m_y );
-        int y = m_table.getYStartByRowPosition( m_rowPos );
-        int h = m_table.getHeightByRowPosition( m_rowPos );
+        m_row = m_table.getRowAtY( m_y );
+        int y = m_table.getYStartByRow( m_row );
+        int h = m_table.getHeightByRow( m_row );
         if ( m_y > y + h / 2 )
         {
-          m_rowPos++;
+          m_row++;
           y += h;
         }
         m_reorderMarker.setTranslateY( y - m_reorderMarker.getHeight() / 2.0 );
@@ -666,8 +671,8 @@ public class TableCanvas extends Canvas
     if ( m_index < 0 )
     {
       // start reorder
-      m_index = m_table.getRowIndexByPosition( m_rowPos );
-      m_offset = m_y - m_table.getYStartByRowPosition( m_rowPos );
+      m_index = m_row;
+      m_offset = m_y - m_table.getYStartByRow( m_row );
       m_table.clearAllSelection();
       redrawAll();
 
@@ -704,8 +709,8 @@ public class TableCanvas extends Canvas
     if ( m_index < 0 )
     {
       // start reorder
-      m_index = m_table.getColumnIndexByPosition( m_columnPos );
-      m_offset = m_x - m_table.getXStartByColumnPosition( m_columnPos );
+      m_index = m_table.getColumnIndexByPosition( m_column );
+      m_offset = m_x - m_table.getXStartByColumnPosition( m_column );
       m_table.clearAllSelection();
       redrawAll();
 
@@ -797,16 +802,16 @@ public class TableCanvas extends Canvas
         while ( m_table.getWidthByColumnPosition( leftmost ) <= 0 )
           leftmost++;
 
-        if ( m_selectedColumnPos != leftmost )
+        if ( m_selectedColumn != leftmost )
         {
-          m_selectedColumnPos = leftmost;
-          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          m_selectedColumn = leftmost;
+          m_table.scrollTo( m_selectedColumn, m_selectedRow );
           redraw = true;
         }
         if ( m_table.selectionCount() > 1 || redraw )
         {
           m_table.clearAllSelection();
-          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          m_table.setSelection( m_selectedColumn, m_selectedRow, true );
           redraw = true;
         }
         if ( redraw )
@@ -820,16 +825,16 @@ public class TableCanvas extends Canvas
         while ( m_table.getWidthByColumnPosition( rightmost ) <= 0 )
           rightmost--;
 
-        if ( m_selectedColumnPos != rightmost )
+        if ( m_selectedColumn != rightmost )
         {
-          m_selectedColumnPos = rightmost;
-          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          m_selectedColumn = rightmost;
+          m_table.scrollTo( m_selectedColumn, m_selectedRow );
           redraw = true;
         }
         if ( m_table.selectionCount() > 1 || redraw )
         {
           m_table.clearAllSelection();
-          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          m_table.setSelection( m_selectedColumn, m_selectedRow, true );
           redraw = true;
         }
         if ( redraw )
@@ -847,16 +852,16 @@ public class TableCanvas extends Canvas
       case UP:
       case KP_UP:
         // find visible cell above
-        int above = m_selectedRowPos - 1;
-        while ( m_table.getHeightByRowPosition( above ) <= 0 && above >= 0 )
+        int above = m_selectedRow - 1;
+        while ( m_table.getHeightByRow( above ) <= 0 && above >= 0 )
           above--;
 
         // ensure only cell visible above is selected
         if ( above >= 0 )
-          m_selectedRowPos = above;
+          m_selectedRow = above;
         m_table.clearAllSelection();
-        m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
-        m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+        m_table.setSelection( m_selectedColumn, m_selectedRow, true );
+        m_table.scrollTo( m_selectedColumn, m_selectedRow );
         redrawAll();
         break;
 
@@ -864,16 +869,16 @@ public class TableCanvas extends Canvas
       case KP_DOWN:
         // find visible cell above
         int rows = m_table.getDataSource().getRowCount();
-        int below = m_selectedRowPos + 1;
-        while ( m_table.getHeightByRowPosition( below ) <= 0 && below < rows )
+        int below = m_selectedRow + 1;
+        while ( m_table.getHeightByRow( below ) <= 0 && below < rows )
           below++;
 
         // ensure only cell visible below is selected
         if ( below < rows )
-          m_selectedRowPos = below;
+          m_selectedRow = below;
         m_table.clearAllSelection();
-        m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
-        m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+        m_table.setSelection( m_selectedColumn, m_selectedRow, true );
+        m_table.scrollTo( m_selectedColumn, m_selectedRow );
         redrawAll();
         break;
 
@@ -881,20 +886,20 @@ public class TableCanvas extends Canvas
       case KP_RIGHT:
         // find visible cell to right
         int columns = m_table.getDataSource().getColumnCount();
-        int right = m_selectedColumnPos + 1;
+        int right = m_selectedColumn + 1;
         while ( m_table.getWidthByColumnPosition( right ) <= 0 && right < columns )
           right++;
 
-        if ( right < columns && m_selectedColumnPos != right )
+        if ( right < columns && m_selectedColumn != right )
         {
-          m_selectedColumnPos = right;
-          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          m_selectedColumn = right;
+          m_table.scrollTo( m_selectedColumn, m_selectedRow );
           redraw = true;
         }
         if ( m_table.selectionCount() > 1 || redraw )
         {
           m_table.clearAllSelection();
-          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          m_table.setSelection( m_selectedColumn, m_selectedRow, true );
           redraw = true;
         }
         if ( redraw )
@@ -905,20 +910,20 @@ public class TableCanvas extends Canvas
       case LEFT:
       case KP_LEFT:
         // find visible cell to left
-        int left = m_selectedColumnPos - 1;
+        int left = m_selectedColumn - 1;
         while ( m_table.getWidthByColumnPosition( left ) <= 0 && left >= 0 )
           left--;
 
-        if ( left >= 0 && m_selectedColumnPos != left )
+        if ( left >= 0 && m_selectedColumn != left )
         {
-          m_selectedColumnPos = left;
-          m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+          m_selectedColumn = left;
+          m_table.scrollTo( m_selectedColumn, m_selectedRow );
           redraw = true;
         }
         if ( m_table.selectionCount() > 1 || redraw )
         {
           m_table.clearAllSelection();
-          m_table.setSelection( m_selectedColumnPos, m_selectedRowPos, true );
+          m_table.setSelection( m_selectedColumn, m_selectedRow, true );
           redraw = true;
         }
         if ( redraw )
@@ -942,8 +947,8 @@ public class TableCanvas extends Canvas
     // update cursor for potential column/row resizing or re-ordering
     m_x = (int) event.getX();
     m_y = (int) event.getY();
-    m_columnPos = m_table.getColumnPositionExactAtX( m_x );
-    m_rowPos = m_table.getRowPositionExactAtY( m_y );
+    m_column = m_table.getColumnPositionExactAtX( m_x );
+    m_row = m_table.getRowExactAtY( m_y );
 
     setCursor( CURSOR_CROSS );
     m_index = -1;
@@ -953,18 +958,18 @@ public class TableCanvas extends Canvas
     {
       if ( m_x > m_table.getVerticalHeaderWidth() + PROXIMITY )
       {
-        int start = m_table.getXStartByColumnPosition( m_columnPos );
+        int start = m_table.getXStartByColumnPosition( m_column );
 
         if ( m_x - start < PROXIMITY )
         {
           setCursor( CURSOR_H_RESIZE );
-          m_columnPos--;
-          if ( m_columnPos >= m_table.getDataSource().getColumnCount() )
-            m_columnPos = m_table.getDataSource().getColumnCount() - 1;
+          m_column--;
+          if ( m_column >= m_table.getDataSource().getColumnCount() )
+            m_column = m_table.getDataSource().getColumnCount() - 1;
           return;
         }
 
-        int width = m_table.getWidthByColumnPosition( m_columnPos );
+        int width = m_table.getWidthByColumnPosition( m_column );
         if ( start + width - m_x < PROXIMITY )
         {
           setCursor( CURSOR_H_RESIZE );
@@ -980,18 +985,18 @@ public class TableCanvas extends Canvas
     {
       if ( m_y > m_table.getHorizontalHeaderHeight() + PROXIMITY )
       {
-        int start = m_table.getYStartByRowPosition( m_rowPos );
+        int start = m_table.getYStartByRow( m_row );
 
         if ( m_y - start < PROXIMITY )
         {
           setCursor( CURSOR_V_RESIZE );
-          m_rowPos--;
-          if ( m_rowPos >= m_table.getDataSource().getRowCount() )
-            m_rowPos = m_table.getDataSource().getRowCount() - 1;
+          m_row--;
+          if ( m_row >= m_table.getDataSource().getRowCount() )
+            m_row = m_table.getDataSource().getRowCount() - 1;
           return;
         }
 
-        int height = m_table.getHeightByRowPosition( m_rowPos );
+        int height = m_table.getHeightByRow( m_row );
         if ( start + height - m_y < PROXIMITY )
         {
           setCursor( CURSOR_V_RESIZE );
@@ -1010,6 +1015,22 @@ public class TableCanvas extends Canvas
     if ( m_x >= m_table.getVerticalHeaderWidth() + m_table.getBodyWidth()
         || m_y >= m_table.getHorizontalHeaderHeight() + m_table.getBodyHeight() )
       setCursor( CURSOR_DEFAULT );
+
+    // check for expand/hide markers
+    if ( isExpandHideMarker( m_x, m_y ) )
+      setCursor( CURSOR_DEFAULT );
+  }
+
+  /************************************* isExpandHideMarker **************************************/
+  private boolean isExpandHideMarker( int x, int y )
+  {
+    // TODO Auto-generated method stub
+    int indent = m_table.getDataSource().getCellIndent( m_column, m_row );
+    if ( indent > 0 )
+    {
+
+    }
+    return false;
   }
 
   /***************************************** mouseDragged ****************************************/
@@ -1024,15 +1045,15 @@ public class TableCanvas extends Canvas
     {
       if ( m_index < 0 )
       {
-        m_index = m_table.getColumnIndexByPosition( m_columnPos );
-        m_offset = m_x - m_table.getWidthByColumnPosition( m_columnPos );
+        m_index = m_table.getColumnIndexByPosition( m_column );
+        m_offset = m_x - m_table.getWidthByColumnPosition( m_column );
       }
 
       m_table.setWidthByColumnIndex( m_index, m_x - m_offset );
       redrawn = false;
       m_table.setCanvasScrollBars();
       if ( !redrawn )
-        drawWidth( m_table.getXStartByColumnPosition( m_columnPos ), (int) getWidth() );
+        drawWidth( m_table.getXStartByColumnPosition( m_column ), (int) getWidth() );
       return;
     }
 
@@ -1041,15 +1062,15 @@ public class TableCanvas extends Canvas
     {
       if ( m_index < 0 )
       {
-        m_index = m_table.getRowIndexByPosition( m_rowPos );
-        m_offset = m_y - m_table.getHeightByRowPosition( m_rowPos );
+        m_index = m_row;
+        m_offset = m_y - m_table.getHeightByRow( m_row );
       }
 
       m_table.setHeightByRowIndex( m_index, m_y - m_offset );
       redrawn = false;
       m_table.setCanvasScrollBars();
       if ( !redrawn )
-        drawHeight( m_table.getYStartByRowPosition( m_rowPos ), (int) getHeight() );
+        drawHeight( m_table.getYStartByRow( m_row ), (int) getHeight() );
       return;
     }
 
@@ -1065,14 +1086,14 @@ public class TableCanvas extends Canvas
     if ( getCursor() == CURSOR_CROSS && event.isPrimaryButtonDown() && !event.isAltDown() )
     {
       int columnPos = m_table.getColumnPositionAtX( m_x );
-      int rowPos = m_table.getRowPositionAtY( m_y );
+      int rowPos = m_table.getRowAtY( m_y );
       m_table.scrollTo( columnPos, rowPos );
 
       m_table.clearAllSelection();
-      int column1 = Math.min( columnPos, m_selectedColumnPos );
-      int column2 = Math.max( columnPos, m_selectedColumnPos );
-      int row1 = Math.min( rowPos, m_selectedRowPos );
-      int row2 = Math.max( rowPos, m_selectedRowPos );
+      int column1 = Math.min( columnPos, m_selectedColumn );
+      int column2 = Math.max( columnPos, m_selectedColumn );
+      int row1 = Math.min( rowPos, m_selectedRow );
+      int row2 = Math.max( rowPos, m_selectedRow );
       for ( int column = column1; column <= column2; column++ )
         for ( int row = row1; row <= row2; row++ )
           m_table.setSelection( column, row, true );
@@ -1099,10 +1120,10 @@ public class TableCanvas extends Canvas
         m_reorderMarker = null;
 
         int oldPos = m_table.getColumnPositionByIndex( m_index );
-        if ( m_columnPos < oldPos )
-          m_table.moveColumn( oldPos, m_columnPos );
-        if ( m_columnPos > oldPos + 1 )
-          m_table.moveColumn( oldPos, m_columnPos - 1 );
+        if ( m_column < oldPos )
+          m_table.moveColumn( oldPos, m_column );
+        if ( m_column > oldPos + 1 )
+          m_table.moveColumn( oldPos, m_column - 1 );
         redrawAll();
       }
       else
@@ -1111,24 +1132,24 @@ public class TableCanvas extends Canvas
         if ( event.isAltDown() )
           return;
 
-        int column1 = m_columnPos;
-        int column2 = m_columnPos;
+        int column1 = m_column;
+        int column2 = m_column;
         boolean select = true;
 
         if ( !event.isControlDown() && !event.isShiftDown() )
           m_table.clearAllSelection();
 
-        if ( event.isShiftDown() && m_selectedColumnPos >= 0 )
+        if ( event.isShiftDown() && m_selectedColumn >= 0 )
         {
-          column1 = Math.min( m_columnPos, m_selectedColumnPos );
-          column2 = Math.max( m_columnPos, m_selectedColumnPos );
+          column1 = Math.min( m_column, m_selectedColumn );
+          column2 = Math.max( m_column, m_selectedColumn );
         }
 
         if ( event.isControlDown() && !event.isShiftDown() )
-          select = !m_table.isColumnAllSelected( m_columnPos );
+          select = !m_table.isColumnAllSelected( m_column );
 
-        m_selectedColumnPos = m_columnPos;
-        m_selectedRowPos = 0;
+        m_selectedColumn = m_column;
+        m_selectedRow = 0;
         for ( int column = column1; column <= column2; column++ )
           m_table.setColumnSelection( column, select );
         redrawAll();
@@ -1147,11 +1168,11 @@ public class TableCanvas extends Canvas
         m_reorderSlider = null;
         m_reorderMarker = null;
 
-        int oldPos = m_table.getRowPositionByIndex( m_index );
-        if ( m_rowPos < oldPos )
-          m_table.moveRow( oldPos, m_rowPos );
-        if ( m_rowPos > oldPos + 1 )
-          m_table.moveRow( oldPos, m_rowPos - 1 );
+        int oldPos = m_index;
+        if ( m_row < oldPos )
+          m_table.moveRow( oldPos, m_row );
+        if ( m_row > oldPos + 1 )
+          m_table.moveRow( oldPos, m_row - 1 );
         redrawAll();
       }
       else
@@ -1160,24 +1181,24 @@ public class TableCanvas extends Canvas
         if ( event.isAltDown() )
           return;
 
-        int row1 = m_rowPos;
-        int row2 = m_rowPos;
+        int row1 = m_row;
+        int row2 = m_row;
         boolean select = true;
 
         if ( !event.isControlDown() && !event.isShiftDown() )
           m_table.clearAllSelection();
 
-        if ( event.isShiftDown() && m_selectedRowPos >= 0 )
+        if ( event.isShiftDown() && m_selectedRow >= 0 )
         {
-          row1 = Math.min( m_rowPos, m_selectedRowPos );
-          row2 = Math.max( m_rowPos, m_selectedRowPos );
+          row1 = Math.min( m_row, m_selectedRow );
+          row2 = Math.max( m_row, m_selectedRow );
         }
 
         if ( event.isControlDown() && !event.isShiftDown() )
-          select = !m_table.isRowAllSelected( m_rowPos );
+          select = !m_table.isRowAllSelected( m_row );
 
-        m_selectedColumnPos = 0;
-        m_selectedRowPos = m_rowPos;
+        m_selectedColumn = 0;
+        m_selectedRow = m_row;
         for ( int row = row1; row <= row2; row++ )
           m_table.setRowSelection( row, select );
         redrawAll();
@@ -1198,15 +1219,15 @@ public class TableCanvas extends Canvas
     if ( getCursor() == CURSOR_CROSS && event.isPrimaryButtonDown() && !event.isAltDown() )
     {
       // scroll to cell
-      m_table.scrollTo( m_columnPos, m_rowPos );
+      m_table.scrollTo( m_column, m_row );
 
       // no shift + no control = select single cell
       if ( !event.isControlDown() && !event.isShiftDown() )
       {
-        m_selectedColumnPos = m_columnPos;
-        m_selectedRowPos = m_rowPos;
+        m_selectedColumn = m_column;
+        m_selectedRow = m_row;
         m_table.clearAllSelection();
-        m_table.setSelection( m_columnPos, m_rowPos, true );
+        m_table.setSelection( m_column, m_row, true );
         redrawAll();
         return;
       }
@@ -1214,18 +1235,18 @@ public class TableCanvas extends Canvas
       // control + no shift = toggle single cell
       if ( event.isControlDown() && !event.isShiftDown() )
       {
-        boolean wasSelected = m_table.isSelected( m_columnPos, m_rowPos );
+        boolean wasSelected = m_table.isSelected( m_column, m_row );
         if ( !wasSelected )
         {
-          m_selectedColumnPos = m_columnPos;
-          m_selectedRowPos = m_rowPos;
+          m_selectedColumn = m_column;
+          m_selectedRow = m_row;
         }
         else
         {
-          m_selectedColumnPos = -1;
-          m_selectedRowPos = -1;
+          m_selectedColumn = -1;
+          m_selectedRow = -1;
         }
-        m_table.setSelection( m_columnPos, m_rowPos, !wasSelected );
+        m_table.setSelection( m_column, m_row, !wasSelected );
         redrawAll();
         return;
       }
@@ -1233,17 +1254,17 @@ public class TableCanvas extends Canvas
       // shift = select rectangular area between previous selected cell and this 
       if ( event.isShiftDown() )
       {
-        if ( m_selectedColumnPos < 0 || m_selectedRowPos < 0 )
+        if ( m_selectedColumn < 0 || m_selectedRow < 0 )
         {
-          m_selectedColumnPos = m_columnPos;
-          m_selectedRowPos = m_rowPos;
+          m_selectedColumn = m_column;
+          m_selectedRow = m_row;
         }
 
         m_table.clearAllSelection();
-        int column1 = Math.min( m_columnPos, m_selectedColumnPos );
-        int column2 = Math.max( m_columnPos, m_selectedColumnPos );
-        int row1 = Math.min( m_rowPos, m_selectedRowPos );
-        int row2 = Math.max( m_rowPos, m_selectedRowPos );
+        int column1 = Math.min( m_column, m_selectedColumn );
+        int column2 = Math.max( m_column, m_selectedColumn );
+        int row1 = Math.min( m_row, m_selectedRow );
+        int row2 = Math.max( m_row, m_selectedRow );
         for ( int column = column1; column <= column2; column++ )
           for ( int row = row1; row <= row2; row++ )
             m_table.setSelection( column, row, true );
@@ -1277,12 +1298,12 @@ public class TableCanvas extends Canvas
   private void openCellEditor( Object value )
   {
     // scroll to cell
-    m_table.scrollTo( m_selectedColumnPos, m_selectedRowPos );
+    m_table.scrollTo( m_selectedColumn, m_selectedRow );
     m_table.finishAnimation();
 
     // open cell editor for currently selected table cell
-    int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumnPos );
-    int rowIndex = m_table.getRowIndexByPosition( m_selectedRowPos );
+    int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumn );
+    int rowIndex = m_selectedRow;
     AbstractCellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
 
     // open editor if one available

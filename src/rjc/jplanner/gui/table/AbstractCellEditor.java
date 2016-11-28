@@ -157,10 +157,9 @@ abstract public class AbstractCellEditor
     int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
     int h = m_table.getHeightByRowIndex( m_rowIndex ) + 1;
     int columnPos = m_table.getColumnPositionByIndex( m_columnIndex );
-    int rowPos = m_table.getRowPositionByIndex( m_rowIndex );
 
     m_control.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
-    m_control.setLayoutY( m_table.getYStartByRowPosition( rowPos ) - 1 );
+    m_control.setLayoutY( m_table.getYStartByRow( m_rowIndex ) - 1 );
     m_control.setMaxSize( w, h );
     m_control.setMinSize( w, h );
 
