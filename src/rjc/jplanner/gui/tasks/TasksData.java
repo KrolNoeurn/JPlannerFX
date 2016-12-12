@@ -20,6 +20,7 @@ package rjc.jplanner.gui.tasks;
 
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.Colors;
@@ -172,8 +173,11 @@ public class TasksData implements ITableDataSource
   @Override
   public Font getCellFont( int columnIndex, int rowIndex )
   {
-    // return cell display font
-    return null;
+    // return cell display font, bold for summary tasks
+    if ( JPlanner.plan.task( rowIndex ).isSummary() )
+      return Font.font( Font.getDefault().getFamily(), FontWeight.BOLD, Font.getDefault().getSize() );
+
+    return Font.getDefault();
   }
 
   /**************************************** getCellIndent ****************************************/

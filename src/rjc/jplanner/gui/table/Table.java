@@ -444,14 +444,14 @@ public class Table extends TableDisplay
   /********************************** getColumnIndexByPosition ***********************************/
   public int getColumnIndexByPosition( int columnPos )
   {
-    // return column index from position
+    // return column index from position (faster)
     return m_columnIndexes.get( columnPos );
   }
 
   /********************************** getColumnPositionByIndex ***********************************/
   public int getColumnPositionByIndex( int columnIndex )
   {
-    // return column position from index
+    // return column position from index (slower)
     return m_columnIndexes.indexOf( columnIndex );
   }
 
@@ -878,7 +878,7 @@ public class Table extends TableDisplay
   /************************************* getNonNullRowBelow **************************************/
   public int getNonNullRowBelow( int row )
   {
-    // return row number below specified row which has a non-null column 0 value, or -1
+    // return row number below specified row which has a non-null column 0 value, or -1 if none
     int rowCount = m_data.getRowCount();
     while ( ++row < rowCount && m_data.getCellText( 0, row ) == null )
       ;

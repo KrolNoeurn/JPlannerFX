@@ -185,6 +185,9 @@ public class TableDisplay extends TableParent
   {
     // trigger simple complete redraw of table canvas
     m_canvas.redrawAll();
+
+    // ensure reorder marker if exists is correctly positioned due to scrolling
+    m_canvas.setMarkerPosition();
   }
 
   /*********************************** animationScrollVertical ***********************************/

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
 import javafx.scene.canvas.Canvas;
@@ -60,31 +61,31 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static final String ELLIPSIS         = "...";          // ellipsis to show text has been truncated
-  public static final int    CELL_PADDING     = 4;              // cell padding for text left & right edges
-  private static final int   PROXIMITY        = 4;              // used to distinguish resize from reorder
-  private static final int   INDENT           = 14;             // cell left padding per indent level 
+  public static final String  ELLIPSIS          = "...";          // ellipsis to show text has been truncated
+  public static final int     CELL_PADDING      = 4;              // cell padding for text left & right edges
+  private static final int    PROXIMITY         = 4;              // used to distinguish resize from reorder
+  private static final int    INDENT            = 14;             // cell left padding per indent level 
 
-  public static final Cursor CURSOR_H_RESIZE  = Cursor.H_RESIZE;
-  public static final Cursor CURSOR_V_RESIZE  = Cursor.V_RESIZE;
-  public static final Cursor CURSOR_DEFAULT   = Cursor.DEFAULT;
-  public static Cursor       CURSOR_DOWNARROW;
-  public static Cursor       CURSOR_RIGHTARROW;
-  public static Cursor       CURSOR_CROSS;
+  private static final Cursor CURSOR_H_RESIZE   = Cursor.H_RESIZE;
+  private static final Cursor CURSOR_V_RESIZE   = Cursor.V_RESIZE;
+  private static final Cursor CURSOR_DEFAULT    = Cursor.DEFAULT;
+  private static Cursor       CURSOR_DOWNARROW;
+  private static Cursor       CURSOR_RIGHTARROW;
+  private static Cursor       CURSOR_CROSS;
 
-  private Table              m_table;                           // table defining this table canvas
-  private int                m_x;                               // last mouse move/drag x
-  private int                m_y;                               // last mouse move/drag y
-  private int                m_column;                          // last mouse move or reorder column position
-  private int                m_row;                             // last mouse move or reorder row position
-  private int                m_offset;                          // x or y resize/reorder offset
-  private int                m_selectedColumn = -1;             // column of last single cell selected
-  private int                m_selectedRow    = -1;             // row of last single cell selected
-  private int                m_index          = -1;             // column or row index for resize or reorder
-  private Canvas             m_reorderSlider;                   // visual slider for when reordering
-  private Canvas             m_reorderMarker;                   // visual marker for new position when reordering
+  private Table               m_table;                            // table displaying this table canvas
+  private int                 m_x;                                // last mouse move/drag x
+  private int                 m_y;                                // last mouse move/drag y
+  private int                 m_column;                           // last mouse move or reorder column position
+  private int                 m_row;                              // last mouse move or reorder row position
+  private int                 m_offset;                           // x or y resize/reorder offset
+  private int                 m_selectedColumn  = -1;             // column of last single cell selected
+  private int                 m_selectedRow     = -1;             // row of last single cell selected
+  private int                 m_index           = -1;             // column or row index for resize or reorder
+  private Canvas              m_reorderSlider;                    // visual slider for when reordering
+  private Canvas              m_reorderMarker;                    // visual marker for new position when reordering
 
-  public boolean             redrawn;                           // set true if has table be totally redrawn recently
+  private boolean             m_recentlyRedrawn = false;          // set true if has table be totally redrawn recently
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -122,8 +123,7 @@ public class TableCanvas extends Canvas
   {
     // redraw whole canvas
     drawWidth( 0, (int) getWidth() );
-    setMarkerPosition();
-    redrawn = true;
+    m_recentlyRedrawn = true;
   }
 
   /****************************************** drawWidth ******************************************/
@@ -304,8 +304,7 @@ public class TableCanvas extends Canvas
     if ( text != null )
     {
       Font font = m_table.getDataSource().getCellFont( columnIndex, row );
-      if ( font != null )
-        gc.setFont( font );
+      gc.setFont( font );
 
       // text alignment and colour
       int indent = m_table.getDataSource().getCellIndent( columnIndex, row );
@@ -323,19 +322,23 @@ public class TableCanvas extends Canvas
         gc.fillText( line.txt, x + line.x, y + line.y );
 
       // draw expand-hide marker
-      if ( indent > 0 )
+      Rectangle2D rect = getExpandHideMarkerRectangle( columnIndex, row, indent, x, y, h );
+      if ( rect != null )
       {
-        int rowBelow = m_table.getNonNullRowBelow( row );
-        if ( rowBelow > 0 && m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
-        {
-          gc.setStroke( gc.getFill() );
-          double xx = x - 5.0;
-          double yy = y + h / 2 - 1.0;
-          gc.strokeRect( xx - 4.5, yy - 4.5, 9.0, 9.0 );
-          gc.strokeRect( xx - 2.5, yy - 0.5, 5.0, 1.0 );
-          if ( m_table.isRowCollapsed( row ) )
-            gc.strokeRect( xx - 0.5, yy - 2.5, 1.0, 5.0 );
-        }
+        // draw outer box
+        gc.setStroke( gc.getFill() );
+        gc.strokeRect( rect.getMinX(), rect.getMinY(), rect.getWidth(), rect.getHeight() );
+
+        // determine box centre
+        double cx = rect.getMinX() + rect.getWidth() / 2.0;
+        double cy = rect.getMinY() + rect.getHeight() / 2.0;
+
+        // draw horizontal line (minus)
+        gc.strokeRect( rect.getMinX() + 2.0, cy - 0.5, rect.getWidth() - 4.0, 1.0 );
+
+        // draw vertical line (to make plus) only if row is marked as collapsed        
+        if ( m_table.isRowCollapsed( row ) )
+          gc.strokeRect( cx - 0.5, rect.getMinY() + 2.0, 1.0, rect.getHeight() - 4.0 );
       }
     }
   }
@@ -381,6 +384,7 @@ public class TableCanvas extends Canvas
       gc.setFill( Colors.NORMAL_TEXT );
 
     gc.setFontSmoothingType( FontSmoothingType.LCD );
+    gc.setFont( Font.getDefault() );
     for ( TextLine line : lines )
       gc.fillText( line.txt, line.x, y + line.y );
   }
@@ -427,6 +431,7 @@ public class TableCanvas extends Canvas
       gc.setFill( Colors.NORMAL_TEXT );
 
     gc.setFontSmoothingType( FontSmoothingType.LCD );
+    gc.setFont( Font.getDefault() );
     for ( TextLine line : lines )
       gc.fillText( line.txt, x + line.x, line.y );
   }
@@ -450,25 +455,26 @@ public class TableCanvas extends Canvas
   }
 
   /**************************************** getTextLines *****************************************/
-  private ArrayList<TextLine> getTextLines( String text, Font font, Alignment alignment, double w, double h )
+  private ArrayList<TextLine> getTextLines( String string, Font font, Alignment alignment, double w, double h )
   {
     // initialise variables
     ArrayList<TextLine> lines = new ArrayList<TextLine>();
-    double width = w - 2 * CELL_PADDING;
-    double height = h - CELL_PADDING;
+    final double width = w - 2 * CELL_PADDING;
+    final double height = h - 0.5 * CELL_PADDING;
     double x = CELL_PADDING;
     double y = 0.0;
     Bounds bounds;
     double alignX = 0.0;
     double alignY = 0.0;
+    Text text = new Text();
+    text.setFont( font );
 
     // determine how text needs to be split into lines
-    while ( text != null )
+    while ( string != null )
     {
       TextLine line = new TextLine();
-      bounds = new Text( text ).getLayoutBounds();
-
-      // NEED TO DO SOMETHING WITH FONT - TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      text.setText( string );
+      bounds = text.getLayoutBounds();
 
       if ( bounds.getWidth() <= width )
       {
@@ -478,12 +484,10 @@ public class TableCanvas extends Canvas
         if ( alignment == Alignment.MIDDLE )
           alignX = ( width - bounds.getWidth() ) / 2.0;
 
-        alignY = ( height - ( y + bounds.getHeight() ) ) / 2.0 + bounds.getHeight();
-
-        line.txt = text;
+        line.txt = string;
         line.x = x + alignX;
         line.y = y;
-        text = null;
+        string = null;
       }
       else
       {
@@ -492,13 +496,14 @@ public class TableCanvas extends Canvas
         if ( isLastLine )
         {
           // last line so fit as much as possible with ellipsis on end
-          int cut = text.length();
+          int cut = string.length();
           try
           {
             do
             {
               cut--;
-              bounds = new Text( text.substring( 0, cut ) + ELLIPSIS ).getLayoutBounds();
+              text.setText( string.substring( 0, cut ) + ELLIPSIS );
+              bounds = text.getLayoutBounds();
             }
             while ( bounds.getWidth() > width );
           }
@@ -512,86 +517,89 @@ public class TableCanvas extends Canvas
           if ( alignment == Alignment.MIDDLE )
             alignX = ( width - bounds.getWidth() ) / 2.0;
 
-          alignY = ( height - ( y + bounds.getHeight() ) ) / 2.0 + bounds.getHeight();
-
-          line.txt = text.substring( 0, cut ) + ELLIPSIS;
+          line.txt = string.substring( 0, cut ) + ELLIPSIS;
           line.x = x + alignX;
           line.y = y;
           line.ellipsis = true;
-          text = null;
+          string = null;
         }
         else
         {
           // not last line so break at word end
-          int cut = text.length();
+          int cut = string.length();
           try
           {
             do
             {
               cut--;
-              bounds = new Text( text.substring( 0, cut ) ).getLayoutBounds();
+              text.setText( string.substring( 0, cut ) );
+              bounds = text.getLayoutBounds();
             }
-            while ( bounds.getWidth() > width || !Character.isWhitespace( text.charAt( cut ) ) );
+            while ( bounds.getWidth() > width || !Character.isWhitespace( string.charAt( cut ) ) );
 
             if ( alignment == Alignment.RIGHT )
               alignX = width - bounds.getWidth();
             if ( alignment == Alignment.MIDDLE )
               alignX = ( width - bounds.getWidth() ) / 2.0;
 
-            line.txt = text.substring( 0, cut );
+            line.txt = string.substring( 0, cut );
             line.x = x + alignX;
             line.y = y;
 
-            while ( Character.isWhitespace( text.charAt( cut ) ) )
+            while ( Character.isWhitespace( string.charAt( cut ) ) )
               cut++;
-            text = text.substring( cut );
+            string = string.substring( cut );
           }
           catch ( StringIndexOutOfBoundsException wordTooLong )
           {
             // even one word is too long so don't bother looking for word end
-            cut = text.length();
+            cut = string.length();
             do
             {
               cut--;
-              bounds = new Text( text.substring( 0, cut ) + ELLIPSIS ).getLayoutBounds();
+              text.setText( string.substring( 0, cut ) + ELLIPSIS );
+              bounds = text.getLayoutBounds();
             }
-            while ( bounds.getWidth() > width );
+            while ( bounds.getWidth() > width && cut > 0 );
 
             if ( alignment == Alignment.RIGHT )
               alignX = width - bounds.getWidth();
             if ( alignment == Alignment.MIDDLE )
               alignX = ( width - bounds.getWidth() ) / 2.0;
 
-            line.txt = text.substring( 0, cut ) + ELLIPSIS;
+            line.txt = string.substring( 0, cut ) + ELLIPSIS;
             line.x = x + alignX;
             line.y = y;
             line.ellipsis = true;
 
             try
             {
-              while ( !Character.isWhitespace( text.charAt( cut ) ) )
+              while ( !Character.isWhitespace( string.charAt( cut ) ) )
                 cut++;
-              while ( Character.isWhitespace( text.charAt( cut ) ) )
+              while ( Character.isWhitespace( string.charAt( cut ) ) )
                 cut++;
-              text = text.substring( cut );
+              string = string.substring( cut );
             }
             catch ( StringIndexOutOfBoundsException noWordsRemain )
             {
-              alignY = ( height - ( y + bounds.getHeight() ) ) / 2.0 + bounds.getHeight();
-              text = null;
+              string = null;
             }
           }
 
         }
       }
 
+      alignY = ( h - y + 1 ) / 2.0 + bounds.getMinY() + bounds.getHeight();
+      if ( alignY < bounds.getHeight() / 1.8 )
+        alignY = bounds.getHeight() / 1.8;
+
       lines.add( line );
-      y += bounds.getHeight();
+      y += Math.rint( bounds.getHeight() );
     }
 
     // move all lines down to vertically centre within cell
     for ( TextLine line : lines )
-      line.y += alignY - 3;
+      line.y += alignY;
 
     return lines;
   }
@@ -624,12 +632,13 @@ public class TableCanvas extends Canvas
   }
 
   /************************************** setMarkerPosition **************************************/
-  private void setMarkerPosition()
+  void setMarkerPosition()
   {
     // ensure reorder marker position and visibility is correct
     if ( m_reorderMarker != null )
       if ( getCursor() == CURSOR_DOWNARROW )
       {
+        // vertical reorder marker
         m_column = m_table.getColumnPositionAtX( m_x );
         int x = m_table.getXStartByColumnPosition( m_column );
         int w = m_table.getWidthByColumnPosition( m_column );
@@ -647,6 +656,7 @@ public class TableCanvas extends Canvas
       }
       else
       {
+        // horizontal reorder marker
         m_row = m_table.getRowAtY( m_y );
         int y = m_table.getYStartByRow( m_row );
         int h = m_table.getHeightByRow( m_row );
@@ -676,7 +686,7 @@ public class TableCanvas extends Canvas
       m_table.clearAllSelection();
       redrawAll();
 
-      // create reorder slider
+      // create reorder slider (translucent cell header)
       int h = m_table.getHeightByRowIndex( m_index );
       int w = m_table.getVerticalHeaderWidth();
       String text = m_table.getDataSource().getRowTitle( m_index );
@@ -684,7 +694,7 @@ public class TableCanvas extends Canvas
       drawRowHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
 
-      // create reorder marker
+      // create reorder marker (red horizontal line)
       m_reorderMarker = createReorderMarker();
 
       // add slider & marker to display
@@ -714,7 +724,7 @@ public class TableCanvas extends Canvas
       m_table.clearAllSelection();
       redrawAll();
 
-      // create reorder slider
+      // create reorder slider (translucent cell header)
       int w = m_table.getWidthByColumnIndex( m_index );
       int h = m_table.getHorizontalHeaderHeight();
       String text = m_table.getDataSource().getColumnTitle( m_index );
@@ -722,7 +732,7 @@ public class TableCanvas extends Canvas
       drawColumnHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
 
-      // create reorder marker
+      // create reorder marker (red vertical line)
       m_reorderMarker = createReorderMarker();
 
       // add slider & marker to display
@@ -1017,20 +1027,62 @@ public class TableCanvas extends Canvas
       setCursor( CURSOR_DEFAULT );
 
     // check for expand/hide markers
-    if ( isExpandHideMarker( m_x, m_y ) )
+    if ( isExpandHideMarker() )
       setCursor( CURSOR_DEFAULT );
   }
 
   /************************************* isExpandHideMarker **************************************/
-  private boolean isExpandHideMarker( int x, int y )
+  private boolean isExpandHideMarker()
   {
-    // TODO Auto-generated method stub
-    int indent = m_table.getDataSource().getCellIndent( m_column, m_row );
-    if ( indent > 0 )
-    {
+    // return true if cursor over row expand-hide marker
+    Rectangle2D rect = getExpandHideMarkerRectangle( m_column, m_row );
+    if ( rect != null )
+      return rect.contains( m_x, m_y );
 
-    }
     return false;
+  }
+
+  /******************************** getExpandHideMarkerRectangle ********************************/
+  private Rectangle2D getExpandHideMarkerRectangle( int columnPos, int row )
+  {
+    // return expand-hide marker rectangle, or null if none
+    if ( columnPos < 0 || row < 0 )
+      return null;
+
+    int columnIndex = m_table.getColumnIndexByPosition( columnPos );
+    int indent = m_table.getDataSource().getCellIndent( columnIndex, row );
+    if ( indent <= 0 )
+      return null;
+
+    int rowBelow = m_table.getNonNullRowBelow( row );
+    if ( rowBelow <= 0 )
+      return null;
+
+    if ( m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
+    {
+      double x = m_table.getXStartByColumnPosition( columnPos ) + indent * INDENT;
+      double y = m_table.getYStartByRow( row ) + m_table.getHeightByRow( row ) / 2.0;
+      return new Rectangle2D( x - 8.5, y - 4.5, 9.0, 9.0 );
+    }
+
+    return null;
+  }
+
+  /******************************** getExpandHideMarkerRectangle ********************************/
+  private Rectangle2D getExpandHideMarkerRectangle( int columnIndex, int row, int indent, int x, int y, int h )
+  {
+    // return expand-hide marker rectangle, or null if none
+    if ( indent <= 0 )
+      return null;
+
+    int rowBelow = m_table.getNonNullRowBelow( row );
+    if ( rowBelow <= 0 )
+      return null;
+
+    if ( m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
+      return new Rectangle2D( x - 8.5, y + h / 2 - 4.5, 9.0, 9.0 );
+
+    return null;
   }
 
   /***************************************** mouseDragged ****************************************/
@@ -1050,9 +1102,9 @@ public class TableCanvas extends Canvas
       }
 
       m_table.setWidthByColumnIndex( m_index, m_x - m_offset );
-      redrawn = false;
+      m_recentlyRedrawn = false;
       m_table.setCanvasScrollBars();
-      if ( !redrawn )
+      if ( !m_recentlyRedrawn )
         drawWidth( m_table.getXStartByColumnPosition( m_column ), (int) getWidth() );
       return;
     }
@@ -1067,9 +1119,9 @@ public class TableCanvas extends Canvas
       }
 
       m_table.setHeightByRowIndex( m_index, m_y - m_offset );
-      redrawn = false;
+      m_recentlyRedrawn = false;
       m_table.setCanvasScrollBars();
-      if ( !redrawn )
+      if ( !m_recentlyRedrawn )
         drawHeight( m_table.getYStartByRow( m_row ), (int) getHeight() );
       return;
     }
@@ -1292,6 +1344,18 @@ public class TableCanvas extends Canvas
     // auto-resize row if vertical resize cursor and double click
     if ( getCursor() == CURSOR_V_RESIZE && doubleClicked )
       JPlanner.trace( "TODO - Implement auto-resize row" );
+
+    // expand or collapse rows if expand-hide marker clicked
+    if ( getCursor() == CURSOR_DEFAULT && isExpandHideMarker() )
+    {
+      if ( m_table.isRowCollapsed( m_row ) )
+        m_table.expandRow( m_row );
+      else
+        m_table.collapsedRow( m_row );
+
+      // redraw table from mouse y downwards 
+      drawHeight( m_y, (int) getHeight() );
+    }
   }
 
   /*************************************** openCellEditor ****************************************/

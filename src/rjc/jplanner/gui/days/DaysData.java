@@ -168,7 +168,7 @@ public class DaysData implements ITableDataSource
   public Font getCellFont( int columnIndex, int rowIndex )
   {
     // return cell display font
-    return null;
+    return Font.getDefault();
   }
 
   /**************************************** getCellIndent ****************************************/
