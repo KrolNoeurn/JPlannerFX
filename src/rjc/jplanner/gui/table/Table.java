@@ -21,6 +21,7 @@ package rjc.jplanner.gui.table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -628,6 +629,18 @@ public class Table extends TableDisplay
     else
       for ( int row = 0; row < num; row++ )
         m_selected.remove( columnPos * SELECT_HASH + row );
+  }
+
+  /*************************************** getSelectedRows ***************************************/
+  public Set<Integer> getSelectedRows()
+  {
+    // return set of selected row indexes
+    Set<Integer> rows = new HashSet<Integer>();
+
+    for ( int hash : m_selected )
+      rows.add( hash % SELECT_HASH );
+
+    return rows;
   }
 
   /****************************************** writeXML *******************************************/

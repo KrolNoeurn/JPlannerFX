@@ -19,6 +19,7 @@
 package rjc.jplanner.gui.table;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
@@ -36,6 +37,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandTaskIndent;
+import rjc.jplanner.command.CommandTaskOutdent;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 import rjc.jplanner.gui.table.Table.Alignment;
@@ -893,6 +896,13 @@ public class TableCanvas extends Canvas
         break;
 
       case RIGHT:
+        if ( event.isAltDown() )
+        {
+          Set<Integer> indent = JPlanner.plan.tasks.canIndent( m_table.getSelectedRows() );
+          if ( !indent.isEmpty() )
+            JPlanner.plan.undostack().push( new CommandTaskIndent( indent ) );
+          break;
+        }
       case KP_RIGHT:
         // find visible cell to right
         int columns = m_table.getDataSource().getColumnCount();
@@ -918,6 +928,13 @@ public class TableCanvas extends Canvas
         break;
 
       case LEFT:
+        if ( event.isAltDown() )
+        {
+          Set<Integer> outdent = JPlanner.plan.tasks.canOutdent( m_table.getSelectedRows() );
+          if ( !outdent.isEmpty() )
+            JPlanner.plan.undostack().push( new CommandTaskOutdent( outdent ) );
+          break;
+        }
       case KP_LEFT:
         // find visible cell to left
         int left = m_selectedColumn - 1;

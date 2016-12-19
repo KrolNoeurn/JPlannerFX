@@ -229,58 +229,6 @@ public class Tasks extends ArrayList<Task>
     return rows;
   }
 
-  /******************************************* indent ********************************************/
-  public void indent( Set<Integer> rows )
-  {
-    // add summary task's subtasks, assume tasks that can't be indented already removed
-    Set<Integer> temp = new HashSet<Integer>();
-    for ( int row : rows )
-    {
-      int summaryEnd = get( row ).summaryEnd();
-      if ( summaryEnd > row )
-        for ( int i = row + 1; i <= summaryEnd; i++ )
-          if ( !get( i ).isNull() )
-            temp.add( i );
-    }
-    rows.addAll( temp );
-
-    // increment indent of each row in set by one
-    for ( int row : rows )
-    {
-      Task task = get( row );
-      task.setIndent( task.indent() + 1 );
-    }
-
-    // update task summary end & summary start
-    updateSummaryMarkers();
-  }
-
-  /******************************************* outdent *******************************************/
-  public void outdent( Set<Integer> rows )
-  {
-    // add summary task's subtasks, assume tasks that can't be outdented already removed
-    Set<Integer> temp = new HashSet<Integer>();
-    for ( int row : rows )
-    {
-      int summaryEnd = get( row ).summaryEnd();
-      if ( summaryEnd > row )
-        for ( int i = row + 1; i <= summaryEnd; i++ )
-          if ( !get( i ).isNull() )
-            temp.add( i );
-    }
-    rows.addAll( temp );
-
-    // decrement indent of each row in set by one
-    for ( int row : rows )
-    {
-      Task task = get( row );
-      task.setIndent( task.indent() - 1 );
-    }
-
-    // update task summary end & summary start
-    updateSummaryMarkers();
-  }
-
   /************************************ updateSummaryMarkers *************************************/
   public void updateSummaryMarkers()
   {
