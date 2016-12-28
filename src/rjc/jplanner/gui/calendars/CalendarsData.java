@@ -19,7 +19,6 @@
 package rjc.jplanner.gui.calendars;
 
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandCalendarSetCycleLength;
 import rjc.jplanner.command.CommandCalendarSetExceptions;
@@ -27,19 +26,17 @@ import rjc.jplanner.command.CommandCalendarSetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.days.EditorSelectDay;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.gui.table.AbstractDataSource;
 import rjc.jplanner.gui.table.EditorDateTime;
-import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Calendar;
-import rjc.jplanner.model.Date;
-import rjc.jplanner.model.Day;
 
 /*************************************************************************************************/
 /**************************** Table data source for showing calendars ****************************/
 /*************************************************************************************************/
 
-public class CalendarsData implements ITableDataSource
+public class CalendarsData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/
@@ -67,6 +64,7 @@ public class CalendarsData implements ITableDataSource
   @Override
   public String getColumnTitle( int columnIndex )
   {
+    // return column title
     return "Calendar " + ( columnIndex + 1 );
   }
 
@@ -74,6 +72,7 @@ public class CalendarsData implements ITableDataSource
   @Override
   public String getRowTitle( int rowIndex )
   {
+    // return row title
     return Calendar.sectionName( rowIndex );
   }
 
@@ -81,6 +80,7 @@ public class CalendarsData implements ITableDataSource
   @Override
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
   {
+    // return alignment
     return Alignment.LEFT;
   }
 
@@ -126,13 +126,12 @@ public class CalendarsData implements ITableDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Object oldValue = getValue( columnIndex, rowIndex );
+    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    Object oldValue = cal.getValue( rowIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic
-    Calendar cal = JPlanner.plan.calendar( columnIndex );
-
     if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
       JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
     else if ( rowIndex == Calendar.SECTION_CYCLE_LEN )
@@ -145,42 +144,8 @@ public class CalendarsData implements ITableDataSource
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
+    // return cell value
     return JPlanner.plan.calendar( columnIndex ).getValue( rowIndex );
-  }
-
-  /***************************************** getCellText *****************************************/
-  @Override
-  public String getCellText( int columnIndex, int rowIndex )
-  {
-    // get value to be displayed
-    Object value = getValue( columnIndex, rowIndex );
-
-    // convert dates into strings using plan format
-    if ( value instanceof Date )
-      return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
-
-    // for day-types display name
-    if ( value instanceof Day )
-      return ( (Day) value ).name();
-
-    // return cell display text
-    return ( value == null ? null : value.toString() );
-  }
-
-  /***************************************** getCellFont *****************************************/
-  @Override
-  public Font getCellFont( int columnIndex, int rowIndex )
-  {
-    // return cell display font
-    return Font.getDefault();
-  }
-
-  /**************************************** getCellIndent ****************************************/
-  @Override
-  public int getCellIndent( int columnIndex, int rowIndex )
-  {
-    // return cell indent level (0 = no indent)
-    return 0;
   }
 
   /********************************** defaultTableModifications **********************************/

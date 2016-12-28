@@ -25,21 +25,19 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.gui.table.AbstractDataSource;
 import rjc.jplanner.gui.table.EditorDateTime;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
-import rjc.jplanner.gui.table.ITableDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
-import rjc.jplanner.model.Date;
-import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
 /****************************** Table data source for showing tasks ******************************/
 /*************************************************************************************************/
 
-public class TasksData implements ITableDataSource
+public class TasksData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/
@@ -149,24 +147,8 @@ public class TasksData implements ITableDataSource
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
+    // return cell value
     return JPlanner.plan.task( rowIndex ).getValue( columnIndex );
-  }
-
-  /***************************************** getCellText *****************************************/
-  @Override
-  public String getCellText( int columnIndex, int rowIndex )
-  {
-    // get value to be displayed
-    Object value = getValue( columnIndex, rowIndex );
-
-    // convert date and date-times into strings using plan formats
-    if ( value instanceof DateTime )
-      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
-    if ( value instanceof Date )
-      return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
-
-    // return cell display text
-    return ( value == null ? null : value.toString() );
   }
 
   /***************************************** getCellFont *****************************************/
@@ -191,11 +173,22 @@ public class TasksData implements ITableDataSource
     return 0;
   }
 
+  /************************************** getSummaryEndRow ***************************************/
+  @Override
+  public int getSummaryEndRow( int columnIndex, int rowIndex )
+  {
+    // return cell summary end row for specified cell index (or -1 if not summary)
+    if ( columnIndex == Task.SECTION_TITLE )
+      return JPlanner.plan.task( rowIndex ).summaryEnd();
+
+    return -1;
+  }
+
   /********************************** defaultTableModifications **********************************/
   @Override
   public void defaultTableModifications( Table table )
   {
-    // default table modifications
+    // default task table modifications
     table.setDefaultColumnWidth( 110 );
 
     table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );

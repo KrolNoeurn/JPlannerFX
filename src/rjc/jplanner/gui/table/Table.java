@@ -21,6 +21,7 @@ package rjc.jplanner.gui.table;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
@@ -37,31 +38,31 @@ import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 
 public class Table extends TableDisplay
 {
-  private ITableDataSource          m_data;                                           // data source for the table
+  private AbstractDataSource    m_data;                                           // data source for the table
 
-  private int                       m_defaultRowHeight;
-  private int                       m_defaultColumnWidth;
-  private int                       m_minimumRowHeight;
-  private int                       m_minimumColumnWidth;
-  private int                       m_hHeaderHeight;
-  private int                       m_vHeaderWidth;
+  private int                   m_defaultRowHeight;
+  private int                   m_defaultColumnWidth;
+  private int                   m_minimumRowHeight;
+  private int                   m_minimumColumnWidth;
+  private int                   m_hHeaderHeight;
+  private int                   m_vHeaderWidth;
 
-  private int                       m_bodyWidth;                                      // body cells total width (excludes header)
-  private int                       m_bodyHeight;                                     // body cells total height (excludes header)
+  private int                   m_bodyWidth;                                      // body cells total width (excludes header)
+  private int                   m_bodyHeight;                                     // body cells total height (excludes header)
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private HashMap<Integer, Integer> m_columnWidths  = new HashMap<Integer, Integer>();
-  private HashMap<Integer, Integer> m_rowHeights    = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> m_columnWidths  = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> m_rowHeights    = new HashMap<Integer, Integer>();
 
   // set of collapsed rows (only used for collapsed tasks)
-  private HashSet<Integer>          m_rowCollapsed  = new HashSet<Integer>();
+  private Set<Integer>          m_rowCollapsed  = new HashSet<Integer>();
 
   // array with mapping from position to index
-  private ArrayList<Integer>        m_columnIndexes = new ArrayList<Integer>();
+  private ArrayList<Integer>    m_columnIndexes = new ArrayList<Integer>();
 
   // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + row
-  private static final int          SELECT_HASH     = 9999;
-  private HashSet<Integer>          m_selected      = new HashSet<Integer>();
+  private static final int      SELECT_HASH     = 9999;
+  private Set<Integer>          m_selected      = new HashSet<Integer>();
 
   public static enum Alignment// alignment of text to be drawn in cell
   {
@@ -71,7 +72,7 @@ public class Table extends TableDisplay
   public String name; // table name helpful when debugging
 
   /**************************************** constructor ******************************************/
-  public Table( String name, ITableDataSource data )
+  public Table( String name, AbstractDataSource data )
   {
     // prepare table
     m_data = data;
@@ -177,8 +178,8 @@ public class Table extends TableDisplay
     m_bodyWidth += ( columnCount - exceptionsCount ) * m_defaultColumnWidth;
   }
 
-  /*************************************** getDataSource *****************************************/
-  public ITableDataSource getDataSource()
+  /****************************************** getData ********************************************/
+  public AbstractDataSource getData()
   {
     // return data source for this table
     return m_data;
@@ -353,25 +354,11 @@ public class Table extends TableDisplay
   /*************************************** getHeightByRow ****************************************/
   public int getHeightByRow( int row )
   {
-    // return height from row position - bit slower
+    // return height from row position
     if ( row < 0 || row >= m_data.getRowCount() )
       return Integer.MAX_VALUE;
 
     int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
-    if ( height < 0 )
-      return 0; // -ve means row hidden, so return zero
-
-    return height;
-  }
-
-  /************************************* getHeightByRowIndex *************************************/
-  public int getHeightByRowIndex( int rowIndex )
-  {
-    // return height from row index - bit faster
-    if ( rowIndex < 0 || rowIndex >= m_data.getRowCount() )
-      return Integer.MAX_VALUE;
-
-    int height = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
     if ( height < 0 )
       return 0; // -ve means row hidden, so return zero
 
@@ -429,17 +416,17 @@ public class Table extends TableDisplay
     m_columnWidths.put( columnIndex, newWidth );
   }
 
-  /************************************ setHeightByRowIndex **************************************/
-  public void setHeightByRowIndex( int rowIndex, int newHeight )
+  /*************************************** setHeightByRow ****************************************/
+  public void setHeightByRow( int row, int newHeight )
   {
     // height should not be below minimum
     if ( newHeight < m_minimumRowHeight )
       newHeight = m_minimumRowHeight;
 
     // record height so overrides default
-    int oldHeight = getHeightByRowIndex( rowIndex );
+    int oldHeight = getHeightByRow( row );
     m_bodyHeight = m_bodyHeight - oldHeight + newHeight;
-    m_rowHeights.put( rowIndex, newHeight );
+    m_rowHeights.put( row, newHeight );
   }
 
   /********************************** getColumnIndexByPosition ***********************************/
@@ -564,7 +551,7 @@ public class Table extends TableDisplay
   public boolean isRowAllSelected( int row )
   {
     // return true if every body cell in row is selected
-    int num = getDataSource().getColumnCount();
+    int num = getData().getColumnCount();
     for ( int columnPos = 0; columnPos < num; columnPos++ )
       if ( !isSelected( columnPos, row ) )
         return false;
@@ -587,7 +574,7 @@ public class Table extends TableDisplay
   public boolean isColumnAllSelected( int columnPos )
   {
     // return true if every body cell in column is selected
-    int num = getDataSource().getRowCount();
+    int num = getData().getRowCount();
     for ( int row = 0; row < num; row++ )
       if ( !isSelected( columnPos, row ) )
         return false;
@@ -609,7 +596,7 @@ public class Table extends TableDisplay
   public void setRowSelection( int row, boolean selected )
   {
     // set whether specified table row is selected
-    int num = getDataSource().getColumnCount();
+    int num = getData().getColumnCount();
     if ( selected )
       for ( int columnPos = 0; columnPos < num; columnPos++ )
         m_selected.add( columnPos * SELECT_HASH + row );
@@ -622,7 +609,7 @@ public class Table extends TableDisplay
   public void setColumnSelection( int columnPos, boolean selected )
   {
     // set whether specified table column is selected
-    int num = getDataSource().getRowCount();
+    int num = getData().getRowCount();
     if ( selected )
       for ( int row = 0; row < num; row++ )
         m_selected.add( columnPos * SELECT_HASH + row );
@@ -657,7 +644,11 @@ public class Table extends TableDisplay
       xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( columnIndex ) );
 
       if ( m_columnWidths.containsKey( columnIndex ) )
-        xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( m_columnWidths.get( columnIndex ) ) );
+      {
+        int width = m_columnWidths.get( columnIndex );
+        if ( width != m_defaultColumnWidth )
+          xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( width ) );
+      }
 
       xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getColumnPositionByIndex( columnIndex ) ) );
       xsw.writeEndElement(); // XML_COLUMN
@@ -675,7 +666,11 @@ public class Table extends TableDisplay
       xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( rowIndex ) );
 
       if ( m_rowHeights.containsKey( rowIndex ) )
-        xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
+      {
+        int height = m_rowHeights.get( rowIndex );
+        if ( height != m_defaultRowHeight )
+          xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
+      }
 
       if ( m_rowCollapsed.contains( rowIndex ) )
         xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
@@ -888,36 +883,15 @@ public class Table extends TableDisplay
     return m_rowCollapsed.contains( row );
   }
 
-  /************************************* getNonNullRowBelow **************************************/
-  public int getNonNullRowBelow( int row )
+  /************************************** collapseSummary ****************************************/
+  public void collapseSummary( int summaryRow )
   {
-    // return row number below specified row which has a non-null column 0 value, or -1 if none
-    int rowCount = m_data.getRowCount();
-    while ( ++row < rowCount && m_data.getCellText( 0, row ) == null )
-      ;
+    // check row is plan summary task
+    if ( !m_data.isCellSummary( 0, summaryRow ) )
+      throw new IllegalArgumentException( "Task " + summaryRow + " is not a summary!" );
 
-    if ( row < rowCount )
-      return row;
-
-    return -1;
-  }
-
-  /**************************************** collapsedRow *****************************************/
-  public void collapsedRow( int summaryRow )
-  {
-    // collapse summary on specified row
-    int indent = m_data.getCellIndent( 0, summaryRow );
-    int endRow = summaryRow;
-
-    while ( true )
-    {
-      int rowBelow = getNonNullRowBelow( endRow );
-      if ( rowBelow < 0 || m_data.getCellIndent( 0, rowBelow ) <= indent )
-        break;
-      endRow = rowBelow;
-    }
-
-    // hide all rows below start until end
+    // hide all summary sub-tasks
+    int endRow = m_data.getSummaryEndRow( 0, summaryRow );
     for ( int row = summaryRow + 1; row <= endRow; row++ )
       hideRow( row );
 
@@ -925,32 +899,57 @@ public class Table extends TableDisplay
     m_rowCollapsed.add( summaryRow );
   }
 
-  /****************************************** expandRow ******************************************/
-  public void expandRow( int summaryRow )
+  /**************************************** expandSummary ****************************************/
+  public void expandSummary( int summaryRow )
   {
-    // expand summary on specified row
-    int indent = m_data.getCellIndent( 0, summaryRow );
-    int endRow = summaryRow;
+    // check row is plan summary task
+    if ( !m_data.isCellSummary( 0, summaryRow ) )
+      throw new IllegalArgumentException( "Task " + summaryRow + " is not a summary!" );
 
-    while ( true )
-    {
-      int rowBelow = getNonNullRowBelow( endRow );
-      if ( rowBelow < 0 || m_data.getCellIndent( 0, rowBelow ) <= indent )
-        break;
-      endRow = rowBelow;
-    }
-
-    // expand all rows below start until end
+    // show all summary sub-tasks
+    int endRow = m_data.getSummaryEndRow( 0, summaryRow );
     for ( int row = summaryRow + 1; row <= endRow; row++ )
+    {
       showRow( row );
 
-    // collapse any sub-summaries which were previously collapsed
-    for ( int row = summaryRow + 1; row <= endRow; row++ )
+      // except those of collapsed sub-summaries, skip over these
       if ( isRowCollapsed( row ) )
-        collapsedRow( row );
+        row = m_data.getSummaryEndRow( 0, row );
+    }
 
     // remove summary collapsed mark
     m_rowCollapsed.remove( summaryRow );
+  }
+
+  /**************************************** getCollapsed *****************************************/
+  public Set<Integer> getCollapsed()
+  {
+    // return collapsed summary rows
+    return m_rowCollapsed;
+  }
+
+  /**************************************** setCollapsed *****************************************/
+  public void setCollapsed( Set<Integer> rows )
+  {
+    // show all hidden rows
+    m_rowHeights.forEach( ( row, height ) ->
+    {
+      if ( height < 0 )
+      {
+        if ( -height == m_defaultRowHeight )
+          m_rowHeights.remove( row );
+        else
+          m_rowHeights.put( row, -height );
+        m_bodyHeight = m_bodyHeight - height;
+      }
+    } );
+
+    // collapse all valid summaries
+    rows.forEach( row ->
+    {
+      if ( m_data.isCellSummary( 0, row ) )
+        collapseSummary( row );
+    } );
   }
 
 }

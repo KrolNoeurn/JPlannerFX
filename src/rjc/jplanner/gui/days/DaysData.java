@@ -19,13 +19,12 @@
 package rjc.jplanner.gui.days;
 
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandDaySetNumPeriods;
 import rjc.jplanner.command.CommandDaySetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.gui.table.ITableDataSource;
+import rjc.jplanner.gui.table.AbstractDataSource;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Day;
@@ -35,7 +34,7 @@ import rjc.jplanner.model.Time;
 /**************************** Table data source for showing day-types ****************************/
 /*************************************************************************************************/
 
-public class DaysData implements ITableDataSource
+public class DaysData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/
@@ -55,6 +54,7 @@ public class DaysData implements ITableDataSource
   @Override
   public int getRowCount()
   {
+    // return number of rows
     return JPlanner.plan.daysCount();
   }
 
@@ -62,6 +62,7 @@ public class DaysData implements ITableDataSource
   @Override
   public String getColumnTitle( int columnIndex )
   {
+    // return column title
     return Day.sectionName( columnIndex );
   }
 
@@ -124,13 +125,12 @@ public class DaysData implements ITableDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Object oldValue = getValue( columnIndex, rowIndex );
+    Day day = JPlanner.plan.day( rowIndex );
+    Object oldValue = day.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting number of work periods, otherwise generic
-    Day day = JPlanner.plan.day( rowIndex );
-
     if ( columnIndex == Day.SECTION_PERIODS )
       JPlanner.plan.undostack().push( new CommandDaySetNumPeriods( day, (int) newValue, (int) oldValue ) );
     else
@@ -141,6 +141,7 @@ public class DaysData implements ITableDataSource
   @Override
   public Object getValue( int columnIndex, int rowIndex )
   {
+    // return cell value
     return JPlanner.plan.day( rowIndex ).getValue( columnIndex );
   }
 
@@ -161,22 +162,6 @@ public class DaysData implements ITableDataSource
 
     // return cell display text
     return ( value == null ? null : value.toString() );
-  }
-
-  /***************************************** getCellFont *****************************************/
-  @Override
-  public Font getCellFont( int columnIndex, int rowIndex )
-  {
-    // return cell display font
-    return Font.getDefault();
-  }
-
-  /**************************************** getCellIndent ****************************************/
-  @Override
-  public int getCellIndent( int columnIndex, int rowIndex )
-  {
-    // return cell indent level (0 = no indent)
-    return 0;
   }
 
   /********************************** defaultTableModifications **********************************/

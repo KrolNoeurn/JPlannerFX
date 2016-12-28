@@ -39,7 +39,7 @@ abstract public class AbstractCellEditor
 
   private Table                     m_table;
   private int                       m_columnIndex;
-  private int                       m_rowIndex;
+  private int                       m_row;
   private MoveDirection             m_moveDirection;
 
   private Control                   m_control;             // prime control that has focus
@@ -54,11 +54,11 @@ abstract public class AbstractCellEditor
   abstract public void setValue( Object value ); // set cell editor value
 
   /***************************************** constructor *****************************************/
-  public AbstractCellEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor( int columnIndex, int row )
   {
     // initialise private variables
     m_columnIndex = columnIndex;
-    m_rowIndex = rowIndex;
+    m_row = row;
   }
 
   /***************************************** endEditing ******************************************/
@@ -114,7 +114,7 @@ abstract public class AbstractCellEditor
   public int getRowIndex()
   {
     // return row index
-    return m_rowIndex;
+    return m_row;
   }
 
   /******************************************* isError *******************************************/
@@ -131,7 +131,7 @@ abstract public class AbstractCellEditor
     m_cellEditorInProgress = null;
     if ( commit )
     {
-      m_table.getDataSource().setValue( m_columnIndex, m_rowIndex, getValue() );
+      m_table.getData().setValue( m_columnIndex, m_row, getValue() );
       m_table.moveFocus( m_moveDirection );
     }
 
@@ -155,11 +155,11 @@ abstract public class AbstractCellEditor
     m_moveDirection = move;
 
     int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
-    int h = m_table.getHeightByRowIndex( m_rowIndex ) + 1;
+    int h = m_table.getHeightByRow( m_row ) + 1;
     int columnPos = m_table.getColumnPositionByIndex( m_columnIndex );
 
     m_control.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );
-    m_control.setLayoutY( m_table.getYStartByRow( m_rowIndex ) - 1 );
+    m_control.setLayoutY( m_table.getYStartByRow( m_row ) - 1 );
     m_control.setMaxSize( w, h );
     m_control.setMinSize( w, h );
 
@@ -205,7 +205,7 @@ abstract public class AbstractCellEditor
   public Object getDataSourceValue()
   {
     // return value for table cell from table data source
-    return m_table.getDataSource().getValue( m_columnIndex, m_rowIndex );
+    return m_table.getData().getValue( m_columnIndex, m_row );
   }
 
   /****************************************** validValue *****************************************/

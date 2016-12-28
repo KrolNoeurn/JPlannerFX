@@ -136,7 +136,7 @@ public class TaskType
   public boolean equals( Object other )
   {
     // return true if this task-type and other task-type are same
-    if ( other != null && other instanceof TaskType )
+    if ( other instanceof TaskType )
       return m_type == ( (TaskType) other ).m_type;
     else
       return false;

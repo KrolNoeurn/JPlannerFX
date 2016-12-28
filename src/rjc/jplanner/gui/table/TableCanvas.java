@@ -288,10 +288,8 @@ public class TableCanvas extends Canvas
 
     // fill
     boolean m_selected = m_table.isSelected( columnPos, row );
-    Paint color = m_table.getDataSource().getCellBackground( columnIndex, row );
-    if ( m_selected && color == Colors.NORMAL_HEADER )
-      gc.setFill( Colors.SELECTED_HEADER );
-    else if ( m_selected )
+    Paint color = m_table.getData().getCellBackground( columnIndex, row );
+    if ( m_selected )
       gc.setFill( Colors.SELECTED_CELL );
     else
       gc.setFill( color );
@@ -303,15 +301,15 @@ public class TableCanvas extends Canvas
     gc.strokeLine( x + 0.5, y + h - 0.5, x + w - 0.5, y + h - 0.5 );
 
     // text
-    String text = m_table.getDataSource().getCellText( columnIndex, row );
+    String text = m_table.getData().getCellText( columnIndex, row );
     if ( text != null )
     {
-      Font font = m_table.getDataSource().getCellFont( columnIndex, row );
+      Font font = m_table.getData().getCellFont( columnIndex, row );
       gc.setFont( font );
 
       // text alignment and colour
-      int indent = m_table.getDataSource().getCellIndent( columnIndex, row );
-      Alignment alignment = m_table.getDataSource().getCellAlignment( columnIndex, row );
+      int indent = m_table.getData().getCellIndent( columnIndex, row );
+      Alignment alignment = m_table.getData().getCellAlignment( columnIndex, row );
       ArrayList<TextLine> lines = getTextLines( text, font, alignment, w - indent * INDENT, h );
       if ( m_selected )
         gc.setFill( Colors.SELECTED_TEXT );
@@ -358,7 +356,7 @@ public class TableCanvas extends Canvas
     GraphicsContext gc = getGraphicsContext2D();
     int y = m_table.getYStartByRow( rowIndex );
     int w = m_table.getVerticalHeaderWidth();
-    String text = m_table.getDataSource().getRowTitle( rowIndex );
+    String text = m_table.getData().getRowTitle( rowIndex );
     boolean selected = m_table.doesRowHaveSelection( rowIndex );
 
     drawRowHeaderCell( gc, y, w, h, text, selected );
@@ -405,7 +403,7 @@ public class TableCanvas extends Canvas
     int x = m_table.getXStartByColumnPosition( columnPos );
     int h = m_table.getHorizontalHeaderHeight();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    String text = m_table.getDataSource().getColumnTitle( columnIndex );
+    String text = m_table.getData().getColumnTitle( columnIndex );
     boolean selected = m_table.doesColumnHaveSelection( columnPos );
 
     drawColumnHeaderCell( gc, x, w, h, text, selected );
@@ -690,9 +688,9 @@ public class TableCanvas extends Canvas
       redrawAll();
 
       // create reorder slider (translucent cell header)
-      int h = m_table.getHeightByRowIndex( m_index );
+      int h = m_table.getHeightByRow( m_index );
       int w = m_table.getVerticalHeaderWidth();
-      String text = m_table.getDataSource().getRowTitle( m_index );
+      String text = m_table.getData().getRowTitle( m_index );
       m_reorderSlider = new Canvas( w, h );
       drawRowHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
@@ -730,7 +728,7 @@ public class TableCanvas extends Canvas
       // create reorder slider (translucent cell header)
       int w = m_table.getWidthByColumnIndex( m_index );
       int h = m_table.getHorizontalHeaderHeight();
-      String text = m_table.getDataSource().getColumnTitle( m_index );
+      String text = m_table.getData().getColumnTitle( m_index );
       m_reorderSlider = new Canvas( w, h );
       drawColumnHeaderCell( m_reorderSlider.getGraphicsContext2D(), 0, w, h, text, true );
       m_reorderSlider.setOpacity( 0.8 );
@@ -834,7 +832,7 @@ public class TableCanvas extends Canvas
 
       case END:
         // find right-most visible column
-        int rightmost = m_table.getDataSource().getColumnCount() - 1;
+        int rightmost = m_table.getData().getColumnCount() - 1;
         while ( m_table.getWidthByColumnPosition( rightmost ) <= 0 )
           rightmost--;
 
@@ -881,7 +879,7 @@ public class TableCanvas extends Canvas
       case DOWN:
       case KP_DOWN:
         // find visible cell above
-        int rows = m_table.getDataSource().getRowCount();
+        int rows = m_table.getData().getRowCount();
         int below = m_selectedRow + 1;
         while ( m_table.getHeightByRow( below ) <= 0 && below < rows )
           below++;
@@ -905,7 +903,7 @@ public class TableCanvas extends Canvas
         }
       case KP_RIGHT:
         // find visible cell to right
-        int columns = m_table.getDataSource().getColumnCount();
+        int columns = m_table.getData().getColumnCount();
         int right = m_selectedColumn + 1;
         while ( m_table.getWidthByColumnPosition( right ) <= 0 && right < columns )
           right++;
@@ -991,8 +989,8 @@ public class TableCanvas extends Canvas
         {
           setCursor( CURSOR_H_RESIZE );
           m_column--;
-          if ( m_column >= m_table.getDataSource().getColumnCount() )
-            m_column = m_table.getDataSource().getColumnCount() - 1;
+          if ( m_column >= m_table.getData().getColumnCount() )
+            m_column = m_table.getData().getColumnCount() - 1;
           return;
         }
 
@@ -1018,8 +1016,8 @@ public class TableCanvas extends Canvas
         {
           setCursor( CURSOR_V_RESIZE );
           m_row--;
-          if ( m_row >= m_table.getDataSource().getRowCount() )
-            m_row = m_table.getDataSource().getRowCount() - 1;
+          if ( m_row >= m_table.getData().getRowCount() )
+            m_row = m_table.getData().getRowCount() - 1;
           return;
         }
 
@@ -1067,16 +1065,9 @@ public class TableCanvas extends Canvas
       return null;
 
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    int indent = m_table.getDataSource().getCellIndent( columnIndex, row );
-    if ( indent <= 0 )
-      return null;
-
-    int rowBelow = m_table.getNonNullRowBelow( row );
-    if ( rowBelow <= 0 )
-      return null;
-
-    if ( m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
+    if ( m_table.getData().isCellSummary( columnIndex, row ) )
     {
+      int indent = m_table.getData().getCellIndent( columnIndex, row );
       double x = m_table.getXStartByColumnPosition( columnPos ) + indent * INDENT;
       double y = m_table.getYStartByRow( row ) + m_table.getHeightByRow( row ) / 2.0;
       return new Rectangle2D( x - 8.5, y - 4.5, 9.0, 9.0 );
@@ -1089,14 +1080,7 @@ public class TableCanvas extends Canvas
   private Rectangle2D getExpandHideMarkerRectangle( int columnIndex, int row, int indent, int x, int y, int h )
   {
     // return expand-hide marker rectangle, or null if none
-    if ( indent <= 0 )
-      return null;
-
-    int rowBelow = m_table.getNonNullRowBelow( row );
-    if ( rowBelow <= 0 )
-      return null;
-
-    if ( m_table.getDataSource().getCellIndent( columnIndex, rowBelow ) > indent )
+    if ( indent > 0 && m_table.getData().isCellSummary( columnIndex, row ) )
       return new Rectangle2D( x - 8.5, y + h / 2 - 4.5, 9.0, 9.0 );
 
     return null;
@@ -1135,7 +1119,7 @@ public class TableCanvas extends Canvas
         m_offset = m_y - m_table.getHeightByRow( m_row );
       }
 
-      m_table.setHeightByRowIndex( m_index, m_y - m_offset );
+      m_table.setHeightByRow( m_index, m_y - m_offset );
       m_recentlyRedrawn = false;
       m_table.setCanvasScrollBars();
       if ( !m_recentlyRedrawn )
@@ -1366,9 +1350,9 @@ public class TableCanvas extends Canvas
     if ( getCursor() == CURSOR_DEFAULT && isExpandHideMarker() )
     {
       if ( m_table.isRowCollapsed( m_row ) )
-        m_table.expandRow( m_row );
+        m_table.expandSummary( m_row );
       else
-        m_table.collapsedRow( m_row );
+        m_table.collapseSummary( m_row );
 
       // redraw table from mouse y downwards 
       drawHeight( m_y, (int) getHeight() );
@@ -1385,7 +1369,7 @@ public class TableCanvas extends Canvas
     // open cell editor for currently selected table cell
     int columnIndex = m_table.getColumnIndexByPosition( m_selectedColumn );
     int rowIndex = m_selectedRow;
-    AbstractCellEditor editor = m_table.getDataSource().getEditor( columnIndex, rowIndex );
+    AbstractCellEditor editor = m_table.getData().getEditor( columnIndex, rowIndex );
 
     // open editor if one available
     if ( editor != null && editor.validValue( value ) )
