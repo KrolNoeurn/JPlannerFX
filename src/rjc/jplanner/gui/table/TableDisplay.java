@@ -32,17 +32,17 @@ public class TableDisplay extends TableParent
 {
   protected ScrollBar m_vScrollBar;       // vertical scroll bar
   protected ScrollBar m_hScrollBar;       // horizontal scroll bar
-  private TableCanvas m_canvas;           // table canvas
+  private TableEvents m_canvas;           // table canvas
   private Table       m_table;            // table definition
 
   private static int  SCROLLBAR_SIZE = 18;
 
-  /************************************** initialiseDisplay **************************************/
-  public void initialiseDisplay( Table table )
+  /****************************************** assemble *******************************************/
+  public void assemble( Table table )
   {
     // construct table display with canvas and scroll bars
     m_table = table;
-    m_canvas = new TableCanvas( m_table );
+    m_canvas = new TableEvents( table );
 
     // vertical scroll bar
     m_vScrollBar = new XScrollBar( table );
@@ -73,7 +73,7 @@ public class TableDisplay extends TableParent
   {
     // when parent resized ensure canvas and scroll bars adjust accordingly
     super.resize( width, height );
-    setCanvasScrollBars();
+    resizeCanvasScrollBars();
   }
 
   /**************************************** requestFocus *****************************************/
@@ -84,8 +84,8 @@ public class TableDisplay extends TableParent
     m_canvas.requestFocus();
   }
 
-  /************************************ setCanvasScrollBars **************************************/
-  public void setCanvasScrollBars()
+  /*********************************** resizeCanvasScrollBars ************************************/
+  public void resizeCanvasScrollBars()
   {
     // determine which scroll-bars should be visible
     boolean isVSBvisible = getHeight() < m_table.getTableHeight();
@@ -190,7 +190,7 @@ public class TableDisplay extends TableParent
     m_canvas.setMarkerPosition();
   }
 
-  /*********************************** animationScrollVertical ***********************************/
+  /************************************** animateToVOffset ***************************************/
   public void animateToVOffset( int endValue )
   {
     // create scroll vertical animation
@@ -201,7 +201,7 @@ public class TableDisplay extends TableParent
     animate( m_vScrollBar.valueProperty(), endValue, 200 );
   }
 
-  /********************************** animationScrollHorizontal **********************************/
+  /************************************** animateToHOffset ***************************************/
   public void animateToHOffset( int endValue )
   {
     // create scroll horizontal animation

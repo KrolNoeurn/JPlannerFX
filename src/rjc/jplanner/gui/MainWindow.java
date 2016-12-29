@@ -199,7 +199,7 @@ public class MainWindow
     if ( path == null || path.length() < 1 || !Files.isWritable( Paths.get( path ) ) )
       path = System.getProperty( "java.io.tmpdir" );
 
-    // attempt to save this path and using existing filename & location
+    // save to discard.xml
     return save( new File( path, "discarded.xml" ) );
   }
 
@@ -891,6 +891,13 @@ public class MainWindow
   {
     // return if control in error state
     return control == null || control.getId() == JPlanner.ERROR;
+  }
+
+  /******************************************* getTabs *******************************************/
+  public ArrayList<MainTabWidget> getTabs()
+  {
+    // return list of main tab widgets
+    return m_tabWidgets;
   }
 
 }

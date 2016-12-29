@@ -77,7 +77,7 @@ public class Table extends TableDisplay
     // prepare table
     m_data = data;
     this.name = name;
-    initialiseDisplay( this );
+    assemble( this );
     reset();
   }
 
@@ -128,7 +128,7 @@ public class Table extends TableDisplay
     // re-calculate table size canvas for example after change in number of columns or rows
     calculateBodyHeight();
     calculateBodyWidth();
-    setCanvasScrollBars();
+    resizeCanvasScrollBars();
     redraw();
   }
 
@@ -931,15 +931,12 @@ public class Table extends TableDisplay
   /**************************************** setCollapsed *****************************************/
   public void setCollapsed( Set<Integer> rows )
   {
-    // show all hidden rows
+    // show all hidden rows (except row 0)
     m_rowHeights.forEach( ( row, height ) ->
     {
-      if ( height < 0 )
+      if ( row > 0 && height < 0 )
       {
-        if ( -height == m_defaultRowHeight )
-          m_rowHeights.remove( row );
-        else
-          m_rowHeights.put( row, -height );
+        m_rowHeights.put( row, -height );
         m_bodyHeight = m_bodyHeight - height;
       }
     } );
@@ -950,6 +947,8 @@ public class Table extends TableDisplay
       if ( m_data.isCellSummary( 0, row ) )
         collapseSummary( row );
     } );
+
+    resizeCanvasScrollBars();
   }
 
 }

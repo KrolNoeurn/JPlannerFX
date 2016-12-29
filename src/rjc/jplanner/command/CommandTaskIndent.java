@@ -18,10 +18,13 @@
 
 package rjc.jplanner.command;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.MainTabWidget;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.Task;
 import rjc.jplanner.model.Tasks.PredecessorsList;
 
@@ -65,6 +68,14 @@ public class CommandTaskIndent implements IUndoCommand
   @Override
   public void redo()
   {
+    // collect table collapsed summary rows
+    HashMap<Table, Set<Integer>> collapsed = new HashMap<Table, Set<Integer>>();
+    for ( MainTabWidget tabs : JPlanner.gui.getTabs() )
+    {
+      Table table = tabs.getTasksTab().getTable();
+      collapsed.put( table, table.getCollapsed() );
+    }
+
     // action command
     for ( int row : m_rows )
     {
@@ -74,12 +85,23 @@ public class CommandTaskIndent implements IUndoCommand
     JPlanner.plan.tasks.updateSummaryMarkers();
     m_predecessors = JPlanner.plan.tasks.cleanPredecessors();
     JPlanner.gui.message( m_predecessors.toString( "Cleaned" ) );
+
+    // reinstate table collapsed summaries
+    collapsed.forEach( ( table, collapse ) -> table.setCollapsed( collapse ) );
   }
 
   /******************************************* undo **********************************************/
   @Override
   public void undo()
   {
+    // collect table collapsed summary rows
+    HashMap<Table, Set<Integer>> collapsed = new HashMap<Table, Set<Integer>>();
+    for ( MainTabWidget tabs : JPlanner.gui.getTabs() )
+    {
+      Table table = tabs.getTasksTab().getTable();
+      collapsed.put( table, table.getCollapsed() );
+    }
+
     // revert command
     for ( int row : m_rows )
     {
@@ -89,6 +111,9 @@ public class CommandTaskIndent implements IUndoCommand
     JPlanner.plan.tasks.updateSummaryMarkers();
     JPlanner.plan.tasks.restorePredecessors( m_predecessors );
     JPlanner.gui.message( m_predecessors.toString( "Restored" ) );
+
+    // reinstate table collapsed summaries
+    collapsed.forEach( ( table, collapse ) -> table.setCollapsed( collapse ) );
   }
 
   /****************************************** update *********************************************/
