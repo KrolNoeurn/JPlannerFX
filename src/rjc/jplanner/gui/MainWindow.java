@@ -726,15 +726,13 @@ public class MainWindow
   private void updateWindowTitles()
   {
     // refresh title on each JPlanner window
-    String title;
-    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().length() < 1 )
-      title = "JPlannerFX";
-    else
+    String title = "JPlannerFX " + JPlanner.VERSION;
+    if ( JPlanner.plan.filename() != null || JPlanner.plan.filename().length() > 0 )
     {
       if ( JPlanner.plan.undostack().isClean() )
-        title = JPlanner.plan.filename() + " - JPlannerFX";
+        title = JPlanner.plan.filename() + " - " + title;
       else
-        title = JPlanner.plan.filename() + "* - JPlannerFX";
+        title = JPlanner.plan.filename() + "* - " + title;
     }
 
     for ( MainTabWidget tabs : m_tabWidgets )

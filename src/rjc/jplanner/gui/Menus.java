@@ -196,7 +196,7 @@ public class Menus extends MenuBar
     Menu menu = new Menu( "Help" );
     menu.setOnShowing( event -> onMenuShow() );
 
-    MenuItem helpAbout = new MenuItem( "About JPlanner" );
+    MenuItem helpAbout = new MenuItem( "About JPlannerFX " + JPlanner.VERSION );
     helpAbout.setDisable( true );
 
     menu.getItems().addAll( helpAbout );
