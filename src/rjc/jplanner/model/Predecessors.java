@@ -45,12 +45,12 @@ public class Predecessors
     public String toString()
     {
       String str = Integer.toString( task.index() );
-      if ( type != TYPE_DEFAULT || lag.number() != 0.0 )
+      if ( type != TYPE_DEFAULT || lag.getNumber() != 0.0 )
       {
         str += type;
-        if ( lag.number() > 0.0 )
+        if ( lag.getNumber() > 0.0 )
           str += "+";
-        if ( lag.number() != 0.0 )
+        if ( lag.getNumber() != 0.0 )
           str += lag.toString();
       }
       return str;

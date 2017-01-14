@@ -630,7 +630,7 @@ public class TableEvents extends TableCanvas
     AbstractCellEditor editor = m_table.getData().getEditor( columnIndex, rowIndex );
 
     // open editor if one available
-    if ( editor != null && editor.validValue( value ) )
+    if ( editor != null && editor.isValueValid( value ) )
       editor.open( m_table, value, MoveDirection.DOWN );
   }
 

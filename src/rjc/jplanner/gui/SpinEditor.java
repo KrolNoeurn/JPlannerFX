@@ -21,6 +21,7 @@ package rjc.jplanner.gui;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -32,22 +33,25 @@ import rjc.jplanner.JPlanner;
 
 public class SpinEditor extends XTextField
 {
-  private double        m_min;                                    // minimum number allowed
-  private double        m_max;                                    // maximum number allowed
-  private int           m_dp;                                     // number of digits after decimal point
+  private double        m_minValue;          // minimum number allowed
+  private double        m_maxValue;          // maximum number allowed
+  private int           m_maxFractionDigits; // number of digits after decimal point
+  private int           m_caretPos = -1;     // set to >= 0 to position caret *before* setting text
 
-  private double        m_page;                                   // value increment or decrement on page-up or page-down
-  private double        m_step;                                   // value increment or decrement on arrow-up or arrow-down
-  private String        m_prefix;                                 // prefix shown before value
-  private String        m_suffix;                                 // suffix shown after value
+  private double        m_page;              // value increment or decrement on page-up or page-down
+  private double        m_step;              // value increment or decrement on arrow-up or arrow-down
+  private String        m_prefix;            // prefix shown before value
+  private String        m_suffix;            // suffix shown after value
 
-  private DecimalFormat m_numberFormat = new DecimalFormat( "0" );
-  private String        m_rangeError;                             // error message when value out of range
+  private DecimalFormat m_numberFormat;      // number decimal format
+  private String        m_rangeError;        // error message when value out of range
 
   /**************************************** constructor ******************************************/
   public SpinEditor()
   {
     // set default spin editor characteristics
+    setPrefixSuffix( null, null );
+    setFormat( "0" );
     setRange( 0.0, 999.0, 0 );
     setStepPage( 1.0, 10.0 );
     setButtonType( ButtonType.UP_DOWN );
@@ -56,65 +60,88 @@ public class SpinEditor extends XTextField
     setOnKeyPressed( event -> keyPressed( event ) );
     getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
-    // add listener to ensure error status is correct
+    // use TextFormatter to correctly position caret
+    setTextFormatter( new TextFormatter<>( change ->
+    {
+      // position caret
+      if ( m_caretPos >= 0 )
+      {
+        change.selectRange( m_caretPos, m_caretPos );
+        m_caretPos = -1;
+      }
+      return change;
+    } ) );
+
+    // add listener to set control error state and remove any excess leading zeros
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
+      // if spinner value not in range, set control into error state
       double num = getDouble();
       if ( JPlanner.gui != null )
-        JPlanner.gui.setError( this, num < m_min || num > m_max || getText().length() < 1 ? m_rangeError : null );
-
-      // remove any excess zero at start of number
-      if ( m_numberFormat.getMinimumIntegerDigits() <= 1 )
-      {
-        String str = newText;
-        if ( m_prefix != null )
-          str = str.substring( m_prefix.length() );
-        if ( m_suffix != null )
-          str = str.substring( 0, str.length() - m_suffix.length() );
-
-        if ( str.length() > 1 && str.charAt( 0 ) == '0' && str.charAt( 1 ) != '.' )
-          setTextCore( str.substring( 1 ) );
-        if ( str.length() > 2 && str.charAt( 0 ) == '-' && str.charAt( 1 ) == '0' && str.charAt( 2 ) != '.' )
-          setTextCore( "-" + str.substring( 2 ) );
-      }
+        JPlanner.gui.setError( this,
+            num < m_minValue || num > m_maxValue || getText().length() < 1 ? m_rangeError : null );
     } );
+
   }
 
-  /***************************************** getTextCore *****************************************/
-  public String getTextCore()
+  /***************************************** replaceText *****************************************/
+  @Override
+  public void replaceText( int start, int end, String text )
   {
-    // return editor text less prefix + suffix
-    String text = getText();
-    if ( m_prefix != null )
-      text = text.substring( m_prefix.length() );
-    if ( m_suffix != null )
-      text = text.substring( 0, text.length() - m_suffix.length() );
+    // determine text before and after replace
+    String oldText = getText();
+    String newText = oldText.substring( 0, start ) + text + oldText.substring( end );
 
-    return text;
+    // determine start of integer part of number
+    int intStart = m_prefix.length();
+    if ( newText.length() > intStart && newText.charAt( intStart ) == '-' )
+      intStart++;
+
+    // determine end of integer part of number
+    int intEnd = newText.length() - m_suffix.length();
+    int pointPos = newText.indexOf( '.', intStart );
+    if ( pointPos >= 0 && pointPos < intEnd )
+      intEnd = pointPos;
+
+    // check if integer part longer than minimum and starts with zero
+    if ( intEnd - intStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( intStart ) == '0' )
+    {
+      // determine new start of integer part skipping excess zeros
+      int newStart = intStart;
+      while ( intEnd - newStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( newStart ) == '0' )
+        newStart++;
+
+      // replace old text with new text with excess zeros removed
+      newText = newText.substring( 0, intStart ) + newText.substring( newStart, newText.length() );
+      m_caretPos = intStart;
+      super.replaceText( 0, oldText.length(), newText );
+      return;
+    }
+
+    // proceed with normal replace (no excess zeros)
+    super.replaceText( start, end, text );
   }
 
-  /***************************************** setTextCore *****************************************/
-  public void setTextCore( String text )
+  /****************************************** setValue *******************************************/
+  public void setValue( String text )
   {
     // set editor text adding prefix and suffix
-    if ( m_prefix != null && !text.startsWith( m_prefix ) )
-      text = m_prefix + text;
-    if ( m_suffix != null && !text.endsWith( m_suffix ) )
-      text = text + m_suffix;
+    m_caretPos = m_prefix.length() + text.length();
+    setText( m_prefix + text + m_suffix );
+  }
 
-    // set caret position before suffix 
-    int caretPos = text.length();
-    if ( m_suffix != null )
-      caretPos -= m_suffix.length();
-
-    setTextCaret( text, caretPos );
+  /****************************************** getValue *******************************************/
+  public String getValue()
+  {
+    // return editor text without prefix + suffix
+    return getText().substring( m_prefix.length(), getText().length() - m_suffix.length() );
   }
 
   /****************************************** setDouble ******************************************/
   public void setDouble( double value )
   {
     // set editor text (adding prefix and suffix)
-    setTextCore( m_numberFormat.format( value ) );
+    setValue( m_numberFormat.format( value ) );
   }
 
   /****************************************** getDouble ******************************************/
@@ -123,7 +150,7 @@ public class SpinEditor extends XTextField
     // return editor text (less prefix + suffix) converted to double number
     try
     {
-      return Double.parseDouble( getTextCore() );
+      return Double.parseDouble( getValue() );
     }
     catch ( Exception exception )
     {
@@ -135,7 +162,7 @@ public class SpinEditor extends XTextField
   public void setInteger( int value )
   {
     // set editor text (adding prefix and suffix)
-    setTextCore( m_numberFormat.format( value ) );
+    setValue( m_numberFormat.format( value ) );
   }
 
   /***************************************** getInteger ******************************************/
@@ -144,7 +171,7 @@ public class SpinEditor extends XTextField
     // return editor text (less prefix + suffix) converted to integer number
     try
     {
-      return Integer.parseInt( getTextCore() );
+      return Integer.parseInt( getValue() );
     }
     catch ( Exception exception )
     {
@@ -160,23 +187,24 @@ public class SpinEditor extends XTextField
   }
 
   /******************************************* setRange ******************************************/
-  public void setRange( double min, double max, int dp )
+  public void setRange( double minValue, double maxValue, int maxFractionDigits )
   {
     // check inputs
-    if ( min > max )
-      throw new IllegalArgumentException( "Min greater than max! " + min + " " + max );
-    if ( dp < 0 || dp > 8 )
-      throw new IllegalArgumentException( "Digits after deciminal place out of 0-8 range! " + dp );
+    if ( minValue > maxValue )
+      throw new IllegalArgumentException( "Min greater than max! " + minValue + " " + maxValue );
+    if ( maxFractionDigits < 0 || maxFractionDigits > 8 )
+      throw new IllegalArgumentException( "Digits after deciminal place out of 0-8 range! " + maxFractionDigits );
 
     // set range and number of digits after decimal point
-    m_min = min;
-    m_max = max;
-    m_dp = dp;
+    m_minValue = minValue;
+    m_maxValue = maxValue;
+    m_maxFractionDigits = maxFractionDigits;
 
     // sets the max number of digits after decimal point when displayed as text
-    m_numberFormat.setMaximumFractionDigits( dp );
-    setAllowed();
-    m_rangeError = "Value not between " + m_numberFormat.format( m_min ) + " and " + m_numberFormat.format( m_max );
+    m_numberFormat.setMaximumFractionDigits( maxFractionDigits );
+    determineAllowed();
+    m_rangeError = "Value not between " + m_numberFormat.format( m_minValue ) + " and "
+        + m_numberFormat.format( m_maxValue );
   }
 
   /***************************************** setStepPage *****************************************/
@@ -190,31 +218,41 @@ public class SpinEditor extends XTextField
   /*************************************** setPrefixSuffix ***************************************/
   public void setPrefixSuffix( String prefix, String suffix )
   {
-    // set prefix and suffix
-    m_prefix = prefix;
-    m_suffix = suffix;
-    setAllowed();
+    // set prefix and suffix, translating null to ""
+    m_prefix = ( prefix == null ? "" : prefix );
+    m_suffix = ( suffix == null ? "" : suffix );
+    determineAllowed();
   }
 
-  /***************************************** setAllowed ******************************************/
-  private void setAllowed()
+  /****************************************** getPrefix ******************************************/
+  public String getPrefix()
+  {
+    // return prefix
+    return m_prefix;
+  }
+
+  /****************************************** getSuffix ******************************************/
+  public String getSuffix()
+  {
+    // return suffix
+    return m_suffix;
+  }
+
+  /************************************** determineAllowed ***************************************/
+  private void determineAllowed()
   {
     // determine regular expression defining text allowed to be entered
     StringBuilder allow = new StringBuilder( 32 );
+    allow.append( Pattern.quote( m_prefix ) );
 
-    if ( m_prefix != null )
-      allow.append( Pattern.quote( m_prefix ) );
-
-    if ( m_min < 0.0 )
+    if ( m_minValue < 0.0 )
       allow.append( "-?" );
     allow.append( "\\d*" );
-    if ( m_dp > 0 )
-      allow.append( "\\.?\\d{0," + m_dp + "}" );
+    if ( m_maxFractionDigits > 0 )
+      allow.append( "\\.?\\d{0," + m_maxFractionDigits + "}" );
 
-    if ( m_suffix != null )
-      allow.append( Pattern.quote( m_suffix ) );
-
-    setAllowed( allow.toString() );
+    allow.append( Pattern.quote( m_suffix ) );
+    super.setAllowed( allow.toString() );
   }
 
   /**************************************** buttonPressed ****************************************/
@@ -225,6 +263,8 @@ public class SpinEditor extends XTextField
       changeNumber( m_step );
     else
       changeNumber( -m_step );
+
+    event.consume();
   }
 
   /**************************************** changeNumber *****************************************/
@@ -232,10 +272,10 @@ public class SpinEditor extends XTextField
   {
     // modify number, ensuring it is between min and max
     double num = getDouble() + delta;
-    if ( num < m_min )
-      num = m_min;
-    if ( num > m_max )
-      num = m_max;
+    if ( num < m_minValue )
+      num = m_minValue;
+    if ( num > m_maxValue )
+      num = m_maxValue;
     setDouble( num );
   }
 
@@ -247,21 +287,27 @@ public class SpinEditor extends XTextField
     {
       case DOWN:
         changeNumber( -m_step );
+        event.consume();
         break;
       case PAGE_DOWN:
         changeNumber( -m_page );
+        event.consume();
         break;
       case UP:
         changeNumber( m_step );
+        event.consume();
         break;
       case PAGE_UP:
         changeNumber( m_page );
+        event.consume();
         break;
       case HOME:
-        setDouble( m_min );
+        setDouble( m_minValue );
+        event.consume();
         break;
       case END:
-        setDouble( m_max );
+        setDouble( m_maxValue );
+        event.consume();
         break;
       default:
         break;

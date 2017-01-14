@@ -26,20 +26,19 @@ import java.text.DecimalFormat;
 
 public class TimeSpan
 {
-  private double             m_num;
-  private char               m_units;
+  private double              m_num;
+  private char                m_units;
 
-  public static final char   UNIT_SECONDS = 'S';
-  public static final char   UNIT_MINUTES = 'M';
-  public static final char   UNIT_HOURS   = 'H';
-  public static final char   UNIT_DAYS    = 'd';
-  public static final char   UNIT_WEEKS   = 'w';
-  public static final char   UNIT_MONTHS  = 'm';
-  public static final char   UNIT_YEARS   = 'y';
-  private static final char  UNIT_DEFAULT = UNIT_DAYS;
+  public static final char    UNIT_SECONDS = 'S';
+  public static final char    UNIT_MINUTES = 'M';
+  public static final char    UNIT_HOURS   = 'H';
+  public static final char    UNIT_DAYS    = 'd';
+  public static final char    UNIT_WEEKS   = 'w';
+  public static final char    UNIT_MONTHS  = 'm';
+  public static final char    UNIT_YEARS   = 'y';
+  public static final char    UNIT_DEFAULT = UNIT_DAYS;
 
-  public static final String NUMPOINT     = "01234567890.";
-  public static final String UNITS        = "SMHdwmy";
+  private static final String VALID_UNITS  = "SMHdwmy";
 
   /**************************************** constructor ******************************************/
   public TimeSpan()
@@ -52,38 +51,42 @@ public class TimeSpan
   /**************************************** constructor ******************************************/
   public TimeSpan( String str )
   {
-    // construct time-span from string
+    // construct time-span from string, start with default
     this();
 
-    // is string is of zero length, don't do anything more
+    // if string is null, don't do anything more
+    if ( str == null )
+      return;
+
+    // if string with white-spaces removed is zero length, don't do anything more
+    str = str.replaceAll( "\\s+", "" );
     if ( str.length() == 0 )
       return;
 
-    // remove any spaces and determine last character
-    str = str.replaceAll( "\\s+", "" );
-    char lastchr = str.charAt( str.length() - 1 );
-
     // if last char is not a number digit, check if it is a valid units 
-    if ( NUMPOINT.indexOf( lastchr ) < 0 )
+    char lastchr = str.charAt( str.length() - 1 );
+    if ( !isNumberOrPoint( lastchr ) )
     {
-      if ( UNITS.indexOf( lastchr ) >= 0 ) // check if valid units
+      if ( isValidUnits( lastchr ) )
       {
         m_units = lastchr;
         str = str.substring( 0, str.length() - 1 );
       }
       else
-      {
         throw new IllegalArgumentException( "Invalid units '" + str + "'" );
-      }
     }
 
-    m_num = Double.parseDouble( str );
+    // set number rounding to 
+    m_num = Math.rint( Double.parseDouble( str ) * 100.0 ) / 100.0;
   }
 
   /**************************************** constructor ******************************************/
   public TimeSpan( double num, char units )
   {
     // construct time-span from parameters, rounding number based on units
+    if ( !isValidUnits( units ) )
+      throw new IllegalArgumentException( "Invalid units '" + units + "'" );
+
     m_units = units;
     if ( units == UNIT_SECONDS )
       m_num = Math.rint( num );
@@ -100,14 +103,14 @@ public class TimeSpan
     return df.format( m_num ) + " " + m_units;
   }
 
-  /******************************************** units ********************************************/
-  public char units()
+  /****************************************** getUnits *******************************************/
+  public char getUnits()
   {
     return m_units;
   }
 
-  /******************************************* number ********************************************/
-  public double number()
+  /****************************************** getNumber ******************************************/
+  public double getNumber()
   {
     return m_num;
   }
@@ -116,6 +119,18 @@ public class TimeSpan
   public TimeSpan minus()
   {
     return new TimeSpan( -m_num, m_units );
+  }
+
+  /**************************************** isValidUnits *****************************************/
+  public static boolean isValidUnits( char unit )
+  {
+    return VALID_UNITS.indexOf( unit ) >= 0;
+  }
+
+  /*************************************** isNumberOrPoint ***************************************/
+  public static boolean isNumberOrPoint( char num )
+  {
+    return ( num >= '0' && num <= '9' ) || num == '.';
   }
 
   /******************************************* equals ********************************************/
@@ -128,8 +143,8 @@ public class TimeSpan
       TimeSpan ts = (TimeSpan) other;
       return m_units == ts.m_units && Math.abs( m_num - ts.m_num ) < 0.01;
     }
-    else
-      return false;
+
+    return false;
   }
 
 }

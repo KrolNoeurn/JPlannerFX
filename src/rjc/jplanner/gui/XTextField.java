@@ -18,7 +18,8 @@
 
 package rjc.jplanner.gui;
 
-import javafx.application.Platform;
+import java.util.regex.Pattern;
+
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
@@ -32,11 +33,11 @@ import javafx.scene.text.Text;
 
 public class XTextField extends TextField
 {
-  private String           m_allowed;             // regular expression defining text allowed to be entered
-  private double           m_minWidth;            // minimum width for editor
-  private double           m_maxWidth;            // maximum width for editor
-  private ButtonType       m_buttonType;          // button type, null means none
-  private Canvas           m_button;              // canvas so show buttons
+  private Pattern          m_allowed;             // pattern defining text allowed to be entered
+  private double           m_minWidth;            // minimum width for editor in pixels
+  private double           m_maxWidth;            // maximum width for editor in pixels
+  private ButtonType       m_buttonType;          // button type, null means no button
+  private Canvas           m_button;              // canvas to show button
 
   private static final int BUTTONS_WIDTH_MAX = 16;
   private static final int BUTTONS_PADDING   = 2;
@@ -52,15 +53,10 @@ public class XTextField extends TextField
     // create enhanced text field control
     super();
 
-    // add listener to check new values
+    // if min & max width set, increase editor width if needed to show whole text
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
-      // ensure text is always allowed
-      if ( m_allowed != null && !newText.matches( m_allowed ) )
-        setText( oldText );
-
-      // if min & max width set, increase width if needed to show whole text
-      if ( m_minWidth > 0.0 && m_maxWidth >= m_minWidth )
+      if ( m_minWidth > 0.0 && m_maxWidth > m_minWidth )
       {
         Text text = new Text( newText );
         double width = text.getLayoutBounds().getWidth() + getPadding().getLeft() + getPadding().getRight()
@@ -79,22 +75,30 @@ public class XTextField extends TextField
 
   }
 
-  /***************************************** setTextCaret ****************************************/
-  public void setTextCaret( String text, int caretPos )
+  /***************************************** replaceText *****************************************/
+  @Override
+  public void replaceText( int start, int end, String text )
   {
-    // set editor text value (cannot override final TextField setText method)
-    setText( text );
+    // only progress text updates that result in allowed new text
+    String oldText = getText();
+    String newText = oldText.substring( 0, start ) + text + oldText.substring( end );
 
-    // place editor caret (and in future so not overtaken other caret moving activities)
-    selectRange( caretPos, caretPos );
-    Platform.runLater( () -> selectRange( caretPos, caretPos ) );
+    if ( isAllowed( newText ) )
+      super.replaceText( start, end, text );
   }
 
   /****************************************** setAllowed *****************************************/
-  public void setAllowed( String allowed )
+  public void setAllowed( String regex )
   {
     // regular expression that limits what can be entered into editor
-    m_allowed = allowed;
+    m_allowed = regex == null ? null : Pattern.compile( regex );
+  }
+
+  /****************************************** isAllowed ******************************************/
+  public boolean isAllowed( String text )
+  {
+    // return true if text is allowed
+    return m_allowed == null || m_allowed.matcher( text ).matches();
   }
 
   /****************************************** setWidths ******************************************/
@@ -104,7 +108,7 @@ public class XTextField extends TextField
     m_minWidth = min;
     m_maxWidth = max;
 
-    // redraw button trigger editor padding calculation
+    // if button, trigger editor padding calculation by redrawing button
     if ( m_buttonType != null )
       drawButton();
   }

@@ -504,7 +504,7 @@ public class Task implements Comparable<Task>
     }
 
     Calendar planCal = JPlanner.plan.calendar();
-    if ( m_duration.number() == 0.0 )
+    if ( m_duration.getNumber() == 0.0 )
     {
       // milestone
       if ( hasToStart )

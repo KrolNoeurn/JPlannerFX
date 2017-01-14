@@ -414,30 +414,30 @@ public class Calendar
   public DateTime workTimeSpan( DateTime start, TimeSpan ts )
   {
     // if time-span is zero length return original start
-    if ( ts.number() == 0.0 )
+    if ( ts.getNumber() == 0.0 )
       return start;
 
     // return date-time moved by TimeSpan
-    if ( ts.units() == TimeSpan.UNIT_SECONDS )
-      return workSeconds( start, ts.number() );
+    if ( ts.getUnits() == TimeSpan.UNIT_SECONDS )
+      return workSeconds( start, ts.getNumber() );
 
-    if ( ts.units() == TimeSpan.UNIT_MINUTES )
-      return workSeconds( start, ts.number() * 60.0 );
+    if ( ts.getUnits() == TimeSpan.UNIT_MINUTES )
+      return workSeconds( start, ts.getNumber() * 60.0 );
 
-    if ( ts.units() == TimeSpan.UNIT_HOURS )
-      return workSeconds( start, ts.number() * 3600.0 );
+    if ( ts.getUnits() == TimeSpan.UNIT_HOURS )
+      return workSeconds( start, ts.getNumber() * 3600.0 );
 
-    if ( ts.units() == TimeSpan.UNIT_DAYS )
-      return workDays( start, ts.number() );
+    if ( ts.getUnits() == TimeSpan.UNIT_DAYS )
+      return workDays( start, ts.getNumber() );
 
-    if ( ts.units() == TimeSpan.UNIT_WEEKS )
-      return workWeeks( start, ts.number() );
+    if ( ts.getUnits() == TimeSpan.UNIT_WEEKS )
+      return workWeeks( start, ts.getNumber() );
 
-    if ( ts.units() == TimeSpan.UNIT_MONTHS )
-      return workMonths( start, ts.number() );
+    if ( ts.getUnits() == TimeSpan.UNIT_MONTHS )
+      return workMonths( start, ts.getNumber() );
 
-    if ( ts.units() == TimeSpan.UNIT_YEARS )
-      return workYears( start, ts.number() );
+    if ( ts.getUnits() == TimeSpan.UNIT_YEARS )
+      return workYears( start, ts.getNumber() );
 
     // unknown time-span units - should never happen!
     throw new IllegalArgumentException( ts.toString() );

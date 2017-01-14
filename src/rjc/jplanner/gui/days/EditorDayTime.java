@@ -60,9 +60,37 @@ public class EditorDayTime extends AbstractCellEditor
       m_max -= 60000;
     }
 
-    // add listener to set error status
-    ( (XTextField) getControl() ).textProperty()
-        .addListener( ( observable, oldText, newText ) -> JPlanner.gui.setError( getControl(), check( newText ) ) );
+    // add listener text changes to wrap hours and minutes, and set error status
+    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    {
+      // as prefix hold hours, if not null means minutes are being edited
+      if ( m_spin.getPrefix() != null )
+      {
+        // if minutes greater than 59, increase hours
+        int minutes = m_spin.getInteger();
+        if ( minutes > 59 )
+        {
+          String prefix = m_spin.getPrefix();
+          int hours = minutes / 60 + Integer.parseInt( prefix.substring( 0, prefix.length() - 1 ) );
+          m_spin.setPrefixSuffix( hours + ":", null );
+          m_spin.setInteger( minutes % 60 );
+          return;
+        }
+
+        // if minutes less than 0, decrease hours
+        if ( minutes < 0 )
+        {
+          String prefix = m_spin.getPrefix();
+          int hours = ( minutes - 60 ) / 60 + Integer.parseInt( prefix.substring( 0, prefix.length() - 1 ) );
+          m_spin.setPrefixSuffix( hours + ":", null );
+          m_spin.setInteger( ( minutes + 60 ) % 60 );
+          return;
+        }
+      }
+
+      // check editor value and if error
+      JPlanner.gui.setError( getControl(), check( newText ) );
+    } );
 
   }
 
@@ -103,18 +131,21 @@ public class EditorDayTime extends AbstractCellEditor
     // set value depending on type
     if ( value instanceof Time )
     {
+      // default to editing minutes, with hours in prefix
       Time time = (Time) value;
       String prefix = time.hours() + ":";
       m_spin.setPrefixSuffix( prefix, null );
       m_spin.setInteger( time.minutes() );
+      m_spin.setRange( -99, 99, 0 );
+      m_spin.setStepPage( 1, 10 );
     }
     else
-      m_spin.setTextCore( (String) value );
+      m_spin.setValue( (String) value );
   }
 
   /****************************************** validValue *****************************************/
   @Override
-  public boolean validValue( Object value )
+  public boolean isValueValid( Object value )
   {
     // value is valid if null or converts to a integer or is colon punctuation
     if ( value == null )

@@ -208,8 +208,8 @@ abstract public class AbstractCellEditor
     return m_table.getData().getValue( m_columnIndex, m_row );
   }
 
-  /****************************************** validValue *****************************************/
-  protected boolean validValue( Object value )
+  /***************************************** isValueValid ****************************************/
+  protected boolean isValueValid( Object value )
   {
     // return true only if value valid for editor - default true
     return true;

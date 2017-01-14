@@ -50,44 +50,52 @@ public class EditorTimeSpan extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
-    // set value depending on type
+    // if value of type TimeSpan
     if ( value instanceof TimeSpan )
-      setTimeSpan( (TimeSpan) value );
-    else if ( value instanceof String )
     {
-      String str = (String) value;
+      setTimeSpan( (TimeSpan) value );
+      return;
+    }
 
-      // if value is just decimal point then get time-span from data source and overwrite number
+    // if value of type String
+    if ( value instanceof String )
+    {
+      String str = ( (String) value ).replaceAll( "\\s+", "" );
+
+      // if string is just decimal point then get time-span from data source and overwrite number
       if ( str.equals( "." ) )
       {
         setTimeSpan( (TimeSpan) getDataSourceValue() );
-        m_spin.setTextCore( str );
+        m_spin.setValue( str );
         return;
       }
 
+      // if string valid number then add units from data source
       try
       {
-        // if value just number then add units from data source
         Double.parseDouble( str );
-        char units = ( (TimeSpan) getDataSourceValue() ).units();
+        char units = ( (TimeSpan) getDataSourceValue() ).getUnits();
         setTimeSpan( new TimeSpan( str + units ) );
       }
       catch ( Exception exception )
       {
         // if value just units then add number from data source
         char unit = str.charAt( 0 );
-        if ( TimeSpan.UNITS.indexOf( unit ) >= 0 )
+        if ( TimeSpan.isValidUnits( unit ) )
         {
-          double num = ( (TimeSpan) getDataSourceValue() ).number();
+          double num = ( (TimeSpan) getDataSourceValue() ).getNumber();
           setTimeSpan( new TimeSpan( num, unit ) );
         }
         else
           // else use full time-span from data source
           setTimeSpan( (TimeSpan) getDataSourceValue() );
       }
+
+      return;
     }
-    else
-      throw new IllegalArgumentException( "Invalid value type " + value.getClass() );
+
+    // unhandled value type 
+    throw new IllegalArgumentException( "Invalid value type " + value.getClass() );
   }
 
   /********************************************* open ********************************************/
@@ -101,7 +109,7 @@ public class EditorTimeSpan extends AbstractCellEditor
     m_spin.setOnKeyTyped( event ->
     {
       char unit = event.getCharacter().charAt( 0 );
-      if ( TimeSpan.UNITS.indexOf( unit ) >= 0 )
+      if ( TimeSpan.isValidUnits( unit ) )
         setTimeSpan( new TimeSpan( m_spin.getDouble(), unit ) );
     } );
   }
@@ -110,7 +118,7 @@ public class EditorTimeSpan extends AbstractCellEditor
   private char getUnits()
   {
     // return units which is last character of suffix (= last character of displayed text)
-    String text = m_spin.getText();
+    String text = m_spin.getSuffix();
     return text.charAt( text.length() - 1 );
   }
 
@@ -118,13 +126,13 @@ public class EditorTimeSpan extends AbstractCellEditor
   private void setTimeSpan( TimeSpan ts )
   {
     // number of seconds must be integer, otherwise non-integer allowed
-    if ( ts.units() == TimeSpan.UNIT_SECONDS )
+    if ( ts.getUnits() == TimeSpan.UNIT_SECONDS )
       m_spin.setRange( 0, 9999, 0 );
     else
       m_spin.setRange( 0.0, 9999.99, 2 );
 
-    m_spin.setPrefixSuffix( null, " " + ts.units() );
-    m_spin.setDouble( ts.number() );
+    m_spin.setPrefixSuffix( null, " " + ts.getUnits() );
+    m_spin.setDouble( ts.getNumber() );
   }
 
 }

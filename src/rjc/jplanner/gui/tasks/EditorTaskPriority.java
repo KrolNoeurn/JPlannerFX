@@ -54,12 +54,12 @@ public class EditorTaskPriority extends AbstractCellEditor
     if ( value instanceof Integer )
       m_spin.setInteger( (int) value );
     else
-      m_spin.setTextCore( (String) value );
+      m_spin.setValue( (String) value );
   }
 
   /****************************************** validValue *****************************************/
   @Override
-  public boolean validValue( Object value )
+  public boolean isValueValid( Object value )
   {
     // value is valid if null or converts to an integer
     if ( value == null )

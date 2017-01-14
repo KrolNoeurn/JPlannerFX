@@ -41,16 +41,21 @@ import rjc.jplanner.model.Plan;
 
 public class JPlanner extends Application
 {
-  public static Plan         plan;                    // globally accessible plan
-  public static MainWindow   gui;                     // globally accessible main-window
+  public static Plan         plan;             // globally accessible plan
+  public static MainWindow   gui;              // globally accessible main-window
 
   public static final String ERROR   = "error";
-  public static final String VERSION = "v0.0.1-alpha";
+  public static final String VERSION = "";
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
   {
     // main entry point for application startup
+    trace( "################################## Java details ##################################" );
+    trace( System.getProperty( "java.vendor" ), System.getProperty( "java.version" ) );
+    trace( System.getProperty( "java.home" ) );
+    trace( System.getProperty( "java.class.path" ) );
+    trace( System.getProperty( "os.arch" ), System.getProperty( "os.name" ), System.getProperty( "os.version" ) );
     trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
     trace( plan );
     plan = new Plan();
@@ -82,8 +87,12 @@ public class JPlanner extends Application
     {
       if ( obj == null )
         str.append( "null " );
+      else if ( obj instanceof String )
+        str.append( "\"" + obj + "\" " );
+      else if ( obj instanceof Character )
+        str.append( "'" + obj + "' " );
       else
-        str.append( obj.toString() + " " );
+        str.append( obj + " " );
     }
 
     StackTraceElement[] stack = new Throwable().getStackTrace();
@@ -113,7 +122,7 @@ public class JPlanner extends Application
   /*************************************** tool-tip hack *****************************************/
   static
   {
-    // hack tool-tip durations behaviour (temporary until Java 9)
+    // hack tool-tip durations behaviour (temporary until Java 9) - has stopped working?
     try
     {
       Tooltip obj = new Tooltip();

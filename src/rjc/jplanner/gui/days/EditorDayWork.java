@@ -57,12 +57,12 @@ public class EditorDayWork extends AbstractCellEditor
     if ( value instanceof Double )
       m_spin.setDouble( (double) value );
     else
-      m_spin.setTextCore( (String) value );
+      m_spin.setValue( (String) value );
   }
 
   /****************************************** validValue *****************************************/
   @Override
-  public boolean validValue( Object value )
+  public boolean isValueValid( Object value )
   {
     // value is valid if null or converts to a double or is decimal point
     if ( value == null )

@@ -64,7 +64,7 @@ public class EditorCalendarCycleLength extends AbstractCellEditor
 
   /****************************************** validValue *****************************************/
   @Override
-  public boolean validValue( Object value )
+  public boolean isValueValid( Object value )
   {
     // value is valid if null or converts to an integer greater than zero
     if ( value == null )
