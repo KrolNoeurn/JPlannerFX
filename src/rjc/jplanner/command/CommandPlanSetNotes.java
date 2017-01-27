@@ -33,7 +33,7 @@ public class CommandPlanSetNotes implements IUndoCommand
   public CommandPlanSetNotes( String newNotes )
   {
     // initialise private variables
-    m_oldNotes = JPlanner.plan.notes();
+    m_oldNotes = JPlanner.plan.getNotes();
     m_newNotes = newNotes;
   }
 

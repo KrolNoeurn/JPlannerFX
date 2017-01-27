@@ -20,6 +20,7 @@ package rjc.jplanner.gui;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
@@ -55,7 +56,7 @@ public class DateTimeSelector extends Popup
   private Canvas              m_calendar;    // for picking date
   private HBox                m_buttons;     // for today + start + end buttons
 
-  private SpinEditor          m_month;
+  private MonthSpinEditor     m_month;
   private SpinEditor          m_year;
 
   private SpinEditor          m_hours;
@@ -74,7 +75,7 @@ public class DateTimeSelector extends Popup
   private double              m_y;
 
   private static final double PADDING = 3.0;
-  private static final double HEIGHT  = 19.0;
+  private static final double HEIGHT  = 23.0;
 
   /**************************************** constructor ******************************************/
   public DateTimeSelector( DateTimeEditor parent )
@@ -83,7 +84,8 @@ public class DateTimeSelector extends Popup
     super();
     setAutoHide( true );
     setConsumeAutoHidingEvents( false );
-    createContents();
+
+    constructSelector();
     setValues();
     getContent().add( m_pane );
 
@@ -116,8 +118,8 @@ public class DateTimeSelector extends Popup
 
   }
 
-  /*************************************** createContents ****************************************/
-  private void createContents()
+  /************************************** constructSelector **************************************/
+  private void constructSelector()
   {
     // define background and border for the selector
     Background BACKGROUND = new Background( new BackgroundFill( Colors.GENERAL_BACKGROUND, null, null ) );
@@ -130,8 +132,12 @@ public class DateTimeSelector extends Popup
     m_date = new HBox();
     m_date.setPadding( INSETS );
     m_date.setSpacing( PADDING );
-    m_month = createSpinEditor( 1, 12, 121 );
     m_year = createSpinEditor( -999999, 999999, 80 );
+    m_month = new MonthSpinEditor();
+    m_month.setPrefWidth( 121 );
+    m_month.setMinHeight( HEIGHT );
+    m_month.setMaxHeight( HEIGHT );
+    m_month.setYearSpinEditor( m_year );
     m_date.getChildren().addAll( m_month, m_year );
 
     // create spin editors for entering time hh:mm:ss:mmm
@@ -162,6 +168,10 @@ public class DateTimeSelector extends Popup
     m_pane.getChildren().addAll( m_date, m_calendar, m_time, m_buttons );
     m_pane.setBackground( BACKGROUND );
     m_pane.setBorder( BORDER );
+
+    // update calendar canvas when month or year changes
+    m_year.getNumberProperty().addListener( ( observable, oldYear, newYear ) -> drawCalendar() );
+    m_month.getMonthProperty().addListener( ( observable, oldMonth, newMonth ) -> drawCalendar() );
   }
 
   /************************************* createSpinEditor ****************************************/
@@ -206,7 +216,7 @@ public class DateTimeSelector extends Popup
   private void setValues()
   {
     // TODO
-    m_month.setInteger( 11 );
+    m_month.setMonth( Month.FEBRUARY );
     m_year.setInteger( 2016 );
 
     m_hours.setInteger( 23 );
@@ -221,7 +231,7 @@ public class DateTimeSelector extends Popup
     // draw calendar for month-year specified in the spin editors
     double w = m_calendar.getWidth();
     double h = m_calendar.getHeight();
-    int month = m_month.getInteger();
+    int month = m_month.getMonthNumber();
     int year = m_year.getInteger();
 
     LocalDate ld = LocalDate.of( year, month, 1 );

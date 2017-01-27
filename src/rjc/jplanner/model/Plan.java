@@ -93,12 +93,12 @@ public class Plan
     resources.initialise();
     tasks.initialise();
 
-    m_calendar = calendar( 0 );
+    m_calendar = getCalendar( 0 );
     m_start = m_calendar.roundUp( new DateTime( Date.now(), Time.MIN_VALUE ) );
   }
 
-  /************************************** tasksNotNullCount **************************************/
-  public int tasksNotNullCount()
+  /************************************ getTasksNotNullCount *************************************/
+  public int getTasksNotNullCount()
   {
     // return number of not-null tasks in plan (skipping special task 0)
     int count = 0;
@@ -109,8 +109,8 @@ public class Plan
     return count;
   }
 
-  /************************************ resourcesNotNullCount ************************************/
-  public int resourcesNotNullCount()
+  /********************************** getResourcesNotNullCount ***********************************/
+  public int getResourcesNotNullCount()
   {
     // return number of not-null resources in plan (skipping special resource 0)
     int count = 0;
@@ -121,102 +121,102 @@ public class Plan
     return count;
   }
 
-  /**************************************** tasksCount *******************************************/
-  public int tasksCount()
+  /**************************************** getTasksCount ****************************************/
+  public int getTasksCount()
   {
     // return number of tasks in plan (including null tasks)
     return tasks.size();
   }
 
-  /************************************** resourcesCount *****************************************/
-  public int resourcesCount()
+  /************************************** getResourcesCount **************************************/
+  public int getResourcesCount()
   {
     // return number of resources in plan (including null resources)
     return resources.size();
   }
 
-  /************************************** calendarsCount *****************************************/
-  public int calendarsCount()
+  /************************************** getCalendarsCount **************************************/
+  public int getCalendarsCount()
   {
     // return number of calendars in plan
     return calendars.size();
   }
 
-  /***************************************** daysCount *******************************************/
-  public int daysCount()
+  /***************************************** getDaysCount ****************************************/
+  public int getDaysCount()
   {
     // return number of day-types in plan
     return daytypes.size();
   }
 
   /******************************************** task *********************************************/
-  public Task task( int index )
+  public Task getTask( int index )
   {
     // return task corresponding to index
     return tasks.get( index );
   }
 
-  public int index( Task task )
+  public int getIndex( Task task )
   {
     return tasks.indexOf( task );
   }
 
   /****************************************** resource *******************************************/
-  public Resource resource( int index )
+  public Resource getResource( int index )
   {
     // return resource corresponding to index
     return resources.get( index );
   }
 
-  public int index( Resource res )
+  public int getIndex( Resource res )
   {
     return resources.indexOf( res );
   }
 
   /****************************************** calendar *******************************************/
-  public Calendar calendar( int index )
+  public Calendar getCalendar( int index )
   {
     // return calendar corresponding to index
     return calendars.get( index );
   }
 
-  public int index( Calendar cal )
+  public int getIndex( Calendar cal )
   {
     return calendars.indexOf( cal );
   }
 
   /********************************************* day *********************************************/
-  public Day day( int index )
+  public Day getDay( int index )
   {
     // return day-type corresponding to index
     return daytypes.get( index );
   }
 
-  public int index( Day day )
+  public int getIndex( Day day )
   {
     return daytypes.indexOf( day );
   }
 
-  /******************************************** title ********************************************/
-  public String title()
+  /****************************************** getTitle *******************************************/
+  public String getTitle()
   {
     return m_title;
   }
 
-  /******************************************** notes ********************************************/
-  public String notes()
+  /****************************************** getNotes *******************************************/
+  public String getNotes()
   {
     return m_notes;
   }
 
-  /******************************************** start ********************************************/
-  public DateTime start()
+  /****************************************** getStart *******************************************/
+  public DateTime getStart()
   {
     return m_start;
   }
 
-  /****************************************** earliest *******************************************/
-  public DateTime earliest()
+  /************************************ getEarliestTaskStart *************************************/
+  public DateTime getEarliestTaskStart()
   {
     // return start date-time of earliest starting plan task, or null if no tasks
     DateTime earliest = DateTime.MAX_VALUE;
@@ -230,8 +230,8 @@ public class Plan
     return earliest;
   }
 
-  /********************************************* end *********************************************/
-  public DateTime end()
+  /************************************** getLatestTaskEnd ***************************************/
+  public DateTime getLatestTaskEnd()
   {
     // return end date-time of latest ending plan task, or null if no tasks
     DateTime latest = DateTime.MIN_VALUE;
@@ -245,50 +245,50 @@ public class Plan
     return latest;
   }
 
-  /******************************************* calendar ******************************************/
-  public Calendar calendar()
+  /************************************** getDefaultcalendar *************************************/
+  public Calendar getDefaultcalendar()
   {
     return m_calendar;
   }
 
-  /**************************************** datetimeFormat ***************************************/
-  public String datetimeFormat()
+  /************************************** getDateTimeFormat **************************************/
+  public String getDateTimeFormat()
   {
     return m_datetimeFormat;
   }
 
-  /****************************************** dateFormat *****************************************/
-  public String dateFormat()
+  /**************************************** getDateFormat ****************************************/
+  public String getDateFormat()
   {
     return m_dateFormat;
   }
 
-  /******************************************* filename ******************************************/
-  public String filename()
+  /***************************************** getFilename *****************************************/
+  public String getFilename()
   {
     return m_filename;
   }
 
-  /***************************************** fileLocation ****************************************/
-  public String fileLocation()
+  /*************************************** getFileLocation ***************************************/
+  public String getFileLocation()
   {
     return m_fileLocation;
   }
 
-  /******************************************* savedBy *******************************************/
-  public String savedBy()
+  /***************************************** getSavedBy ******************************************/
+  public String getSavedBy()
   {
     return m_savedBy;
   }
 
-  /****************************************** savedWhen ******************************************/
-  public DateTime savedWhen()
+  /**************************************** getSavedWhen *****************************************/
+  public DateTime getSavedWhen()
   {
     return m_savedWhen;
   }
 
-  /****************************************** undostack ******************************************/
-  public UndoStack undostack()
+  /**************************************** getUndostack *****************************************/
+  public UndoStack getUndostack()
   {
     return m_undostack;
   }
@@ -311,14 +311,14 @@ public class Plan
     m_start = start;
   }
 
-  /****************************************** setCalendar ****************************************/
-  public void setCalendar( Calendar cal )
+  /************************************** setDefaultCalendar *************************************/
+  public void setDefaultCalendar( Calendar cal )
   {
     m_calendar = cal;
   }
 
-  /*************************************** setDatetimeFormat *************************************/
-  public void setDatetimeFormat( String DTformat )
+  /*************************************** setDateTimeFormat *************************************/
+  public void setDateTimeFormat( String DTformat )
   {
     m_datetimeFormat = DTformat;
   }
@@ -349,7 +349,7 @@ public class Plan
       xsw.writeStartElement( XmlLabels.XML_PLAN_DATA );
       xsw.writeAttribute( XmlLabels.XML_TITLE, m_title );
       xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
-      xsw.writeAttribute( XmlLabels.XML_CALENDAR, Integer.toString( index( m_calendar ) ) );
+      xsw.writeAttribute( XmlLabels.XML_CALENDAR, Integer.toString( getIndex( m_calendar ) ) );
       xsw.writeAttribute( XmlLabels.XML_DT_FORMAT, m_datetimeFormat );
       xsw.writeAttribute( XmlLabels.XML_D_FORMAT, m_dateFormat );
 
@@ -418,9 +418,9 @@ public class Plan
 
     // if calendar-id still negative, default to first calendar
     if ( calendarId < 0 )
-      m_calendar = calendar( 0 );
+      m_calendar = getCalendar( 0 );
     else
-      m_calendar = calendar( calendarId );
+      m_calendar = getCalendar( calendarId );
 
     m_filename = filename;
     m_fileLocation = fileloc;
@@ -486,17 +486,17 @@ public class Plan
       }
   }
 
-  /******************************************* errors ********************************************/
-  public String errors()
+  /*************************************** checkForErrors ****************************************/
+  public String checkForErrors()
   {
     // check what errors plan may have
-    if ( daysCount() == 0 )
+    if ( getDaysCount() == 0 )
       return "No day-types";
 
-    if ( calendarsCount() == 0 )
+    if ( getCalendarsCount() == 0 )
       return "No calendars";
 
-    if ( index( calendar() ) == -1 )
+    if ( getIndex( getDefaultcalendar() ) == -1 )
       return "Invalid default calendar";
 
     return null;

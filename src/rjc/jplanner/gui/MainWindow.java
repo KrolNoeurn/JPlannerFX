@@ -158,7 +158,7 @@ public class MainWindow
   {
     // if undo-stack not clean, ask user what to do, true to proceed
     checkPlanUpToDate();
-    if ( !JPlanner.plan.undostack().isClean() )
+    if ( !JPlanner.plan.getUndostack().isClean() )
     {
       ButtonType save = new ButtonType( "Save", ButtonData.YES );
       ButtonType saveAs = new ButtonType( "Save As", ButtonData.NO );
@@ -195,7 +195,7 @@ public class MainWindow
   private boolean discard()
   {
     // if no existing file location set or not writable, use default temporary file path
-    String path = JPlanner.plan.fileLocation();
+    String path = JPlanner.plan.getFileLocation();
     if ( path == null || path.length() < 1 || !Files.isWritable( Paths.get( path ) ) )
       path = System.getProperty( "java.io.tmpdir" );
 
@@ -235,7 +235,7 @@ public class MainWindow
     // use file-chooser defaulting if available to current directory
     FileChooser fc = new FileChooser();
     fc.setTitle( "Open plan" );
-    File initialDirectory = new File( JPlanner.plan.fileLocation() );
+    File initialDirectory = new File( JPlanner.plan.getFileLocation() );
     if ( initialDirectory.isDirectory() )
       fc.setInitialDirectory( initialDirectory );
     fc.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Plan files (*.xml)", "*.xml" ) );
@@ -289,9 +289,9 @@ public class MainWindow
       JPlanner.plan.loadXML( xsr, file.getName(), file.getParent() );
 
       // if new plan not okay, revert back to old plan
-      if ( JPlanner.plan.errors() != null )
+      if ( JPlanner.plan.checkForErrors() != null )
       {
-        message( "Plan '" + file.getPath() + "' not valid (" + JPlanner.plan.errors() + ")" );
+        message( "Plan '" + file.getPath() + "' not valid (" + JPlanner.plan.checkForErrors() + ")" );
         JPlanner.plan = oldPlan;
         fis.close();
         xsr.close();
@@ -332,10 +332,10 @@ public class MainWindow
     // use file-chooser defaulting if available to current directory and file-name
     FileChooser fc = new FileChooser();
     fc.setTitle( "Save plan" );
-    File initialDirectory = new File( JPlanner.plan.fileLocation() );
+    File initialDirectory = new File( JPlanner.plan.getFileLocation() );
     if ( initialDirectory.isDirectory() )
       fc.setInitialDirectory( initialDirectory );
-    fc.setInitialFileName( JPlanner.plan.filename() );
+    fc.setInitialFileName( JPlanner.plan.getFilename() );
     fc.getExtensionFilters().add( new FileChooser.ExtensionFilter( "Plan files (*.xml)", "*.xml" ) );
     File file = fc.showSaveDialog( m_stage );
 
@@ -351,11 +351,11 @@ public class MainWindow
   public boolean save()
   {
     // if no existing filename set, use save-as
-    if ( JPlanner.plan.filename() == null || JPlanner.plan.filename().length() < 1 )
+    if ( JPlanner.plan.getFilename() == null || JPlanner.plan.getFilename().length() < 1 )
       return saveAs();
 
     // attempt to save using existing filename & location
-    return save( new File( JPlanner.plan.fileLocation(), JPlanner.plan.filename() ) );
+    return save( new File( JPlanner.plan.getFileLocation(), JPlanner.plan.getFilename() ) );
   }
 
   /******************************************** save *********************************************/
@@ -420,7 +420,7 @@ public class MainWindow
 
     // save succeed, so update gui
     properties().updateFromPlan();
-    JPlanner.plan.undostack().setClean();
+    JPlanner.plan.getUndostack().setClean();
     updateWindowTitles();
     message( "Saved plan to '" + file.getPath() + "'" );
     return true;
@@ -727,12 +727,12 @@ public class MainWindow
   {
     // refresh title on each JPlanner window
     String title = "JPlannerFX " + JPlanner.VERSION;
-    if ( JPlanner.plan.filename() != null || JPlanner.plan.filename().length() > 0 )
+    if ( JPlanner.plan.getFilename() != null || JPlanner.plan.getFilename().length() > 0 )
     {
-      if ( JPlanner.plan.undostack().isClean() )
-        title = JPlanner.plan.filename() + " - " + title;
+      if ( JPlanner.plan.getUndostack().isClean() )
+        title = JPlanner.plan.getFilename() + " - " + title;
       else
-        title = JPlanner.plan.filename() + "* - " + title;
+        title = JPlanner.plan.getFilename() + "* - " + title;
     }
 
     for ( MainTabWidget tabs : m_tabWidgets )
@@ -828,7 +828,7 @@ public class MainWindow
       m_undoWindow.updateScrollBarAndCanvas();
 
     // if clean state changed, update window titles
-    UndoStack stack = JPlanner.plan.undostack();
+    UndoStack stack = JPlanner.plan.getUndostack();
     if ( stack.getPreviousCleanState() != stack.isClean() )
     {
       updateWindowTitles();

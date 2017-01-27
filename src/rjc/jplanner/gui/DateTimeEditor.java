@@ -29,6 +29,7 @@ public class DateTimeEditor extends XTextField
 {
   private DateTime         m_datetime;
   private DateTimeSelector m_selector;
+  private String           m_validText;
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
@@ -41,8 +42,26 @@ public class DateTimeEditor extends XTextField
     // react to changes to editor text
     textProperty().addListener( ( property, oldText, newText ) ->
     {
-      JPlanner.trace( "'" + oldText + "' -> '" + newText + "'" );
-      // TODO
+      // only check if gui and plan created
+      if ( JPlanner.gui == null || JPlanner.plan == null )
+        return;
+
+      // check editor text can be parsed successfully to determine new date-time
+      m_datetime = DateTime.parse( newText, JPlanner.plan.getDateTimeFormat() );
+      if ( m_datetime == null )
+        JPlanner.gui.setError( this, "Format not '" + JPlanner.plan.getDateTimeFormat() + "'" );
+      else
+        JPlanner.gui.setError( this, null );
+
+      JPlanner.trace( oldText, newText, DateTime.parse( newText, JPlanner.plan.getDateTimeFormat() ) );
+    } );
+
+    // react to changes in editor focus state
+    focusedProperty().addListener( ( property, oldFocus, newFocus ) ->
+    {
+      // if editor loses focus and is in error, return text to a valid value
+      if ( newFocus == false && MainWindow.isError( this ) )
+        setText( m_validText );
     } );
 
   }
@@ -58,8 +77,8 @@ public class DateTimeEditor extends XTextField
   public void setDateTime( DateTime dt )
   {
     // set editor current date-time
-    m_datetime = dt;
-    setText( dt.toString( JPlanner.plan.datetimeFormat() ) );
+    m_validText = dt.toString( JPlanner.plan.getDateTimeFormat() );
+    setText( m_validText );
   }
 
 }

@@ -108,9 +108,9 @@ abstract public class AbstractDataSource
     if ( value instanceof Calendar )
       return ( (Calendar) value ).getName();
     if ( value instanceof DateTime )
-      return ( (DateTime) value ).toString( JPlanner.plan.datetimeFormat() );
+      return ( (DateTime) value ).toString( JPlanner.plan.getDateTimeFormat() );
     if ( value instanceof Date )
-      return ( (Date) value ).toString( JPlanner.plan.dateFormat() );
+      return ( (Date) value ).toString( JPlanner.plan.getDateFormat() );
 
     // return cell display text
     return ( value == null ? null : value.toString() );

@@ -66,11 +66,11 @@ public class Calendar
   public Calendar( DefaultCalendarTypes type )
   {
     // construct default calendar
-    Day working = JPlanner.plan.day( DefaultDayTypes.STANDARDWORK.ordinal() );
-    Day nonWorking = JPlanner.plan.day( DefaultDayTypes.NONWORK.ordinal() );
-    Day fullTime = JPlanner.plan.day( DefaultDayTypes.TWENTYFOURHOURS.ordinal() );
-    Day evening = JPlanner.plan.day( DefaultDayTypes.EVENING.ordinal() );
-    Day shortDay = JPlanner.plan.day( DefaultDayTypes.SHORT.ordinal() );
+    Day working = JPlanner.plan.getDay( DefaultDayTypes.STANDARDWORK.ordinal() );
+    Day nonWorking = JPlanner.plan.getDay( DefaultDayTypes.NONWORK.ordinal() );
+    Day fullTime = JPlanner.plan.getDay( DefaultDayTypes.TWENTYFOURHOURS.ordinal() );
+    Day evening = JPlanner.plan.getDay( DefaultDayTypes.EVENING.ordinal() );
+    Day shortDay = JPlanner.plan.getDay( DefaultDayTypes.SHORT.ordinal() );
 
     m_normal = new ArrayList<Day>();
     m_exceptions = new HashMap<Date, Day>();
@@ -170,7 +170,7 @@ public class Calendar
               break;
             case XmlLabels.XML_DAY:
               int dayIndex = Integer.parseInt( xsr.getAttributeValue( i ) );
-              m_normal.add( JPlanner.plan.day( dayIndex ) );
+              m_normal.add( JPlanner.plan.getDay( dayIndex ) );
               break;
             default:
               JPlanner.trace( "Normal - unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
@@ -197,7 +197,7 @@ public class Calendar
               break;
           }
 
-        m_exceptions.put( date, JPlanner.plan.day( dayIndex ) );
+        m_exceptions.put( date, JPlanner.plan.getDay( dayIndex ) );
       }
 
       xsr.next();
@@ -638,7 +638,7 @@ public class Calendar
   /******************************************** index ********************************************/
   public int index()
   {
-    return JPlanner.plan.index( this );
+    return JPlanner.plan.getIndex( this );
   }
 
 }

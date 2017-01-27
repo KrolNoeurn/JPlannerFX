@@ -549,7 +549,7 @@ public class TableEvents extends TableCanvas
         {
           Set<Integer> indent = JPlanner.plan.tasks.canIndent( m_table.getSelectedRows() );
           if ( !indent.isEmpty() )
-            JPlanner.plan.undostack().push( new CommandTaskIndent( indent ) );
+            JPlanner.plan.getUndostack().push( new CommandTaskIndent( indent ) );
           break;
         }
       case KP_RIGHT:
@@ -581,7 +581,7 @@ public class TableEvents extends TableCanvas
         {
           Set<Integer> outdent = JPlanner.plan.tasks.canOutdent( m_table.getSelectedRows() );
           if ( !outdent.isEmpty() )
-            JPlanner.plan.undostack().push( new CommandTaskOutdent( outdent ) );
+            JPlanner.plan.getUndostack().push( new CommandTaskOutdent( outdent ) );
           break;
         }
       case KP_LEFT:

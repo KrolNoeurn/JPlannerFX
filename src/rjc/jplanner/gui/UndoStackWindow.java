@@ -124,21 +124,21 @@ public class UndoStackWindow extends Stage
   private int size()
   {
     // get undo stack size
-    return JPlanner.plan.undostack().size();
+    return JPlanner.plan.getUndostack().size();
   }
 
   /******************************************** index ********************************************/
   private int index()
   {
     // get undo stack current index
-    return JPlanner.plan.undostack().index();
+    return JPlanner.plan.getUndostack().index();
   }
 
   /****************************************** setIndex *******************************************/
   private void setIndex( int index )
   {
     // set undo stack current index
-    JPlanner.plan.undostack().setIndex( index );
+    JPlanner.plan.getUndostack().setIndex( index );
   }
 
   /**************************************** getIndexAtY ******************************************/
@@ -238,7 +238,7 @@ public class UndoStackWindow extends Stage
       if ( item < 0 )
         text = "<empty>";
       else
-        text = JPlanner.plan.undostack().text( item );
+        text = JPlanner.plan.getUndostack().text( item );
 
       // colour current index item differently
       int y = getYStartByIndex( item );

@@ -154,9 +154,9 @@ public class PlanProperties extends ScrollPane
     {
       int pos = source.getCaretPosition();
       if ( source == m_DTformat )
-        source.setText( JPlanner.plan.datetimeFormat() );
+        source.setText( JPlanner.plan.getDateTimeFormat() );
       if ( source == m_Dformat )
-        source.setText( JPlanner.plan.dateFormat() );
+        source.setText( JPlanner.plan.getDateFormat() );
       source.selectRange( pos, pos );
     }
 
@@ -193,10 +193,10 @@ public class PlanProperties extends ScrollPane
       m_DTformat.setId( JPlanner.ERROR );
     }
 
-    displayDateTime( m_defaultStart, JPlanner.plan.start() );
-    displayDateTime( m_actualStart, JPlanner.plan.earliest() );
-    displayDateTime( m_end, JPlanner.plan.end() );
-    displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
+    displayDateTime( m_defaultStart, JPlanner.plan.getStart() );
+    displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
+    displayDateTime( m_end, JPlanner.plan.getLatestTaskEnd() );
+    displayDateTime( m_savedWhen, JPlanner.plan.getSavedWhen() );
   }
 
   /*************************************** dateFormatChange **************************************/
@@ -247,7 +247,7 @@ public class PlanProperties extends ScrollPane
     if ( dt == null )
       field.setText( null );
     else if ( m_DTformat.getId() == JPlanner.ERROR )
-      field.setText( dt.toString( JPlanner.plan.datetimeFormat() ) );
+      field.setText( dt.toString( JPlanner.plan.getDateTimeFormat() ) );
     else
       field.setText( dt.toString( m_DTformat.getText() ) );
   }
@@ -256,18 +256,18 @@ public class PlanProperties extends ScrollPane
   public void updateFromPlan()
   {
     // update the gui property widgets with values from plan
-    m_title.setText( JPlanner.plan.title() );
-    m_defaultCalendar.setCalendar( JPlanner.plan.calendar() );
-    m_DTformat.setText( JPlanner.plan.datetimeFormat() );
-    m_Dformat.setText( JPlanner.plan.dateFormat() );
-    m_fileName.setText( JPlanner.plan.filename() );
-    m_fileLocation.setText( JPlanner.plan.fileLocation() );
-    m_savedBy.setText( JPlanner.plan.savedBy() );
+    m_title.setText( JPlanner.plan.getTitle() );
+    m_defaultCalendar.setCalendar( JPlanner.plan.getDefaultcalendar() );
+    m_DTformat.setText( JPlanner.plan.getDateTimeFormat() );
+    m_Dformat.setText( JPlanner.plan.getDateFormat() );
+    m_fileName.setText( JPlanner.plan.getFilename() );
+    m_fileLocation.setText( JPlanner.plan.getFileLocation() );
+    m_savedBy.setText( JPlanner.plan.getSavedBy() );
 
-    m_defaultStart.setDateTime( JPlanner.plan.start() );
-    displayDateTime( m_actualStart, JPlanner.plan.earliest() );
-    displayDateTime( m_end, JPlanner.plan.end() );
-    displayDateTime( m_savedWhen, JPlanner.plan.savedWhen() );
+    m_defaultStart.setDateTime( JPlanner.plan.getStart() );
+    displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
+    displayDateTime( m_end, JPlanner.plan.getLatestTaskEnd() );
+    displayDateTime( m_savedWhen, JPlanner.plan.getSavedWhen() );
 
     // update the gui "number of" pane
     m_numberOf.redraw();
@@ -281,18 +281,18 @@ public class PlanProperties extends ScrollPane
     DateTime start = m_defaultStart.getDateTime();
     Calendar cal = m_defaultCalendar.getCalendar();
 
-    String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.datetimeFormat() : m_DTformat.getText();
+    String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateTimeFormat() : m_DTformat.getText();
 
-    String Dformat = m_Dformat.getId() == JPlanner.ERROR ? JPlanner.plan.dateFormat() : m_Dformat.getText();
+    String Dformat = m_Dformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateFormat() : m_Dformat.getText();
 
     // if properties not changed, return doing nothing
-    if ( JPlanner.plan.title().equals( title ) && JPlanner.plan.start().equals( start )
-        && JPlanner.plan.calendar() == cal && JPlanner.plan.datetimeFormat().equals( DTformat )
-        && JPlanner.plan.dateFormat().equals( Dformat ) )
+    if ( JPlanner.plan.getTitle().equals( title ) && JPlanner.plan.getStart().equals( start )
+        && JPlanner.plan.getDefaultcalendar() == cal && JPlanner.plan.getDateTimeFormat().equals( DTformat )
+        && JPlanner.plan.getDateFormat().equals( Dformat ) )
       return;
 
     // update plan via undo-stack
-    JPlanner.plan.undostack().push( new CommandPlanSetProperties( title, start, cal, DTformat, Dformat ) );
+    JPlanner.plan.getUndostack().push( new CommandPlanSetProperties( title, start, cal, DTformat, Dformat ) );
   }
 
 }

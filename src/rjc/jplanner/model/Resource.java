@@ -109,7 +109,7 @@ public class Resource
           m_cost = Double.parseDouble( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_CALENDAR:
-          m_calendar = JPlanner.plan.calendar( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          m_calendar = JPlanner.plan.getCalendar( Integer.parseInt( xsr.getAttributeValue( i ) ) );
           break;
         case XmlLabels.XML_COMMENT:
           m_comment = xsr.getAttributeValue( i );
@@ -190,7 +190,7 @@ public class Resource
     if ( section == SECTION_INITIALS )
     {
       if ( isNull() )
-        m_calendar = JPlanner.plan.calendar();
+        m_calendar = JPlanner.plan.getDefaultcalendar();
 
       m_initials = (String) newValue;
     }
@@ -309,7 +309,7 @@ public class Resource
   /******************************************** index ********************************************/
   public int index()
   {
-    return JPlanner.plan.index( this );
+    return JPlanner.plan.getIndex( this );
   }
 
   /***************************************** isAssignable ****************************************/

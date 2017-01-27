@@ -44,8 +44,8 @@ public class DaysData extends AbstractDataSource
     // table column count is max number of periods * 2 + SECTION_START1
     int max = 0;
     for ( int i = 0; i < getRowCount(); i++ )
-      if ( JPlanner.plan.day( i ).numPeriods() > max )
-        max = JPlanner.plan.day( i ).numPeriods();
+      if ( JPlanner.plan.getDay( i ).numPeriods() > max )
+        max = JPlanner.plan.getDay( i ).numPeriods();
 
     return max * 2 + Day.SECTION_START1;
   }
@@ -55,7 +55,7 @@ public class DaysData extends AbstractDataSource
   public int getRowCount()
   {
     // return number of rows
-    return JPlanner.plan.daysCount();
+    return JPlanner.plan.getDaysCount();
   }
 
   /************************************** getColumnTitle *****************************************/
@@ -90,7 +90,7 @@ public class DaysData extends AbstractDataSource
   public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // all cells are normal coloured except unused start/end
-    Day day = JPlanner.plan.day( rowIndex );
+    Day day = JPlanner.plan.getDay( rowIndex );
     if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
       return Colors.DISABLED_CELL;
 
@@ -102,7 +102,7 @@ public class DaysData extends AbstractDataSource
   public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable, unused start/end
-    Day day = JPlanner.plan.day( rowIndex );
+    Day day = JPlanner.plan.getDay( rowIndex );
     if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
       return null;
 
@@ -125,16 +125,16 @@ public class DaysData extends AbstractDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Day day = JPlanner.plan.day( rowIndex );
+    Day day = JPlanner.plan.getDay( rowIndex );
     Object oldValue = day.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting number of work periods, otherwise generic
     if ( columnIndex == Day.SECTION_PERIODS )
-      JPlanner.plan.undostack().push( new CommandDaySetNumPeriods( day, (int) newValue, (int) oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandDaySetNumPeriods( day, (int) newValue, (int) oldValue ) );
     else
-      JPlanner.plan.undostack().push( new CommandDaySetValue( day, columnIndex, newValue, oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandDaySetValue( day, columnIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
@@ -142,7 +142,7 @@ public class DaysData extends AbstractDataSource
   public Object getValue( int columnIndex, int rowIndex )
   {
     // return cell value
-    return JPlanner.plan.day( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.getDay( rowIndex ).getValue( columnIndex );
   }
 
   /***************************************** getCellText *****************************************/

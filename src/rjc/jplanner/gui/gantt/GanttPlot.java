@@ -90,7 +90,7 @@ public class GanttPlot extends Canvas
   private void shadeNonWorking( int x, int y, int w, int h )
   {
     // shade non-working time on gantt-plot
-    Calendar calendar = JPlanner.plan.calendar();
+    Calendar calendar = JPlanner.plan.getDefaultcalendar();
     Date date = m_gantt.datetime( x - 1 ).date();
     int endEpoch = m_gantt.datetime( x + w ).date().epochday();
     int startShadeEpoch;

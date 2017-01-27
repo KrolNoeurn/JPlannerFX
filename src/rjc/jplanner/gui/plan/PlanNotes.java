@@ -71,17 +71,17 @@ public class PlanNotes extends GridPane
   public void updateFromPlan()
   {
     // update the gui notes with text from plan
-    m_notes.setText( JPlanner.plan.notes() );
+    m_notes.setText( JPlanner.plan.getNotes() );
   }
 
   /************************************** updatePlanNotes ****************************************/
   public void updatePlan()
   {
     // if notes not changed, return doing nothing, otherwise update via undo-stack command
-    if ( JPlanner.plan.notes().equals( m_notes.getText() ) )
+    if ( JPlanner.plan.getNotes().equals( m_notes.getText() ) )
       return;
 
-    JPlanner.plan.undostack().push( new CommandPlanSetNotes( m_notes.getText() ) );
+    JPlanner.plan.getUndostack().push( new CommandPlanSetNotes( m_notes.getText() ) );
   }
 
 }

@@ -128,8 +128,8 @@ public class Task implements Comparable<Task>
     // initialise private variables
     m_duration = new TimeSpan( "1d" );
     m_work = new TimeSpan( "0d" );
-    m_start = JPlanner.plan.start();
-    m_end = JPlanner.plan.start();
+    m_start = JPlanner.plan.getStart();
+    m_end = JPlanner.plan.getStart();
     m_predecessors = new Predecessors( "" );
     m_resources = new TaskResources();
     m_type = new TaskType( TaskType.ASAP_FDUR );
@@ -491,7 +491,7 @@ public class Task implements Comparable<Task>
       Task task = this;
       for ( int indent = m_indent; indent > 0; indent-- )
       {
-        task = JPlanner.plan.task( task.m_summaryStart );
+        task = JPlanner.plan.getTask( task.m_summaryStart );
 
         hasToStart = task.m_predecessors.hasToStart();
         if ( hasToStart )
@@ -503,7 +503,7 @@ public class Task implements Comparable<Task>
       }
     }
 
-    Calendar planCal = JPlanner.plan.calendar();
+    Calendar planCal = JPlanner.plan.getDefaultcalendar();
     if ( m_duration.getNumber() == 0.0 )
     {
       // milestone
@@ -512,7 +512,7 @@ public class Task implements Comparable<Task>
       else if ( hasToFinish )
         m_start = planCal.roundDown( endDueToPredecessors() );
       else
-        m_start = planCal.roundUp( JPlanner.plan.start() );
+        m_start = planCal.roundUp( JPlanner.plan.getStart() );
 
       m_end = m_start;
     }
@@ -531,7 +531,7 @@ public class Task implements Comparable<Task>
       }
       else
       {
-        m_start = planCal.roundUp( JPlanner.plan.start() );
+        m_start = planCal.roundUp( JPlanner.plan.getStart() );
         m_end = planCal.roundDown( planCal.workTimeSpan( m_start, m_duration ) );
       }
     }
@@ -561,7 +561,7 @@ public class Task implements Comparable<Task>
       for ( int id = index() + 1; id <= m_summaryEnd; id++ )
       {
         // if task isn't summary & isn't null, check if its end is after current latest
-        Task task = JPlanner.plan.task( id );
+        Task task = JPlanner.plan.getTask( id );
         if ( !task.isNull() && !task.isSummary() && end.isLessThan( task.m_end ) )
           end = task.m_end;
       }
@@ -583,7 +583,7 @@ public class Task implements Comparable<Task>
       for ( int id = index() + 1; id <= m_summaryEnd; id++ )
       {
         // if task isn't summary & isn't null, check if its start is before current earliest
-        Task task = JPlanner.plan.task( id );
+        Task task = JPlanner.plan.getTask( id );
         if ( !task.isNull() && !task.isSummary() && task.m_start.isLessThan( start ) )
           start = task.m_start;
       }
@@ -613,7 +613,7 @@ public class Task implements Comparable<Task>
   {
     // return task or summary work time-span
     if ( isSummary() )
-      return JPlanner.plan.calendar().workBetween( start(), end() );
+      return JPlanner.plan.getDefaultcalendar().workBetween( start(), end() );
 
     return m_duration;
   }
@@ -628,7 +628,7 @@ public class Task implements Comparable<Task>
     Task task = this;
     for ( int indent = m_indent; indent > 0; indent-- )
     {
-      task = JPlanner.plan.task( task.m_summaryStart );
+      task = JPlanner.plan.getTask( task.m_summaryStart );
 
       // if start from summary predecessors is later, use it instead
       DateTime summaryStart = task.m_predecessors.start();
@@ -649,7 +649,7 @@ public class Task implements Comparable<Task>
     Task task = this;
     for ( int indent = m_indent; indent > 0; indent-- )
     {
-      task = JPlanner.plan.task( task.m_summaryStart );
+      task = JPlanner.plan.getTask( task.m_summaryStart );
 
       // if end from summary predecessors is later, use it instead
       DateTime summaryEnd = task.m_predecessors.end();
@@ -676,7 +676,7 @@ public class Task implements Comparable<Task>
   /******************************************** index ********************************************/
   public int index()
   {
-    return JPlanner.plan.index( this );
+    return JPlanner.plan.getIndex( this );
   }
 
   /****************************************** priority *******************************************/

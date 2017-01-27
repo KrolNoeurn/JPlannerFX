@@ -38,7 +38,7 @@ public class EditorSelectDay extends AbstractCellEditor
     public int getItemCount()
     {
       // return number of day-types
-      return JPlanner.plan.daysCount();
+      return JPlanner.plan.getDaysCount();
     }
 
     /******************************************* getItem *******************************************/
@@ -46,7 +46,7 @@ public class EditorSelectDay extends AbstractCellEditor
     public String getItem( int num )
     {
       // return day-type name
-      return JPlanner.plan.day( num ).name();
+      return JPlanner.plan.getDay( num ).name();
     }
 
     /****************************************** setString ******************************************/
@@ -54,7 +54,7 @@ public class EditorSelectDay extends AbstractCellEditor
     {
       // set editor to data source value, then react to string as if typed
       Day day = (Day) getDataSourceValue();
-      setSelectedIndex( JPlanner.plan.index( day ) );
+      setSelectedIndex( JPlanner.plan.getIndex( day ) );
       keyTyped( new KeyEvent( KeyEvent.KEY_TYPED, str, str, null, false, false, false, false ) );
     }
 
@@ -76,7 +76,7 @@ public class EditorSelectDay extends AbstractCellEditor
   public Object getValue()
   {
     // return selected plan day-type
-    return JPlanner.plan.day( m_combo.getSelectedIndex() );
+    return JPlanner.plan.getDay( m_combo.getSelectedIndex() );
   }
 
   /******************************************* setValue ******************************************/
@@ -85,7 +85,7 @@ public class EditorSelectDay extends AbstractCellEditor
   {
     // set editor display to value if valid day-type, otherwise day-type from data source
     if ( value instanceof Day )
-      m_combo.setSelectedIndex( JPlanner.plan.index( (Day) value ) );
+      m_combo.setSelectedIndex( JPlanner.plan.getIndex( (Day) value ) );
     else if ( value instanceof String )
       m_combo.setString( (String) value );
     else

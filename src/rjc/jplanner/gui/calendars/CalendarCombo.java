@@ -34,7 +34,7 @@ public class CalendarCombo extends AbstractComboEditor
   public int getItemCount()
   {
     // return number of calendars
-    return JPlanner.plan.calendarsCount();
+    return JPlanner.plan.getCalendarsCount();
   }
 
   /******************************************* getItem *******************************************/
@@ -42,21 +42,21 @@ public class CalendarCombo extends AbstractComboEditor
   public String getItem( int num )
   {
     // return calendar name item for list
-    return JPlanner.plan.calendar( num ).getName();
+    return JPlanner.plan.getCalendar( num ).getName();
   }
 
   /***************************************** getCalendar *****************************************/
   public Calendar getCalendar()
   {
     // return plan calendar which is currently selected
-    return JPlanner.plan.calendar( getSelectedIndex() );
+    return JPlanner.plan.getCalendar( getSelectedIndex() );
   }
 
   /***************************************** setCalendar *****************************************/
   public void setCalendar( Calendar calendar )
   {
     // set editor to specified plan calendar
-    setText( JPlanner.plan.calendar().getName() );
+    setText( JPlanner.plan.getDefaultcalendar().getName() );
   }
 
 }

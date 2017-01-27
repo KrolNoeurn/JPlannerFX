@@ -44,11 +44,11 @@ public class CommandPlanSetProperties implements IUndoCommand
   public CommandPlanSetProperties( String title, DateTime start, Calendar cal, String DTformat, String Dformat )
   {
     // initialise private variables
-    m_oldTitle = JPlanner.plan.title();
-    m_oldStart = JPlanner.plan.start();
-    m_oldCal = JPlanner.plan.calendar();
-    m_oldDTformat = JPlanner.plan.datetimeFormat();
-    m_oldDformat = JPlanner.plan.dateFormat();
+    m_oldTitle = JPlanner.plan.getTitle();
+    m_oldStart = JPlanner.plan.getStart();
+    m_oldCal = JPlanner.plan.getDefaultcalendar();
+    m_oldDTformat = JPlanner.plan.getDateTimeFormat();
+    m_oldDformat = JPlanner.plan.getDateFormat();
 
     m_newTitle = title;
     m_newStart = start;
@@ -64,8 +64,8 @@ public class CommandPlanSetProperties implements IUndoCommand
     // action command
     JPlanner.plan.setTitle( m_newTitle );
     JPlanner.plan.setStart( m_newStart );
-    JPlanner.plan.setCalendar( m_newCal );
-    JPlanner.plan.setDatetimeFormat( m_newDTformat );
+    JPlanner.plan.setDefaultCalendar( m_newCal );
+    JPlanner.plan.setDateTimeFormat( m_newDTformat );
     JPlanner.plan.setDateFormat( m_newDformat );
   }
 
@@ -76,8 +76,8 @@ public class CommandPlanSetProperties implements IUndoCommand
     // revert command
     JPlanner.plan.setTitle( m_oldTitle );
     JPlanner.plan.setStart( m_oldStart );
-    JPlanner.plan.setCalendar( m_oldCal );
-    JPlanner.plan.setDatetimeFormat( m_oldDTformat );
+    JPlanner.plan.setDefaultCalendar( m_oldCal );
+    JPlanner.plan.setDateTimeFormat( m_oldDTformat );
     JPlanner.plan.setDateFormat( m_oldDformat );
   }
 

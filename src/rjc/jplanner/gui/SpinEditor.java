@@ -21,6 +21,8 @@ package rjc.jplanner.gui;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -33,23 +35,25 @@ import rjc.jplanner.JPlanner;
 
 public class SpinEditor extends XTextField
 {
-  private double        m_minValue;          // minimum number allowed
-  private double        m_maxValue;          // maximum number allowed
-  private int           m_maxFractionDigits; // number of digits after decimal point
-  private int           m_caretPos = -1;     // set to >= 0 to position caret *before* setting text
+  private ReadOnlyDoubleWrapper m_doubleWrapper;     // read only wrapper for editor value
+  private double                m_minValue;          // minimum number allowed
+  private double                m_maxValue;          // maximum number allowed
+  private int                   m_maxFractionDigits; // number of digits after decimal point
+  private int                   m_caretPos = -1;     // set to >= 0 to position caret *before* setting text
 
-  private double        m_page;              // value increment or decrement on page-up or page-down
-  private double        m_step;              // value increment or decrement on arrow-up or arrow-down
-  private String        m_prefix;            // prefix shown before value
-  private String        m_suffix;            // suffix shown after value
+  private double                m_page;              // value increment or decrement on page-up or page-down
+  private double                m_step;              // value increment or decrement on arrow-up or arrow-down
+  private String                m_prefix;            // prefix shown before value
+  private String                m_suffix;            // suffix shown after value
 
-  private DecimalFormat m_numberFormat;      // number decimal format
-  private String        m_rangeError;        // error message when value out of range
+  private DecimalFormat         m_numberFormat;      // number decimal format
+  private String                m_rangeError;        // error message when value out of range
 
   /**************************************** constructor ******************************************/
   public SpinEditor()
   {
     // set default spin editor characteristics
+    m_doubleWrapper = new ReadOnlyDoubleWrapper();
     setPrefixSuffix( null, null );
     setFormat( "0" );
     setRange( 0.0, 999.0, 0 );
@@ -80,6 +84,8 @@ public class SpinEditor extends XTextField
       if ( JPlanner.gui != null )
         JPlanner.gui.setError( this,
             num < m_minValue || num > m_maxValue || getText().length() < 1 ? m_rangeError : null );
+
+      m_doubleWrapper.set( num );
     } );
 
   }
@@ -135,6 +141,13 @@ public class SpinEditor extends XTextField
   {
     // return editor text without prefix + suffix
     return getText().substring( m_prefix.length(), getText().length() - m_suffix.length() );
+  }
+
+  /************************************** getNumberProperty **************************************/
+  public ReadOnlyDoubleProperty getNumberProperty()
+  {
+    // return read-only property for editor double value
+    return m_doubleWrapper.getReadOnlyProperty();
   }
 
   /****************************************** setDouble ******************************************/

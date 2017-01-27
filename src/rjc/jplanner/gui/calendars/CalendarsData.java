@@ -44,7 +44,7 @@ public class CalendarsData extends AbstractDataSource
   public int getColumnCount()
   {
     // return number of calendars in plan
-    return JPlanner.plan.calendarsCount();
+    return JPlanner.plan.getCalendarsCount();
   }
 
   /**************************************** getRowCount ******************************************/
@@ -54,8 +54,8 @@ public class CalendarsData extends AbstractDataSource
     // table row count is max number of normals + SECTION_NORMAL1
     int max = 0;
     for ( int i = 0; i < getColumnCount(); i++ )
-      if ( JPlanner.plan.calendar( i ).getNormals().size() > max )
-        max = JPlanner.plan.calendar( i ).getNormals().size();
+      if ( JPlanner.plan.getCalendar( i ).getNormals().size() > max )
+        max = JPlanner.plan.getCalendar( i ).getNormals().size();
 
     return max + Calendar.SECTION_NORMAL1;
   }
@@ -89,7 +89,7 @@ public class CalendarsData extends AbstractDataSource
   public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // all cells are normal coloured except unused normal section cells
-    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    Calendar cal = JPlanner.plan.getCalendar( columnIndex );
     if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return Colors.DISABLED_CELL;
 
@@ -101,7 +101,7 @@ public class CalendarsData extends AbstractDataSource
   public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable, unused normal section cells
-    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    Calendar cal = JPlanner.plan.getCalendar( columnIndex );
     if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return null;
 
@@ -126,18 +126,18 @@ public class CalendarsData extends AbstractDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Calendar cal = JPlanner.plan.calendar( columnIndex );
+    Calendar cal = JPlanner.plan.getCalendar( columnIndex );
     Object oldValue = cal.getValue( rowIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic
     if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
-      JPlanner.plan.undostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
     else if ( rowIndex == Calendar.SECTION_CYCLE_LEN )
-      JPlanner.plan.undostack().push( new CommandCalendarSetCycleLength( cal, (int) newValue, (int) oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandCalendarSetCycleLength( cal, (int) newValue, (int) oldValue ) );
     else
-      JPlanner.plan.undostack().push( new CommandCalendarSetValue( cal, rowIndex, newValue, oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandCalendarSetValue( cal, rowIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
@@ -145,7 +145,7 @@ public class CalendarsData extends AbstractDataSource
   public Object getValue( int columnIndex, int rowIndex )
   {
     // return cell value
-    return JPlanner.plan.calendar( columnIndex ).getValue( rowIndex );
+    return JPlanner.plan.getCalendar( columnIndex ).getValue( rowIndex );
   }
 
   /********************************** defaultTableModifications **********************************/

@@ -575,7 +575,7 @@ public class Day
   /******************************************** index ********************************************/
   public int index()
   {
-    return JPlanner.plan.index( this );
+    return JPlanner.plan.getIndex( this );
   }
 
 }

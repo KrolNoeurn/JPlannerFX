@@ -45,7 +45,7 @@ public class CommandCalendarSetCycleLength implements IUndoCommand
     if ( newLength > oldLength )
     {
       // need to add new normal-cycle-days
-      Day day = JPlanner.plan.day( 0 );
+      Day day = JPlanner.plan.getDay( 0 );
       for ( int count = oldLength; count < newLength; count++ )
         m_newNormals.add( day );
     }

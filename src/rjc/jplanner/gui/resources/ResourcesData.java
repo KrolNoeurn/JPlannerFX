@@ -50,7 +50,7 @@ public class ResourcesData extends AbstractDataSource
   public int getRowCount()
   {
     // return number of rows
-    return JPlanner.plan.resourcesCount();
+    return JPlanner.plan.getResourcesCount();
   }
 
   /************************************** getColumnTitle *****************************************/
@@ -88,7 +88,7 @@ public class ResourcesData extends AbstractDataSource
   public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // all cells are normal coloured except if null resource
-    Resource res = JPlanner.plan.resource( rowIndex );
+    Resource res = JPlanner.plan.getResource( rowIndex );
     if ( columnIndex != Resource.SECTION_INITIALS && res.isNull() )
       return Colors.DISABLED_CELL;
 
@@ -100,7 +100,7 @@ public class ResourcesData extends AbstractDataSource
   public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return null if cell is not editable
-    Resource res = JPlanner.plan.resource( rowIndex );
+    Resource res = JPlanner.plan.getResource( rowIndex );
     if ( columnIndex != Resource.SECTION_INITIALS && res.isNull() )
       return null;
 
@@ -121,12 +121,12 @@ public class ResourcesData extends AbstractDataSource
   public void setValue( int columnIndex, int rowIndex, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Resource res = JPlanner.plan.resource( rowIndex );
+    Resource res = JPlanner.plan.getResource( rowIndex );
     Object oldValue = res.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
 
-    JPlanner.plan.undostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
+    JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
@@ -134,7 +134,7 @@ public class ResourcesData extends AbstractDataSource
   public Object getValue( int columnIndex, int rowIndex )
   {
     // return cell value
-    return JPlanner.plan.resource( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.getResource( rowIndex ).getValue( columnIndex );
   }
 
   /********************************** defaultTableModifications **********************************/

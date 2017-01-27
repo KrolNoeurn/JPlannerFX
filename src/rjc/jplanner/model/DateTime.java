@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import rjc.jplanner.JPlanner;
+
 /*************************************************************************************************/
 /********************************* Date-time (with no timezone) **********************************/
 /*************************************************************************************************/
@@ -374,6 +376,26 @@ public class DateTime implements Comparable<DateTime>
     if ( sign < 0 )
       return -1;
     return 0;
+  }
+
+  /******************************************** parse ********************************************/
+  public static DateTime parse( String text, String format )
+  {
+    // return date-time if text can be parsed, otherwise return null
+    DateTime datetime = null;
+
+    try
+    {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern( format );
+      LocalDateTime ldt = LocalDateTime.parse( text, formatter );
+      datetime = new DateTime( ldt );
+    }
+    catch ( Exception exception )
+    {
+      JPlanner.trace( text, format, exception );
+    }
+
+    return datetime;
   }
 
 }

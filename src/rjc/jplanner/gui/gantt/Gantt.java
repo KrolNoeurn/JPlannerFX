@@ -83,7 +83,7 @@ public class Gantt extends Region
       getChildren().add( scale );
 
     // set sensible start, mspp and end
-    setStart( new DateTime( JPlanner.plan.start().milliseconds() - 300000000L ) );
+    setStart( new DateTime( JPlanner.plan.getStart().milliseconds() - 300000000L ) );
     setMsPP( 3600 * 6000 );
     setEnd( new DateTime( m_start.milliseconds() + m_millisecondsPP * (long) getWidth() ) );
 

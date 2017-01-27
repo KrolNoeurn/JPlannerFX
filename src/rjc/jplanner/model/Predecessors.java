@@ -103,7 +103,7 @@ public class Predecessors
       }
 
       Predecessor pred = new Predecessor();
-      pred.task = JPlanner.plan.task( taskNum );
+      pred.task = JPlanner.plan.getTask( taskNum );
       pred.type = type;
       pred.lag = lag;
       m_preds.add( pred );
@@ -169,7 +169,7 @@ public class Predecessors
 
       // check number is non-null task
       int taskNum = Integer.parseInt( part.substring( 0, digit ) );
-      if ( taskNum >= JPlanner.plan.tasksCount() || JPlanner.plan.task( taskNum ).isNull() )
+      if ( taskNum >= JPlanner.plan.getTasksCount() || JPlanner.plan.getTask( taskNum ).isNull() )
       {
         error.append( '\'' ).append( taskNum ).append( "' is a null task.  " );
         continue;
@@ -183,16 +183,16 @@ public class Predecessors
       }
 
       // check number is not sub-task if this task is a summary
-      if ( JPlanner.plan.task( thisTaskNum ).isSummary() && taskNum > thisTaskNum
-          && taskNum <= JPlanner.plan.task( thisTaskNum ).summaryEnd() )
+      if ( JPlanner.plan.getTask( thisTaskNum ).isSummary() && taskNum > thisTaskNum
+          && taskNum <= JPlanner.plan.getTask( thisTaskNum ).summaryEnd() )
       {
         error.append( '\'' ).append( taskNum ).append( "' is a sub-task of this summary.  " );
         continue;
       }
 
       // check number is not summary containing this task
-      if ( JPlanner.plan.task( taskNum ).isSummary() && thisTaskNum > taskNum
-          && thisTaskNum <= JPlanner.plan.task( taskNum ).summaryEnd() )
+      if ( JPlanner.plan.getTask( taskNum ).isSummary() && thisTaskNum > taskNum
+          && thisTaskNum <= JPlanner.plan.getTask( taskNum ).summaryEnd() )
       {
         error.append( '\'' ).append( taskNum ).append( "' is a summary containing this sub-task.  " );
         continue;
@@ -206,7 +206,7 @@ public class Predecessors
       }
 
       // check number is does not cause circular reference
-      if ( JPlanner.plan.task( taskNum ).hasPredecessor( JPlanner.plan.task( thisTaskNum ) ) )
+      if ( JPlanner.plan.getTask( taskNum ).hasPredecessor( JPlanner.plan.getTask( thisTaskNum ) ) )
       {
         error.append( '\'' ).append( taskNum ).append( "' gives a circular reference to this task.  " );
         continue;
@@ -262,7 +262,7 @@ public class Predecessors
         iter.remove();
 
       // summaries not allowed to depend on a sub-task
-      Task thisTask = JPlanner.plan.task( thisTaskNum );
+      Task thisTask = JPlanner.plan.getTask( thisTaskNum );
       if ( thisTask.isSummary() && thisTaskNum < predNum && thisTask.summaryEnd() >= predNum )
         iter.remove();
     }
@@ -302,7 +302,7 @@ public class Predecessors
   public DateTime start()
   {
     // return task start based on predecessors
-    Calendar cal = JPlanner.plan.calendar();
+    Calendar cal = JPlanner.plan.getDefaultcalendar();
     DateTime start = DateTime.MIN_VALUE;
     for ( Predecessor pred : m_preds )
     {
@@ -328,7 +328,7 @@ public class Predecessors
   public DateTime end()
   {
     // return task end based on predecessors
-    Calendar cal = JPlanner.plan.calendar();
+    Calendar cal = JPlanner.plan.getDefaultcalendar();
     DateTime end = DateTime.MAX_VALUE;
     for ( Predecessor pred : m_preds )
     {

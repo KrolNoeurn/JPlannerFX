@@ -85,16 +85,16 @@ public class NumberOf extends Pane
     // draw labels and number of
     double y = m_inset + m_height;
     gc.fillText( "Tasks", m_inset, y );
-    gc.fillText( ": " + JPlanner.plan.tasksNotNullCount(), m_numbers, y );
+    gc.fillText( ": " + JPlanner.plan.getTasksNotNullCount(), m_numbers, y );
     y += m_height;
     gc.fillText( "Recources", m_inset, y );
-    gc.fillText( ": " + JPlanner.plan.resourcesNotNullCount(), m_numbers, y );
+    gc.fillText( ": " + JPlanner.plan.getResourcesNotNullCount(), m_numbers, y );
     y += m_height;
     gc.fillText( "Calendars", m_inset, y );
-    gc.fillText( ": " + JPlanner.plan.calendarsCount(), m_numbers, y );
+    gc.fillText( ": " + JPlanner.plan.getCalendarsCount(), m_numbers, y );
     y += m_height;
     gc.fillText( "Days", m_inset, y );
-    gc.fillText( ": " + JPlanner.plan.daysCount(), m_numbers, y );
+    gc.fillText( ": " + JPlanner.plan.getDaysCount(), m_numbers, y );
   }
 
 }
