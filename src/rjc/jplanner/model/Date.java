@@ -60,8 +60,8 @@ public class Date
     m_epochday = (int) localDate.toEpochDay();
   }
 
-  /****************************************** epochday *******************************************/
-  public int epochday()
+  /**************************************** getEpochday ******************************************/
+  public int getEpochday()
   {
     // return int count of days from day 0 is 01-Jan-1970
     return m_epochday;
@@ -142,7 +142,7 @@ public class Date
 
     // determine half-of-year
     String yearHalf;
-    if ( month() < 7 )
+    if ( getMonth() < 7 )
       yearHalf = "1";
     else
       yearHalf = "2";
@@ -200,23 +200,23 @@ public class Date
     }
   }
 
-  /******************************************** year *********************************************/
-  public int year()
+  /****************************************** getYear ********************************************/
+  public int getYear()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getYear();
   }
 
-  /******************************************** month ********************************************/
-  public int month()
+  /****************************************** getMonth *******************************************/
+  public int getMonth()
   {
     // return month of year as number 1 to 12
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getMonthValue();
   }
 
-  /***************************************** dayOfMonth ******************************************/
-  public int dayOfMonth()
+  /*************************************** getDayOfMonth *****************************************/
+  public int getDayOfMonth()
   {
     LocalDate ld = LocalDate.ofEpochDay( m_epochday );
     return ld.getDayOfMonth();

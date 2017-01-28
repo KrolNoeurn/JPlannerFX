@@ -26,13 +26,15 @@ import java.time.LocalTime;
 
 public class Time
 {
-  private int              m_milliseconds;                                                    // milliseconds from 00:00:00.000 start of day
+  // milliseconds from 00:00:00.000 start of day
+  private int                        m_milliseconds;
 
-  public static final int  MILLISECONDS_IN_DAY = 24 * 3600 * 1000;                            // milliseconds in day
-  public static final Time MIN_VALUE           = Time.fromMilliseconds( 0 );
-  public static final Time MAX_VALUE           = Time.fromMilliseconds( MILLISECONDS_IN_DAY );
+  // anything between MIN_VALUE and MAX_VALUE inclusive is valid, anything else invalid
+  public static final int            MILLISECONDS_IN_DAY = 24 * 3600 * 1000;
+  public static final Time           MIN_VALUE           = Time.fromMilliseconds( 0 );
+  public static final Time           MAX_VALUE           = Time.fromMilliseconds( MILLISECONDS_IN_DAY );
 
-  // anything between Zero and MAX inclusive is valid, anything else invalid
+  private static final StringBuilder BUFFER              = new StringBuilder();
 
   /* ======================================= constructor ======================================= */
   private Time( int milliseconds )
@@ -71,7 +73,7 @@ public class Time
   }
 
   /**************************************** milliseconds *****************************************/
-  public int milliseconds()
+  public int getMilliseconds()
   {
     // return int number of milliseconds from start of day
     return m_milliseconds;
@@ -141,32 +143,50 @@ public class Time
   public String toString()
   {
     // convert to string to "hh:mm:ss.mmm" format
-    StringBuilder buf = new StringBuilder( 16 );
-    int hour = hours();
-    int minute = minutes();
-    int second = seconds();
+    BUFFER.setLength( 0 );
+    int hour = getHours();
+    int minute = getMinutes();
+    int second = getSeconds();
     int milli = m_milliseconds % 1000;
 
-    buf.append( hour < 10 ? "0" : "" ).append( hour );
-    buf.append( minute < 10 ? ":0" : ":" ).append( minute );
-    buf.append( second < 10 ? ":0" : ":" ).append( second );
-    buf.append( milli < 10 ? ".0" : "." ).append( milli < 100 ? "0" : "" ).append( milli );
+    if ( hour < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( hour );
+    BUFFER.append( ':' );
+    if ( minute < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( minute );
+    BUFFER.append( ':' );
+    if ( second < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( second );
+    BUFFER.append( '.' );
+    if ( milli < 100 )
+      BUFFER.append( '0' );
+    if ( milli < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( milli );
 
-    return buf.toString();
+    return BUFFER.toString();
   }
 
   /****************************************** toString *******************************************/
   public String toStringShort()
   {
     // convert to string to "hh:mm" format
-    StringBuilder buf = new StringBuilder( 6 );
-    int hour = hours();
-    int minute = minutes();
+    BUFFER.setLength( 0 );
+    int hour = getHours();
+    int minute = getMinutes();
 
-    buf.append( hour < 10 ? "0" : "" ).append( hour );
-    buf.append( minute < 10 ? ":0" : ":" ).append( minute );
+    if ( hour < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( hour );
+    BUFFER.append( ':' );
+    if ( minute < 10 )
+      BUFFER.append( '0' );
+    BUFFER.append( minute );
 
-    return buf.toString();
+    return BUFFER.toString();
   }
 
   /********************************************* now *********************************************/
@@ -176,33 +196,38 @@ public class Time
     return new Time( (int) ( LocalTime.now().toNanoOfDay() / 1_000_000L ) );
   }
 
-  /******************************************** hours ********************************************/
-  public int hours()
+  /****************************************** getHours *******************************************/
+  public int getHours()
   {
+    // return hours (0 to 24 inclusive)
     return m_milliseconds / 3600_000;
   }
 
-  /******************************************* minutes *******************************************/
-  public int minutes()
+  /***************************************** getMinutes ******************************************/
+  public int getMinutes()
   {
+    // return minutes (0 to 59 inclusive)
     return m_milliseconds / 60_000 % 60;
   }
 
-  /******************************************* seconds *******************************************/
-  public int seconds()
+  /***************************************** getSeconds ******************************************/
+  public int getSeconds()
   {
+    // return seconds (0 to 59 inclusive)
     return m_milliseconds / 1000 % 60;
   }
 
   /******************************************* equals ********************************************/
   public boolean equals( Time other )
   {
+    // return true if equal
     return m_milliseconds == other.m_milliseconds;
   }
 
   /*************************************** addMilliseconds ***************************************/
   public Time addMilliseconds( int ms )
   {
+    // add milliseconds to this time
     m_milliseconds += ms;
     return this;
   }

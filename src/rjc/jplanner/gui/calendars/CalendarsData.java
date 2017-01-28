@@ -73,7 +73,7 @@ public class CalendarsData extends AbstractDataSource
   public String getRowTitle( int rowIndex )
   {
     // return row title
-    return Calendar.sectionName( rowIndex );
+    return Calendar.getSectionName( rowIndex );
   }
 
   /************************************* getCellAlignment ****************************************/

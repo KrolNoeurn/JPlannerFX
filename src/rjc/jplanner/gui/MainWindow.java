@@ -490,7 +490,7 @@ public class MainWindow
     String name = file.getName();
     int last = name.lastIndexOf( '.' );
     if ( last >= 0 )
-      name = name.substring( 0, last ) + DateTime.now().milliseconds() + name.substring( last, name.length() );
+      name = name.substring( 0, last ) + DateTime.now().getMilliseconds() + name.substring( last, name.length() );
     else
       name += DateTime.now();
 

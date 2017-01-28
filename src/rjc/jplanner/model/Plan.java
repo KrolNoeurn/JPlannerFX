@@ -94,7 +94,7 @@ public class Plan
     tasks.initialise();
 
     m_calendar = getCalendar( 0 );
-    m_start = m_calendar.roundUp( new DateTime( Date.now(), Time.MIN_VALUE ) );
+    m_start = m_calendar.getWorkDateTimeUp( new DateTime( Date.now(), Time.MIN_VALUE ) );
   }
 
   /************************************ getTasksNotNullCount *************************************/
@@ -222,8 +222,8 @@ public class Plan
     DateTime earliest = DateTime.MAX_VALUE;
 
     for ( Task task : tasks )
-      if ( !task.isNull() && !task.isSummary() && task.start().isLessThan( earliest ) )
-        earliest = task.start();
+      if ( !task.isNull() && !task.isSummary() && task.getStart().isLessThan( earliest ) )
+        earliest = task.getStart();
 
     if ( earliest == DateTime.MAX_VALUE )
       return null;
@@ -237,8 +237,8 @@ public class Plan
     DateTime latest = DateTime.MIN_VALUE;
 
     for ( Task task : tasks )
-      if ( !task.isNull() && !task.isSummary() && latest.isLessThan( task.end() ) )
-        latest = task.end();
+      if ( !task.isNull() && !task.isSummary() && latest.isLessThan( task.getEnd() ) )
+        latest = task.getEnd();
 
     if ( latest == DateTime.MIN_VALUE )
       return null;
@@ -512,8 +512,8 @@ public class Plan
     // return date-time stretched across full 24 hrs if plan stretchTasks flag is true
     if ( stretchTasks )
     {
-      Time time = m_calendar.day( dt.date() ).stretch( dt.time() );
-      return new DateTime( dt.date(), time );
+      Time time = m_calendar.getDay( dt.getDate() ).stretch( dt.getTime() );
+      return new DateTime( dt.getDate(), time );
     }
 
     // plan stretchTasks flag not true, so return original date-time

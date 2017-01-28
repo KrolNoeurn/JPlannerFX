@@ -197,7 +197,7 @@ public class Tasks extends ArrayList<Task>
       int above = row - 1;
       while ( get( above ).isNull() )
         above--;
-      if ( task.indent() > get( above ).indent() ) // excluded tasks already indented compared with task above
+      if ( task.getIndent() > get( above ).getIndent() ) // excluded tasks already indented compared with task above
         temp.add( row );
     }
     rows.removeAll( temp );
@@ -221,7 +221,7 @@ public class Tasks extends ArrayList<Task>
         continue;
       }
 
-      if ( task.indent() == 0 ) // excluded tasks with no indent
+      if ( task.getIndent() == 0 ) // excluded tasks with no indent
         temp.add( row );
     }
     rows.removeAll( temp );
@@ -239,7 +239,7 @@ public class Tasks extends ArrayList<Task>
       if ( task.isNull() )
         continue;
 
-      int indent = task.indent();
+      int indent = task.getIndent();
 
       // check if summary, and if summary set summary end
       Task other;
@@ -251,7 +251,7 @@ public class Tasks extends ArrayList<Task>
         if ( other.isNull() )
           continue;
 
-        if ( other.indent() <= indent )
+        if ( other.getIndent() <= indent )
           break;
         else
           end = check;
@@ -265,7 +265,7 @@ public class Tasks extends ArrayList<Task>
         if ( other.isNull() )
           continue;
 
-        if ( other.indent() < indent )
+        if ( other.getIndent() < indent )
         {
           task.setSummaryStart( start );
           break;
@@ -274,7 +274,7 @@ public class Tasks extends ArrayList<Task>
     }
 
     // ensure special task 0 is marked as summary
-    if ( get( 0 ).summaryEnd() < 0 )
+    if ( get( 0 ).getSummaryEnd() < 0 )
       get( 0 ).setSummaryEnd( size() - 1 );
   }
 
@@ -290,7 +290,7 @@ public class Tasks extends ArrayList<Task>
       if ( task.isNull() )
         continue;
 
-      Predecessors pred = task.predecessors();
+      Predecessors pred = task.getPredecessors();
       String before = pred.toString();
       pred.clean( id );
       if ( !before.equals( pred.toString() ) )

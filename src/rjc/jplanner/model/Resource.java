@@ -229,8 +229,8 @@ public class Resource
     return ( m_initials == null );
   }
 
-  /**************************************** sectionName ******************************************/
-  public static String sectionName( int num )
+  /*************************************** getSectionName ****************************************/
+  public static String getSectionName( int num )
   {
     // return section title
     if ( num == SECTION_INITIALS )
@@ -277,7 +277,7 @@ public class Resource
   {
     // write resource data to xml stream
     xsw.writeStartElement( XmlLabels.XML_RESOURCE );
-    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
 
     if ( !isNull() )
     {
@@ -298,7 +298,7 @@ public class Resource
         xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
       xsw.writeAttribute( XmlLabels.XML_AVAIL, Double.toString( m_availability ) );
       xsw.writeAttribute( XmlLabels.XML_COST, Double.toString( m_cost ) );
-      xsw.writeAttribute( XmlLabels.XML_CALENDAR, Integer.toString( m_calendar.index() ) );
+      xsw.writeAttribute( XmlLabels.XML_CALENDAR, Integer.toString( m_calendar.getIndex() ) );
       if ( m_comment != null )
         xsw.writeAttribute( XmlLabels.XML_COMMENT, m_comment );
     }
@@ -306,8 +306,8 @@ public class Resource
     xsw.writeEndElement(); // XML_RESOURCE
   }
 
-  /******************************************** index ********************************************/
-  public int index()
+  /****************************************** getIndex *******************************************/
+  public int getIndex()
   {
     return JPlanner.plan.getIndex( this );
   }
@@ -323,31 +323,35 @@ public class Resource
     return false;
   }
 
-  /******************************************** start ********************************************/
-  public DateTime start()
+  /****************************************** getStart *******************************************/
+  public DateTime getStart()
   {
+    // return date-time when this resource starts being available
     if ( m_start == null )
       return DateTime.MIN_VALUE;
     return new DateTime( m_start, Time.MIN_VALUE );
   }
 
-  /********************************************* end *********************************************/
-  public DateTime end()
+  /******************************************* getEnd ********************************************/
+  public DateTime getEnd()
   {
+    // return date-time when this resource stops being available
     if ( m_end == null )
       return DateTime.MAX_VALUE;
     return new DateTime( m_end, Time.MAX_VALUE );
   }
 
-  /****************************************** available ******************************************/
-  public double available()
+  /**************************************** getAvailable *****************************************/
+  public double getAvailable()
   {
+    // return the number of these resource's available
     return m_availability;
   }
 
   /***************************************** getInitials *****************************************/
   public String getInitials()
   {
+    // return the resource's initials
     return m_initials;
   }
 

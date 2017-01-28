@@ -223,7 +223,7 @@ public class Calendar
     return m_cycleAnchor;
   }
 
-  /******************************************* normal ********************************************/
+  /****************************************** getNormal ******************************************/
   public Day getNormal( int index )
   {
     return m_normal.get( index );
@@ -295,25 +295,25 @@ public class Calendar
   public boolean isWorking( Date date )
   {
     // return whether date is working or not
-    return day( date ).isWorking();
+    return getDay( date ).isWorking();
   }
 
-  /********************************************* day *********************************************/
-  public Day day( Date date )
+  /******************************************* getDay ********************************************/
+  public Day getDay( Date date )
   {
     // if exception exists return it, otherwise return normal cycle day
     if ( m_exceptions.containsKey( date ) )
       return m_exceptions.get( date );
 
-    int normal = ( date.epochday() - m_cycleAnchor.epochday() ) % m_normal.size();
+    int normal = ( date.getEpochday() - m_cycleAnchor.getEpochday() ) % m_normal.size();
     if ( normal < 0 )
       normal += m_normal.size();
 
     return m_normal.get( normal );
   }
 
-  /**************************************** sectionName ******************************************/
-  public static String sectionName( int num )
+  /*************************************** getSectionName ****************************************/
+  public static String getSectionName( int num )
   {
     // return section title
     if ( num == SECTION_NAME )
@@ -331,43 +331,43 @@ public class Calendar
     return "Normal " + ( num + 1 - SECTION_NORMAL1 );
   }
 
-  /***************************************** roundDown *******************************************/
-  public DateTime roundDown( DateTime dt )
+  /************************************ getWorkDateTimeDown **************************************/
+  public DateTime getWorkDateTimeDown( DateTime dt )
   {
     // return date-time if working, otherwise last past working date-time
-    Date date = dt.date();
-    Time time = dt.time();
-    Day day = day( date );
+    Date date = dt.getDate();
+    Time time = dt.getTime();
+    Day day = getDay( date );
 
-    Time newTime = day.workDown( time );
+    Time newTime = day.getWorkTimeDown( time );
     while ( newTime == null )
     {
       date.decrement();
-      day = day( date );
+      day = getDay( date );
 
       if ( day.isWorking() )
-        newTime = day.end();
+        newTime = day.getEnd();
     }
 
     return new DateTime( date, newTime );
   }
 
-  /******************************************* roundUp *******************************************/
-  public DateTime roundUp( DateTime dt )
+  /************************************* getWorkDateTimeUp ***************************************/
+  public DateTime getWorkDateTimeUp( DateTime dt )
   {
     // return date-time if working, otherwise next future working date-time
-    Date date = dt.date();
-    Time time = dt.time();
-    Day day = day( date );
+    Date date = dt.getDate();
+    Time time = dt.getTime();
+    Day day = getDay( date );
 
-    Time newTime = day.workUp( time );
+    Time newTime = day.getWorkTimeUp( time );
     while ( newTime == null )
     {
       date.increment();
-      day = day( date );
+      day = getDay( date );
 
       if ( day.isWorking() )
-        newTime = day.start();
+        newTime = day.getStart();
     }
 
     return new DateTime( date, newTime );
@@ -378,7 +378,7 @@ public class Calendar
   {
     // write calendar data to XML stream
     xsw.writeStartElement( XmlLabels.XML_CALENDAR );
-    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
     xsw.writeAttribute( XmlLabels.XML_NAME, m_name );
     xsw.writeAttribute( XmlLabels.XML_ANCHOR, m_cycleAnchor.toString() );
 
@@ -386,7 +386,7 @@ public class Calendar
     {
       xsw.writeEmptyElement( XmlLabels.XML_NORMAL );
       xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( p ) );
-      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_normal.get( p ).index() ) );
+      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_normal.get( p ).getIndex() ) );
     }
 
     // generate sorted list of exception keys so order always same in XML file
@@ -396,7 +396,7 @@ public class Calendar
       @Override
       public int compare( Date date1, Date date2 )
       {
-        return Integer.compare( date1.epochday(), date2.epochday() );
+        return Integer.compare( date1.getEpochday(), date2.getEpochday() );
       }
     } );
 
@@ -404,7 +404,7 @@ public class Calendar
     {
       xsw.writeEmptyElement( XmlLabels.XML_EXCEPTION );
       xsw.writeAttribute( XmlLabels.XML_DATE, date.toString() );
-      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_exceptions.get( date ).index() ) );
+      xsw.writeAttribute( XmlLabels.XML_DAY, Integer.toString( m_exceptions.get( date ).getIndex() ) );
     }
 
     xsw.writeEndElement(); // XML_CALENDAR
@@ -447,9 +447,9 @@ public class Calendar
   private DateTime workSeconds( DateTime start, double secs )
   {
     // return date-time from start by specified number for worked seconds
-    Date date = start.date();
-    Time fromTime = start.time();
-    Day day = day( date );
+    Date date = start.getDate();
+    Time fromTime = start.getTime();
+    Day day = getDay( date );
     int ms = (int) Math.round( secs * 1000.0 );
 
     if ( ms > 0 )
@@ -464,16 +464,16 @@ public class Calendar
       // if not valid time, move to next date
       ms -= day.millisecondsToGo( fromTime );
       date.increment();
-      day = day( date );
+      day = getDay( date );
       while ( ms >= day.milliseconds() )
       {
         ms -= day.milliseconds();
         date.increment();
-        day = day( date );
+        day = getDay( date );
       }
 
       if ( ms == 0 )
-        return new DateTime( date, day.start() );
+        return new DateTime( date, day.getStart() );
       else
         return new DateTime( date, day.millisecondsForward( ms ) );
     }
@@ -490,16 +490,16 @@ public class Calendar
       // if not valid time, move to previous date
       ms -= day.millisecondsDone( fromTime );
       date.decrement();
-      day = day( date );
+      day = getDay( date );
       while ( ms >= day.milliseconds() )
       {
         ms -= day.milliseconds();
         date.decrement();
-        day = day( date );
+        day = getDay( date );
       }
 
       if ( ms == 0 )
-        return new DateTime( date, day.end() );
+        return new DateTime( date, day.getEnd() );
       else
         return new DateTime( date, day.millisecondsBackward( ms ) );
     }
@@ -509,9 +509,9 @@ public class Calendar
   private DateTime workDays( DateTime start, double work )
   {
     // return date-time from start by specified number for work equivalent days
-    Date date = start.date();
-    Time fromTime = start.time();
-    Day day = day( date );
+    Date date = start.getDate();
+    Time fromTime = start.getTime();
+    Day day = getDay( date );
 
     if ( work > 0 )
     {
@@ -525,16 +525,16 @@ public class Calendar
       // if not valid time, move to next date
       work -= day.workToGo( fromTime );
       date.increment();
-      day = day( date );
-      while ( work >= day.work() )
+      day = getDay( date );
+      while ( work >= day.getWork() )
       {
-        work -= day.work();
+        work -= day.getWork();
         date.increment();
-        day = day( date );
+        day = getDay( date );
       }
 
       if ( work == 0 )
-        return new DateTime( date, day.start() );
+        return new DateTime( date, day.getStart() );
       else
         return new DateTime( date, day.workForward( work ) );
     }
@@ -551,16 +551,16 @@ public class Calendar
       // if not valid time, move to previous date
       work -= day.workDone( fromTime );
       date.decrement();
-      day = day( date );
-      while ( work >= day.work() )
+      day = getDay( date );
+      while ( work >= day.getWork() )
       {
-        work -= day.work();
+        work -= day.getWork();
         date.decrement();
-        day = day( date );
+        day = getDay( date );
       }
 
       if ( work == 0 )
-        return new DateTime( date, day.end() );
+        return new DateTime( date, day.getEnd() );
       else
         return new DateTime( date, day.workBackward( work ) );
     }
@@ -586,8 +586,8 @@ public class Calendar
 
     // if fraction, add months and days
     start = start.plusMonths( (int) months );
-    int days1 = start.date().epochday();
-    int days2 = start.plusMonths( 1 ).date().epochday();
+    int days1 = start.getDate().getEpochday();
+    int days2 = start.plusMonths( 1 ).getDate().getEpochday();
     int daysInMonth = days2 - days1;
     return start.plusDays( (int) ( daysInMonth * fraction ) );
   }
@@ -611,12 +611,12 @@ public class Calendar
   public TimeSpan workBetween( DateTime start, DateTime end )
   {
     // return number of work equivalent days between the two date-times
-    Date sd = start.date();
-    Time st = start.time();
-    Day day = day( sd );
+    Date sd = start.getDate();
+    Time st = start.getTime();
+    Day day = getDay( sd );
 
-    Date ed = end.date();
-    Time et = end.time();
+    Date ed = end.getDate();
+    Time et = end.getTime();
 
     // if start date same as end date, just work in day
     if ( sd.equals( ed ) )
@@ -627,16 +627,16 @@ public class Calendar
     sd.increment();
     while ( !sd.equals( ed ) )
     {
-      work += day( sd ).work();
+      work += getDay( sd ).getWork();
       sd.increment();
     }
-    work += day( ed ).workDone( et );
+    work += getDay( ed ).workDone( et );
 
     return new TimeSpan( work, TimeSpan.UNIT_DAYS );
   }
 
-  /******************************************** index ********************************************/
-  public int index()
+  /****************************************** getIndex *******************************************/
+  public int getIndex()
   {
     return JPlanner.plan.getIndex( this );
   }

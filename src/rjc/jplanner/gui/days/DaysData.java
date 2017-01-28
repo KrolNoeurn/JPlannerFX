@@ -44,8 +44,8 @@ public class DaysData extends AbstractDataSource
     // table column count is max number of periods * 2 + SECTION_START1
     int max = 0;
     for ( int i = 0; i < getRowCount(); i++ )
-      if ( JPlanner.plan.getDay( i ).numPeriods() > max )
-        max = JPlanner.plan.getDay( i ).numPeriods();
+      if ( JPlanner.plan.getDay( i ).getNumberOfPeriods() > max )
+        max = JPlanner.plan.getDay( i ).getNumberOfPeriods();
 
     return max * 2 + Day.SECTION_START1;
   }
@@ -63,7 +63,7 @@ public class DaysData extends AbstractDataSource
   public String getColumnTitle( int columnIndex )
   {
     // return column title
-    return Day.sectionName( columnIndex );
+    return Day.getSectionName( columnIndex );
   }
 
   /**************************************** getRowTitle ******************************************/
@@ -91,7 +91,7 @@ public class DaysData extends AbstractDataSource
   {
     // all cells are normal coloured except unused start/end
     Day day = JPlanner.plan.getDay( rowIndex );
-    if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
+    if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
       return Colors.DISABLED_CELL;
 
     return Colors.NORMAL_CELL;
@@ -103,7 +103,7 @@ public class DaysData extends AbstractDataSource
   {
     // return null if cell is not editable, unused start/end
     Day day = JPlanner.plan.getDay( rowIndex );
-    if ( columnIndex >= day.numPeriods() * 2 + Day.SECTION_START1 )
+    if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
       return null;
 
     // return editor for table body cell

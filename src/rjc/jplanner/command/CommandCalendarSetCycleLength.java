@@ -86,7 +86,7 @@ public class CommandCalendarSetCycleLength implements IUndoCommand
   public String text()
   {
     // text description of command
-    return "Calendar " + ( m_calendar.index() + 1 ) + " Cycle = " + m_newNormals.size();
+    return "Calendar " + ( m_calendar.getIndex() + 1 ) + " Cycle = " + m_newNormals.size();
   }
 
 }

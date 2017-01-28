@@ -85,7 +85,7 @@ public class CommandResourceSetValue implements IUndoCommand
     if ( m_newValue instanceof Calendar )
       newValue = ( (Calendar) m_newValue ).getName();
 
-    return "Resource " + m_res.index() + " " + Resource.sectionName( m_section ) + " = " + newValue;
+    return "Resource " + m_res.getIndex() + " " + Resource.getSectionName( m_section ) + " = " + newValue;
   }
 
 }

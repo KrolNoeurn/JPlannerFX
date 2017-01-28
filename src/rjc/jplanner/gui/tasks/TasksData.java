@@ -61,7 +61,7 @@ public class TasksData extends AbstractDataSource
   public String getColumnTitle( int columnIndex )
   {
     // return column title
-    return Task.sectionName( columnIndex );
+    return Task.getSectionName( columnIndex );
   }
 
   /**************************************** getRowTitle ******************************************/
@@ -168,7 +168,7 @@ public class TasksData extends AbstractDataSource
   {
     // return cell indent level (0 = no indent)
     if ( columnIndex == Task.SECTION_TITLE )
-      return JPlanner.plan.getTask( rowIndex ).indent() + 1;
+      return JPlanner.plan.getTask( rowIndex ).getIndent() + 1;
 
     return 0;
   }
@@ -179,7 +179,7 @@ public class TasksData extends AbstractDataSource
   {
     // return cell summary end row for specified cell index (or -1 if not summary)
     if ( columnIndex == Task.SECTION_TITLE )
-      return JPlanner.plan.getTask( rowIndex ).summaryEnd();
+      return JPlanner.plan.getTask( rowIndex ).getSummaryEnd();
 
     return -1;
   }

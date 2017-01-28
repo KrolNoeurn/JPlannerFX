@@ -108,10 +108,10 @@ public class ResourceWork
       throw new IllegalArgumentException( "quantity must be greater than zero " + quantity );
     if ( !start.isLessThan( end ) )
       throw new IllegalArgumentException( "start " + start + " >= end " + end );
-    if ( start.isLessThan( m_res.start() ) )
-      throw new IllegalArgumentException( "start " + start + " < resource start " + m_res.start() );
-    if ( m_res.end().isLessThan( end ) )
-      throw new IllegalArgumentException( "resource end " + m_res.end() + " < end " + end );
+    if ( start.isLessThan( m_res.getStart() ) )
+      throw new IllegalArgumentException( "start " + start + " < resource start " + m_res.getStart() );
+    if ( m_res.getEnd().isLessThan( end ) )
+      throw new IllegalArgumentException( "resource end " + m_res.getEnd() + " < end " + end );
 
     // check this won't cause over-allocation (PROBABLY CAN BE REMOVED TO AVOID DOUBLE CHECKING)
 
@@ -129,16 +129,16 @@ public class ResourceWork
     // return available quantity of resource at date-time from, and when this changes
 
     // if before resource start date
-    if ( from.isLessThan( m_res.start() ) )
-      return new DateTimeNumber( m_res.start(), 0.0 );
+    if ( from.isLessThan( m_res.getStart() ) )
+      return new DateTimeNumber( m_res.getStart(), 0.0 );
 
     // if after resource end date
-    if ( m_res.end().isLessThan( from ) )
-      return new DateTimeNumber( m_res.end(), m_res.available() );
+    if ( m_res.getEnd().isLessThan( from ) )
+      return new DateTimeNumber( m_res.getEnd(), m_res.getAvailable() );
 
     // okay, so in resource available period
     DateTime change = DateTime.MAX_VALUE;
-    double avail = m_res.available();
+    double avail = m_res.getAvailable();
 
     // loop thru each existing allocation and deduct any for specified date-time
     for ( Map.Entry<DateTime, Alloc> alloc : m_allocs.entrySet() )

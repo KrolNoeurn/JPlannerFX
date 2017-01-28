@@ -44,7 +44,7 @@ public class Predecessors
     @Override
     public String toString()
     {
-      String str = Integer.toString( task.index() );
+      String str = Integer.toString( task.getIndex() );
       if ( type != TYPE_DEFAULT || lag.getNumber() != 0.0 )
       {
         str += type;
@@ -184,7 +184,7 @@ public class Predecessors
 
       // check number is not sub-task if this task is a summary
       if ( JPlanner.plan.getTask( thisTaskNum ).isSummary() && taskNum > thisTaskNum
-          && taskNum <= JPlanner.plan.getTask( thisTaskNum ).summaryEnd() )
+          && taskNum <= JPlanner.plan.getTask( thisTaskNum ).getSummaryEnd() )
       {
         error.append( '\'' ).append( taskNum ).append( "' is a sub-task of this summary.  " );
         continue;
@@ -192,7 +192,7 @@ public class Predecessors
 
       // check number is not summary containing this task
       if ( JPlanner.plan.getTask( taskNum ).isSummary() && thisTaskNum > taskNum
-          && thisTaskNum <= JPlanner.plan.getTask( taskNum ).summaryEnd() )
+          && thisTaskNum <= JPlanner.plan.getTask( taskNum ).getSummaryEnd() )
       {
         error.append( '\'' ).append( taskNum ).append( "' is a summary containing this sub-task.  " );
         continue;
@@ -255,15 +255,15 @@ public class Predecessors
     while ( iter.hasNext() )
     {
       Task pred = iter.next().task;
-      int predNum = pred.index();
+      int predNum = pred.getIndex();
 
       // sub-tasks not allowed to depend on their summaries
-      if ( pred.isSummary() && predNum < thisTaskNum && pred.summaryEnd() >= thisTaskNum )
+      if ( pred.isSummary() && predNum < thisTaskNum && pred.getSummaryEnd() >= thisTaskNum )
         iter.remove();
 
       // summaries not allowed to depend on a sub-task
       Task thisTask = JPlanner.plan.getTask( thisTaskNum );
-      if ( thisTask.isSummary() && thisTaskNum < predNum && thisTask.summaryEnd() >= predNum )
+      if ( thisTask.isSummary() && thisTaskNum < predNum && thisTask.getSummaryEnd() >= predNum )
         iter.remove();
     }
   }
@@ -298,8 +298,8 @@ public class Predecessors
     return false;
   }
 
-  /******************************************** start ********************************************/
-  public DateTime start()
+  /****************************************** getStart *******************************************/
+  public DateTime getStart()
   {
     // return task start based on predecessors
     Calendar cal = JPlanner.plan.getDefaultcalendar();
@@ -308,15 +308,15 @@ public class Predecessors
     {
       if ( pred.type == TYPE_FINISH_START )
       {
-        DateTime check = cal.workTimeSpan( pred.task.end(), pred.lag );
-        if ( check.milliseconds() > start.milliseconds() )
+        DateTime check = cal.workTimeSpan( pred.task.getEnd(), pred.lag );
+        if ( check.getMilliseconds() > start.getMilliseconds() )
           start = check;
       }
 
       if ( pred.type == TYPE_START_START )
       {
-        DateTime check = cal.workTimeSpan( pred.task.start(), pred.lag );
-        if ( check.milliseconds() > start.milliseconds() )
+        DateTime check = cal.workTimeSpan( pred.task.getStart(), pred.lag );
+        if ( check.getMilliseconds() > start.getMilliseconds() )
           start = check;
       }
     }
@@ -324,8 +324,8 @@ public class Predecessors
     return start;
   }
 
-  /********************************************* end *********************************************/
-  public DateTime end()
+  /******************************************* getEnd ********************************************/
+  public DateTime getEnd()
   {
     // return task end based on predecessors
     Calendar cal = JPlanner.plan.getDefaultcalendar();
@@ -334,15 +334,15 @@ public class Predecessors
     {
       if ( pred.type == TYPE_FINISH_FINISH )
       {
-        DateTime check = cal.workTimeSpan( pred.task.end(), pred.lag );
-        if ( check.milliseconds() < end.milliseconds() )
+        DateTime check = cal.workTimeSpan( pred.task.getEnd(), pred.lag );
+        if ( check.getMilliseconds() < end.getMilliseconds() )
           end = check;
       }
 
       if ( pred.type == TYPE_START_FINISH )
       {
-        DateTime check = cal.workTimeSpan( pred.task.start(), pred.lag );
-        if ( check.milliseconds() < end.milliseconds() )
+        DateTime check = cal.workTimeSpan( pred.task.getStart(), pred.lag );
+        if ( check.getMilliseconds() < end.getMilliseconds() )
           end = check;
       }
     }
@@ -350,8 +350,8 @@ public class Predecessors
     return end;
   }
 
-  /******************************************** count ********************************************/
-  public int count()
+  /****************************************** getCount *******************************************/
+  public int getCount()
   {
     return m_preds.size();
   }

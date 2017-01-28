@@ -53,7 +53,7 @@ public class Days extends ArrayList<Day>
     {
       if ( i == skip )
         continue;
-      if ( txt.equals( get( i ).name() ) )
+      if ( txt.equals( get( i ).getName() ) )
         return true;
     }
 
@@ -102,7 +102,7 @@ public class Days extends ArrayList<Day>
   {
     // return day-type with matching name
     for ( Day day : this )
-      if ( day.name().equals( name ) )
+      if ( day.getName().equals( name ) )
         return day;
 
     // no day-type found with matching name, so return null

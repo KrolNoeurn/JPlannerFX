@@ -37,8 +37,23 @@ public class TimeSpan
   public static final char    UNIT_MONTHS  = 'm';
   public static final char    UNIT_YEARS   = 'y';
   public static final char    UNIT_DEFAULT = UNIT_DAYS;
-
   private static final String VALID_UNITS  = "SMHdwmy";
+
+  // private inner class defining time-span number formatting
+  private static final class TimeSpanFormat extends DecimalFormat
+  {
+    private static final long serialVersionUID = 1L;
+
+    public TimeSpanFormat()
+    {
+      super();
+      applyPattern( "0" );
+      setMaximumFractionDigits( 2 );
+    }
+  }
+
+  private static final TimeSpanFormat FORMAT = new TimeSpanFormat();
+  private static final char           POINT  = FORMAT.getDecimalFormatSymbols().getDecimalSeparator();
 
   /**************************************** constructor ******************************************/
   public TimeSpan()
@@ -94,43 +109,47 @@ public class TimeSpan
       m_num = Math.rint( num * 100.0 ) / 100.0;
   }
 
-  /***************************************** toString ********************************************/
+  /****************************************** toString *******************************************/
   @Override
   public String toString()
   {
-    DecimalFormat df = new DecimalFormat( "0" );
-    df.setMaximumFractionDigits( 3 );
-    return df.format( m_num ) + " " + m_units;
+    // return time-span as string
+    return FORMAT.format( m_num ) + " " + m_units;
   }
 
   /****************************************** getUnits *******************************************/
   public char getUnits()
   {
+    // return time-span units
     return m_units;
   }
 
   /****************************************** getNumber ******************************************/
   public double getNumber()
   {
+    // return time-span number
     return m_num;
   }
 
   /******************************************** minus ********************************************/
   public TimeSpan minus()
   {
+    // return a new time-span with minus number
     return new TimeSpan( -m_num, m_units );
   }
 
   /**************************************** isValidUnits *****************************************/
   public static boolean isValidUnits( char unit )
   {
+    // return true if specified char is a valid time-span unit
     return VALID_UNITS.indexOf( unit ) >= 0;
   }
 
   /*************************************** isNumberOrPoint ***************************************/
   public static boolean isNumberOrPoint( char num )
   {
-    return ( num >= '0' && num <= '9' ) || num == '.';
+    // return true if specified char is a numeric digit or decimal point
+    return ( num >= '0' && num <= '9' ) || num == POINT;
   }
 
   /******************************************* equals ********************************************/

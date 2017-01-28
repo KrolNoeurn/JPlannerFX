@@ -39,15 +39,15 @@ public class CommandDaySetNumPeriods implements IUndoCommand
   {
     // initialise private variables
     m_day = day;
-    m_oldPeriods = new ArrayList<DayWorkPeriod>( day.workPeriods() );
-    m_newPeriods = new ArrayList<DayWorkPeriod>( day.workPeriods() );
+    m_oldPeriods = new ArrayList<DayWorkPeriod>( day.getWorkPeriods() );
+    m_newPeriods = new ArrayList<DayWorkPeriod>( day.getWorkPeriods() );
 
     if ( newNum > oldNum )
     {
       // need to add new work-periods
       double remainingHours = 24.0;
       if ( !m_newPeriods.isEmpty() )
-        remainingHours -= 24.0 * m_newPeriods.get( oldNum - 1 ).m_end.milliseconds() / Time.MILLISECONDS_IN_DAY;
+        remainingHours -= 24.0 * m_newPeriods.get( oldNum - 1 ).m_end.getMilliseconds() / Time.MILLISECONDS_IN_DAY;
 
       double increment = remainingHours / ( 1 + 2 * ( newNum - oldNum ) );
       if ( increment >= 8.0 )
@@ -112,7 +112,7 @@ public class CommandDaySetNumPeriods implements IUndoCommand
   public String text()
   {
     // text description of command
-    return "Day " + ( m_day.index() + 1 ) + " Periods = " + m_newPeriods.size();
+    return "Day " + ( m_day.getIndex() + 1 ) + " Periods = " + m_newPeriods.size();
   }
 
 }

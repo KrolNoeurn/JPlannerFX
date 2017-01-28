@@ -49,7 +49,7 @@ public class CommandTaskOutdent implements IUndoCommand
       if ( row < m_min )
         m_min = row;
 
-      int summaryEnd = JPlanner.plan.getTask( row ).summaryEnd();
+      int summaryEnd = JPlanner.plan.getTask( row ).getSummaryEnd();
       if ( summaryEnd > 0 && summaryEnd > m_max )
         m_max = summaryEnd;
 
@@ -80,7 +80,7 @@ public class CommandTaskOutdent implements IUndoCommand
     for ( int row : m_rows )
     {
       Task task = JPlanner.plan.getTask( row );
-      task.setIndent( task.indent() - 1 );
+      task.setIndent( task.getIndent() - 1 );
     }
     JPlanner.plan.tasks.updateSummaryMarkers();
     m_predecessors = JPlanner.plan.tasks.cleanPredecessors();
@@ -106,7 +106,7 @@ public class CommandTaskOutdent implements IUndoCommand
     for ( int row : m_rows )
     {
       Task task = JPlanner.plan.getTask( row );
-      task.setIndent( task.indent() + 1 );
+      task.setIndent( task.getIndent() + 1 );
     }
     JPlanner.plan.tasks.updateSummaryMarkers();
     JPlanner.plan.tasks.restorePredecessors( m_predecessors );

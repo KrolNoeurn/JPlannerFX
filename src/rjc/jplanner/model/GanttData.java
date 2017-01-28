@@ -54,7 +54,7 @@ public class GanttData
     start = taskStart;
 
     // check if milestone or task bar needed
-    if ( taskStart.milliseconds() < taskEnd.milliseconds() )
+    if ( taskStart.getMilliseconds() < taskEnd.getMilliseconds() )
     {
       end = new ArrayList<DateTime>();
       end.add( taskEnd );

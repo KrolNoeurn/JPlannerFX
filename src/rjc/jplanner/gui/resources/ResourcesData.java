@@ -58,7 +58,7 @@ public class ResourcesData extends AbstractDataSource
   public String getColumnTitle( int columnIndex )
   {
     // return column title
-    return Resource.sectionName( columnIndex );
+    return Resource.getSectionName( columnIndex );
   }
 
   /**************************************** getRowTitle ******************************************/

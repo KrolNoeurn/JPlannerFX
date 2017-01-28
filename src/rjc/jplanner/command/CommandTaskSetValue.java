@@ -80,7 +80,7 @@ public class CommandTaskSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    return "Task " + m_task.index() + " " + Task.sectionName( m_section ) + " = " + m_newValue;
+    return "Task " + m_task.getIndex() + " " + Task.getSectionName( m_section ) + " = " + m_newValue;
   }
 
 }

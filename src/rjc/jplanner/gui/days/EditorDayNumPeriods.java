@@ -39,11 +39,11 @@ public class EditorDayNumPeriods extends AbstractCellEditor
     m_spin = new SpinEditor();
 
     // determine max count of number of work periods
-    if ( JPlanner.plan.getDay( rowIndex ).numPeriods() > 0 )
+    if ( JPlanner.plan.getDay( rowIndex ).getNumberOfPeriods() > 0 )
     {
-      Time end = JPlanner.plan.getDay( rowIndex ).end();
-      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.milliseconds() ) / 60000;
-      int max = JPlanner.plan.getDay( rowIndex ).numPeriods() + minutesToMidnight / 2;
+      Time end = JPlanner.plan.getDay( rowIndex ).getEnd();
+      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.getMilliseconds() ) / 60000;
+      int max = JPlanner.plan.getDay( rowIndex ).getNumberOfPeriods() + minutesToMidnight / 2;
       m_spin.setRange( 0, max > 8 ? 8 : max, 0 );
     }
     else

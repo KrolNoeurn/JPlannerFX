@@ -104,7 +104,7 @@ abstract public class AbstractDataSource
 
     // convert date and date-times into strings using plan formats
     if ( value instanceof Day )
-      return ( (Day) value ).name();
+      return ( (Day) value ).getName();
     if ( value instanceof Calendar )
       return ( (Calendar) value ).getName();
     if ( value instanceof DateTime )

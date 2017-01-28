@@ -83,9 +83,9 @@ public class Gantt extends Region
       getChildren().add( scale );
 
     // set sensible start, mspp and end
-    setStart( new DateTime( JPlanner.plan.getStart().milliseconds() - 300000000L ) );
+    setStart( new DateTime( JPlanner.plan.getStart().getMilliseconds() - 300000000L ) );
     setMsPP( 3600 * 6000 );
-    setEnd( new DateTime( m_start.milliseconds() + m_millisecondsPP * (long) getWidth() ) );
+    setEnd( new DateTime( m_start.getMilliseconds() + m_millisecondsPP * (long) getWidth() ) );
 
     // set scroll-bar height & value
     m_scrollBar.setMinHeight( SCROLLBAR_SIZE );
@@ -260,7 +260,7 @@ public class Gantt extends Region
     m_plot.setWidth( newWidth );
 
     // set scroll-bar width
-    int ganttWidth = (int) ( ( m_end.milliseconds() - m_start.milliseconds() ) / m_millisecondsPP );
+    int ganttWidth = (int) ( ( m_end.getMilliseconds() - m_start.getMilliseconds() ) / m_millisecondsPP );
     if ( ganttWidth > newWidth )
     {
       m_scrollBar.setVisible( true );
@@ -286,7 +286,7 @@ public class Gantt extends Region
   public int x( DateTime dt )
   {
     // return x-coordinate for specified date-time
-    return (int) ( ( dt.milliseconds() - m_start.milliseconds() ) / m_millisecondsPP - m_scrollBar.getValue() );
+    return (int) ( ( dt.getMilliseconds() - m_start.getMilliseconds() ) / m_millisecondsPP - m_scrollBar.getValue() );
   }
 
   /****************************************** datetime *******************************************/

@@ -91,8 +91,8 @@ public class GanttPlot extends Canvas
   {
     // shade non-working time on gantt-plot
     Calendar calendar = JPlanner.plan.getDefaultcalendar();
-    Date date = m_gantt.datetime( x - 1 ).date();
-    int endEpoch = m_gantt.datetime( x + w ).date().epochday();
+    Date date = m_gantt.datetime( x - 1 ).getDate();
+    int endEpoch = m_gantt.datetime( x + w ).getDate().getEpochday();
     int startShadeEpoch;
 
     GraphicsContext gc = getGraphicsContext2D();
@@ -102,25 +102,25 @@ public class GanttPlot extends Canvas
       // find start of non-working period
       if ( !calendar.isWorking( date ) )
       {
-        startShadeEpoch = date.epochday();
+        startShadeEpoch = date.getEpochday();
 
         // find end of non-working period
         do
           date.increment();
-        while ( date.epochday() <= endEpoch && !calendar.isWorking( date ) );
+        while ( date.getEpochday() <= endEpoch && !calendar.isWorking( date ) );
 
         // if width at least 1 pixel shade non-working period
-        long width = ( date.epochday() - startShadeEpoch ) * DateTime.MILLISECONDS_IN_DAY / m_gantt.getMsPP();
+        long width = ( date.getEpochday() - startShadeEpoch ) * DateTime.MILLISECONDS_IN_DAY / m_gantt.getMsPP();
         if ( width > 0L )
         {
-          long xe = m_gantt.x( new DateTime( date.epochday() * DateTime.MILLISECONDS_IN_DAY ) );
+          long xe = m_gantt.x( new DateTime( date.getEpochday() * DateTime.MILLISECONDS_IN_DAY ) );
           gc.fillRect( xe - width, y, width, h );
         }
       }
 
       date.increment();
     }
-    while ( date.epochday() <= endEpoch );
+    while ( date.getEpochday() <= endEpoch );
   }
 
 }

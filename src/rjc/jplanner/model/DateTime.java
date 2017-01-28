@@ -60,14 +60,14 @@ public class DateTime implements Comparable<DateTime>
     int split = str.indexOf( 'T' );
     Date date = Date.fromString( str.substring( 0, split ) );
     Time time = Time.fromString( str.substring( split + 1, str.length() ) );
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
   }
 
   /***************************************** constructor *****************************************/
   public DateTime( Date date, Time time )
   {
     // constructor
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
   }
 
   /***************************************** constructor *****************************************/
@@ -76,7 +76,7 @@ public class DateTime implements Comparable<DateTime>
     // constructor
     Date date = new Date( dt.toLocalDate() );
     Time time = new Time( dt.toLocalTime() );
-    m_milliseconds = date.epochday() * MILLISECONDS_IN_DAY + time.milliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
   }
 
   /****************************************** toString *******************************************/
@@ -84,7 +84,7 @@ public class DateTime implements Comparable<DateTime>
   public String toString()
   {
     // convert to string to "YYYY-MM-DDThh:mm:ss.mmm" format
-    return date().toString() + "T" + time().toString();
+    return getDate().toString() + "T" + getTime().toString();
   }
 
   /****************************************** toString *******************************************/
@@ -154,7 +154,7 @@ public class DateTime implements Comparable<DateTime>
 
     // determine half-of-year
     String yearHalf;
-    if ( month() < 7 )
+    if ( getMonth() < 7 )
       yearHalf = "1";
     else
       yearHalf = "2";
@@ -182,8 +182,8 @@ public class DateTime implements Comparable<DateTime>
     return str;
   }
 
-  /******************************************** date *********************************************/
-  public Date date()
+  /******************************************* getDate *******************************************/
+  public Date getDate()
   {
     if ( m_milliseconds < 0 )
       return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) - 1 );
@@ -191,8 +191,8 @@ public class DateTime implements Comparable<DateTime>
     return new Date( (int) ( m_milliseconds / MILLISECONDS_IN_DAY ) );
   }
 
-  /******************************************** time *********************************************/
-  public Time time()
+  /******************************************* getTime *******************************************/
+  public Time getTime()
   {
     int ms = (int) ( m_milliseconds % MILLISECONDS_IN_DAY );
     if ( ms < 0 )
@@ -208,88 +208,88 @@ public class DateTime implements Comparable<DateTime>
     return new DateTime( LocalDateTime.now() );
   }
 
-  /******************************************** year *********************************************/
-  public int year()
+  /****************************************** getYear ********************************************/
+  public int getYear()
   {
-    return date().year();
+    return getDate().getYear();
   }
 
-  /******************************************** month ********************************************/
-  public int month()
+  /****************************************** getMonth *******************************************/
+  public int getMonth()
   {
     // return month of year as number 1 to 12
-    return date().month();
+    return getDate().getMonth();
   }
 
-  /***************************************** dayOfMonth ******************************************/
-  public int dayOfMonth()
+  /*************************************** getDayOfMonth *****************************************/
+  public int getDayOfMonth()
   {
-    return date().dayOfMonth();
+    return getDate().getDayOfMonth();
   }
 
-  /******************************************** hours ********************************************/
-  public int hours()
+  /****************************************** getHours *******************************************/
+  public int getHours()
   {
-    return time().hours();
+    return getTime().getHours();
   }
 
-  /******************************************* minutes *******************************************/
-  public int minutes()
+  /***************************************** getMinutes ******************************************/
+  public int getMinutes()
   {
-    return time().minutes();
+    return getTime().getMinutes();
   }
 
-  /******************************************* seconds *******************************************/
-  public int seconds()
+  /***************************************** getSeconds ******************************************/
+  public int getSeconds()
   {
-    return time().seconds();
+    return getTime().getSeconds();
   }
 
-  /*************************************** addMilliseconds ***************************************/
+  /************************************** plusMilliseconds ***************************************/
   public DateTime plusMilliseconds( long ms )
   {
     return new DateTime( m_milliseconds + ms );
   }
 
-  /***************************************** milliseconds ****************************************/
-  public long milliseconds()
+  /*************************************** getMilliseconds ***************************************/
+  public long getMilliseconds()
   {
     return m_milliseconds;
   }
 
-  /******************************************** trunc ********************************************/
-  public DateTime trunc( Interval interval )
+  /**************************************** getTruncated *****************************************/
+  public DateTime getTruncated( Interval interval )
   {
     // return new date-time truncated down to specified interval
     if ( interval == Interval.YEAR )
     {
-      Date date = new Date( date().year(), 1, 1 );
-      return new DateTime( date.epochday() * MILLISECONDS_IN_DAY );
+      Date date = new Date( getDate().getYear(), 1, 1 );
+      return new DateTime( date.getEpochday() * MILLISECONDS_IN_DAY );
     }
 
     if ( interval == Interval.HALFYEAR )
     {
-      Date date = date();
-      int month = ( ( date.month() - 1 ) / 6 ) * 6 + 1;
+      Date date = getDate();
+      int month = ( ( date.getMonth() - 1 ) / 6 ) * 6 + 1;
 
-      Date hy = new Date( date.year(), month, 1 );
-      return new DateTime( hy.epochday() * MILLISECONDS_IN_DAY );
+      Date hy = new Date( date.getYear(), month, 1 );
+      return new DateTime( hy.getEpochday() * MILLISECONDS_IN_DAY );
     }
 
     if ( interval == Interval.QUARTERYEAR )
     {
-      Date date = date();
-      int month = ( ( date.month() - 1 ) / 3 ) * 3 + 1;
+      Date date = getDate();
+      int month = ( ( date.getMonth() - 1 ) / 3 ) * 3 + 1;
 
-      Date qy = new Date( date.year(), month, 1 );
-      return new DateTime( qy.epochday() * MILLISECONDS_IN_DAY );
+      Date qy = new Date( date.getYear(), month, 1 );
+      return new DateTime( qy.getEpochday() * MILLISECONDS_IN_DAY );
     }
 
     if ( interval == Interval.MONTH )
     {
-      Date date = date();
-      Date md = new Date( date.year(), date.month(), 1 );
-      return new DateTime( md.epochday() * MILLISECONDS_IN_DAY );
+      Date date = getDate();
+      Date md = new Date( date.getYear(), date.getMonth(), 1 );
+      return new DateTime( md.getEpochday() * MILLISECONDS_IN_DAY );
     }
 
     if ( interval == Interval.WEEK )
@@ -319,14 +319,14 @@ public class DateTime implements Comparable<DateTime>
   public DateTime plusMonths( int months )
   {
     // return new date-time specified months added or subtracted
-    return new DateTime( date().plusMonths( months ), time() );
+    return new DateTime( getDate().plusMonths( months ), getTime() );
   }
 
   /***************************************** plusYears *******************************************/
   public DateTime plusYears( int years )
   {
     // return new date-time specified months added or subtracted
-    return new DateTime( date().plusYears( years ), time() );
+    return new DateTime( getDate().plusYears( years ), getTime() );
   }
 
   /**************************************** plusInterval *****************************************/

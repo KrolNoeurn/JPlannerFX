@@ -117,7 +117,7 @@ public class GanttScale extends Canvas
     gc.strokeLine( oldW, y, newW, y );
 
     // determine first interval
-    DateTime start = m_gantt.datetime( oldW ).trunc( m_interval );
+    DateTime start = m_gantt.datetime( oldW ).getTruncated( m_interval );
     DateTime end = start.plusInterval( m_interval );
     int xs = m_gantt.x( start );
     int xe = m_gantt.x( end );

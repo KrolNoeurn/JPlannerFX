@@ -78,7 +78,7 @@ public class CommandDaySetValue implements IUndoCommand
   public String text()
   {
     // command description
-    String str = "Day " + ( m_day.index() + 1 ) + " " + Day.sectionName( m_section ) + " = ";
+    String str = "Day " + ( m_day.getIndex() + 1 ) + " " + Day.getSectionName( m_section ) + " = ";
     if ( m_newValue instanceof Time )
       return str + ( (Time) m_newValue ).toStringShort();
     else

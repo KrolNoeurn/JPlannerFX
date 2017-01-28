@@ -66,7 +66,8 @@ public class Task implements Comparable<Task>
   /**************************************** constructor ******************************************/
   public Task()
   {
-    // do nothing
+    // initialise
+    m_summaryEnd = -1;
   }
 
   /**************************************** constructor ******************************************/
@@ -153,16 +154,16 @@ public class Task implements Comparable<Task>
       return null;
 
     if ( section == SECTION_DURATION )
-      return duration();
+      return getDuration();
 
     if ( section == SECTION_START )
-      return start();
+      return getStart();
 
     if ( section == SECTION_END )
-      return end();
+      return getEnd();
 
     if ( section == SECTION_WORK )
-      return work();
+      return getWork();
 
     if ( section == SECTION_PRED )
       return m_predecessors;
@@ -243,8 +244,8 @@ public class Task implements Comparable<Task>
     return ( m_title == null );
   }
 
-  /**************************************** sectionName ******************************************/
-  public static String sectionName( int num )
+  /*************************************** getSectionName ****************************************/
+  public static String getSectionName( int num )
   {
     // return section title
     if ( num == SECTION_TITLE )
@@ -297,7 +298,7 @@ public class Task implements Comparable<Task>
   {
     // write task data to XML stream (except predecessors)
     xsw.writeStartElement( XmlLabels.XML_TASK );
-    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
 
     if ( !isNull() )
     {
@@ -332,7 +333,7 @@ public class Task implements Comparable<Task>
     if ( preds.length() > 0 )
     {
       xsw.writeStartElement( XmlLabels.XML_PREDECESSORS );
-      xsw.writeAttribute( XmlLabels.XML_TASK, Integer.toString( this.index() ) );
+      xsw.writeAttribute( XmlLabels.XML_TASK, Integer.toString( this.getIndex() ) );
       xsw.writeAttribute( XmlLabels.XML_PREDS, preds );
       xsw.writeEndElement(); // XML_PREDECESSORS
     }
@@ -355,7 +356,7 @@ public class Task implements Comparable<Task>
       return -1;
 
     // finally by index
-    return this.index() - other.index();
+    return this.getIndex() - other.getIndex();
   }
 
   /***************************************** toString ********************************************/
@@ -378,8 +379,8 @@ public class Task implements Comparable<Task>
     // if task is summary, then sub-tasks are implicit predecessors
     if ( m_summaryEnd > 0 )
     {
-      int thisNum = this.index();
-      int otherNum = other.index();
+      int thisNum = this.getIndex();
+      int otherNum = other.getIndex();
       if ( otherNum > thisNum && otherNum <= m_summaryEnd )
         return true;
     }
@@ -390,24 +391,28 @@ public class Task implements Comparable<Task>
   /***************************************** isSummary *******************************************/
   public boolean isSummary()
   {
+    // return true if task is a summary
     return m_summaryEnd > 0;
   }
 
-  /***************************************** summaryEnd ******************************************/
-  public int summaryEnd()
+  /**************************************** getSummaryEnd ****************************************/
+  public int getSummaryEnd()
   {
+    // if task is a summary, return index of bottom subtask, else return -1
     return m_summaryEnd;
   }
 
   /**************************************** setSummaryEnd ****************************************/
   public void setSummaryEnd( int index )
   {
+    // set index of summary end, otherwise -1
     m_summaryEnd = index;
   }
 
   /*************************************** setSummaryStart ***************************************/
   public void setSummaryStart( int index )
   {
+    // set index of this task's summary, ultimately task 0
     m_summaryStart = index;
   }
 
@@ -508,11 +513,11 @@ public class Task implements Comparable<Task>
     {
       // milestone
       if ( hasToStart )
-        m_start = planCal.roundDown( startDueToPredecessors() );
+        m_start = planCal.getWorkDateTimeDown( startDueToPredecessors() );
       else if ( hasToFinish )
-        m_start = planCal.roundDown( endDueToPredecessors() );
+        m_start = planCal.getWorkDateTimeDown( endDueToPredecessors() );
       else
-        m_start = planCal.roundUp( JPlanner.plan.getStart() );
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getStart() );
 
       m_end = m_start;
     }
@@ -521,18 +526,18 @@ public class Task implements Comparable<Task>
       // not milestone
       if ( hasToStart )
       {
-        m_start = planCal.roundUp( startDueToPredecessors() );
-        m_end = planCal.roundDown( planCal.workTimeSpan( m_start, m_duration ) );
+        m_start = planCal.getWorkDateTimeUp( startDueToPredecessors() );
+        m_end = planCal.getWorkDateTimeDown( planCal.workTimeSpan( m_start, m_duration ) );
       }
       else if ( hasToFinish )
       {
-        m_end = planCal.roundDown( endDueToPredecessors() );
-        m_start = planCal.roundUp( planCal.workTimeSpan( m_end, m_duration.minus() ) );
+        m_end = planCal.getWorkDateTimeDown( endDueToPredecessors() );
+        m_start = planCal.getWorkDateTimeUp( planCal.workTimeSpan( m_end, m_duration.minus() ) );
       }
       else
       {
-        m_start = planCal.roundUp( JPlanner.plan.getStart() );
-        m_end = planCal.roundDown( planCal.workTimeSpan( m_start, m_duration ) );
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getStart() );
+        m_end = planCal.getWorkDateTimeDown( planCal.workTimeSpan( m_start, m_duration ) );
       }
     }
 
@@ -542,7 +547,7 @@ public class Task implements Comparable<Task>
 
     // set gantt task bar data
     if ( isSummary() )
-      m_gantt.setSummary( start(), end() );
+      m_gantt.setSummary( getStart(), getEnd() );
     else
       m_gantt.setTask( m_start, m_end );
 
@@ -550,19 +555,19 @@ public class Task implements Comparable<Task>
     m_resources.assign( this );
   }
 
-  /********************************************* end *********************************************/
-  public DateTime end()
+  /******************************************* getEnd ********************************************/
+  public DateTime getEnd()
   {
     // return task or summary end date-time
     if ( isSummary() )
     {
       // loop through each subtask
       DateTime end = DateTime.MIN_VALUE;
-      for ( int id = index() + 1; id <= m_summaryEnd; id++ )
+      for ( int id = getIndex() + 1; id <= m_summaryEnd; id++ )
       {
-        // if task isn't summary & isn't null, check if its end is after current latest
+        // if task isn't summary, check if its end is after current latest
         Task task = JPlanner.plan.getTask( id );
-        if ( !task.isNull() && !task.isSummary() && end.isLessThan( task.m_end ) )
+        if ( !task.isSummary() && end.isLessThan( task.m_end ) )
           end = task.m_end;
       }
 
@@ -572,19 +577,19 @@ public class Task implements Comparable<Task>
     return m_end;
   }
 
-  /******************************************** start ********************************************/
-  public DateTime start()
+  /****************************************** getStart *******************************************/
+  public DateTime getStart()
   {
     // return task or summary start date-time
     if ( isSummary() )
     {
       // loop through each subtask
       DateTime start = DateTime.MAX_VALUE;
-      for ( int id = index() + 1; id <= m_summaryEnd; id++ )
+      for ( int id = getIndex() + 1; id <= m_summaryEnd; id++ )
       {
-        // if task isn't summary & isn't null, check if its start is before current earliest
+        // if task isn't summary, check if its start is before current earliest
         Task task = JPlanner.plan.getTask( id );
-        if ( !task.isNull() && !task.isSummary() && task.m_start.isLessThan( start ) )
+        if ( !task.isSummary() && task.m_start.isLessThan( start ) )
           start = task.m_start;
       }
 
@@ -594,8 +599,8 @@ public class Task implements Comparable<Task>
     return m_start;
   }
 
-  /******************************************** work *********************************************/
-  public TimeSpan work()
+  /******************************************* getWork *******************************************/
+  public TimeSpan getWork()
   {
     // return task or summary work time-span
     if ( isSummary() )
@@ -608,12 +613,12 @@ public class Task implements Comparable<Task>
     return m_work;
   }
 
-  /****************************************** duration *******************************************/
-  public TimeSpan duration()
+  /***************************************** getDuration *****************************************/
+  public TimeSpan getDuration()
   {
     // return task or summary work time-span
     if ( isSummary() )
-      return JPlanner.plan.getDefaultcalendar().workBetween( start(), end() );
+      return JPlanner.plan.getDefaultcalendar().workBetween( getStart(), getEnd() );
 
     return m_duration;
   }
@@ -622,7 +627,7 @@ public class Task implements Comparable<Task>
   private DateTime startDueToPredecessors()
   {
     // get start based on this task's predecessors
-    DateTime start = m_predecessors.start();
+    DateTime start = m_predecessors.getStart();
 
     // if indented also check start against summary(s) predecessors
     Task task = this;
@@ -631,7 +636,7 @@ public class Task implements Comparable<Task>
       task = JPlanner.plan.getTask( task.m_summaryStart );
 
       // if start from summary predecessors is later, use it instead
-      DateTime summaryStart = task.m_predecessors.start();
+      DateTime summaryStart = task.m_predecessors.getStart();
       if ( start.isLessThan( summaryStart ) )
         start = summaryStart;
     }
@@ -643,7 +648,7 @@ public class Task implements Comparable<Task>
   private DateTime endDueToPredecessors()
   {
     // get end based on this task's predecessors
-    DateTime end = m_predecessors.end();
+    DateTime end = m_predecessors.getEnd();
 
     // if indented also check end against summary(s) predecessors
     Task task = this;
@@ -652,7 +657,7 @@ public class Task implements Comparable<Task>
       task = JPlanner.plan.getTask( task.m_summaryStart );
 
       // if end from summary predecessors is later, use it instead
-      DateTime summaryEnd = task.m_predecessors.end();
+      DateTime summaryEnd = task.m_predecessors.getEnd();
       if ( summaryEnd.isLessThan( end ) )
         end = summaryEnd;
     }
@@ -660,33 +665,33 @@ public class Task implements Comparable<Task>
     return end;
   }
 
-  /**************************************** predecessors *****************************************/
-  public Predecessors predecessors()
+  /*************************************** getPredecessors ***************************************/
+  public Predecessors getPredecessors()
   {
     return m_predecessors;
   }
 
-  /****************************************** ganttData ******************************************/
-  public GanttData ganttData()
+  /**************************************** getGanttData *****************************************/
+  public GanttData getGanttData()
   {
     // return gantt-data associated with the task
     return m_gantt;
   }
 
-  /******************************************** index ********************************************/
-  public int index()
+  /****************************************** getIndex *******************************************/
+  public int getIndex()
   {
     return JPlanner.plan.getIndex( this );
   }
 
-  /****************************************** priority *******************************************/
-  public int priority()
+  /***************************************** getPriority *****************************************/
+  public int getPriority()
   {
     return m_priority;
   }
 
-  /******************************************* indent ********************************************/
-  public int indent()
+  /****************************************** getIndent ******************************************/
+  public int getIndent()
   {
     return m_indent;
   }

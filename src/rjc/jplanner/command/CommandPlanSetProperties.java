@@ -113,7 +113,7 @@ public class CommandPlanSetProperties implements IUndoCommand
 
     if ( !m_newTitle.equals( m_oldTitle ) )
       txt.append( "title/" );
-    if ( m_newStart.milliseconds() != m_oldStart.milliseconds() )
+    if ( m_newStart.getMilliseconds() != m_oldStart.getMilliseconds() )
       txt.append( "default start/" );
     if ( m_newCal != m_oldCal )
       txt.append( "default calendar/" );

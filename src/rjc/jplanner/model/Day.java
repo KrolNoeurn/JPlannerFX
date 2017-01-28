@@ -149,11 +149,11 @@ public class Day
               break;
             case XmlLabels.XML_START:
               time = Time.fromString( xsr.getAttributeValue( i ) );
-              start = time.milliseconds() / 3600_000.0;
+              start = time.getMilliseconds() / 3600_000.0;
               break;
             case XmlLabels.XML_END:
               time = Time.fromString( xsr.getAttributeValue( i ) );
-              end = time.milliseconds() / 3600_000.0;
+              end = time.getMilliseconds() / 3600_000.0;
               break;
             default:
               JPlanner.trace( "Period - unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
@@ -167,61 +167,61 @@ public class Day
     }
   }
 
-  /***************************************** toString ********************************************/
+  /****************************************** toString *******************************************/
   @Override
   public String toString()
   {
     return "DayType[" + m_name + ", " + m_work + ", " + m_periods + "]";
   }
 
-  /******************************************* name **********************************************/
-  public String name()
+  /******************************************* getName *******************************************/
+  public String getName()
   {
     return m_name;
   }
 
-  /******************************************* work **********************************************/
-  public double work()
+  /******************************************* getWork *******************************************/
+  public double getWork()
   {
     return m_work;
   }
 
-  /**************************************** numPeriods *******************************************/
-  public int numPeriods()
+  /************************************** getNumberOfPeriods *************************************/
+  public int getNumberOfPeriods()
   {
     return m_periods.size();
   }
 
-  /**************************************** workPeriods ******************************************/
-  public ArrayList<DayWorkPeriod> workPeriods()
+  /**************************************** getWorkPeriods ***************************************/
+  public ArrayList<DayWorkPeriod> getWorkPeriods()
   {
     return m_periods;
   }
 
-  /******************************************** end **********************************************/
-  public Time end( int num )
+  /******************************************** getEnd *******************************************/
+  public Time getEnd( int num )
   {
     return m_periods.get( num ).m_end;
   }
 
-  /******************************************* start *********************************************/
-  public Time start( int num )
+  /******************************************* getStart ******************************************/
+  public Time getStart( int num )
   {
     return m_periods.get( num ).m_start;
   }
 
-  /******************************************** end **********************************************/
-  public Time end()
+  /******************************************** getEnd *******************************************/
+  public Time getEnd()
   {
     // return end of working day
-    return end( m_periods.size() - 1 );
+    return getEnd( m_periods.size() - 1 );
   }
 
-  /******************************************* start *********************************************/
-  public Time start()
+  /******************************************* getStart ******************************************/
+  public Time getStart()
   {
     // return start of working day
-    return start( 0 );
+    return getStart( 0 );
   }
 
   /****************************************** getValue *******************************************/
@@ -235,15 +235,15 @@ public class Day
       return m_work;
 
     if ( section == SECTION_PERIODS )
-      return numPeriods();
+      return getNumberOfPeriods();
 
     section -= SECTION_START1;
     try
     {
       if ( section % 2 == 0 )
-        return start( section / 2 );
+        return getStart( section / 2 );
       else
-        return end( section / 2 );
+        return getEnd( section / 2 );
     }
     catch ( IndexOutOfBoundsException e )
     {
@@ -286,8 +286,8 @@ public class Day
     return m_periods.size() > 0;
   }
 
-  /**************************************** sectionName ******************************************/
-  public static String sectionName( int num )
+  /*************************************** getSectionName ****************************************/
+  public static String getSectionName( int num )
   {
     // return section title
     if ( num == SECTION_NAME )
@@ -305,19 +305,19 @@ public class Day
       return "Start " + ( num / 2 );
   }
 
-  /****************************************** workDown *******************************************/
-  public Time workDown( Time time )
+  /************************************** getWorkTimeDown ****************************************/
+  public Time getWorkTimeDown( Time time )
   {
     // if in work period, return original time, otherwise end of earlier period, or null
-    int ms = time.milliseconds();
+    int ms = time.getMilliseconds();
     Time answer = null;
 
     for ( DayWorkPeriod period : m_periods )
     {
-      if ( ms <= period.m_start.milliseconds() )
+      if ( ms <= period.m_start.getMilliseconds() )
         return answer;
 
-      if ( ms <= period.m_end.milliseconds() )
+      if ( ms <= period.m_end.getMilliseconds() )
         return time;
 
       answer = period.m_end;
@@ -326,18 +326,18 @@ public class Day
     return answer;
   }
 
-  /******************************************* workUp ********************************************/
-  public Time workUp( Time time )
+  /*************************************** getWorkTimeUp *****************************************/
+  public Time getWorkTimeUp( Time time )
   {
     // if in work period, return original time, otherwise start of later period, or null
-    int ms = time.milliseconds();
+    int ms = time.getMilliseconds();
 
     for ( DayWorkPeriod period : m_periods )
     {
-      if ( ms < period.m_start.milliseconds() )
+      if ( ms < period.m_start.getMilliseconds() )
         return period.m_start;
 
-      if ( ms < period.m_end.milliseconds() )
+      if ( ms < period.m_end.getMilliseconds() )
         return time;
     }
 
@@ -349,7 +349,7 @@ public class Day
   {
     // write day-type data to XML stream
     xsw.writeStartElement( XmlLabels.XML_DAY );
-    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.index() ) );
+    xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
     xsw.writeAttribute( XmlLabels.XML_NAME, m_name );
     xsw.writeAttribute( XmlLabels.XML_WORK, Double.toString( m_work ) );
 
@@ -371,25 +371,25 @@ public class Day
     m_workMS = 0;
 
     for ( DayWorkPeriod period : m_periods )
-      m_workMS += period.m_end.milliseconds() - period.m_start.milliseconds();
+      m_workMS += period.m_end.getMilliseconds() - period.m_start.getMilliseconds();
   }
 
   /*************************************** millisecondsDone **************************************/
   public int millisecondsDone( Time time )
   {
     // return number of ms done from 00:00 to specified time
-    int ms = time.milliseconds();
+    int ms = time.getMilliseconds();
     int done = 0;
 
     for ( DayWorkPeriod period : m_periods )
     {
-      if ( ms <= period.m_start.milliseconds() )
+      if ( ms <= period.m_start.getMilliseconds() )
         return done;
 
-      if ( ms < period.m_end.milliseconds() )
-        return done + ms - period.m_start.milliseconds();
+      if ( ms < period.m_end.getMilliseconds() )
+        return done + ms - period.m_start.getMilliseconds();
 
-      done += period.m_end.milliseconds() - period.m_start.milliseconds();
+      done += period.m_end.getMilliseconds() - period.m_start.getMilliseconds();
     }
 
     return done;
@@ -432,7 +432,7 @@ public class Day
   /***************************************** workForward *****************************************/
   public Time workForward( Time from, double work )
   {
-    return workForward( from.milliseconds(), work );
+    return workForward( from.getMilliseconds(), work );
   }
 
   public Time workForward( double work )
@@ -448,7 +448,7 @@ public class Day
   /***************************************** workBackward ****************************************/
   public Time workBackward( Time from, double work )
   {
-    return workBackward( from.milliseconds(), work );
+    return workBackward( from.getMilliseconds(), work );
   }
 
   public Time workBackward( double work )
@@ -477,7 +477,7 @@ public class Day
   /************************************* millisecondsForward *************************************/
   public Time millisecondsForward( Time from, int ms )
   {
-    return millisecondsForward( from.milliseconds(), ms );
+    return millisecondsForward( from.getMilliseconds(), ms );
   }
 
   public Time millisecondsForward( int ms )
@@ -493,16 +493,16 @@ public class Day
     // work forwards specified number of ms
     for ( DayWorkPeriod period : m_periods )
     {
-      if ( period.m_end.milliseconds() < from )
+      if ( period.m_end.getMilliseconds() < from )
         continue;
 
-      if ( from < period.m_start.milliseconds() )
-        from = period.m_start.milliseconds();
+      if ( from < period.m_start.getMilliseconds() )
+        from = period.m_start.getMilliseconds();
 
-      if ( from + ms <= period.m_end.milliseconds() )
+      if ( from + ms <= period.m_end.getMilliseconds() )
         return Time.fromMilliseconds( from + ms );
 
-      ms -= period.m_end.milliseconds() - from;
+      ms -= period.m_end.getMilliseconds() - from;
     }
 
     return null;
@@ -511,7 +511,7 @@ public class Day
   /************************************* millisecondsBackward ************************************/
   public Time millisecondsBackward( Time from, int ms )
   {
-    return millisecondsBackward( from.milliseconds(), ms );
+    return millisecondsBackward( from.getMilliseconds(), ms );
   }
 
   public Time millisecondsBackward( int ms )
@@ -529,16 +529,16 @@ public class Day
     {
       DayWorkPeriod period = m_periods.get( p );
 
-      if ( period.m_start.milliseconds() > from )
+      if ( period.m_start.getMilliseconds() > from )
         continue;
 
-      if ( from > period.m_end.milliseconds() )
-        from = period.m_end.milliseconds();
+      if ( from > period.m_end.getMilliseconds() )
+        from = period.m_end.getMilliseconds();
 
-      if ( from - ms >= period.m_start.milliseconds() )
+      if ( from - ms >= period.m_start.getMilliseconds() )
         return Time.fromMilliseconds( from - ms );
 
-      ms -= from - period.m_start.milliseconds();
+      ms -= from - period.m_start.getMilliseconds();
     }
 
     return null;
@@ -558,12 +558,12 @@ public class Day
     if ( m_periods.size() == 0 )
       return time;
 
-    int now = time.milliseconds();
-    int s = m_periods.get( 0 ).m_start.milliseconds();
+    int now = time.getMilliseconds();
+    int s = m_periods.get( 0 ).m_start.getMilliseconds();
     if ( now <= s )
       return Time.MIN_VALUE;
 
-    int e = m_periods.get( m_periods.size() - 1 ).m_end.milliseconds();
+    int e = m_periods.get( m_periods.size() - 1 ).m_end.getMilliseconds();
     if ( now >= e )
       return Time.MAX_VALUE;
 
@@ -572,8 +572,8 @@ public class Day
     return Time.fromMilliseconds( (int) ( scale * ( now - s ) ) );
   }
 
-  /******************************************** index ********************************************/
-  public int index()
+  /******************************************* getIndex ******************************************/
+  public int getIndex()
   {
     return JPlanner.plan.getIndex( this );
   }

@@ -50,13 +50,13 @@ public class EditorDayTime extends AbstractCellEditor
     Day day = JPlanner.plan.daytypes.get( rowIndex );
     if ( columnIndex > Day.SECTION_START1 )
     {
-      m_min = ( (Time) day.getValue( columnIndex - 1 ) ).milliseconds();
+      m_min = ( (Time) day.getValue( columnIndex - 1 ) ).getMilliseconds();
       m_min += 60000;
     }
-    int num = day.numPeriods();
+    int num = day.getNumberOfPeriods();
     if ( columnIndex < Day.SECTION_START1 + 2 * num - 1 )
     {
-      m_max = ( (Time) day.getValue( columnIndex + 1 ) ).milliseconds();
+      m_max = ( (Time) day.getValue( columnIndex + 1 ) ).getMilliseconds();
       m_max -= 60000;
     }
 
@@ -109,7 +109,7 @@ public class EditorDayTime extends AbstractCellEditor
     }
 
     // check time is between min & max
-    if ( time.milliseconds() < m_min || time.milliseconds() > m_max )
+    if ( time.getMilliseconds() < m_min || time.getMilliseconds() > m_max )
       return "Time not between " + Time.fromMilliseconds( m_min ).toStringShort() + " and "
           + Time.fromMilliseconds( m_max ).toStringShort();
 
@@ -133,9 +133,9 @@ public class EditorDayTime extends AbstractCellEditor
     {
       // default to editing minutes, with hours in prefix
       Time time = (Time) value;
-      String prefix = time.hours() + ":";
+      String prefix = time.getHours() + ":";
       m_spin.setPrefixSuffix( prefix, null );
-      m_spin.setInteger( time.minutes() );
+      m_spin.setInteger( time.getMinutes() );
       m_spin.setRange( -99, 99, 0 );
       m_spin.setStepPage( 1, 10 );
     }

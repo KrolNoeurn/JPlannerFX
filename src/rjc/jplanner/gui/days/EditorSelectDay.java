@@ -46,7 +46,7 @@ public class EditorSelectDay extends AbstractCellEditor
     public String getItem( int num )
     {
       // return day-type name
-      return JPlanner.plan.getDay( num ).name();
+      return JPlanner.plan.getDay( num ).getName();
     }
 
     /****************************************** setString ******************************************/
