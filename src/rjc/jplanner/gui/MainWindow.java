@@ -109,7 +109,7 @@ public class MainWindow
     m_stage = stage;
     m_tabWidgets = new ArrayList<MainTabWidget>();
     m_tabWidgets.add( m_mainTabWidget );
-    properties().updateFromPlan();
+    getPropertiesPane().updateFromPlan();
 
     // on minimising to icon, minimise other windows
     stage.iconifiedProperty().addListener( ( observable, oldValue, newValue ) ->
@@ -419,7 +419,7 @@ public class MainWindow
     }
 
     // save succeed, so update gui
-    properties().updateFromPlan();
+    getPropertiesPane().updateFromPlan();
     JPlanner.plan.getUndostack().setClean();
     updateWindowTitles();
     message( "Saved plan to '" + file.getPath() + "'" );
@@ -610,8 +610,8 @@ public class MainWindow
   {
     // update window titles and plan tab
     updateWindowTitles();
-    properties().updateFromPlan();
-    notes().updateFromPlan();
+    getPropertiesPane().updateFromPlan();
+    getNotesPane().updateFromPlan();
 
     // reset set all tables
     m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().reset() );
@@ -705,19 +705,19 @@ public class MainWindow
     // ensure plan is up-to-date
     if ( m_mainTabWidget.getPlanTab().isSelected() )
     {
-      properties().updatePlan();
-      notes().updatePlan();
+      getPropertiesPane().updatePlan();
+      getNotesPane().updatePlan();
     }
   }
 
-  /***************************************** properties ******************************************/
-  public PlanProperties properties()
+  /************************************** getPropertiesPane **************************************/
+  public PlanProperties getPropertiesPane()
   {
     return m_mainTabWidget.getPlanTab().getPlanProperties();
   }
 
-  /******************************************** notes ********************************************/
-  public PlanNotes notes()
+  /**************************************** getNotesPane *****************************************/
+  public PlanNotes getNotesPane()
   {
     return m_mainTabWidget.getPlanTab().getPlanNotes();
   }

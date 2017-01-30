@@ -154,7 +154,7 @@ public class DateTime implements Comparable<DateTime>
 
     // determine half-of-year
     String yearHalf;
-    if ( getMonth() < 7 )
+    if ( getDate().getMonth() < 7 )
       yearHalf = "1";
     else
       yearHalf = "2";
@@ -206,43 +206,6 @@ public class DateTime implements Comparable<DateTime>
   {
     // return a new DateTime from current system clock
     return new DateTime( LocalDateTime.now() );
-  }
-
-  /****************************************** getYear ********************************************/
-  public int getYear()
-  {
-    return getDate().getYear();
-  }
-
-  /****************************************** getMonth *******************************************/
-  public int getMonth()
-  {
-    // return month of year as number 1 to 12
-    return getDate().getMonth();
-  }
-
-  /*************************************** getDayOfMonth *****************************************/
-  public int getDayOfMonth()
-  {
-    return getDate().getDayOfMonth();
-  }
-
-  /****************************************** getHours *******************************************/
-  public int getHours()
-  {
-    return getTime().getHours();
-  }
-
-  /***************************************** getMinutes ******************************************/
-  public int getMinutes()
-  {
-    return getTime().getMinutes();
-  }
-
-  /***************************************** getSeconds ******************************************/
-  public int getSeconds()
-  {
-    return getTime().getSeconds();
   }
 
   /************************************** plusMilliseconds ***************************************/

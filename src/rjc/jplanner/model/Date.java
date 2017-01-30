@@ -264,4 +264,11 @@ public class Date
     return m_epochday == other.m_epochday;
   }
 
+  /****************************************** localDate ******************************************/
+  public LocalDate localDate()
+  {
+    // return LocalData equivalent of date
+    return LocalDate.ofEpochDay( m_epochday );
+  }
+
 }

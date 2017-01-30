@@ -295,4 +295,18 @@ public class PlanProperties extends ScrollPane
     JPlanner.plan.getUndostack().push( new CommandPlanSetProperties( title, start, cal, DTformat, Dformat ) );
   }
 
+  /***************************************** getCalendar *****************************************/
+  public Calendar getCalendar()
+  {
+    // return calendar display, may differ from default calendar in plan
+    return m_defaultCalendar.getCalendar();
+  }
+
+  /************************************** getDateTimeFormat **************************************/
+  public String getDateTimeFormat()
+  {
+    // return calendar display, may differ from default calendar in plan
+    return m_DTformat.getText();
+  }
+
 }

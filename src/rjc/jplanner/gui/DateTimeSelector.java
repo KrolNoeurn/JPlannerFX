@@ -21,6 +21,7 @@ package rjc.jplanner.gui;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
@@ -43,6 +44,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
+import rjc.jplanner.JPlanner;
+import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Date;
+import rjc.jplanner.model.DateTime;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /********************* Pop-up window to display date-time selection widgets **********************/
@@ -50,11 +56,14 @@ import javafx.stage.Popup;
 
 public class DateTimeSelector extends Popup
 {
-  private Pane                m_pane;        // contains the pop-up widgets
-  private HBox                m_date;        // for entering month + year
-  private HBox                m_time;        // for entering hours + mins + secs + millisecs
-  private Canvas              m_calendar;    // for picking date
-  private HBox                m_buttons;     // for today + start + end buttons
+  private DateTimeEditor      m_parent;
+  private boolean             m_ignoreUpdates;
+
+  private Pane                m_pane;              // contains the pop-up widgets
+  private HBox                m_date;              // for entering month + year
+  private HBox                m_time;              // for entering hours + mins + secs + millisecs
+  private Canvas              m_calendar;          // for picking date
+  private HBox                m_buttons;           // for today + start + end buttons
 
   private MonthSpinEditor     m_month;
   private SpinEditor          m_year;
@@ -74,48 +83,109 @@ public class DateTimeSelector extends Popup
   private double              m_x;
   private double              m_y;
 
-  private static final double PADDING = 3.0;
-  private static final double HEIGHT  = 23.0;
+  private static final double PADDING       = 3.0;
+  private static final double HEIGHT        = 23.0;
+  private static final double SHADOW_RADIUS = 4.0;
 
   /**************************************** constructor ******************************************/
   public DateTimeSelector( DateTimeEditor parent )
   {
     // create pop-up window to display date-time selection widgets
     super();
+    m_parent = parent;
     setAutoHide( true );
     setConsumeAutoHidingEvents( false );
-
     constructSelector();
-    setValues();
-    getContent().add( m_pane );
 
     // add shadow
     DropShadow shadow = new DropShadow();
     shadow.setColor( Colors.FOCUSED_BLUE );
-    shadow.setRadius( 4.0 );
+    shadow.setRadius( SHADOW_RADIUS );
     getScene().getRoot().setEffect( shadow );
 
     // toggle pop-up when parent button is pressed
-    parent.getButton().setOnMousePressed( event ->
-    {
-      if ( isShowing() )
-        hide();
-      else
-      {
-        // set pop-up position and show 
-        Point2D point = parent.localToScreen( 0.0, parent.getHeight() );
-        show( parent, point.getX() - shadow.getRadius() + 1.0, point.getY() - shadow.getRadius() + 1.0 );
-        positionContents();
-      }
-    } );
+    m_parent.getButton().setOnMousePressed( event -> toggleSelector( event ) );
+    m_parent.textProperty().addListener( ( observable, oldText, newText ) -> setDateTime( m_parent.getDateTime() ) );
+    setOnHidden( event -> m_parent.setEditable( true ) );
 
     m_calendar.setOnMouseClicked( event -> calendarMouseClicked( event ) );
+    m_year.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_year ) );
+    m_month.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_month ) );
+    m_hours.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_hours ) );
+    m_mins.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_mins ) );
+    m_secs.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_secs ) );
+    m_millisecs.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_millisecs ) );
   }
 
-  private void calendarMouseClicked( MouseEvent event )
+  /*************************************** updateParent ******************************************/
+  private void updateParent( XTextField editor )
   {
-    // TODO Auto-generated method stub
+    // if editor not showing, return immediately not doing anything
+    if ( m_ignoreUpdates || !isShowing() )
+      return;
 
+    //editor.requestFocus();
+    JPlanner.trace( "SETTING PARENT to ", getDateTime() );
+    m_parent.setDateTime( getDateTime() );
+  }
+
+  /***************************************** setDateTime *****************************************/
+  private void setDateTime( DateTime dt )
+  {
+    JPlanner.trace( "SETTING SELECTOR to ", dt );
+    // set selector to specified date-time
+    if ( dt == null )
+      return;
+
+    m_ignoreUpdates = true;
+    m_month.setMonth( Month.of( dt.getDate().getMonth() ) );
+    m_year.setInteger( dt.getDate().getYear() );
+    m_hours.setInteger( dt.getTime().getHours() );
+    m_mins.setInteger( dt.getTime().getMinutes() );
+    m_secs.setInteger( dt.getTime().getSeconds() );
+    m_millisecs.setInteger( dt.getTime().getMs() );
+    m_ignoreUpdates = false;
+    drawCalendar();
+  }
+
+  /***************************************** getDateTime *****************************************/
+  private DateTime getDateTime()
+  {
+    // return date-time shown by selector (day of month comes from parent editor)
+    int dayofmonth = m_parent.getDateTime().getDate().getDayOfMonth();
+    int year = m_year.getInteger();
+    int month = m_month.getMonthNumber();
+    YearMonth ym = YearMonth.of( year, month );
+    if ( dayofmonth > ym.lengthOfMonth() )
+      dayofmonth = ym.lengthOfMonth();
+
+    return new DateTime( new Date( year, month, dayofmonth ), getTime() );
+  }
+
+  /******************************************* getTime *******************************************/
+  private Time getTime()
+  {
+    // return time shown by selector
+    int hours = m_hours.getInteger();
+    int mins = m_mins.getInteger();
+    int secs = m_secs.getInteger();
+    int ms = m_millisecs.getInteger();
+    return new Time( hours, mins, secs, ms );
+  }
+
+  /*************************************** toggleSelector ****************************************/
+  private void toggleSelector( MouseEvent event )
+  {
+    // if selector open, hide, if hidden, open
+    if ( isShowing() )
+      hide();
+    else
+    {
+      m_parent.setEditable( false );
+      Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
+      show( m_parent, point.getX() - SHADOW_RADIUS + 1.0, point.getY() - SHADOW_RADIUS + 1.0 );
+      arrangeSelector();
+    }
   }
 
   /************************************** constructSelector **************************************/
@@ -132,7 +202,7 @@ public class DateTimeSelector extends Popup
     m_date = new HBox();
     m_date.setPadding( INSETS );
     m_date.setSpacing( PADDING );
-    m_year = createSpinEditor( -999999, 999999, 80 );
+    m_year = createSpinEditor( -999999, 999999, 80, "0000", null );
     m_month = new MonthSpinEditor();
     m_month.setPrefWidth( 121 );
     m_month.setMinHeight( HEIGHT );
@@ -144,15 +214,15 @@ public class DateTimeSelector extends Popup
     m_time = new HBox();
     m_time.setPadding( INSETS );
     m_time.setSpacing( PADDING );
-    m_hours = createSpinEditor( 0, 23, 47 );
-    m_mins = createSpinEditor( 0, 59, 47 );
-    m_secs = createSpinEditor( 0, 59, 47 );
-    m_millisecs = createSpinEditor( 0, 999, 53 );
+    m_hours = createSpinEditor( 0, 23, 47, "00", null );
+    m_mins = createSpinEditor( 0, 59, 47, "00", m_hours );
+    m_secs = createSpinEditor( 0, 59, 47, "00", m_mins );
+    m_millisecs = createSpinEditor( 0, 999, 53, "000", m_secs );
     m_time.getChildren().addAll( m_hours, m_mins, m_secs, m_millisecs );
 
     // create calendar canvas
     m_calendar = new Canvas();
-    m_calendar.setHeight( 132.0 );
+    m_calendar.setHeight( 17.0 * 7.0 );
 
     // create buttons
     m_buttons = new HBox();
@@ -168,26 +238,25 @@ public class DateTimeSelector extends Popup
     m_pane.getChildren().addAll( m_date, m_calendar, m_time, m_buttons );
     m_pane.setBackground( BACKGROUND );
     m_pane.setBorder( BORDER );
-
-    // update calendar canvas when month or year changes
-    m_year.getNumberProperty().addListener( ( observable, oldYear, newYear ) -> drawCalendar() );
-    m_month.getMonthProperty().addListener( ( observable, oldMonth, newMonth ) -> drawCalendar() );
+    getContent().add( m_pane );
   }
 
   /************************************* createSpinEditor ****************************************/
-  private SpinEditor createSpinEditor( int min, int max, int width )
+  private SpinEditor createSpinEditor( int minValue, int maxValue, int width, String format, SpinEditor wrap )
   {
     // create a spin-editor
     SpinEditor spin = new SpinEditor();
-    spin.setRange( min, max, 0 );
+    spin.setRange( minValue, maxValue, 0 );
     spin.setPrefWidth( width );
     spin.setMinHeight( HEIGHT );
     spin.setMaxHeight( HEIGHT );
+    spin.setFormat( format );
+    spin.setWrapSpinEditor( wrap );
     return spin;
   }
 
-  /************************************** positionContents ***************************************/
-  private void positionContents()
+  /*************************************** arrangeSelector ***************************************/
+  private void arrangeSelector()
   {
     // position date
     double y = PADDING;
@@ -204,51 +273,42 @@ public class DateTimeSelector extends Popup
     m_time.relocate( 0.0, y );
 
     // position buttons
-    double x = ( m_time.getWidth() - m_buttons.getWidth() ) / 2.0;
-
     y += m_time.getHeight();
     m_buttons.relocate( 0.0, y );
 
     m_pane.autosize();
   }
 
-  /****************************************** setValues ******************************************/
-  private void setValues()
-  {
-    // TODO
-    m_month.setMonth( Month.FEBRUARY );
-    m_year.setInteger( 2016 );
-
-    m_hours.setInteger( 23 );
-    m_mins.setInteger( 59 );
-    m_secs.setInteger( 59 );
-    m_millisecs.setInteger( 999 );
-  }
-
   /**************************************** drawCalendar *****************************************/
   private void drawCalendar()
   {
+    JPlanner.trace( "DRAWING CALENDAR" );
+    // only draw if selector is showing
+    if ( !isShowing() )
+      return;
+
     // draw calendar for month-year specified in the spin editors
-    double w = m_calendar.getWidth();
-    double h = m_calendar.getHeight();
     int month = m_month.getMonthNumber();
     int year = m_year.getInteger();
-
-    LocalDate ld = LocalDate.of( year, month, 1 );
-    int dow = ld.getDayOfWeek().getValue();
-    ld = ld.minusDays( dow - 1 );
+    LocalDate localdate = LocalDate.of( year, month, 1 );
+    int dayofweek = localdate.getDayOfWeek().getValue();
+    localdate = localdate.minusDays( dayofweek - 1 );
+    LocalDate selecteddate = m_parent.getDateTime().getDate().localDate();
 
     // calculate calendar cell width & height
+    double w = m_calendar.getWidth();
+    double h = m_calendar.getHeight();
     m_columnWidth = Math.floor( w / 7.0 );
-    m_rowHeight = Math.floor( h / 6.0 );
+    m_rowHeight = Math.floor( h / 7.0 );
 
     // clear the calendar
     m_gc = m_calendar.getGraphicsContext2D();
-    m_gc.clearRect( 0.0, 0.0, m_calendar.getWidth(), m_calendar.getHeight() );
+    m_gc.clearRect( 0.0, 0.0, w, h );
     m_gc.setFontSmoothingType( FontSmoothingType.LCD );
+    Calendar calendar = JPlanner.gui.getPropertiesPane().getCalendar();
 
     // draw the calendar day labels and day-of-month numbers
-    for ( int row = 0; row < 6; row++ )
+    for ( int row = 0; row < 7; row++ )
     {
       m_y = row * m_rowHeight;
       for ( int column = 0; column < 7; column++ )
@@ -256,27 +316,37 @@ public class DateTimeSelector extends Popup
         m_x = column * m_columnWidth;
 
         if ( row == 0 )
+        // in first row put day of week
         {
-          // in first row put day of week
           DayOfWeek day = DayOfWeek.of( column + 1 );
           String label = day.getDisplayName( TextStyle.SHORT, Locale.getDefault() ).substring( 0, 2 );
           drawText( label, Color.BLACK, Color.BEIGE );
         }
         else
+        // in other rows put day-of-month numbers
         {
-          // in other rows put day-of-month numbers
+          // numbers are black except gray for other months and red for today
           Color textColor = Color.BLACK;
-          if ( ld.getMonthValue() != month )
+          if ( localdate.getMonthValue() != month )
             textColor = Color.GRAY;
-          if ( column > 4 )
+          if ( localdate.isEqual( selecteddate ) )
+            textColor = Color.WHITE;
+          if ( localdate.isEqual( LocalDate.now() ) )
             textColor = Color.RED;
 
-          Color backColor = Color.WHITE;
-          if ( ld.isEqual( LocalDate.now() ) )
-            backColor = Color.CHARTREUSE;
+          // number background colour is shade of gray to white depending of day work
+          double work = calendar.getDay( new Date( localdate ) ).getWork();
+          if ( work > 1.0 )
+            work = 1.0;
+          Color backColor = Color.gray( work / 10.0 + 0.9 );
 
-          drawText( "" + ld.getDayOfMonth(), textColor, backColor );
-          ld = ld.plusDays( 1 );
+          // select day is blue
+          if ( localdate.isEqual( selecteddate ) )
+            backColor = Colors.FOCUSED_BLUE;
+
+          // draw number and move to next day
+          drawText( localdate.getDayOfMonth(), textColor, backColor );
+          localdate = localdate.plusDays( 1 );
         }
       }
     }
@@ -284,20 +354,35 @@ public class DateTimeSelector extends Popup
   }
 
   /****************************************** drawText *******************************************/
-  private void drawText( String text, Color textColor, Color backgroundColor )
+  private void drawText( Object text, Color textColor, Color backgroundColor )
   {
     // draw text centred in box defined by m_x, m_y, m_columnWidth, m_rowHeight
-    if ( backgroundColor != null )
-    {
-      m_gc.setFill( backgroundColor );
-      m_gc.fillRect( m_x, m_y, m_columnWidth, m_rowHeight );
-    }
+    m_gc.setFill( backgroundColor );
+    m_gc.fillRect( m_x, m_y, m_columnWidth, m_rowHeight );
 
-    Bounds bounds = new Text( text ).getLayoutBounds();
+    Bounds bounds = new Text( text.toString() ).getLayoutBounds();
     double x = m_x + ( m_columnWidth - bounds.getWidth() ) / 2.0;
     double y = m_y + ( m_rowHeight - bounds.getHeight() ) / 2.0 - bounds.getMinY();
+
     m_gc.setFill( textColor );
-    m_gc.fillText( text, x, y );
+    m_gc.fillText( text.toString(), x, y );
+  }
+
+  /************************************** calendarMouseClicked **************************************/
+  private void calendarMouseClicked( MouseEvent event )
+  {
+    // update editor date with calendar date clicked
+    int column = (int) ( event.getX() / m_columnWidth );
+    int row = (int) ( event.getY() / m_rowHeight );
+    if ( row < 1 )
+      return;
+
+    LocalDate ld = LocalDate.of( m_year.getInteger(), m_month.getMonthNumber(), 1 );
+    ld = ld.minusDays( ld.getDayOfWeek().getValue() - 1 );
+    ld = ld.plusDays( column + 7 * ( --row ) );
+
+    DateTime dt = new DateTime( new Date( ld ), getTime() );
+    m_parent.setDateTime( dt );
   }
 
 }

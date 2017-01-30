@@ -27,9 +27,8 @@ import rjc.jplanner.model.DateTime;
 
 public class DateTimeEditor extends XTextField
 {
-  private DateTime         m_datetime;
-  private DateTimeSelector m_selector;
-  private String           m_validText;
+  private DateTime m_datetime;  // editor date-time, or null if editor date-time invalid
+  private String   m_validText; // last valid editor text used if focus lost when in error
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
@@ -37,23 +36,25 @@ public class DateTimeEditor extends XTextField
     // construct editor
     super();
     setButtonType( ButtonType.DOWN );
-    m_selector = new DateTimeSelector( this );
 
-    // react to changes to editor text
+    // react to editor text changes
     textProperty().addListener( ( property, oldText, newText ) ->
     {
       // only check if gui and plan created
       if ( JPlanner.gui == null || JPlanner.plan == null )
         return;
 
-      // check editor text can be parsed successfully to determine new date-time
-      m_datetime = DateTime.parse( newText, JPlanner.plan.getDateTimeFormat() );
-      if ( m_datetime == null )
-        JPlanner.gui.setError( this, "Format not '" + JPlanner.plan.getDateTimeFormat() + "'" );
-      else
-        JPlanner.gui.setError( this, null );
+      // parse editor text into date-time using format displayed in plan properties
+      m_datetime = DateTime.parse( newText, format() );
 
-      JPlanner.trace( oldText, newText, DateTime.parse( newText, JPlanner.plan.getDateTimeFormat() ) );
+      // if text is not valid date-time set editor into error state
+      if ( m_datetime == null )
+        JPlanner.gui.setError( this, "Format not '" + format() + "'" );
+      else
+      {
+        JPlanner.gui.setError( this, null );
+        m_validText = newText;
+      }
     } );
 
     // react to changes in editor focus state
@@ -64,21 +65,32 @@ public class DateTimeEditor extends XTextField
         setText( m_validText );
     } );
 
+    new DateTimeSelector( this );
+  }
+
+  /******************************************* format ********************************************/
+  private String format()
+  {
+    // return format this editor uses for converting text to date-time
+    if ( JPlanner.gui == null )
+      return JPlanner.plan.getDateTimeFormat();
+    else
+      return JPlanner.gui.getPropertiesPane().getDateTimeFormat();
   }
 
   /**************************************** getDateTime ******************************************/
   public DateTime getDateTime()
   {
-    // return editor current date-time (null if invalid)
+    // return editor date-time (null if invalid)
     return m_datetime;
   }
 
   /**************************************** setDateTime ******************************************/
   public void setDateTime( DateTime dt )
   {
-    // set editor current date-time
-    m_validText = dt.toString( JPlanner.plan.getDateTimeFormat() );
-    setText( m_validText );
+    // set editor to specified date-time
+    m_datetime = dt;
+    setText( dt.toString( format() ) );
   }
 
 }

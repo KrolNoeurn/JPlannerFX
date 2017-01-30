@@ -21,13 +21,10 @@ package rjc.jplanner.gui;
 import java.text.DateFormatSymbols;
 import java.time.Month;
 
-import javafx.beans.property.ReadOnlyIntegerProperty;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import rjc.jplanner.JPlanner;
 
 /*************************************************************************************************/
 /**************************** Spin editor for selecting month-of-year ****************************/
@@ -35,26 +32,33 @@ import rjc.jplanner.JPlanner;
 
 public class MonthSpinEditor extends XTextField
 {
-  private ReadOnlyIntegerWrapper m_month; // read only wrapper for editor month number
-  private SpinEditor             m_year;  // spin editor showing year
+  private Month      m_month;        // month being displayed
+  private SpinEditor m_year;         // spin editor showing year
+  private boolean    m_justGotFocus; // flag to say if editor has just acquired focus
 
   /**************************************** constructor ******************************************/
   public MonthSpinEditor()
   {
     // set default spin editor characteristics
-    m_month = new ReadOnlyIntegerWrapper();
     setButtonType( ButtonType.UP_DOWN );
     setEditable( false );
+    setMonth( Month.JANUARY );
 
     // react to key presses and button mouse clicks
     setOnKeyPressed( event -> keyPressed( event ) );
+    setOnKeyTyped( event -> keyTyped( event ) );
     getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
-    // use TextFormatter to correctly position caret
+    // listener to record if just got focus
+    focusedProperty().addListener( ( property, oldFocus, newFocus ) -> m_justGotFocus = newFocus );
+
+    // use TextFormatter to prevent editor text being all selected on getting focus
     setTextFormatter( new TextFormatter<>( change ->
     {
-      JPlanner.trace( change );
-      return change;
+      if ( !m_justGotFocus || change.isContentChange() )
+        return change;
+      m_justGotFocus = false;
+      return null;
     } ) );
 
   }
@@ -70,36 +74,29 @@ public class MonthSpinEditor extends XTextField
   public void setMonth( Month month )
   {
     // set month
-    setMonth( month.getValue() );
+    m_month = month;
+    setText( DateFormatSymbols.getInstance().getMonths()[month.getValue() - 1] );
   }
 
   /****************************************** setMonth *******************************************/
-  private void setMonth( int month )
+  public void setMonth( int month )
   {
     // set month from number ISO-8601 value 1 (January) to 12 (December)
-    m_month.set( month );
-    setText( DateFormatSymbols.getInstance().getMonths()[month - 1] );
+    setMonth( Month.of( month ) );
   }
 
   /****************************************** getMonth *******************************************/
   public Month getMonth()
   {
     // return month
-    return Month.of( m_month.get() );
+    return m_month;
   }
 
   /*************************************** getMonthNumber ****************************************/
   public int getMonthNumber()
   {
     // return month number ISO-8601 value 1 (January) to 12 (December)
-    return m_month.get();
-  }
-
-  /************************************** getMonthProperty ***************************************/
-  public ReadOnlyIntegerProperty getMonthProperty()
-  {
-    // return read-only property for editor month number
-    return m_month.getReadOnlyProperty();
+    return m_month.getValue();
   }
 
   /******************************************* change ********************************************/
@@ -113,17 +110,17 @@ public class MonthSpinEditor extends XTextField
     if ( num > 12 )
     {
       int yearDelta = ( num - 1 ) / 12;
-      setMonth( num - 12 * yearDelta );
       if ( m_year != null )
         m_year.setInteger( m_year.getInteger() + yearDelta );
+      setMonth( num - 12 * yearDelta );
     }
 
     if ( num < 1 )
     {
       int yearDelta = ( num - 12 ) / 12;
-      setMonth( num - 12 * yearDelta );
       if ( m_year != null )
         m_year.setInteger( m_year.getInteger() + yearDelta );
+      setMonth( num - 12 * yearDelta );
     }
 
     if ( num >= 1 && num <= 12 )
@@ -138,8 +135,27 @@ public class MonthSpinEditor extends XTextField
       change( 1 );
     else
       change( -1 );
+  }
 
-    event.consume();
+  /****************************************** keyTyped *******************************************/
+  private void keyTyped( KeyEvent event )
+  {
+    // action key typed to change month
+    char letter = event.getCharacter().charAt( 0 );
+    int month = m_month.getValue();
+    for ( int loop = 1; loop <= 12; loop++ )
+    {
+      month = ( month == 12 ) ? 1 : month + 1;
+      char monthChar = DateFormatSymbols.getInstance().getMonths()[month - 1].charAt( 0 );
+
+      // if typed letter matches first character of month name, change to that month
+      if ( Character.toLowerCase( letter ) == Character.toLowerCase( monthChar ) )
+      {
+        setMonth( month );
+        return;
+      }
+    }
+
   }
 
   /***************************************** keyPressed ******************************************/

@@ -73,7 +73,7 @@ public class GanttPlot extends Canvas
   /***************************************** heightChange ****************************************/
   private void heightChange( int oldH, int newH )
   {
-    JPlanner.trace( "PLOT", this, oldH, newH, getHeight() );
+    //JPlanner.trace( "PLOT", this, oldH, newH, getHeight() );
 
     // draw only if increase in height
     if ( getWidth() <= 0.0 || newH <= oldH )

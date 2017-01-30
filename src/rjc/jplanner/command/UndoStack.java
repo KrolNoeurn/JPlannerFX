@@ -97,9 +97,9 @@ public class UndoStack
         JPlanner.gui.relayoutDayTypeTables();
 
       if ( ( updates & IUndoCommand.UPDATE_PROPERTIES ) > 0 )
-        JPlanner.gui.properties().updateFromPlan();
+        JPlanner.gui.getPropertiesPane().updateFromPlan();
       if ( ( updates & IUndoCommand.UPDATE_NOTES ) > 0 )
-        JPlanner.gui.notes().updateFromPlan();
+        JPlanner.gui.getNotesPane().updateFromPlan();
 
       if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
         JPlanner.gui.schedule();
