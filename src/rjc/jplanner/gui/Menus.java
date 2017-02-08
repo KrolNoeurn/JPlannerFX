@@ -26,6 +26,7 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyCombination.Modifier;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 
@@ -35,9 +36,17 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 
 public class Menus extends MenuBar
 {
+  // public variables
   public CheckMenuItem viewUndoStack;
   public MenuItem      editUndo;
   public MenuItem      editRedo;
+  public Menu          menuTasks;
+  public MenuItem      tasksIndent;
+  public MenuItem      tasksOutdent;
+
+  // modifier shortcuts
+  private Modifier     SHIFT   = KeyCombination.SHIFT_DOWN;
+  private Modifier     CONTROL = KeyCombination.CONTROL_DOWN;
 
   /**************************************** constructor ******************************************/
   public Menus()
@@ -49,10 +58,12 @@ public class Menus extends MenuBar
     Menu menuFile = fileMenu();
     Menu menuEdit = editMenu();
     Menu menuReport = reportMenu();
+    menuTasks = tasksMenu();
+    menuTasks.setDisable( true );
     Menu menuView = viewMenu();
     Menu menuHelp = helpMenu();
 
-    getMenus().addAll( menuFile, menuEdit, menuReport, menuView, menuHelp );
+    getMenus().addAll( menuFile, menuEdit, menuReport, menuTasks, menuView, menuHelp );
   }
 
   /***************************************** onMenuShow ******************************************/
@@ -76,15 +87,15 @@ public class Menus extends MenuBar
     menu.setOnShowing( event -> onMenuShow() );
 
     MenuItem fileNew = new MenuItem( "New" );
-    fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, KeyCombination.CONTROL_DOWN ) );
+    fileNew.setAccelerator( new KeyCodeCombination( KeyCode.N, CONTROL ) );
     fileNew.setOnAction( event -> JPlanner.gui.newPlan() );
 
     MenuItem fileOpen = new MenuItem( "Open..." );
-    fileOpen.setAccelerator( new KeyCodeCombination( KeyCode.O, KeyCombination.CONTROL_DOWN ) );
+    fileOpen.setAccelerator( new KeyCodeCombination( KeyCode.O, CONTROL ) );
     fileOpen.setOnAction( event -> JPlanner.gui.load() );
 
     MenuItem fileSave = new MenuItem( "Save" );
-    fileSave.setAccelerator( new KeyCodeCombination( KeyCode.S, KeyCombination.CONTROL_DOWN ) );
+    fileSave.setAccelerator( new KeyCodeCombination( KeyCode.S, CONTROL ) );
     fileSave.setOnAction( event -> JPlanner.gui.save() );
 
     MenuItem fileSaveAs = new MenuItem( "Save As..." );
@@ -97,7 +108,7 @@ public class Menus extends MenuBar
     filePrint.setDisable( true );
 
     MenuItem fileExit = new MenuItem( "Exit" );
-    fileExit.setAccelerator( new KeyCodeCombination( KeyCode.Q, KeyCombination.CONTROL_DOWN ) );
+    fileExit.setAccelerator( new KeyCodeCombination( KeyCode.Q, CONTROL ) );
     fileExit.setDisable( true );
 
     menu.getItems().addAll( fileNew, fileOpen, fileSave, fileSaveAs );
@@ -114,11 +125,11 @@ public class Menus extends MenuBar
     menu.setOnShowing( event -> onMenuShow() );
 
     editUndo = new MenuItem( "Undo" );
-    editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, KeyCombination.CONTROL_DOWN ) );
+    editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, CONTROL ) );
     editUndo.setDisable( true );
 
     editRedo = new MenuItem( "Redo" );
-    editRedo.setAccelerator( new KeyCodeCombination( KeyCode.Y, KeyCombination.CONTROL_DOWN ) );
+    editRedo.setAccelerator( new KeyCodeCombination( KeyCode.Y, CONTROL ) );
     editRedo.setDisable( true );
 
     MenuItem editInsert = new MenuItem( "Insert" );
@@ -130,19 +141,19 @@ public class Menus extends MenuBar
     editDelete.setDisable( true );
 
     MenuItem editCut = new MenuItem( "Cut" );
-    editCut.setAccelerator( new KeyCodeCombination( KeyCode.X, KeyCombination.CONTROL_DOWN ) );
+    editCut.setAccelerator( new KeyCodeCombination( KeyCode.X, CONTROL ) );
     editCut.setDisable( true );
 
     MenuItem editCopy = new MenuItem( "Copy" );
-    editCopy.setAccelerator( new KeyCodeCombination( KeyCode.C, KeyCombination.CONTROL_DOWN ) );
+    editCopy.setAccelerator( new KeyCodeCombination( KeyCode.C, CONTROL ) );
     editCopy.setDisable( true );
 
     MenuItem editPaste = new MenuItem( "Paste" );
-    editPaste.setAccelerator( new KeyCodeCombination( KeyCode.V, KeyCombination.CONTROL_DOWN ) );
+    editPaste.setAccelerator( new KeyCodeCombination( KeyCode.V, CONTROL ) );
     editPaste.setDisable( true );
 
     MenuItem editFind = new MenuItem( "Find/Replace..." );
-    editFind.setAccelerator( new KeyCodeCombination( KeyCode.F, KeyCombination.CONTROL_DOWN ) );
+    editFind.setAccelerator( new KeyCodeCombination( KeyCode.F, CONTROL ) );
     editFind.setDisable( true );
 
     MenuItem editSchedule = new MenuItem( "Schedule" );
@@ -200,6 +211,25 @@ public class Menus extends MenuBar
     helpAbout.setDisable( true );
 
     menu.getItems().addAll( helpAbout );
+    return menu;
+  }
+
+  /****************************************** tasksMenu ******************************************/
+  private Menu tasksMenu()
+  {
+    // tasks menu (only enabled when Tasks tab selected)
+    Menu menu = new Menu( "Tasks" );
+    menu.setOnShowing( event -> onMenuShow() );
+
+    tasksIndent = new MenuItem( "Indent" );
+    tasksIndent.setAccelerator( new KeyCodeCombination( KeyCode.I, SHIFT, CONTROL ) );
+    tasksIndent.setDisable( true );
+
+    tasksOutdent = new MenuItem( "Outdent" );
+    tasksOutdent.setAccelerator( new KeyCodeCombination( KeyCode.O, SHIFT, CONTROL ) );
+    tasksOutdent.setDisable( true );
+
+    menu.getItems().addAll( tasksIndent, tasksOutdent );
     return menu;
   }
 

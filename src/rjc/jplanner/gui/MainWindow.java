@@ -112,13 +112,13 @@ public class MainWindow
     getPropertiesPane().updateFromPlan();
 
     // on minimising to icon, minimise other windows
-    stage.iconifiedProperty().addListener( ( observable, oldValue, newValue ) ->
+    stage.iconifiedProperty().addListener( ( observable, wasI, isI ) ->
     {
       for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
-        ( (Stage) tabs.getScene().getWindow() ).setIconified( newValue );
+        ( (Stage) tabs.getScene().getWindow() ).setIconified( isI );
 
       if ( m_undoWindow != null )
-        m_undoWindow.setIconified( newValue );
+        m_undoWindow.setIconified( isI );
     } );
 
     // on close request if undo-stack not clean check if user wants to save
@@ -137,6 +137,15 @@ public class MainWindow
       else
         // not okay to proceed, therefore consume event to prevent closing
         event.consume();
+    } );
+
+    // adjust menus on main-tab-widget selected tab change
+    m_mainTabWidget.getSelectionModel().selectedItemProperty().addListener( ( observable, oldS, newS ) ->
+    {
+      if ( newS == m_mainTabWidget.getTasksTab() )
+        m_menus.menuTasks.setDisable( false );
+      else
+        m_menus.menuTasks.setDisable( true );
     } );
   }
 
@@ -306,6 +315,7 @@ public class MainWindow
       relayoutCalendarTables();
       relayoutDayTypeTables();
       redrawGantts();
+      m_stage.requestFocus();
 
       fis.close();
       xsr.close();
@@ -788,6 +798,14 @@ public class MainWindow
     stage.setTitle( m_stage.getTitle() );
     stage.show();
     stage.getIcons().add( JPLANNER_ICON );
+
+    // position and size new window
+    double w = m_stage.getWidth();
+    double h = m_stage.getHeight();
+    stage.setX( m_stage.getX() + w / 10 );
+    stage.setY( m_stage.getY() + h / 10 );
+    stage.setWidth( w / 1.3 );
+    stage.setHeight( h / 1.3 );
 
     // add new MainTabWidget to tracking list
     m_tabWidgets.add( newTabWidget );

@@ -73,8 +73,9 @@ public class UndoStackWindow extends Stage
     scene.heightProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
     scene.widthProperty().addListener( ( observable, oldValue, newValue ) -> updateScrollBarAndCanvas() );
 
-    // update canvas on scroll bar movement
+    // update canvas on scroll bar movement or focus change
     m_scrollbar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redrawCanvas() );
+    m_canvas.focusedProperty().addListener( ( observable, oldF, newF ) -> redrawCanvas() );
 
     // update selected index on mouse button press and drag
     m_canvas.setOnMousePressed( event -> setIndex( getIndexAtY( event.getY() ) + 1 ) );
@@ -244,7 +245,11 @@ public class UndoStackWindow extends Stage
       int y = getYStartByIndex( item );
       if ( item == index() - 1 )
       {
-        gc.setFill( Colors.SELECTED_CELL );
+        if ( m_canvas.isFocused() )
+          gc.setFill( Colors.SELECTED_CELL );
+        else
+          gc.setFill( Colors.SELECTED_CELL.desaturate().desaturate() );
+
         gc.fillRect( 0.0, y, getWidth(), m_rowHeight );
         gc.setFill( Colors.SELECTED_TEXT );
       }

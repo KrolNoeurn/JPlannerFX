@@ -91,8 +91,14 @@ public class DateTime implements Comparable<DateTime>
   public String toString( String format )
   {
     // convert to string in specified format
-    LocalDateTime ldt = LocalDateTime.ofEpochSecond( m_milliseconds / 1000L, (int) ( m_milliseconds % 1000 * 1000000 ),
-        ZoneOffset.UTC );
+    long secs = m_milliseconds / 1000L;
+    int nanos = (int) ( m_milliseconds % 1000L * 1000000L );
+    if ( nanos < 0 )
+    {
+      nanos += 1000000000;
+      secs--;
+    }
+    LocalDateTime ldt = LocalDateTime.ofEpochSecond( secs, nanos, ZoneOffset.UTC );
 
     // to support half-of-year using Bs, quote any unquoted Bs in format
     StringBuilder newFormat = new StringBuilder();
@@ -205,7 +211,7 @@ public class DateTime implements Comparable<DateTime>
   public static DateTime now()
   {
     // return a new DateTime from current system clock
-    return new DateTime( LocalDateTime.now() );
+    return new DateTime( System.currentTimeMillis() );
   }
 
   /************************************** plusMilliseconds ***************************************/

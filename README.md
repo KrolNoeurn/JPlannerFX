@@ -41,7 +41,7 @@ Java version 8 (or later)
 Simply copy the application JAR file to the location of your choice on your machine, and execute.
 
 ```
-JPlannerFX.jar
+java -jar JPlannerFX.jar
 ```
 
 ## Built With

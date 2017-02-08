@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui.table;
 
+import java.util.Set;
+
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import rjc.jplanner.JPlanner;
@@ -75,21 +77,21 @@ abstract public class AbstractDataSource
     // set cell value for specified cell index
   }
 
-  /***************************************** getEditor *******************************************/
+  /****************************************** getEditor ******************************************/
   public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
   {
     // return editor to use for specified cell index
     return null;
   }
 
-  /************************************* getCellAlignment ****************************************/
+  /************************************** getCellAlignment ***************************************/
   public Alignment getCellAlignment( int columnIndex, int rowIndex )
   {
     // return cell contents alignment for specified cell index
     return Alignment.LEFT;
   }
 
-  /************************************* getCellBackground ***************************************/
+  /************************************** getCellBackground **************************************/
   public Paint getCellBackground( int columnIndex, int rowIndex )
   {
     // return cell background colour for specified cell index
@@ -142,6 +144,20 @@ abstract public class AbstractDataSource
   {
     // return true is cell is a collapsible summary
     return getSummaryEndRow( columnIndex, rowIndex ) > 0;
+  }
+
+  /***************************************** indentRows ******************************************/
+  public Set<Integer> indentRows( Set<Integer> rows )
+  {
+    // return the subset of rows indented
+    return null;
+  }
+
+  /***************************************** outdentRows *****************************************/
+  public Set<Integer> outdentRows( Set<Integer> rows )
+  {
+    // return the subset of rows outdented
+    return null;
   }
 
   /********************************** defaultTableModifications **********************************/

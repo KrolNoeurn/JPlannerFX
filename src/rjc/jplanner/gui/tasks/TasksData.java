@@ -18,10 +18,14 @@
 
 package rjc.jplanner.gui.tasks;
 
+import java.util.Set;
+
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandTaskIndent;
+import rjc.jplanner.command.CommandTaskOutdent;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.AbstractCellEditor;
@@ -201,6 +205,30 @@ public class TasksData extends AbstractDataSource
     table.setWidthByColumnIndex( Task.SECTION_COMMENT, 140 );
 
     table.hideRow( 0 ); // hide row 0 (the overall project summary)
+  }
+
+  /***************************************** indentRows ******************************************/
+  @Override
+  public Set<Integer> indentRows( Set<Integer> rows )
+  {
+    // return the subset of rows indented
+    Set<Integer> indent = JPlanner.plan.tasks.canIndent( rows );
+    if ( !indent.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandTaskIndent( indent ) );
+
+    return indent;
+  }
+
+  /***************************************** outdentRows *****************************************/
+  @Override
+  public Set<Integer> outdentRows( Set<Integer> rows )
+  {
+    // return the subset of rows outdented
+    Set<Integer> outdent = JPlanner.plan.tasks.canOutdent( rows );
+    if ( !outdent.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandTaskOutdent( outdent ) );
+
+    return outdent;
   }
 
 }

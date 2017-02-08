@@ -41,5 +41,4 @@ public class Colors
 
   public static final Color TABLE_GRID         = Color.SILVER;
   public static final Color NORMAL_HEADER      = GENERAL_BACKGROUND;
-  public static final Color SELECTED_HEADER    = Color.rgb( 192, 192, 192 ); // medium dark grey
 }

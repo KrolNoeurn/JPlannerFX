@@ -64,11 +64,23 @@ public class TableCanvas extends Canvas
   {
     // setup table canvas
     super();
+    setFocusTraversable( true );
     m_table = table;
 
     // when size changes draw new bits
-    widthProperty().addListener( ( observable, oldW, newW ) -> drawWidth( oldW.intValue(), newW.intValue() ) );
-    heightProperty().addListener( ( observable, oldH, newH ) -> drawHeight( oldH.intValue(), newH.intValue() ) );
+    widthProperty().addListener( ( observable, oldW, newW ) ->
+    {
+      AbstractCellEditor.endEditing();
+      drawWidth( oldW.intValue(), newW.intValue() );
+    } );
+    heightProperty().addListener( ( observable, oldH, newH ) ->
+    {
+      AbstractCellEditor.endEditing();
+      drawHeight( oldH.intValue(), newH.intValue() );
+    } );
+
+    // redraw table when focus changes
+    focusedProperty().addListener( ( observable, oldF, newF ) -> redrawAll() );
   }
 
   /****************************************** redrawAll ******************************************/
@@ -82,9 +94,6 @@ public class TableCanvas extends Canvas
   /****************************************** drawWidth ******************************************/
   public void drawWidth( int oldW, int newW )
   {
-    // canvas update means something important such as scrolling or resize, therefore end editing
-    AbstractCellEditor.endEditing();
-
     // draw only if increase in width
     if ( getHeight() <= 0.0 || newW <= oldW )
       return;
@@ -131,9 +140,6 @@ public class TableCanvas extends Canvas
   /***************************************** drawHeight ******************************************/
   public void drawHeight( int oldH, int newH )
   {
-    // canvas update means something important such as scrolling or resize, therefore end editing
-    AbstractCellEditor.endEditing();
-
     // draw only if increase in height
     if ( getWidth() <= 0.0 || newH <= oldH )
       return;
@@ -237,10 +243,13 @@ public class TableCanvas extends Canvas
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
 
     // fill
-    boolean m_selected = m_table.isSelected( columnPos, row );
+    boolean selected = m_table.isSelected( columnPos, row );
     Paint color = m_table.getData().getCellBackground( columnIndex, row );
-    if ( m_selected )
-      gc.setFill( Colors.SELECTED_CELL );
+    if ( selected )
+      if ( isFocused() )
+        gc.setFill( Colors.SELECTED_CELL );
+      else
+        gc.setFill( Colors.SELECTED_CELL.desaturate().desaturate() );
     else
       gc.setFill( color );
     gc.fillRect( x, y, w - 1, h - 1 );
@@ -261,7 +270,7 @@ public class TableCanvas extends Canvas
       int indent = m_table.getData().getCellIndent( columnIndex, row );
       Alignment alignment = m_table.getData().getCellAlignment( columnIndex, row );
       ArrayList<TextLine> lines = getTextLines( text, font, alignment, w - indent * INDENT, h );
-      if ( m_selected )
+      if ( selected )
         gc.setFill( Colors.SELECTED_TEXT );
       else
         gc.setFill( Colors.NORMAL_TEXT );
@@ -317,7 +326,7 @@ public class TableCanvas extends Canvas
   {
     // draw row header - fill
     if ( selected )
-      gc.setFill( Colors.SELECTED_HEADER );
+      gc.setFill( Colors.NORMAL_HEADER.darker() );
     else
       gc.setFill( Colors.NORMAL_HEADER );
     gc.fillRect( 0, y, w - 1.0, h - 1.0 );
@@ -364,7 +373,7 @@ public class TableCanvas extends Canvas
   {
     // draw column header - fill
     if ( selected )
-      gc.setFill( Colors.SELECTED_HEADER );
+      gc.setFill( Colors.NORMAL_HEADER.darker() );
     else
       gc.setFill( Colors.NORMAL_HEADER );
     gc.fillRect( x, 0, w - 1.0, h - 1.0 );

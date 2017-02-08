@@ -85,25 +85,25 @@ public class SpinEditor extends XTextField
 
   }
 
-  /***************************************** replaceText *****************************************/
+  /***************************************** replaceText *****************************************
   @Override
   public void replaceText( int start, int end, String text )
   {
     // determine text before and after replace
     String oldText = getText();
     String newText = oldText.substring( 0, start ) + text + oldText.substring( end );
-
+  
     // determine start of integer part of number
     int intStart = m_prefix.length();
     if ( newText.length() > intStart && newText.charAt( intStart ) == '-' )
       intStart++;
-
+  
     // determine end of integer part of number
     int intEnd = newText.length() - m_suffix.length();
     int pointPos = newText.indexOf( '.', intStart );
     if ( pointPos >= 0 && pointPos < intEnd )
       intEnd = pointPos;
-
+  
     // check if integer part longer than minimum and starts with zero
     if ( intEnd - intStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( intStart ) == '0' )
     {
@@ -111,18 +111,18 @@ public class SpinEditor extends XTextField
       int newStart = intStart;
       while ( intEnd - newStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( newStart ) == '0' )
         newStart++;
-
+  
       // replace old text with new text with excess zeros removed
       newText = newText.substring( 0, intStart ) + newText.substring( newStart, newText.length() );
       m_caretPos = intStart;
       super.replaceText( 0, oldText.length(), newText );
       return;
     }
-
+  
     // proceed with normal replace (no excess zeros)
     super.replaceText( start, end, text );
   }
-
+  
   /****************************************** setValue *******************************************/
   public void setValue( String text )
   {

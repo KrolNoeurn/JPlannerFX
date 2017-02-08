@@ -48,6 +48,7 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
+import rjc.jplanner.model.Day;
 import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
@@ -65,8 +66,9 @@ public class DateTimeSelector extends Popup
   private Canvas              m_calendar;          // for picking date
   private HBox                m_buttons;           // for today + start + end buttons
 
-  private MonthSpinEditor     m_month;
   private SpinEditor          m_year;
+  private MonthSpinEditor     m_month;
+  private SpinEditor          m_epochDay;
 
   private SpinEditor          m_hours;
   private SpinEditor          m_mins;
@@ -76,6 +78,8 @@ public class DateTimeSelector extends Popup
   private Button              m_today;
   private Button              m_start;
   private Button              m_end;
+  private Button              m_forward;
+  private Button              m_back;
 
   private GraphicsContext     m_gc;
   private double              m_columnWidth;
@@ -105,9 +109,12 @@ public class DateTimeSelector extends Popup
 
     // toggle pop-up when parent button is pressed
     m_parent.getButton().setOnMousePressed( event -> toggleSelector( event ) );
-    m_parent.textProperty().addListener( ( observable, oldText, newText ) -> setDateTime( m_parent.getDateTime() ) );
+
+    // ensure parent editor is editable when selector is hidden
     setOnHidden( event -> m_parent.setEditable( true ) );
 
+    // keep parent editor and this selector synchronised
+    m_parent.textProperty().addListener( ( observable, oldText, newText ) -> setDateTime( m_parent.getDateTime() ) );
     m_calendar.setOnMouseClicked( event -> calendarMouseClicked( event ) );
     m_year.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_year ) );
     m_month.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_month ) );
@@ -118,26 +125,41 @@ public class DateTimeSelector extends Popup
   }
 
   /*************************************** updateParent ******************************************/
-  private void updateParent( XTextField editor )
+  private void updateParent( XTextField trigger )
   {
     // if editor not showing, return immediately not doing anything
-    if ( m_ignoreUpdates || !isShowing() )
+    if ( !isShowing() || m_ignoreUpdates )
       return;
 
-    //editor.requestFocus();
-    JPlanner.trace( "SETTING PARENT to ", getDateTime() );
+    // if triggering editor was month or year, update never visible epoch-day editor
+    if ( trigger == m_month || trigger == m_year )
+    {
+      int year = m_year.getInteger();
+      int month = m_month.getMonthNumber();
+      int day = LocalDate.ofEpochDay( m_epochDay.getInteger() ).getDayOfMonth();
+
+      YearMonth ym = YearMonth.of( year, month );
+      int max = ym.lengthOfMonth();
+      day = Math.min( day, max );
+      if ( day > max )
+        day = max;
+
+      m_epochDay.setDouble( LocalDate.of( year, month, day ).toEpochDay() );
+    }
+
+    // update parent editor to reflect date-time shown in selector
     m_parent.setDateTime( getDateTime() );
   }
 
   /***************************************** setDateTime *****************************************/
   private void setDateTime( DateTime dt )
   {
-    JPlanner.trace( "SETTING SELECTOR to ", dt );
     // set selector to specified date-time
     if ( dt == null )
       return;
 
     m_ignoreUpdates = true;
+    m_epochDay.setInteger( dt.getDate().getEpochday() );
     m_month.setMonth( Month.of( dt.getDate().getMonth() ) );
     m_year.setInteger( dt.getDate().getYear() );
     m_hours.setInteger( dt.getTime().getHours() );
@@ -151,15 +173,15 @@ public class DateTimeSelector extends Popup
   /***************************************** getDateTime *****************************************/
   private DateTime getDateTime()
   {
-    // return date-time shown by selector (day of month comes from parent editor)
-    int dayofmonth = m_parent.getDateTime().getDate().getDayOfMonth();
-    int year = m_year.getInteger();
-    int month = m_month.getMonthNumber();
-    YearMonth ym = YearMonth.of( year, month );
-    if ( dayofmonth > ym.lengthOfMonth() )
-      dayofmonth = ym.lengthOfMonth();
+    // return date-time shown by selector
+    return new DateTime( getDate(), getTime() );
+  }
 
-    return new DateTime( new Date( year, month, dayofmonth ), getTime() );
+  /******************************************* getDate *******************************************/
+  private Date getDate()
+  {
+    // return date shown by selector
+    return new Date( m_epochDay.getInteger() );
   }
 
   /******************************************* getTime *******************************************/
@@ -210,14 +232,19 @@ public class DateTimeSelector extends Popup
     m_month.setYearSpinEditor( m_year );
     m_date.getChildren().addAll( m_month, m_year );
 
+    // this spin editor is never visible, just used to support wrapping
+    m_epochDay = createSpinEditor( Integer.MIN_VALUE, Integer.MAX_VALUE, 0, "0", null );
+
     // create spin editors for entering time hh:mm:ss:mmm
     m_time = new HBox();
     m_time.setPadding( INSETS );
     m_time.setSpacing( PADDING );
-    m_hours = createSpinEditor( 0, 23, 47, "00", null );
+    m_hours = createSpinEditor( 0, 23, 47, "00", m_epochDay );
+    m_hours.setStepPage( 1, 6 );
     m_mins = createSpinEditor( 0, 59, 47, "00", m_hours );
     m_secs = createSpinEditor( 0, 59, 47, "00", m_mins );
     m_millisecs = createSpinEditor( 0, 999, 53, "000", m_secs );
+    m_millisecs.setStepPage( 1, 100 );
     m_time.getChildren().addAll( m_hours, m_mins, m_secs, m_millisecs );
 
     // create calendar canvas
@@ -229,9 +256,36 @@ public class DateTimeSelector extends Popup
     m_buttons.setPadding( INSETS );
     m_buttons.setSpacing( PADDING );
     m_today = new Button( "Today" );
-    m_start = new Button( "Day Start" );
-    m_end = new Button( "Day End" );
-    m_buttons.getChildren().addAll( m_today, m_start, m_end );
+    m_back = new Button( "<" );
+    m_start = new Button( "Start" );
+    m_end = new Button( "End" );
+    m_forward = new Button( ">" );
+    m_buttons.getChildren().addAll( m_today, m_back, m_start, m_end, m_forward );
+
+    // add button actions
+    m_today.setOnAction( event -> m_parent.setDateTime( new DateTime( Date.now(), getTime() ) ) );
+
+    m_back.setOnAction( event -> JPlanner.trace( "BACK" ) );
+
+    m_start.setOnAction( event ->
+    {
+      Day day = JPlanner.gui.getPropertiesPane().getCalendar().getDay( getDate() );
+      if ( day.getNumberOfPeriods() > 0 )
+        m_parent.setDateTime( new DateTime( getDate(), day.getStart() ) );
+      else
+        m_parent.setDateTime( new DateTime( getDate(), Time.MIN_VALUE ) );
+    } );
+
+    m_end.setOnAction( event ->
+    {
+      Day day = JPlanner.gui.getPropertiesPane().getCalendar().getDay( getDate() );
+      if ( day.getNumberOfPeriods() > 0 )
+        m_parent.setDateTime( new DateTime( getDate(), day.getEnd() ) );
+      else
+        m_parent.setDateTime( new DateTime( getDate(), Time.MAX_VALUE ) );
+    } );
+
+    m_forward.setOnAction( event -> JPlanner.trace( "FORWARD" ) );
 
     // populate pane
     m_pane = new Pane();
@@ -276,13 +330,16 @@ public class DateTimeSelector extends Popup
     y += m_time.getHeight();
     m_buttons.relocate( 0.0, y );
 
+    // resize 'today' button
+    m_today.setPrefWidth( m_time.getWidth() - m_back.getWidth() - m_start.getWidth() - m_end.getWidth()
+        - m_forward.getWidth() - 6 * PADDING + 1.0 );
+
     m_pane.autosize();
   }
 
   /**************************************** drawCalendar *****************************************/
   private void drawCalendar()
   {
-    JPlanner.trace( "DRAWING CALENDAR" );
     // only draw if selector is showing
     if ( !isShowing() )
       return;
@@ -291,8 +348,7 @@ public class DateTimeSelector extends Popup
     int month = m_month.getMonthNumber();
     int year = m_year.getInteger();
     LocalDate localdate = LocalDate.of( year, month, 1 );
-    int dayofweek = localdate.getDayOfWeek().getValue();
-    localdate = localdate.minusDays( dayofweek - 1 );
+    localdate = localdate.minusDays( localdate.getDayOfWeek().getValue() - 1 );
     LocalDate selecteddate = m_parent.getDateTime().getDate().localDate();
 
     // calculate calendar cell width & height

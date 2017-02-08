@@ -18,8 +18,6 @@
 
 package rjc.jplanner.gui.table;
 
-import java.util.Set;
-
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
@@ -31,8 +29,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.command.CommandTaskIndent;
-import rjc.jplanner.command.CommandTaskOutdent;
 import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 
 /*************************************************************************************************/
@@ -545,13 +541,6 @@ public class TableEvents extends TableCanvas
         break;
 
       case RIGHT:
-        if ( event.isAltDown() )
-        {
-          Set<Integer> indent = JPlanner.plan.tasks.canIndent( m_table.getSelectedRows() );
-          if ( !indent.isEmpty() )
-            JPlanner.plan.getUndostack().push( new CommandTaskIndent( indent ) );
-          break;
-        }
       case KP_RIGHT:
         // find visible cell to right
         int columns = m_table.getData().getColumnCount();
@@ -577,13 +566,6 @@ public class TableEvents extends TableCanvas
         break;
 
       case LEFT:
-        if ( event.isAltDown() )
-        {
-          Set<Integer> outdent = JPlanner.plan.tasks.canOutdent( m_table.getSelectedRows() );
-          if ( !outdent.isEmpty() )
-            JPlanner.plan.getUndostack().push( new CommandTaskOutdent( outdent ) );
-          break;
-        }
       case KP_LEFT:
         // find visible cell to left
         int left = m_selectedColumn - 1;
@@ -612,6 +594,18 @@ public class TableEvents extends TableCanvas
         openCellEditor( null );
         break;
 
+      case I:
+        // "Ctrl + Shift + I" to indent tasks 
+        if ( event.isControlDown() && event.isShiftDown() )
+          m_table.getData().indentRows( m_table.getSelectedRows() );
+        break;
+
+      case O:
+        // "Ctrl + Shift + O" to outdent tasks 
+        if ( event.isControlDown() && event.isShiftDown() )
+          m_table.getData().outdentRows( m_table.getSelectedRows() );
+        break;
+
       default:
         break;
     }
@@ -620,6 +614,10 @@ public class TableEvents extends TableCanvas
   /*************************************** openCellEditor ****************************************/
   private void openCellEditor( Object value )
   {
+    // only open editor is a cell is selected
+    if ( m_selectedColumn < 0 || m_selectedRow < 0 )
+      return;
+
     // scroll to cell
     m_table.scrollTo( m_selectedColumn, m_selectedRow );
     m_table.finishAnimation();

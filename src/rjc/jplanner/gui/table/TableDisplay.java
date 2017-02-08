@@ -184,6 +184,7 @@ public class TableDisplay extends TableParent
   public void redraw()
   {
     // trigger simple complete redraw of table canvas
+    AbstractCellEditor.endEditing();
     m_canvas.redrawAll();
 
     // ensure reorder marker if exists is correctly positioned due to scrolling
