@@ -166,6 +166,13 @@ public class TableDisplay extends TableParent
     return (int) m_hScrollBar.getValue();
   }
 
+  /****************************************** getCanvas ******************************************/
+  public TableEvents getCanvas()
+  {
+    // return table canvas
+    return m_canvas;
+  }
+
   /*************************************** getCanvasWidth ****************************************/
   public int getCanvasWidth()
   {

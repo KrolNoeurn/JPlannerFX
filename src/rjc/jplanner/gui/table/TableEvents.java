@@ -51,8 +51,8 @@ public class TableEvents extends TableCanvas
   private int                 m_column;                          // last mouse move or reorder column position
   private int                 m_row;                             // last mouse move or reorder row position
   private int                 m_offset;                          // x or y resize/reorder offset
-  private int                 m_selectedColumn = -1;             // column of last single cell selected
-  private int                 m_selectedRow    = -1;             // row of last single cell selected
+  private int                 m_selectedColumn = 999999999;      // column position of last single cell selected
+  private int                 m_selectedRow    = 999999999;      // row of last single cell selected
   private int                 m_index          = -1;             // column or row index for resize or reorder
   private Canvas              m_reorderSlider;                   // visual slider for when reordering
   private Canvas              m_reorderMarker;                   // visual marker for new position when reordering
@@ -81,6 +81,34 @@ public class TableEvents extends TableCanvas
     // when key presses
     setOnKeyPressed( event -> keyPressed( event ) );
     setOnKeyTyped( event -> keyTyped( event ) );
+  }
+
+  /*************************************** getFocusCellRow ***************************************/
+  public int getFocusCellRow()
+  {
+    // return row of cell with current focus
+    return m_selectedRow;
+  }
+
+  /********************************** getFocusCellColumnPosition *********************************/
+  public int getFocusCellColumnPosition()
+  {
+    // return column of cell with current focus
+    return m_selectedColumn;
+  }
+
+  /*************************************** setFocusCellRow ***************************************/
+  public void setFocusCellRow( int row )
+  {
+    // set row of cell with current focus
+    m_selectedRow = row;
+  }
+
+  /********************************** setFocusCellColumnPosition *********************************/
+  public void setFocusCellColumnPosition( int columnPos )
+  {
+    // set column of cell with current focus
+    m_selectedColumn = columnPos;
   }
 
   /****************************************** mouseMoved *****************************************/
@@ -594,15 +622,15 @@ public class TableEvents extends TableCanvas
         openCellEditor( null );
         break;
 
-      case I:
-        // "Ctrl + Shift + I" to indent tasks 
-        if ( event.isControlDown() && event.isShiftDown() )
+      case PERIOD:
+        // "Ctrl + <" to indent tasks 
+        if ( event.isControlDown() )
           m_table.getData().indentRows( m_table.getSelectedRows() );
         break;
 
-      case O:
-        // "Ctrl + Shift + O" to outdent tasks 
-        if ( event.isControlDown() && event.isShiftDown() )
+      case COMMA:
+        // "Ctrl + >" to outdent tasks
+        if ( event.isControlDown() )
           m_table.getData().outdentRows( m_table.getSelectedRows() );
         break;
 

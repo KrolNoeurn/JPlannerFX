@@ -133,11 +133,11 @@ public class Menus extends MenuBar
     editRedo.setDisable( true );
 
     MenuItem editInsert = new MenuItem( "Insert" );
-    editInsert.setAccelerator( new KeyCodeCombination( KeyCode.INSERT, KeyCombination.CONTROL_ANY ) );
+    editInsert.setAccelerator( new KeyCodeCombination( KeyCode.INSERT ) );
     editInsert.setDisable( true );
 
     MenuItem editDelete = new MenuItem( "Delete" );
-    editDelete.setAccelerator( new KeyCodeCombination( KeyCode.DELETE, KeyCombination.CONTROL_ANY ) );
+    editDelete.setAccelerator( new KeyCodeCombination( KeyCode.DELETE ) );
     editDelete.setDisable( true );
 
     MenuItem editCut = new MenuItem( "Cut" );
@@ -222,11 +222,11 @@ public class Menus extends MenuBar
     menu.setOnShowing( event -> onMenuShow() );
 
     tasksIndent = new MenuItem( "Indent" );
-    tasksIndent.setAccelerator( new KeyCodeCombination( KeyCode.I, SHIFT, CONTROL ) );
+    tasksIndent.setAccelerator( new KeyCodeCombination( KeyCode.LESS, CONTROL ) );
     tasksIndent.setDisable( true );
 
     tasksOutdent = new MenuItem( "Outdent" );
-    tasksOutdent.setAccelerator( new KeyCodeCombination( KeyCode.O, SHIFT, CONTROL ) );
+    tasksOutdent.setAccelerator( new KeyCodeCombination( KeyCode.GREATER, CONTROL ) );
     tasksOutdent.setDisable( true );
 
     menu.getItems().addAll( tasksIndent, tasksOutdent );

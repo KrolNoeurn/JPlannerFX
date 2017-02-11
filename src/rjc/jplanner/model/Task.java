@@ -297,7 +297,7 @@ public class Task implements Comparable<Task>
   public void saveToXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write task data to XML stream (except predecessors)
-    xsw.writeStartElement( XmlLabels.XML_TASK );
+    xsw.writeEmptyElement( XmlLabels.XML_TASK );
     xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
 
     if ( !isNull() )
@@ -318,8 +318,6 @@ public class Task implements Comparable<Task>
       if ( m_comment != null )
         xsw.writeAttribute( XmlLabels.XML_COMMENT, m_comment.toString() );
     }
-
-    xsw.writeEndElement(); // XML_TASK
   }
 
   /************************************ savePredecessorToXML *************************************/
@@ -332,10 +330,9 @@ public class Task implements Comparable<Task>
 
     if ( preds.length() > 0 )
     {
-      xsw.writeStartElement( XmlLabels.XML_PREDECESSORS );
+      xsw.writeEmptyElement( XmlLabels.XML_PREDECESSORS );
       xsw.writeAttribute( XmlLabels.XML_TASK, Integer.toString( this.getIndex() ) );
       xsw.writeAttribute( XmlLabels.XML_PREDS, preds );
-      xsw.writeEndElement(); // XML_PREDECESSORS
     }
   }
 

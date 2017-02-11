@@ -47,6 +47,15 @@ public class Resources extends ArrayList<Resource>
   /******************************************* loadXML *******************************************/
   public void loadXML( XMLStreamReader xsr ) throws XMLStreamException
   {
+    // read any attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
     // read XML resource data
     while ( xsr.hasNext() )
     {

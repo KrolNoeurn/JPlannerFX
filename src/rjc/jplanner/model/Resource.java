@@ -276,7 +276,7 @@ public class Resource
   public void saveToXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write resource data to xml stream
-    xsw.writeStartElement( XmlLabels.XML_RESOURCE );
+    xsw.writeEmptyElement( XmlLabels.XML_RESOURCE );
     xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( this.getIndex() ) );
 
     if ( !isNull() )
@@ -302,8 +302,6 @@ public class Resource
       if ( m_comment != null )
         xsw.writeAttribute( XmlLabels.XML_COMMENT, m_comment );
     }
-
-    xsw.writeEndElement(); // XML_RESOURCE
   }
 
   /****************************************** getIndex *******************************************/

@@ -19,11 +19,9 @@
 package rjc.jplanner.gui;
 
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import javafx.scene.control.TabPane;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.gui.calendars.CalendarsTab;
 import rjc.jplanner.gui.days.DaysTab;
@@ -107,27 +105,31 @@ public class MainTabWidget extends TabPane
     // write display data to XML stream
     try
     {
-      // write tasks-gantt display data
-      xsw.writeStartElement( XmlLabels.XML_TASKS_GANTT_TAB );
+      // write gantt display data
+      xsw.writeStartElement( XmlLabels.XML_GANTT );
       xsw.writeAttribute( XmlLabels.XML_SPLITTER, Integer.toString( m_tabTasks.getSplitPosition() ) );
       m_tabTasks.getGantt().writeXML( xsw );
+      xsw.writeEndElement(); // XML_GANTT
+
+      // write tasks table data
+      xsw.writeStartElement( XmlLabels.XML_TASKS_TABLE );
       m_tabTasks.getTable().writeXML( xsw );
-      xsw.writeEndElement(); // XML_TASKS_GANTT_TAB
+      xsw.writeEndElement(); // XML_TASKS_TABLE
 
-      // write resources display data
-      xsw.writeStartElement( XmlLabels.XML_RESOURCES_TAB );
+      // write resources table data
+      xsw.writeStartElement( XmlLabels.XML_RESOURCES_TABLE );
       m_tabResources.getTable().writeXML( xsw );
-      xsw.writeEndElement(); // XML_RESOURCES_TAB
+      xsw.writeEndElement(); // XML_RESOURCES_TABLE
 
-      // write calendars display data
-      xsw.writeStartElement( XmlLabels.XML_CALENDARS_TAB );
+      // write calendars table data
+      xsw.writeStartElement( XmlLabels.XML_CALENDARS_TABLE );
       m_tabCalendars.getTable().writeXML( xsw );
-      xsw.writeEndElement(); // XML_CALENDARS_TAB
+      xsw.writeEndElement(); // XML_CALENDARS_TABLE
 
-      // write day-types display data
-      xsw.writeStartElement( XmlLabels.XML_DAYS_TAB );
+      // write day-types table data
+      xsw.writeStartElement( XmlLabels.XML_DAYTYPES_TABLE );
       m_tabDays.getTable().writeXML( xsw );
-      xsw.writeEndElement(); // XML_DAYS_TAB
+      xsw.writeEndElement(); // XML_DAYTYPES_TABLE
     }
     catch ( XMLStreamException exception )
     {
@@ -137,146 +139,6 @@ public class MainTabWidget extends TabPane
     }
 
     return true;
-  }
-
-  /************************************** loadXmlTasksGantt **************************************/
-  public void loadXmlTasksGantt( XMLStreamReader xsr ) throws XMLStreamException
-  {
-    // adopt tasks-gantt tab data from XML stream, starting with the attributes
-    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
-      switch ( xsr.getAttributeLocalName( i ) )
-      {
-        case XmlLabels.XML_SPLITTER:
-          m_tabTasks.setSplitPosition( Integer.parseInt( xsr.getAttributeValue( i ) ) );
-          break;
-        default:
-          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
-          break;
-      }
-
-    // read tasks-gantt tab XML elements
-    while ( xsr.hasNext() )
-    {
-      xsr.next();
-
-      // if reached end of tab data, break
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_TASKS_GANTT_TAB ) )
-        break;
-
-      if ( xsr.isStartElement() )
-        switch ( xsr.getLocalName() )
-        {
-          case XmlLabels.XML_GANTT:
-            m_tabTasks.getGantt().loadXML( xsr );
-            break;
-          case XmlLabels.XML_COLUMNS:
-            m_tabTasks.getTable().loadColumns( xsr );
-            break;
-          case XmlLabels.XML_ROWS:
-            m_tabTasks.getTable().loadRows( xsr );
-            break;
-          case XmlLabels.XML_SELECTED:
-            m_tabTasks.getTable().loadSelected( xsr );
-            break;
-          default:
-            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
-            break;
-        }
-    }
-
-  }
-
-  /************************************** loadXmlResources ***************************************/
-  public void loadXmlResources( XMLStreamReader xsr ) throws XMLStreamException
-  {
-    // read resources tab XML elements
-    while ( xsr.hasNext() )
-    {
-      xsr.next();
-
-      // if reached end of tab data, break
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_RESOURCES_TAB ) )
-        break;
-
-      if ( xsr.isStartElement() )
-        switch ( xsr.getLocalName() )
-        {
-          case XmlLabels.XML_COLUMNS:
-            m_tabResources.getTable().loadColumns( xsr );
-            break;
-          case XmlLabels.XML_ROWS:
-            m_tabResources.getTable().loadRows( xsr );
-            break;
-          case XmlLabels.XML_SELECTED:
-            m_tabResources.getTable().loadSelected( xsr );
-            break;
-          default:
-            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
-            break;
-        }
-    }
-  }
-
-  /************************************** loadXmlCalendars ***************************************/
-  public void loadXmlCalendars( XMLStreamReader xsr ) throws XMLStreamException
-  {
-    // read calendars tab XML elements
-    while ( xsr.hasNext() )
-    {
-      xsr.next();
-
-      // if reached end of tab data, break
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_CALENDARS_TAB ) )
-        break;
-
-      if ( xsr.isStartElement() )
-        switch ( xsr.getLocalName() )
-        {
-          case XmlLabels.XML_COLUMNS:
-            m_tabCalendars.getTable().loadColumns( xsr );
-            break;
-          case XmlLabels.XML_ROWS:
-            m_tabCalendars.getTable().loadRows( xsr );
-            break;
-          case XmlLabels.XML_SELECTED:
-            m_tabCalendars.getTable().loadSelected( xsr );
-            break;
-          default:
-            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
-            break;
-        }
-    }
-  }
-
-  /*************************************** loadXmlDayTypes ***************************************/
-  public void loadXmlDayTypes( XMLStreamReader xsr ) throws XMLStreamException
-  {
-    // read day-types tab XML elements
-    while ( xsr.hasNext() )
-    {
-      xsr.next();
-
-      // if reached end of tab data, break
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_DAYS_TAB ) )
-        break;
-
-      if ( xsr.isStartElement() )
-        switch ( xsr.getLocalName() )
-        {
-          case XmlLabels.XML_COLUMNS:
-            m_tabDays.getTable().loadColumns( xsr );
-            break;
-          case XmlLabels.XML_ROWS:
-            m_tabDays.getTable().loadRows( xsr );
-            break;
-          case XmlLabels.XML_SELECTED:
-            m_tabDays.getTable().loadSelected( xsr );
-            break;
-          default:
-            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
-            break;
-        }
-    }
   }
 
 }

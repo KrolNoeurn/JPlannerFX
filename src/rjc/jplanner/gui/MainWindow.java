@@ -94,6 +94,7 @@ public class MainWindow
 
     // configure status bar
     m_statusBar.setEditable( false );
+    m_statusBar.setFocusTraversable( false );
     m_statusBar.setBackground( new Background( new BackgroundFill( Colors.GENERAL_BACKGROUND, null, null ) ) );
     m_statusBar.setText( "JPlanner started" );
 
@@ -595,17 +596,20 @@ public class MainWindow
 
           case XmlLabels.XML_DISPLAY_DATA:
             break;
-          case XmlLabels.XML_TASKS_GANTT_TAB:
-            tabs.loadXmlTasksGantt( xsr );
+          case XmlLabels.XML_TASKS_TABLE:
+            tabs.getTasksTab().getTable().loadXML( xsr );
             break;
-          case XmlLabels.XML_RESOURCES_TAB:
-            tabs.loadXmlResources( xsr );
+          case XmlLabels.XML_RESOURCES_TABLE:
+            tabs.getResourcesTab().getTable().loadXML( xsr );
             break;
-          case XmlLabels.XML_CALENDARS_TAB:
-            tabs.loadXmlCalendars( xsr );
+          case XmlLabels.XML_CALENDARS_TABLE:
+            tabs.getCalendarsTab().getTable().loadXML( xsr );
             break;
-          case XmlLabels.XML_DAYS_TAB:
-            tabs.loadXmlDayTypes( xsr );
+          case XmlLabels.XML_DAYTYPES_TABLE:
+            tabs.getDaysTab().getTable().loadXML( xsr );
+            break;
+          case XmlLabels.XML_GANTT:
+            tabs.getTasksTab().getGantt().loadXML( xsr );
             break;
           default:
             JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
@@ -776,13 +780,12 @@ public class MainWindow
     // save data for undo-stack window
     if ( m_undoWindow != null )
     {
-      xsw.writeStartElement( XmlLabels.XML_UNDOSTACK );
+      xsw.writeEmptyElement( XmlLabels.XML_UNDOSTACK );
       xsw.writeAttribute( XmlLabels.XML_VISIBLE, Boolean.toString( m_undoWindow.isShowing() ) );
       xsw.writeAttribute( XmlLabels.XML_X, Integer.toString( (int) m_undoWindow.getX() ) );
       xsw.writeAttribute( XmlLabels.XML_Y, Integer.toString( (int) m_undoWindow.getY() ) );
       xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( (int) m_undoWindow.getWidth() ) );
       xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( (int) m_undoWindow.getHeight() ) );
-      xsw.writeEndElement(); // XML_UNDOSTACK
     }
 
     xsw.writeEndElement(); // XML_DISPLAY_DATA

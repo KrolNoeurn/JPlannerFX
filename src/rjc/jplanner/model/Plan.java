@@ -379,6 +379,21 @@ public class Plan
     // as id of plan-calendar read before the calendars, need temporary store
     int calendarId = -1;
 
+    // read any attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        case XmlLabels.XML_FORMAT:
+        case XmlLabels.XML_SAVEUSER:
+        case XmlLabels.XML_SAVEWHEN:
+        case XmlLabels.XML_SAVENAME:
+        case XmlLabels.XML_SAVEWHERE:
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
     // load plan from XML stream
     while ( xsr.hasNext() )
     {

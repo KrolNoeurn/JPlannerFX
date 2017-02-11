@@ -29,6 +29,7 @@ import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
+import rjc.jplanner.gui.XSplitPane;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.DateTime.Interval;
 
@@ -41,6 +42,7 @@ public class Gantt extends Region
   private ArrayList<GanttScale> m_scales;              // list of gantt-scales
   private GanttPlot             m_plot;                // gantt plot
   private ScrollBar             m_scrollBar;           // horizontal scroll bar
+  private XSplitPane            m_split;               // split-pane displaying this gantt
 
   private DateTime              m_start;               // gantt start date-time
   private DateTime              m_end;                 // gantt end date-time for determining scroll bar
@@ -96,6 +98,13 @@ public class Gantt extends Region
     widthChange( (int) getWidth(), (int) getWidth() );
   }
 
+  /**************************************** setSplitPane *****************************************/
+  public void setSplitPane( XSplitPane splitter )
+  {
+    // record the split-pane due to display this gantt
+    m_split = splitter;
+  }
+
   /******************************************* loadXML *******************************************/
   public void loadXML( XMLStreamReader xsr ) throws XMLStreamException
   {
@@ -109,6 +118,9 @@ public class Gantt extends Region
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
+        case XmlLabels.XML_SPLITTER:
+          m_split.preferredLeftNodeWidth = Integer.parseInt( xsr.getAttributeValue( i ) );
+          break;
         case XmlLabels.XML_START:
           setStart( new DateTime( xsr.getAttributeValue( i ) ) );
           break;
@@ -160,7 +172,6 @@ public class Gantt extends Region
   public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write gantt display data to XML stream
-    xsw.writeStartElement( XmlLabels.XML_GANTT );
     xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
     xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
     xsw.writeAttribute( XmlLabels.XML_MSPP, Long.toString( m_millisecondsPP ) );
@@ -172,14 +183,10 @@ public class Gantt extends Region
     int id = 0;
     for ( GanttScale scale : m_scales )
     {
-      xsw.writeStartElement( XmlLabels.XML_SCALE );
+      xsw.writeEmptyElement( XmlLabels.XML_SCALE );
       xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( id++ ) );
       scale.writeXML( xsw );
-      xsw.writeEndElement(); // XML_SCALE
     }
-
-    // close gantt element
-    xsw.writeEndElement(); // XML_GANTT
   }
 
   /****************************************** setStart *******************************************/

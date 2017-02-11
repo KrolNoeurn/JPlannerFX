@@ -28,7 +28,7 @@ public class XmlLabels
   public static final String ENCODING            = "UTF-8";
 
   // 'JPlanner' labels
-  public static final String FORMAT              = "2016-09";
+  public static final String FORMAT              = "2017-02";
   public static final String XML_JPLANNER        = "JPlanner";
   public static final String XML_FORMAT          = "format";
   public static final String XML_SAVEUSER        = "saved-by";
@@ -91,10 +91,10 @@ public class XmlLabels
   public static final String XML_X               = "x";
   public static final String XML_Y               = "y";
   public static final String XML_TAB             = "tab";
-  public static final String XML_TASKS_GANTT_TAB = "tasks-gantt-tab";
-  public static final String XML_RESOURCES_TAB   = "resources-tab";
-  public static final String XML_CALENDARS_TAB   = "calendars-tab";
-  public static final String XML_DAYS_TAB        = "days-tab";
+  public static final String XML_TASKS_TABLE     = "tasks-table";
+  public static final String XML_RESOURCES_TABLE = "resources-table";
+  public static final String XML_CALENDARS_TABLE = "calendars-table";
+  public static final String XML_DAYTYPES_TABLE  = "days-table";
   public static final String XML_COLUMNS         = "columns";
   public static final String XML_COLUMN          = "column";
   public static final String XML_ROWS            = "rows";

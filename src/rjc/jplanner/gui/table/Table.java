@@ -633,62 +633,109 @@ public class Table extends TableDisplay
   /****************************************** writeXML *******************************************/
   public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
-    // write column widths
+    // write focus cell
+    xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( getCanvas().getFocusCellColumnPosition() ) );
+    xsw.writeAttribute( XmlLabels.XML_ROW, Integer.toString( getCanvas().getFocusCellRow() ) );
+
+    // write column widths (all)
     xsw.writeStartElement( XmlLabels.XML_COLUMNS );
     xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( m_defaultColumnWidth ) );
     xsw.writeAttribute( XmlLabels.XML_SCROLL, Integer.toString( (int) m_hScrollBar.getValue() ) );
     int count = m_data.getColumnCount();
     for ( int columnIndex = 0; columnIndex < count; columnIndex++ )
     {
-      xsw.writeStartElement( XmlLabels.XML_COLUMN );
+      xsw.writeEmptyElement( XmlLabels.XML_COLUMN );
       xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( columnIndex ) );
 
-      if ( m_columnWidths.containsKey( columnIndex ) )
-      {
-        int width = m_columnWidths.get( columnIndex );
-        if ( width != m_defaultColumnWidth )
-          xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( width ) );
-      }
+      int width = m_columnWidths.getOrDefault( columnIndex, m_defaultColumnWidth );
+      if ( width != m_defaultColumnWidth )
+        xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( width ) );
 
       xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getColumnPositionByIndex( columnIndex ) ) );
-      xsw.writeEndElement(); // XML_COLUMN
     }
     xsw.writeEndElement(); // XML_COLUMNS
 
-    // write row heights
+    // write row heights (only those with non-default-height or collapsed)
     xsw.writeStartElement( XmlLabels.XML_ROWS );
     xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_defaultRowHeight ) );
     xsw.writeAttribute( XmlLabels.XML_SCROLL, Integer.toString( (int) m_vScrollBar.getValue() ) );
     count = m_data.getRowCount();
     for ( int rowIndex = 0; rowIndex < count; rowIndex++ )
     {
-      xsw.writeStartElement( XmlLabels.XML_ROW );
-      xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( rowIndex ) );
+      int height = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
+      boolean collapsed = m_rowCollapsed.contains( rowIndex );
 
-      if ( m_rowHeights.containsKey( rowIndex ) )
+      if ( height != m_defaultRowHeight || collapsed )
       {
-        int height = m_rowHeights.get( rowIndex );
+        xsw.writeEmptyElement( XmlLabels.XML_ROW );
+        xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( rowIndex ) );
+
         if ( height != m_defaultRowHeight )
           xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
+
+        if ( collapsed )
+          xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
       }
-
-      if ( m_rowCollapsed.contains( rowIndex ) )
-        xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
-
-      xsw.writeEndElement(); // XML_ROW
     }
     xsw.writeEndElement(); // XML_ROWS
 
-    // write selected cells
-    xsw.writeStartElement( XmlLabels.XML_SELECTED );
+    // write any selected cells
     for ( int hash : m_selected )
     {
-      xsw.writeStartElement( XmlLabels.XML_POSITION );
+      xsw.writeEmptyElement( XmlLabels.XML_SELECTED );
       xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( hash / SELECT_HASH ) );
       xsw.writeAttribute( XmlLabels.XML_ROW, Integer.toString( hash % SELECT_HASH ) );
-      xsw.writeEndElement(); // XML_POSITION
     }
-    xsw.writeEndElement(); // XML_SELECTED
+
+  }
+
+  /************************************** loadXML ***************************************/
+  public void loadXML( XMLStreamReader xsr ) throws XMLStreamException
+  {
+    // determine element end to exit on
+    String element = xsr.getLocalName();
+
+    // read any attributes
+    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+      switch ( xsr.getAttributeLocalName( i ) )
+      {
+        case XmlLabels.XML_COLUMN:
+          getCanvas().setFocusCellColumnPosition( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        case XmlLabels.XML_ROW:
+          getCanvas().setFocusCellRow( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          break;
+        default:
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          break;
+      }
+
+    // read table XML elements
+    while ( xsr.hasNext() )
+    {
+      xsr.next();
+
+      // if reached end of tab data, break
+      if ( xsr.isEndElement() && xsr.getLocalName().equals( element ) )
+        break;
+
+      if ( xsr.isStartElement() )
+        switch ( xsr.getLocalName() )
+        {
+          case XmlLabels.XML_COLUMNS:
+            loadColumns( xsr );
+            break;
+          case XmlLabels.XML_ROWS:
+            loadRows( xsr );
+            break;
+          case XmlLabels.XML_SELECTED:
+            loadSelected( xsr );
+            break;
+          default:
+            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
+            break;
+        }
+    }
   }
 
   /***************************************** loadColumns *****************************************/
@@ -819,54 +866,25 @@ public class Table extends TableDisplay
   /**************************************** loadSelected *****************************************/
   public void loadSelected( XMLStreamReader xsr ) throws XMLStreamException
   {
-    // read XML selected attributes
+    // get attributes from position for selected cells
+    int column = -1;
+    int row = -1;
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
       {
+        case XmlLabels.XML_COLUMN:
+          column = Integer.parseInt( xsr.getAttributeValue( i ) );
+          break;
+        case XmlLabels.XML_ROW:
+          row = Integer.parseInt( xsr.getAttributeValue( i ) );
+          break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
           break;
       }
 
-    // read XML individual rows
-    while ( xsr.hasNext() )
-    {
-      xsr.next();
-
-      // if reached end of rows data, exit loop
-      if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_SELECTED ) )
-        break;
-
-      if ( xsr.isStartElement() )
-        switch ( xsr.getLocalName() )
-        {
-          case XmlLabels.XML_POSITION:
-
-            // get attributes from position for selected cells
-            int column = -1;
-            int row = -1;
-            for ( int i = 0; i < xsr.getAttributeCount(); i++ )
-              switch ( xsr.getAttributeLocalName( i ) )
-              {
-                case XmlLabels.XML_COLUMN:
-                  column = Integer.parseInt( xsr.getAttributeValue( i ) );
-                  break;
-                case XmlLabels.XML_ROW:
-                  row = Integer.parseInt( xsr.getAttributeValue( i ) );
-                  break;
-                default:
-                  JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
-                  break;
-              }
-            if ( column >= 0 && row >= 0 )
-              setSelection( column, row, true );
-            break;
-
-          default:
-            JPlanner.trace( "Unhandled start element '" + xsr.getLocalName() + "'" );
-            break;
-        }
-    }
+    if ( column >= 0 && row >= 0 )
+      setSelection( column, row, true );
   }
 
   /****************************************** moveFocus ******************************************/

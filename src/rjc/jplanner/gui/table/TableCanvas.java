@@ -118,6 +118,7 @@ public class TableCanvas extends Canvas
       if ( getHeight() > m_table.getHorizontalHeaderHeight() )
         for ( int columnPos = column1; columnPos <= column2; columnPos++ )
           drawColumnCells( columnPos );
+      highlightFocusCell();
 
       // draw horizontal header
       for ( int columnPos = column1; columnPos <= column2; columnPos++ )
@@ -164,6 +165,7 @@ public class TableCanvas extends Canvas
       if ( getWidth() > m_table.getVerticalHeaderWidth() )
         for ( int row = row1; row <= row2; row++ )
           drawRowCells( row );
+      highlightFocusCell();
 
       // draw vertical header
       for ( int row = row1; row <= row2; row++ )
@@ -181,6 +183,25 @@ public class TableCanvas extends Canvas
 
       drawHeaderCorner();
     }
+  }
+
+  /************************************* highlightFocusCell **************************************/
+  private void highlightFocusCell()
+  {
+    // highlight focus cell
+    int row = m_table.getCanvas().getFocusCellRow();
+    int columnPos = m_table.getCanvas().getFocusCellColumnPosition();
+
+    int x = m_table.getXStartByColumnPosition( columnPos );
+    int y = m_table.getYStartByRow( row );
+    int w = m_table.getWidthByColumnPosition( columnPos );
+    int h = m_table.getHeightByRow( row );
+
+    // draw body cell
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setStroke( Colors.SELECTED_CELL.darker() );
+    gc.strokeRect( x - 0.5, y - 0.5, w, h );
+    gc.strokeRect( x + 0.5, y + 0.5, w - 2, h - 2 );
   }
 
   /*************************************** drawColumnCells ***************************************/
@@ -241,11 +262,13 @@ public class TableCanvas extends Canvas
     // draw body cell
     GraphicsContext gc = getGraphicsContext2D();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
+    boolean selected = m_table.isSelected( columnPos, row );
+    boolean focusCell = columnPos == m_table.getCanvas().getFocusCellColumnPosition()
+        && row == m_table.getCanvas().getFocusCellRow();
 
     // fill
-    boolean selected = m_table.isSelected( columnPos, row );
     Paint color = m_table.getData().getCellBackground( columnIndex, row );
-    if ( selected )
+    if ( selected && !focusCell )
       if ( isFocused() )
         gc.setFill( Colors.SELECTED_CELL );
       else
@@ -270,7 +293,7 @@ public class TableCanvas extends Canvas
       int indent = m_table.getData().getCellIndent( columnIndex, row );
       Alignment alignment = m_table.getData().getCellAlignment( columnIndex, row );
       ArrayList<TextLine> lines = getTextLines( text, font, alignment, w - indent * INDENT, h );
-      if ( selected )
+      if ( selected && !focusCell )
         gc.setFill( Colors.SELECTED_TEXT );
       else
         gc.setFill( Colors.NORMAL_TEXT );

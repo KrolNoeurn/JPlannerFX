@@ -46,6 +46,7 @@ public class TasksTab extends Tab
     // alongside the gantt
     m_gantt = new Gantt();
     m_split = new XSplitPane( m_table, m_gantt );
+    m_gantt.setSplitPane( m_split );
 
     // only have tab contents set if tab selected
     selectedProperty().addListener( ( observable, oldValue, newValue ) ->
