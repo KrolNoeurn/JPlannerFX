@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2016 by Richard Crook                                   *
+ *  Copyright (C) 2017 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -71,7 +71,7 @@ public class Tasks extends ArrayList<Task>
   {
     // initialise list with default tasks (including special task 0)
     clear();
-    for ( int count = 0; count <= 20; count++ )
+    for ( int count = 0; count <= 2000; count++ )
       add( new Task() );
 
     setupTaskZero();

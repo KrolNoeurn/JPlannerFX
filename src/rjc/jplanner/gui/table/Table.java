@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2016 by Richard Crook                                   *
+ *  Copyright (C) 2017 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -582,8 +582,8 @@ public class Table extends TableDisplay
     return true;
   }
 
-  /**************************************** setSelection *****************************************/
-  public void setSelection( int columnPos, int row, boolean selected )
+  /******************************************* select *******************************************/
+  public void select( int columnPos, int row, boolean selected )
   {
     // set whether specified body cell is selected
     if ( selected )
@@ -884,7 +884,7 @@ public class Table extends TableDisplay
       }
 
     if ( column >= 0 && row >= 0 )
-      setSelection( column, row, true );
+      select( column, row, true );
   }
 
   /****************************************** moveFocus ******************************************/
@@ -935,7 +935,7 @@ public class Table extends TableDisplay
         row = m_data.getSummaryEndRow( 0, row );
     }
 
-    // remove summary collapsed mark
+    // remove summary as collapsed
     m_rowCollapsed.remove( summaryRow );
   }
 
@@ -967,6 +967,62 @@ public class Table extends TableDisplay
     } );
 
     resizeCanvasScrollBars();
+  }
+
+  /******************************** getVisibleColumnPositionRight ********************************/
+  public int getVisibleColumnPositionRight( int columnPos )
+  {
+    // return visible column-position to right, or if none, this one
+    int right = columnPos + 1;
+    while ( getWidthByColumnPosition( right ) <= 0 )
+      right++;
+
+    if ( right < m_data.getColumnCount() )
+      return right;
+
+    return columnPos;
+  }
+
+  /******************************** getVisibleColumnPositionLeft *********************************/
+  public int getVisibleColumnPositionLeft( int columnPos )
+  {
+    // return visible column-position to left, or if none, this one
+    int left = columnPos - 1;
+    while ( getWidthByColumnPosition( left ) <= 0 )
+      left--;
+
+    if ( left >= 0 )
+      return left;
+
+    return columnPos;
+  }
+
+  /************************************* getVisibleRowAbove **************************************/
+  public int getVisibleRowAbove( int row )
+  {
+    // return visible row above, or if none, this one
+    int above = row - 1;
+    while ( getHeightByRow( above ) <= 0 )
+      above--;
+
+    if ( above >= 0 )
+      return above;
+
+    return row;
+  }
+
+  /************************************* getVisibleRowBelow **************************************/
+  public int getVisibleRowBelow( int row )
+  {
+    // return visible row below, or if none, this one
+    int below = row + 1;
+    while ( getHeightByRow( below ) <= 0 )
+      below++;
+
+    if ( below < m_data.getRowCount() )
+      return below;
+
+    return row;
   }
 
 }
