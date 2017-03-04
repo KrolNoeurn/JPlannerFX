@@ -88,4 +88,12 @@ public class XScrollBar extends ScrollBar
     }
   }
 
+  /**************************************** constructor ******************************************/
+  @Override
+  public String toString()
+  {
+    return "VAL=" + getValue() + " MIN=" + getMin() + " MAX=" + getMax() + " VIS=" + getVisibleAmount() + " BLK"
+        + getBlockIncrement() + " UNIT" + getUnitIncrement() + " ORIENT=" + getOrientation();
+  }
+
 }

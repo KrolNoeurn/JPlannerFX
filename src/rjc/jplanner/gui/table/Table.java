@@ -30,7 +30,6 @@ import javax.xml.stream.XMLStreamWriter;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
-import rjc.jplanner.gui.table.AbstractCellEditor.MoveDirection;
 
 /*************************************************************************************************/
 /**************** Display gui scrollable table with horizontal & vertical header *****************/
@@ -592,6 +591,24 @@ public class Table extends TableDisplay
       m_selected.remove( columnPos * SELECT_HASH + row );
   }
 
+  /******************************************* select *******************************************/
+  public void select( int columnPos1, int row1, int columnPos2, int row2, boolean selected )
+  {
+    // set whether specified table region is selected
+    int c1 = Math.min( columnPos1, columnPos2 );
+    int c2 = Math.max( columnPos1, columnPos2 );
+    int r1 = Math.min( row1, row2 );
+    int r2 = Math.max( row1, row2 );
+    for ( int column = c1; column <= c2; column++ )
+      for ( int row = r1; row <= r2; row++ )
+      {
+        if ( selected )
+          m_selected.add( column * SELECT_HASH + row );
+        else
+          m_selected.remove( column * SELECT_HASH + row );
+      }
+  }
+
   /*************************************** setRowSelection ***************************************/
   public void setRowSelection( int row, boolean selected )
   {
@@ -885,13 +902,6 @@ public class Table extends TableDisplay
 
     if ( column >= 0 && row >= 0 )
       select( column, row, true );
-  }
-
-  /****************************************** moveFocus ******************************************/
-  public void moveFocus( MoveDirection direction )
-  {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "NOT YET IMPLEMENTED!" );
   }
 
   /*************************************** isRowCollapsed ****************************************/

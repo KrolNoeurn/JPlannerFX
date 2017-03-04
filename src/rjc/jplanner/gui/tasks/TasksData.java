@@ -193,6 +193,7 @@ public class TasksData extends AbstractDataSource
   public void defaultTableModifications( Table table )
   {
     // default task table modifications
+    table.setVerticalHeaderWidth( 34 );
     table.setDefaultColumnWidth( 110 );
 
     table.setWidthByColumnIndex( Task.SECTION_TITLE, 200 );

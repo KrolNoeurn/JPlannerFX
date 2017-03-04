@@ -21,6 +21,7 @@ package rjc.jplanner;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.TreeSet;
 
 import javafx.application.Application;
 import javafx.scene.control.Tooltip;
@@ -51,11 +52,9 @@ public class JPlanner extends Application
   public static void main( String[] args )
   {
     // main entry point for application startup
-    trace( "################################## Java details ##################################" );
-    trace( System.getProperty( "java.vendor" ), System.getProperty( "java.version" ) );
-    trace( System.getProperty( "java.home" ) );
-    trace( System.getProperty( "java.class.path" ) );
-    trace( System.getProperty( "os.arch" ), System.getProperty( "os.name" ), System.getProperty( "os.version" ) );
+    trace( "################################# Java properties #################################" );
+    for ( Object property : new TreeSet<Object>( System.getProperties().keySet() ) )
+      trace( property + " = '" + System.getProperty( property.toString() ) + "'" );
     trace( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ JPlanner started ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
     trace( plan );
     plan = new Plan();
@@ -95,10 +94,7 @@ public class JPlanner extends Application
         str.append( obj + " " );
     }
 
-    StackTraceElement[] stack = new Throwable().getStackTrace();
-    String method = stack[1].getMethodName() + "()";
-    String file = "(" + stack[1].getFileName() + ":" + stack[1].getLineNumber() + ") ";
-    System.out.println( DateTime.now() + " " + str.toString() + file + method );
+    System.out.println( DateTime.now() + " " + str.toString() + caller( 1 ) );
   }
 
   /******************************************* stack *********************************************/
@@ -110,6 +106,16 @@ public class JPlanner extends Application
     for ( int i = 1; i < stack.length; i++ )
       System.out.println( "\t" + stack[i] );
     System.out.println( DateTime.now() + "===================== STACK END =====================" );
+  }
+
+  /******************************************* caller *******************************************/
+  public static String caller( int pos )
+  {
+    // returns stack entry at specified position
+    StackTraceElement[] stack = new Throwable().getStackTrace();
+    String method = stack[++pos].getMethodName() + "()";
+    String file = "(" + stack[pos].getFileName() + ":" + stack[pos].getLineNumber() + ") ";
+    return file + method;
   }
 
   /******************************************* clean *********************************************/

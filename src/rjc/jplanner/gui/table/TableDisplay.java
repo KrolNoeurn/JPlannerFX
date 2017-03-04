@@ -59,8 +59,16 @@ public class TableDisplay extends TableParent
     add( m_hScrollBar );
 
     // listen to scroll bar values for table scrolling
-    m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
-    m_hScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) -> redraw() );
+    m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( oldValue.intValue() != newValue.intValue() )
+        redraw();
+    } );
+    m_hScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( oldValue.intValue() != newValue.intValue() )
+        redraw();
+    } );
 
     // lock layout to 0,0 to prevent any shudder or incorrect placing
     layoutXProperty().addListener( ( observable, oldValue, newValue ) -> setLayoutX( 0.0 ) );
@@ -118,6 +126,7 @@ public class TableDisplay extends TableParent
       double max = m_table.getTableWidth() - width;
       m_hScrollBar.setMax( max );
       m_hScrollBar.setVisibleAmount( max * width / m_table.getTableWidth() );
+      m_hScrollBar.setBlockIncrement( width - m_table.getVerticalHeaderWidth() );
 
       if ( m_hScrollBar.getValue() > max )
         m_hScrollBar.setValue( max );
@@ -142,6 +151,7 @@ public class TableDisplay extends TableParent
       double max = m_table.getTableHeight() - height;
       m_vScrollBar.setMax( max );
       m_vScrollBar.setVisibleAmount( max * height / m_table.getTableHeight() );
+      m_vScrollBar.setBlockIncrement( height - m_table.getHorizontalHeaderHeight() );
 
       if ( m_vScrollBar.getValue() > max )
         m_vScrollBar.setValue( max );

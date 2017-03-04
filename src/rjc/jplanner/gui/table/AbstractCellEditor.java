@@ -130,10 +130,7 @@ abstract public class AbstractCellEditor
     // if commit requested, save new value to table data source & move focus
     m_cellEditorInProgress = null;
     if ( commit )
-    {
       m_table.getData().setValue( m_columnIndex, m_row, getValue() );
-      m_table.moveFocus( m_moveDirection );
-    }
 
     // remove editor from table
     m_table.remove( m_control );

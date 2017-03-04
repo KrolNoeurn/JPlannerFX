@@ -267,14 +267,20 @@ public class TableCanvas extends Canvas
         && row == m_table.getCanvas().getFocusCellRow();
 
     // fill
-    Paint color = m_table.getData().getCellBackground( columnIndex, row );
+    Paint color;
     if ( selected && !focusCell )
       if ( isFocused() )
-        gc.setFill( Colors.SELECTED_CELL );
+        if ( columnPos == m_table.getCanvas().getSelectCellColumnPosition()
+            && row == m_table.getCanvas().getSelectCellRow() )
+          color = Colors.SELECTED_CELL.desaturate();
+        else
+          color = Colors.SELECTED_CELL;
       else
-        gc.setFill( Colors.SELECTED_CELL.desaturate().desaturate() );
+        color = Colors.SELECTED_CELL.desaturate().desaturate();
     else
-      gc.setFill( color );
+      color = m_table.getData().getCellBackground( columnIndex, row );
+
+    gc.setFill( color );
     gc.fillRect( x, y, w - 1, h - 1 );
 
     // grid
