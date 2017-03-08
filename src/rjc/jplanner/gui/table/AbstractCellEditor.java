@@ -152,7 +152,7 @@ abstract public class AbstractCellEditor
     m_moveDirection = move;
 
     int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
-    int h = m_table.getHeightByRow( m_row ) + 1;
+    int h = m_table.getRowHeight( m_row ) + 1;
     int columnPos = m_table.getColumnPositionByIndex( m_columnIndex );
 
     m_control.setLayoutX( m_table.getXStartByColumnPosition( columnPos ) - 1 );

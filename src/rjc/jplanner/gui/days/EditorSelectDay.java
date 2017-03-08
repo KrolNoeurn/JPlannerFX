@@ -63,10 +63,10 @@ public class EditorSelectDay extends AbstractCellEditor
   DayCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorSelectDay( int columnIndex, int rowIndex )
+  public EditorSelectDay( int columnIndex, int row )
   {
     // create day-type editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_combo = new DayCombo();
     setControl( m_combo );
   }

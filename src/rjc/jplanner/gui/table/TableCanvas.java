@@ -195,7 +195,7 @@ public class TableCanvas extends Canvas
     int x = m_table.getXStartByColumnPosition( columnPos );
     int y = m_table.getYStartByRow( row );
     int w = m_table.getWidthByColumnPosition( columnPos );
-    int h = m_table.getHeightByRow( row );
+    int h = m_table.getRowHeight( row );
 
     // draw body cell
     GraphicsContext gc = getGraphicsContext2D();
@@ -221,7 +221,7 @@ public class TableCanvas extends Canvas
 
     for ( int row = row1; row <= row2; row++ )
     {
-      int h = m_table.getHeightByRow( row );
+      int h = m_table.getRowHeight( row );
       if ( h > 0 )
       {
         drawCell( x, y, w, h, columnPos, row );
@@ -234,7 +234,7 @@ public class TableCanvas extends Canvas
   private void drawRowCells( int row )
   {
     // do not draw hidden rows
-    int h = m_table.getHeightByRow( row );
+    int h = m_table.getRowHeight( row );
     if ( h <= 0 )
       return;
 
@@ -333,19 +333,19 @@ public class TableCanvas extends Canvas
   }
 
   /**************************************** drawRowHeader ****************************************/
-  private void drawRowHeader( int rowIndex )
+  private void drawRowHeader( int row )
   {
     // do not draw hidden rows
-    int h = m_table.getHeightByRow( rowIndex );
+    int h = m_table.getRowHeight( row );
     if ( h <= 0 )
       return;
 
     // draw row header
     GraphicsContext gc = getGraphicsContext2D();
-    int y = m_table.getYStartByRow( rowIndex );
+    int y = m_table.getYStartByRow( row );
     int w = m_table.getVerticalHeaderWidth();
-    String text = m_table.getData().getRowTitle( rowIndex );
-    boolean selected = m_table.doesRowHaveSelection( rowIndex );
+    String text = m_table.getData().getRowTitle( row );
+    boolean selected = m_table.doesRowHaveSelection( row );
 
     drawRowHeaderCell( gc, y, w, h, text, selected );
   }

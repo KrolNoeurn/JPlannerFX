@@ -52,6 +52,7 @@ public class Table extends TableDisplay
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
   private Map<Integer, Integer> m_columnWidths  = new HashMap<Integer, Integer>();
   private Map<Integer, Integer> m_rowHeights    = new HashMap<Integer, Integer>();
+  private ArrayList<Integer>    m_rowYStarts    = new ArrayList<Integer>();
 
   // set of collapsed rows (only used for collapsed tasks)
   private Set<Integer>          m_rowCollapsed  = new HashSet<Integer>();
@@ -96,6 +97,11 @@ public class Table extends TableDisplay
     m_rowCollapsed.clear();
     m_selected.clear();
     m_columnIndexes.clear();
+
+    // prepare row-y-start array with row 0 starting at y=0
+    m_rowYStarts.clear();
+    m_rowYStarts.ensureCapacity( m_data.getRowCount() );
+    m_rowYStarts.add( 0 );
 
     // initialise column position to index mapping
     int count = m_data.getColumnCount();
@@ -339,19 +345,21 @@ public class Table extends TableDisplay
   /*************************************** getYStartByRow ****************************************/
   public int getYStartByRow( int row )
   {
-    // return start-y of specified row position
-    if ( row > m_data.getRowCount() )
-      row = m_data.getRowCount();
-
+    // if first row (or negative row number) return top of table body
     int startY = m_hHeaderHeight - getVOffset();
-    for ( int r = 0; r < row; r++ )
-      startY += getHeightByRow( r );
+    if ( row <= 0 )
+      return startY;
 
-    return startY;
+    // calculate any missing row-y-start array entries
+    for ( int r = m_rowYStarts.size() - 1; r < row; r++ )
+      m_rowYStarts.add( m_rowYStarts.get( r ) + getRowHeight( r ) );
+
+    // return start-y of specified row position
+    return startY + m_rowYStarts.get( row );
   }
 
-  /*************************************** getHeightByRow ****************************************/
-  public int getHeightByRow( int row )
+  /**************************************** getRowHeight *****************************************/
+  public int getRowHeight( int row )
   {
     // return height from row position
     if ( row < 0 || row >= m_data.getRowCount() )
@@ -375,6 +383,7 @@ public class Table extends TableDisplay
   public void setDefaultRowHeight( int height )
   {
     m_defaultRowHeight = height;
+    truncateRowYStarts( 0 );
     calculateBodyHeight();
   }
 
@@ -422,10 +431,28 @@ public class Table extends TableDisplay
     if ( newHeight < m_minimumRowHeight )
       newHeight = m_minimumRowHeight;
 
-    // record height so overrides default
-    int oldHeight = getHeightByRow( row );
+    // if height is not changed, return doing nothing
+    int oldHeight = getRowHeight( row );
+    if ( newHeight == oldHeight )
+      return;
+
+    // record new height
     m_bodyHeight = m_bodyHeight - oldHeight + newHeight;
-    m_rowHeights.put( row, newHeight );
+    if ( newHeight == m_defaultRowHeight )
+      m_rowHeights.remove( row );
+    else
+      m_rowHeights.put( row, newHeight );
+    truncateRowYStarts( row );
+  }
+
+  /************************************* truncateRowYStarts **************************************/
+  private void truncateRowYStarts( int row )
+  {
+    // truncate m_rowYStarts cache to specified row
+    if ( ++row > m_rowYStarts.size() )
+      return;
+
+    m_rowYStarts.subList( row, m_rowYStarts.size() ).clear();
   }
 
   /********************************** getColumnIndexByPosition ***********************************/
@@ -465,7 +492,7 @@ public class Table extends TableDisplay
     }
     else
     {
-      int bottomEdge = topEdge + getHeightByRow( row ) + m_hHeaderHeight;
+      int bottomEdge = topEdge + getRowHeight( row ) + m_hHeaderHeight;
       if ( bottomEdge > getCanvasHeight() )
       {
         finishAnimation();
@@ -475,26 +502,28 @@ public class Table extends TableDisplay
   }
 
   /******************************************* hideRow *******************************************/
-  public void hideRow( int rowIndex )
+  public void hideRow( int row )
   {
     // if already hidden do nothing
-    int oldHeight = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
+    int oldHeight = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
     if ( oldHeight < 0 )
       return;
 
-    m_rowHeights.put( rowIndex, -oldHeight );
+    m_rowHeights.put( row, -oldHeight );
+    truncateRowYStarts( row );
     m_bodyHeight = m_bodyHeight - oldHeight;
   }
 
   /******************************************* showRow *******************************************/
-  public void showRow( int rowIndex )
+  public void showRow( int row )
   {
     // if already shown do nothing
-    int oldHeight = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
+    int oldHeight = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
     if ( oldHeight > 0 )
       return;
 
-    m_rowHeights.put( rowIndex, -oldHeight );
+    m_rowHeights.put( row, -oldHeight );
+    truncateRowYStarts( row );
     m_bodyHeight = m_bodyHeight - oldHeight;
   }
 
@@ -677,18 +706,18 @@ public class Table extends TableDisplay
     xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_defaultRowHeight ) );
     xsw.writeAttribute( XmlLabels.XML_SCROLL, Integer.toString( (int) m_vScrollBar.getValue() ) );
     count = m_data.getRowCount();
-    for ( int rowIndex = 0; rowIndex < count; rowIndex++ )
+    for ( int row = 0; row < count; row++ )
     {
-      int height = m_rowHeights.getOrDefault( rowIndex, m_defaultRowHeight );
-      boolean collapsed = m_rowCollapsed.contains( rowIndex );
+      int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
+      boolean collapsed = m_rowCollapsed.contains( row );
 
       if ( height != m_defaultRowHeight || collapsed )
       {
         xsw.writeEmptyElement( XmlLabels.XML_ROW );
-        xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( rowIndex ) );
+        xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( row ) );
 
         if ( height != m_defaultRowHeight )
-          xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( rowIndex ) ) );
+          xsw.writeAttribute( XmlLabels.XML_HEIGHT, Integer.toString( m_rowHeights.get( row ) ) );
 
         if ( collapsed )
           xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
@@ -877,6 +906,7 @@ public class Table extends TableDisplay
     }
 
     // refresh calculated body height
+    truncateRowYStarts( 0 );
     calculateBodyHeight();
   }
 
@@ -976,6 +1006,7 @@ public class Table extends TableDisplay
         collapseSummary( row );
     } );
 
+    truncateRowYStarts( 0 );
     resizeCanvasScrollBars();
   }
 
@@ -1012,7 +1043,7 @@ public class Table extends TableDisplay
   {
     // return visible row above, or if none, this one
     int above = row - 1;
-    while ( getHeightByRow( above ) <= 0 )
+    while ( getRowHeight( above ) <= 0 )
       above--;
 
     if ( above >= 0 )
@@ -1026,7 +1057,7 @@ public class Table extends TableDisplay
   {
     // return visible row below, or if none, this one
     int below = row + 1;
-    while ( getHeightByRow( below ) <= 0 )
+    while ( getRowHeight( below ) <= 0 )
       below++;
 
     if ( below < m_data.getRowCount() )

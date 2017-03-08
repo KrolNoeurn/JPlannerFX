@@ -63,15 +63,15 @@ public class ResourcesData extends AbstractDataSource
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int rowIndex )
+  public String getRowTitle( int row )
   {
     // return row title
-    return Integer.toString( rowIndex );
+    return Integer.toString( row );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int columnIndex, int rowIndex )
+  public Alignment getCellAlignment( int columnIndex, int row )
   {
     // return alignment based on column
     switch ( columnIndex )
@@ -85,10 +85,10 @@ public class ResourcesData extends AbstractDataSource
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int columnIndex, int rowIndex )
+  public Paint getCellBackground( int columnIndex, int row )
   {
     // all cells are normal coloured except if null resource
-    Resource res = JPlanner.plan.getResource( rowIndex );
+    Resource res = JPlanner.plan.getResource( row );
     if ( columnIndex != Resource.SECTION_INITIALS && res.isNull() )
       return Colors.DISABLED_CELL;
 
@@ -97,10 +97,10 @@ public class ResourcesData extends AbstractDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int row )
   {
     // return null if cell is not editable
-    Resource res = JPlanner.plan.getResource( rowIndex );
+    Resource res = JPlanner.plan.getResource( row );
     if ( columnIndex != Resource.SECTION_INITIALS && res.isNull() )
       return null;
 
@@ -108,20 +108,20 @@ public class ResourcesData extends AbstractDataSource
     switch ( columnIndex )
     {
       case Resource.SECTION_INITIALS:
-        return new EditorResourceInitials( columnIndex, rowIndex );
+        return new EditorResourceInitials( columnIndex, row );
       case Resource.SECTION_CALENDAR:
-        return new EditorSelectCalendar( columnIndex, rowIndex );
+        return new EditorSelectCalendar( columnIndex, row );
       default:
-        return new EditorText( columnIndex, rowIndex );
+        return new EditorText( columnIndex, row );
     }
   }
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int columnIndex, int rowIndex, Object newValue )
+  public void setValue( int columnIndex, int row, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Resource res = JPlanner.plan.getResource( rowIndex );
+    Resource res = JPlanner.plan.getResource( row );
     Object oldValue = res.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
@@ -131,10 +131,10 @@ public class ResourcesData extends AbstractDataSource
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int columnIndex, int rowIndex )
+  public Object getValue( int columnIndex, int row )
   {
     // return cell value
-    return JPlanner.plan.getResource( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.getResource( row ).getValue( columnIndex );
   }
 
   /********************************** defaultTableModifications **********************************/

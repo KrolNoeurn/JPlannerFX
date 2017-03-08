@@ -31,10 +31,10 @@ public class EditorSelectCalendar extends AbstractCellEditor
   CalendarCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorSelectCalendar( int columnIndex, int rowIndex )
+  public EditorSelectCalendar( int columnIndex, int row )
   {
     // create calendar editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_combo = new CalendarCombo();
     setControl( m_combo );
   }

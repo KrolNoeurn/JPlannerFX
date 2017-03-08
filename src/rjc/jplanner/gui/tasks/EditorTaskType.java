@@ -61,10 +61,10 @@ public class EditorTaskType extends AbstractCellEditor
   TaskTypeCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskType( int columnIndex, int rowIndex )
+  public EditorTaskType( int columnIndex, int row )
   {
     // create task type editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_combo = new TaskTypeCombo();
     setControl( m_combo );
   }

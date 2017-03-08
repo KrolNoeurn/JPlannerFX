@@ -70,15 +70,15 @@ public class TasksData extends AbstractDataSource
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int rowIndex )
+  public String getRowTitle( int row )
   {
     // return row title
-    return Integer.toString( rowIndex );
+    return Integer.toString( row );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int columnIndex, int rowIndex )
+  public Alignment getCellAlignment( int columnIndex, int row )
   {
     // return alignment based on column
     switch ( columnIndex )
@@ -98,10 +98,10 @@ public class TasksData extends AbstractDataSource
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int columnIndex, int rowIndex )
+  public Paint getCellBackground( int columnIndex, int row )
   {
     // cell colour determined by if editable
-    if ( JPlanner.plan.getTask( rowIndex ).isSectionEditable( columnIndex ) )
+    if ( JPlanner.plan.getTask( row ).isSectionEditable( columnIndex ) )
       return Colors.NORMAL_CELL;
 
     return Colors.DISABLED_CELL;
@@ -110,10 +110,10 @@ public class TasksData extends AbstractDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int row )
   {
     // return null if cell is not editable
-    if ( !JPlanner.plan.getTask( rowIndex ).isSectionEditable( columnIndex ) )
+    if ( !JPlanner.plan.getTask( row ).isSectionEditable( columnIndex ) )
       return null;
 
     // return editor for table body cell
@@ -121,25 +121,25 @@ public class TasksData extends AbstractDataSource
     {
       case Task.SECTION_DURATION:
       case Task.SECTION_WORK:
-        return new EditorTimeSpan( columnIndex, rowIndex );
+        return new EditorTimeSpan( columnIndex, row );
       case Task.SECTION_START:
       case Task.SECTION_END:
-        return new EditorDateTime( columnIndex, rowIndex );
+        return new EditorDateTime( columnIndex, row );
       case Task.SECTION_PRIORITY:
-        return new EditorTaskPriority( columnIndex, rowIndex );
+        return new EditorTaskPriority( columnIndex, row );
       case Task.SECTION_TYPE:
-        return new EditorTaskType( columnIndex, rowIndex );
+        return new EditorTaskType( columnIndex, row );
       default:
-        return new EditorText( columnIndex, rowIndex );
+        return new EditorText( columnIndex, row );
     }
   }
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int columnIndex, int rowIndex, Object newValue )
+  public void setValue( int columnIndex, int row, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Task task = JPlanner.plan.getTask( rowIndex );
+    Task task = JPlanner.plan.getTask( row );
     Object oldValue = task.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
@@ -149,18 +149,18 @@ public class TasksData extends AbstractDataSource
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int columnIndex, int rowIndex )
+  public Object getValue( int columnIndex, int row )
   {
     // return cell value
-    return JPlanner.plan.getTask( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.getTask( row ).getValue( columnIndex );
   }
 
   /***************************************** getCellFont *****************************************/
   @Override
-  public Font getCellFont( int columnIndex, int rowIndex )
+  public Font getCellFont( int columnIndex, int row )
   {
     // return cell display font, bold for summary tasks
-    if ( JPlanner.plan.getTask( rowIndex ).isSummary() )
+    if ( JPlanner.plan.getTask( row ).isSummary() )
       return Font.font( Font.getDefault().getFamily(), FontWeight.BOLD, Font.getDefault().getSize() );
 
     return Font.getDefault();
@@ -168,22 +168,22 @@ public class TasksData extends AbstractDataSource
 
   /**************************************** getCellIndent ****************************************/
   @Override
-  public int getCellIndent( int columnIndex, int rowIndex )
+  public int getCellIndent( int columnIndex, int row )
   {
     // return cell indent level (0 = no indent)
     if ( columnIndex == Task.SECTION_TITLE )
-      return JPlanner.plan.getTask( rowIndex ).getIndent() + 1;
+      return JPlanner.plan.getTask( row ).getIndent() + 1;
 
     return 0;
   }
 
   /************************************** getSummaryEndRow ***************************************/
   @Override
-  public int getSummaryEndRow( int columnIndex, int rowIndex )
+  public int getSummaryEndRow( int columnIndex, int row )
   {
     // return cell summary end row for specified cell index (or -1 if not summary)
     if ( columnIndex == Task.SECTION_TITLE )
-      return JPlanner.plan.getTask( rowIndex ).getSummaryEnd();
+      return JPlanner.plan.getTask( row ).getSummaryEnd();
 
     return -1;
   }

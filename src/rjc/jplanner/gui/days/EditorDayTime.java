@@ -36,10 +36,10 @@ public class EditorDayTime extends AbstractCellEditor
   int        m_max;  // maximum valid time in milliseconds
 
   /**************************************** constructor ******************************************/
-  public EditorDayTime( int columnIndex, int rowIndex )
+  public EditorDayTime( int columnIndex, int row )
   {
     // use spin editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_spin = new SpinEditor();
     m_spin.setFormat( "00" );
     setControl( m_spin );
@@ -47,7 +47,7 @@ public class EditorDayTime extends AbstractCellEditor
     // determine min & max valid times
     m_min = 0;
     m_max = Time.MILLISECONDS_IN_DAY;
-    Day day = JPlanner.plan.daytypes.get( rowIndex );
+    Day day = JPlanner.plan.daytypes.get( row );
     if ( columnIndex > Day.SECTION_START1 )
     {
       m_min = ( (Time) day.getValue( columnIndex - 1 ) ).getMilliseconds();

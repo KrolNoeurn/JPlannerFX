@@ -230,8 +230,8 @@ public class TableDisplay extends TableParent
     animate( m_hScrollBar.valueProperty(), endValue, 200 );
   }
 
-  /************************************** animateScrollToUp **************************************/
-  public void animateScrollToUp()
+  /************************************* animateScrollToTop **************************************/
+  public void animateScrollToTop()
   {
     // create scroll up animation
     int value = getVOffset();
@@ -247,8 +247,8 @@ public class TableDisplay extends TableParent
     animate( m_vScrollBar.valueProperty(), max, 5 * ( max - value ) );
   }
 
-  /************************************ animateScrollToRight *************************************/
-  public void animateScrollToRight()
+  /********************************** animateScrollToRightEdge ***********************************/
+  public void animateScrollToRightEdge()
   {
     // create scroll right animation
     int value = getHOffset();
@@ -256,8 +256,8 @@ public class TableDisplay extends TableParent
     animate( m_hScrollBar.valueProperty(), max, 5 * ( max - value ) );
   }
 
-  /************************************* animateScrollToLeft *************************************/
-  public void animateScrollToLeft()
+  /*********************************** animateScrollToLeftEdge ***********************************/
+  public void animateScrollToLeftEdge()
   {
     // create scroll left animation
     int value = getHOffset();

@@ -19,14 +19,10 @@
 package rjc.jplanner;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.TreeSet;
 
 import javafx.application.Application;
-import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Plan;
@@ -125,7 +121,7 @@ public class JPlanner extends Application
     return txt.trim().replaceAll( "\\s", " " ).replaceAll( "(\\s{2,})", " " );
   }
 
-  /*************************************** tool-tip hack *****************************************/
+  /*************************************** tool-tip hack *****************************************
   static
   {
     // hack tool-tip durations behaviour (temporary until Java 9) - has stopped working?
@@ -149,4 +145,5 @@ public class JPlanner extends Application
       trace( exception );
     }
   }
+  ***/
 }

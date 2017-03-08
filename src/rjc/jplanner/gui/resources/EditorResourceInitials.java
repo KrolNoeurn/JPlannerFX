@@ -30,10 +30,10 @@ public class EditorResourceInitials extends EditorText
 {
 
   /**************************************** constructor ******************************************/
-  public EditorResourceInitials( int columnIndex, int rowIndex )
+  public EditorResourceInitials( int columnIndex, int row )
   {
     // create editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     ( (XTextField) getControl() ).setAllowed( "\\S*" ); // only allow non-whitespace characters
 
     // add listener to set error status
@@ -46,7 +46,7 @@ public class EditorResourceInitials extends EditorText
         error = "Name length not between 1 and 20 characters";
 
       // initials should be unique
-      if ( JPlanner.plan.resources.isDuplicateInitials( newText, rowIndex ) )
+      if ( JPlanner.plan.resources.isDuplicateInitials( newText, row ) )
         error = "Name not unique";
 
       // display error message and set editor error status

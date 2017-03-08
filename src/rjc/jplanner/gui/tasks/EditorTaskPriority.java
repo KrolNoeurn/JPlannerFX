@@ -30,10 +30,10 @@ public class EditorTaskPriority extends AbstractCellEditor
   SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorTaskPriority( int columnIndex, int rowIndex )
+  public EditorTaskPriority( int columnIndex, int row )
   {
     // default spin editor is fine
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_spin = new SpinEditor();
     setControl( m_spin );
   }

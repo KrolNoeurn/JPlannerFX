@@ -30,10 +30,10 @@ public class EditorDayWork extends AbstractCellEditor
   SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorDayWork( int columnIndex, int rowIndex )
+  public EditorDayWork( int columnIndex, int row )
   {
     // use spin editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_spin = new SpinEditor();
     m_spin.setFormat( "0.00" );
     m_spin.setRange( 0.0, 9.99, 2 );

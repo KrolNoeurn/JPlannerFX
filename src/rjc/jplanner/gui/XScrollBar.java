@@ -58,7 +58,7 @@ public class XScrollBar extends ScrollBar
       int row = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() );
       int newy = m_table.getYStartByRow( row );
       while ( newy <= m_table.getHorizontalHeaderHeight() )
-        newy += m_table.getHeightByRow( row++ );
+        newy += m_table.getRowHeight( row++ );
 
       double value = getValue() + newy - m_table.getHorizontalHeaderHeight();
       m_table.animate( valueProperty(), (int) ( value < getMax() ? value : getMax() ), 100 );

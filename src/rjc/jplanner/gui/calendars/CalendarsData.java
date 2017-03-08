@@ -70,15 +70,15 @@ public class CalendarsData extends AbstractDataSource
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int rowIndex )
+  public String getRowTitle( int row )
   {
     // return row title
-    return Calendar.getSectionName( rowIndex );
+    return Calendar.getSectionName( row );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int columnIndex, int rowIndex )
+  public Alignment getCellAlignment( int columnIndex, int row )
   {
     // return alignment
     return Alignment.LEFT;
@@ -86,11 +86,11 @@ public class CalendarsData extends AbstractDataSource
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int columnIndex, int rowIndex )
+  public Paint getCellBackground( int columnIndex, int row )
   {
     // all cells are normal coloured except unused normal section cells
     Calendar cal = JPlanner.plan.getCalendar( columnIndex );
-    if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
+    if ( row >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return Colors.DISABLED_CELL;
 
     return Colors.NORMAL_CELL;
@@ -98,54 +98,54 @@ public class CalendarsData extends AbstractDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int row )
   {
     // return null if cell is not editable, unused normal section cells
     Calendar cal = JPlanner.plan.getCalendar( columnIndex );
-    if ( rowIndex >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
+    if ( row >= cal.getNormals().size() + Calendar.SECTION_NORMAL1 )
       return null;
 
     // return editor for table body cell
-    switch ( rowIndex )
+    switch ( row )
     {
       case Calendar.SECTION_NAME:
-        return new EditorCalendarName( columnIndex, rowIndex );
+        return new EditorCalendarName( columnIndex, row );
       case Calendar.SECTION_ANCHOR:
-        return new EditorDateTime( columnIndex, rowIndex );
+        return new EditorDateTime( columnIndex, row );
       case Calendar.SECTION_EXCEPTIONS:
-        return new EditorCalendarExceptions( columnIndex, rowIndex );
+        return new EditorCalendarExceptions( columnIndex, row );
       case Calendar.SECTION_CYCLE_LEN:
-        return new EditorCalendarCycleLength( columnIndex, rowIndex );
+        return new EditorCalendarCycleLength( columnIndex, row );
       default:
-        return new EditorSelectDay( columnIndex, rowIndex );
+        return new EditorSelectDay( columnIndex, row );
     }
   }
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int columnIndex, int rowIndex, Object newValue )
+  public void setValue( int columnIndex, int row, Object newValue )
   {
     // if new value equals old value, exit with no command
     Calendar cal = JPlanner.plan.getCalendar( columnIndex );
-    Object oldValue = cal.getValue( rowIndex );
+    Object oldValue = cal.getValue( row );
     if ( newValue.equals( oldValue ) )
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic
-    if ( rowIndex == Calendar.SECTION_EXCEPTIONS )
+    if ( row == Calendar.SECTION_EXCEPTIONS )
       JPlanner.plan.getUndostack().push( new CommandCalendarSetExceptions( cal, newValue, oldValue ) );
-    else if ( rowIndex == Calendar.SECTION_CYCLE_LEN )
+    else if ( row == Calendar.SECTION_CYCLE_LEN )
       JPlanner.plan.getUndostack().push( new CommandCalendarSetCycleLength( cal, (int) newValue, (int) oldValue ) );
     else
-      JPlanner.plan.getUndostack().push( new CommandCalendarSetValue( cal, rowIndex, newValue, oldValue ) );
+      JPlanner.plan.getUndostack().push( new CommandCalendarSetValue( cal, row, newValue, oldValue ) );
   }
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int columnIndex, int rowIndex )
+  public Object getValue( int columnIndex, int row )
   {
     // return cell value
-    return JPlanner.plan.getCalendar( columnIndex ).getValue( rowIndex );
+    return JPlanner.plan.getCalendar( columnIndex ).getValue( row );
   }
 
   /********************************** defaultTableModifications **********************************/

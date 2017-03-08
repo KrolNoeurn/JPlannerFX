@@ -30,10 +30,10 @@ public class EditorCalendarName extends EditorText
 {
 
   /**************************************** constructor ******************************************/
-  public EditorCalendarName( int columnIndex, int rowIndex )
+  public EditorCalendarName( int columnIndex, int row )
   {
     // create editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
 
     // add listener to set error status
     ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->

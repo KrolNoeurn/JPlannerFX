@@ -30,10 +30,10 @@ public class EditorTimeSpan extends AbstractCellEditor
   SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorTimeSpan( int columnIndex, int rowIndex )
+  public EditorTimeSpan( int columnIndex, int row )
   {
     // start with default spin editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_spin = new SpinEditor();
     setControl( m_spin );
   }

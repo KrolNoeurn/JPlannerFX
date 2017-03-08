@@ -28,10 +28,10 @@ public class EditorText extends AbstractCellEditor
 {
 
   /**************************************** constructor ******************************************/
-  public EditorText( int columnIndex, int rowIndex )
+  public EditorText( int columnIndex, int row )
   {
     // create text table cell editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     setControl( new XTextField() );
   }
 

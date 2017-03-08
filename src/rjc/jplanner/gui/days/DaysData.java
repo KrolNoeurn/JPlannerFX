@@ -68,15 +68,15 @@ public class DaysData extends AbstractDataSource
 
   /**************************************** getRowTitle ******************************************/
   @Override
-  public String getRowTitle( int rowIndex )
+  public String getRowTitle( int row )
   {
     // display row number plus one, so row index zero is displayed as "1" etc
-    return Integer.toString( rowIndex + 1 );
+    return Integer.toString( row + 1 );
   }
 
   /************************************* getCellAlignment ****************************************/
   @Override
-  public Alignment getCellAlignment( int columnIndex, int rowIndex )
+  public Alignment getCellAlignment( int columnIndex, int row )
   {
     // all cells are middle aligned except name which is left aligned
     if ( columnIndex == Day.SECTION_NAME )
@@ -87,10 +87,10 @@ public class DaysData extends AbstractDataSource
 
   /************************************* getCellBackground ***************************************/
   @Override
-  public Paint getCellBackground( int columnIndex, int rowIndex )
+  public Paint getCellBackground( int columnIndex, int row )
   {
     // all cells are normal coloured except unused start/end
-    Day day = JPlanner.plan.getDay( rowIndex );
+    Day day = JPlanner.plan.getDay( row );
     if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
       return Colors.DISABLED_CELL;
 
@@ -99,10 +99,10 @@ public class DaysData extends AbstractDataSource
 
   /***************************************** getEditor *******************************************/
   @Override
-  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int row )
   {
     // return null if cell is not editable, unused start/end
-    Day day = JPlanner.plan.getDay( rowIndex );
+    Day day = JPlanner.plan.getDay( row );
     if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
       return null;
 
@@ -110,22 +110,22 @@ public class DaysData extends AbstractDataSource
     switch ( columnIndex )
     {
       case Day.SECTION_NAME:
-        return new EditorDayName( columnIndex, rowIndex );
+        return new EditorDayName( columnIndex, row );
       case Day.SECTION_WORK:
-        return new EditorDayWork( columnIndex, rowIndex );
+        return new EditorDayWork( columnIndex, row );
       case Day.SECTION_PERIODS:
-        return new EditorDayNumPeriods( columnIndex, rowIndex );
+        return new EditorDayNumPeriods( columnIndex, row );
       default:
-        return new EditorDayTime( columnIndex, rowIndex );
+        return new EditorDayTime( columnIndex, row );
     }
   }
 
   /****************************************** setValue *******************************************/
   @Override
-  public void setValue( int columnIndex, int rowIndex, Object newValue )
+  public void setValue( int columnIndex, int row, Object newValue )
   {
     // if new value equals old value, exit with no command
-    Day day = JPlanner.plan.getDay( rowIndex );
+    Day day = JPlanner.plan.getDay( row );
     Object oldValue = day.getValue( columnIndex );
     if ( newValue.equals( oldValue ) )
       return;
@@ -139,18 +139,18 @@ public class DaysData extends AbstractDataSource
 
   /****************************************** getValue *******************************************/
   @Override
-  public Object getValue( int columnIndex, int rowIndex )
+  public Object getValue( int columnIndex, int row )
   {
     // return cell value
-    return JPlanner.plan.getDay( rowIndex ).getValue( columnIndex );
+    return JPlanner.plan.getDay( row ).getValue( columnIndex );
   }
 
   /***************************************** getCellText *****************************************/
   @Override
-  public String getCellText( int columnIndex, int rowIndex )
+  public String getCellText( int columnIndex, int row )
   {
     // get value to be displayed
-    Object value = getValue( columnIndex, rowIndex );
+    Object value = getValue( columnIndex, row );
 
     // convert times into string using "HH:MM" formats
     if ( value instanceof Time )

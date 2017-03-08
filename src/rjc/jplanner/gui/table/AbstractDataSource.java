@@ -65,44 +65,44 @@ abstract public class AbstractDataSource
   }
 
   /****************************************** getValue *******************************************/
-  public Object getValue( int columnIndex, int rowIndex )
+  public Object getValue( int columnIndex, int row )
   {
     // return cell value for specified cell index
     return "?";
   }
 
   /****************************************** setValue *******************************************/
-  public void setValue( int columnIndex, int rowIndex, Object newValue )
+  public void setValue( int columnIndex, int row, Object newValue )
   {
     // set cell value for specified cell index
   }
 
   /****************************************** getEditor ******************************************/
-  public AbstractCellEditor getEditor( int columnIndex, int rowIndex )
+  public AbstractCellEditor getEditor( int columnIndex, int row )
   {
     // return editor to use for specified cell index
     return null;
   }
 
   /************************************** getCellAlignment ***************************************/
-  public Alignment getCellAlignment( int columnIndex, int rowIndex )
+  public Alignment getCellAlignment( int columnIndex, int row )
   {
     // return cell contents alignment for specified cell index
     return Alignment.LEFT;
   }
 
   /************************************** getCellBackground **************************************/
-  public Paint getCellBackground( int columnIndex, int rowIndex )
+  public Paint getCellBackground( int columnIndex, int row )
   {
     // return cell background colour for specified cell index
     return Colors.NORMAL_CELL;
   }
 
   /***************************************** getCellText *****************************************/
-  public String getCellText( int columnIndex, int rowIndex )
+  public String getCellText( int columnIndex, int row )
   {
     // return cell display text for specified cell index
-    Object value = getValue( columnIndex, rowIndex );
+    Object value = getValue( columnIndex, row );
 
     // convert date and date-times into strings using plan formats
     if ( value instanceof Day )
@@ -119,31 +119,31 @@ abstract public class AbstractDataSource
   }
 
   /***************************************** getCellFont *****************************************/
-  public Font getCellFont( int columnIndex, int rowIndex )
+  public Font getCellFont( int columnIndex, int row )
   {
     // return cell display font for specified cell index
     return Font.getDefault();
   }
 
   /**************************************** getCellIndent ****************************************/
-  public int getCellIndent( int columnIndex, int rowIndex )
+  public int getCellIndent( int columnIndex, int row )
   {
     // return cell display indent level for specified cell index
     return 0;
   }
 
   /************************************** getSummaryEndRow ***************************************/
-  public int getSummaryEndRow( int columnIndex, int rowIndex )
+  public int getSummaryEndRow( int columnIndex, int row )
   {
     // return cell summary end row for specified cell index (or -1 if not summary)
     return -1;
   }
 
   /**************************************** isCellSummary ****************************************/
-  public boolean isCellSummary( int columnIndex, int rowIndex )
+  public boolean isCellSummary( int columnIndex, int row )
   {
     // return true is cell is a collapsible summary
-    return getSummaryEndRow( columnIndex, rowIndex ) > 0;
+    return getSummaryEndRow( columnIndex, row ) > 0;
   }
 
   /***************************************** indentRows ******************************************/

@@ -30,10 +30,10 @@ public class EditorDateTime extends AbstractCellEditor
   DateTimeEditor m_editor; // date-time editor
 
   /**************************************** constructor ******************************************/
-  public EditorDateTime( int columnIndex, int rowIndex )
+  public EditorDateTime( int columnIndex, int row )
   {
     // create date-time table cell editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_editor = new DateTimeEditor();
     setControl( m_editor );
   }

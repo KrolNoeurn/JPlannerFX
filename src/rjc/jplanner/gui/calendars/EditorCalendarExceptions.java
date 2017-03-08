@@ -28,10 +28,10 @@ public class EditorCalendarExceptions extends EditorText
 {
 
   /**************************************** constructor ******************************************/
-  public EditorCalendarExceptions( int columnIndex, int rowIndex )
+  public EditorCalendarExceptions( int columnIndex, int row )
   {
     // create editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
 
     // TODO ..............
   }

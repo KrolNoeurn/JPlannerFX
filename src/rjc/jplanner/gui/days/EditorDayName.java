@@ -30,10 +30,10 @@ public class EditorDayName extends EditorText
 {
 
   /**************************************** constructor ******************************************/
-  public EditorDayName( int columnIndex, int rowIndex )
+  public EditorDayName( int columnIndex, int row )
   {
     // create editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
 
     // add listener to set error status
     ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
@@ -46,7 +46,7 @@ public class EditorDayName extends EditorText
         error = "Name length not between 1 and 40 characters";
 
       // name should be unique
-      if ( JPlanner.plan.daytypes.isDuplicateDayName( tidy, rowIndex ) )
+      if ( JPlanner.plan.daytypes.isDuplicateDayName( tidy, row ) )
         error = "Name not unique";
 
       // display error message and set editor error status

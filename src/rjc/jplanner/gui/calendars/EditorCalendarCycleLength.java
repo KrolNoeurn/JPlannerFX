@@ -30,10 +30,10 @@ public class EditorCalendarCycleLength extends AbstractCellEditor
   SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorCalendarCycleLength( int columnIndex, int rowIndex )
+  public EditorCalendarCycleLength( int columnIndex, int row )
   {
     // use spin editor
-    super( columnIndex, rowIndex );
+    super( columnIndex, row );
     m_spin = new SpinEditor();
 
     m_spin.setRange( 1, 99, 0 );
