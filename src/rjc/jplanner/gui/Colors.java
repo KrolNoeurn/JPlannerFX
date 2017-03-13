@@ -26,19 +26,33 @@ import javafx.scene.paint.Color;
 
 public class Colors
 {
+  // general useful new colours
   public static final Color LIGHTERGRAY        = Color.rgb( 225, 225, 225 );
+  public static final Color VLIGHTERGRAY       = Color.rgb( 240, 240, 240 );
+  public static final Color LIGHTBLUE          = Color.rgb( 51, 153, 255 );
+  public static final Color FOCUSBLUE          = Color.rgb( 3, 158, 211 );
+
+  // general gui colours
+  public static final Color GENERAL_BACKGROUND = VLIGHTERGRAY;
   public static final Color BUTTON_BACKGROUND  = LIGHTERGRAY;
   public static final Color BUTTON_ARROW       = Color.BLACK;
-  public static final Color GENERAL_BACKGROUND = Color.rgb( 240, 240, 240 );
-  public static final Color FOCUSED_BLUE       = Color.rgb( 3, 158, 211 );   // light blue;
 
+  // table colours
+  public static final Color TABLE_GRID         = Color.SILVER;
+  public static final Color NORMAL_HEADER      = GENERAL_BACKGROUND;
   public static final Color NORMAL_CELL        = Color.WHITE;
-  public static final Color SELECTED_CELL      = Color.rgb( 51, 153, 255 );  // light blue;
-  public static final Color DISABLED_CELL      = Color.rgb( 227, 227, 227 ); // medium grey
-
+  public static final Color SELECTED_CELL      = LIGHTBLUE;
+  public static final Color DISABLED_CELL      = LIGHTERGRAY;
   public static final Color NORMAL_TEXT        = Color.BLACK;
   public static final Color SELECTED_TEXT      = Color.WHITE;
 
-  public static final Color TABLE_GRID         = Color.SILVER;
-  public static final Color NORMAL_HEADER      = GENERAL_BACKGROUND;
+  // gantt colours
+  public static final Color GANTT_BACKGROUND   = Color.WHITE;
+  public static final Color GANTT_NONWORKING   = VLIGHTERGRAY;
+  public static final Color GANTT_DIVIDER      = Color.SILVER;
+  public static final Color GANTT_TASK_EDGE    = Color.BLACK;
+  public static final Color GANTT_TASK_FILL    = Color.YELLOW;
+  public static final Color GANTT_SUMMARY      = Color.BLACK;
+  public static final Color GANTT_MILESTONE    = Color.BLACK;
+  public static final Color GANTT_DEPENDENCY   = Color.SLATEGRAY;
 }

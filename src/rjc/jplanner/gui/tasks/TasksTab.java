@@ -44,7 +44,7 @@ public class TasksTab extends Tab
     m_table = new Table( "Tasks", new TasksData() );
 
     // alongside the gantt
-    m_gantt = new Gantt();
+    m_gantt = new Gantt( m_table );
     m_split = new XSplitPane( m_table, m_gantt );
     m_gantt.setSplitPane( m_split );
 

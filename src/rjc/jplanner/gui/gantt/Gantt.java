@@ -30,6 +30,7 @@ import javafx.stage.Screen;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
 import rjc.jplanner.gui.XSplitPane;
+import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.DateTime.Interval;
 
@@ -52,10 +53,10 @@ public class Gantt extends Region
   final public static int       GANTTSCALE_HEIGHT = 15;
 
   /**************************************** constructor ******************************************/
-  public Gantt()
+  public Gantt( Table table )
   {
     // create default gantt 
-    m_plot = new GanttPlot( this );
+    m_plot = new GanttPlot( this, table );
     m_scales = new ArrayList<GanttScale>();
     m_scrollBar = new ScrollBar();
     setDefault();

@@ -230,7 +230,6 @@ public class MainWindow
     relayoutResourceTables();
     relayoutCalendarTables();
     relayoutDayTypeTables();
-    redrawGantts();
     message( "New plan" );
     return true;
   }
@@ -315,7 +314,6 @@ public class MainWindow
       relayoutResourceTables();
       relayoutCalendarTables();
       relayoutDayTypeTables();
-      redrawGantts();
       m_stage.requestFocus();
 
       fis.close();
@@ -669,13 +667,6 @@ public class MainWindow
     m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().relayout() );
   }
 
-  /**************************************** redrawGantts *****************************************/
-  public void redrawGantts()
-  {
-    // redraw all plan gantts
-    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getGantt().redraw() );
-  }
-
   /************************************** redrawTaskTables ***************************************/
   public void redrawTaskTables()
   {
@@ -710,7 +701,6 @@ public class MainWindow
     // schedule the plan, then redraw task tables and gantt to show result
     JPlanner.plan.schedule();
     redrawTaskTables();
-    redrawGantts();
   }
 
   /************************************** checkPlanUpToDate **************************************/

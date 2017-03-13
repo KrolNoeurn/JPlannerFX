@@ -103,7 +103,7 @@ public class DateTimeSelector extends Popup
 
     // add shadow
     DropShadow shadow = new DropShadow();
-    shadow.setColor( Colors.FOCUSED_BLUE );
+    shadow.setColor( Colors.FOCUSBLUE );
     shadow.setRadius( SHADOW_RADIUS );
     getScene().getRoot().setEffect( shadow );
 
@@ -215,7 +215,7 @@ public class DateTimeSelector extends Popup
   {
     // define background and border for the selector
     Background BACKGROUND = new Background( new BackgroundFill( Colors.GENERAL_BACKGROUND, null, null ) );
-    Border BORDER = new Border( new BorderStroke( Colors.FOCUSED_BLUE, BorderStrokeStyle.SOLID, null, null ) );
+    Border BORDER = new Border( new BorderStroke( Colors.FOCUSBLUE, BorderStrokeStyle.SOLID, null, null ) );
 
     // padding around the widgets
     Insets INSETS = new Insets( PADDING - 2.0, PADDING - 1.0, PADDING, PADDING );
@@ -398,7 +398,7 @@ public class DateTimeSelector extends Popup
 
           // select day is blue
           if ( localdate.isEqual( selecteddate ) )
-            backColor = Colors.FOCUSED_BLUE;
+            backColor = Colors.FOCUSBLUE;
 
           // draw number and move to next day
           drawText( localdate.getDayOfMonth(), textColor, backColor );

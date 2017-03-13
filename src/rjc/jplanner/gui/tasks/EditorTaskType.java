@@ -74,7 +74,7 @@ public class EditorTaskType extends AbstractCellEditor
   public Object getValue()
   {
     // return selected task type
-    return new TaskType( m_combo.getText() );
+    return TaskType.from( m_combo.getText() );
   }
 
   /******************************************* setValue ******************************************/

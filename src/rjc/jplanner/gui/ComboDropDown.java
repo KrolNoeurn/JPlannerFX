@@ -56,7 +56,7 @@ public class ComboDropDown extends Popup
 
     // add shadow
     DropShadow shadow = new DropShadow();
-    shadow.setColor( Colors.FOCUSED_BLUE );
+    shadow.setColor( Colors.FOCUSBLUE );
     shadow.setRadius( 4.0 );
     getScene().getRoot().setEffect( shadow );
 
@@ -125,7 +125,7 @@ public class ComboDropDown extends Popup
     // fill background and draw border
     gc.setFill( Colors.NORMAL_CELL );
     gc.fillRect( 0.0, 0.0, w, h );
-    gc.setStroke( Colors.FOCUSED_BLUE );
+    gc.setStroke( Colors.FOCUSBLUE );
     gc.strokeRect( 0.5, 0.5, w - 1.0, h - 1.0 );
 
     // determine list visible range

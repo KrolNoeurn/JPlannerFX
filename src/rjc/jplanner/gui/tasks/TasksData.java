@@ -28,6 +28,7 @@ import rjc.jplanner.command.CommandTaskIndent;
 import rjc.jplanner.command.CommandTaskOutdent;
 import rjc.jplanner.command.CommandTaskSetValue;
 import rjc.jplanner.gui.Colors;
+import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.AbstractDataSource;
 import rjc.jplanner.gui.table.EditorDateTime;
@@ -193,6 +194,7 @@ public class TasksData extends AbstractDataSource
   public void defaultTableModifications( Table table )
   {
     // default task table modifications
+    table.setHorizontalHeaderHeight( Gantt.GANTTSCALE_HEIGHT * 2 );
     table.setVerticalHeaderWidth( 34 );
     table.setDefaultColumnWidth( 110 );
 

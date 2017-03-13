@@ -24,44 +24,21 @@ package rjc.jplanner.model;
 
 public class TaskType
 {
-  private static final int   TYPES_COUNT  = 5;                     // number of different task types
+  private static final int     TYPES_COUNT  = 5;                 // number of different task types
 
-  public static final String ASAP_FDUR    = "ASAP - duration";     // early as possible - fixed duration
-  public static final String ASAP_FWORK   = "ASAP - work";         // early as possible - fixed work
-  public static final String SON_FDUR     = "Start on - duration"; // start on - fixed duration
-  public static final String SON_FWORK    = "Start on - work";     // start on - fixed work
-  public static final String FIXED_PERIOD = "Fixed period";        // fixed period
+  public static final TaskType ASAP_FDUR    = new TaskType( 0 ); // early as possible - fixed duration
+  public static final TaskType ASAP_FWORK   = new TaskType( 1 ); // early as possible - fixed work
+  public static final TaskType SON_FDUR     = new TaskType( 2 ); // start on - fixed duration
+  public static final TaskType SON_FWORK    = new TaskType( 3 ); // start on - fixed work
+  public static final TaskType FIXED_PERIOD = new TaskType( 4 ); // fixed period
 
-  private String             m_type;
-
-  /***************************************** constructor *****************************************/
-  public TaskType( String str )
-  {
-    // create task type, don't assume string-pointer is correct even if string is valid
-    if ( str.equals( ASAP_FDUR ) )
-      m_type = ASAP_FDUR;
-
-    else if ( str.equals( ASAP_FWORK ) )
-      m_type = ASAP_FWORK;
-
-    else if ( str.equals( SON_FDUR ) )
-      m_type = SON_FDUR;
-
-    else if ( str.equals( SON_FWORK ) )
-      m_type = SON_FWORK;
-
-    else if ( str.equals( FIXED_PERIOD ) )
-      m_type = FIXED_PERIOD;
-
-    else
-      throw new IllegalArgumentException( "str=" + str );
-  }
+  private short                m_type;
 
   /***************************************** constructor *****************************************/
-  public TaskType( int num )
+  private TaskType( int num )
   {
     // create task type based on number
-    m_type = TaskType.toString( num );
+    m_type = (short) num;
   }
 
   /****************************************** toString *******************************************/
@@ -69,7 +46,7 @@ public class TaskType
   public String toString()
   {
     // returns string representation
-    return m_type;
+    return toString( m_type );
   }
 
   /****************************************** toString *******************************************/
@@ -79,15 +56,15 @@ public class TaskType
     switch ( num )
     {
       case 0:
-        return ASAP_FDUR;
+        return "ASAP - duration";
       case 1:
-        return ASAP_FWORK;
+        return "ASAP - work";
       case 2:
-        return SON_FDUR;
+        return "Start on - duration";
       case 3:
-        return SON_FWORK;
+        return "Start on - work";
       case 4:
-        return FIXED_PERIOD;
+        return "Fixed period";
       default:
         throw new IllegalArgumentException( "num=" + num );
     }
@@ -105,41 +82,44 @@ public class TaskType
   {
     // returns true if section is editable based on task type
     if ( section == Task.SECTION_DURATION )
-      if ( m_type == ASAP_FWORK || m_type == SON_FWORK || m_type == FIXED_PERIOD )
+      if ( this == ASAP_FWORK || this == SON_FWORK || this == FIXED_PERIOD )
         return false;
 
     if ( section == Task.SECTION_START )
-      if ( m_type == ASAP_FDUR || m_type == ASAP_FWORK )
+      if ( this == ASAP_FDUR || this == ASAP_FWORK )
         return false;
 
     if ( section == Task.SECTION_END )
-      if ( m_type == ASAP_FDUR || m_type == ASAP_FWORK || m_type == SON_FDUR || m_type == SON_FWORK )
+      if ( this == ASAP_FDUR || this == ASAP_FWORK || this == SON_FDUR || this == SON_FWORK )
         return false;
 
     if ( section == Task.SECTION_WORK )
-      if ( m_type == ASAP_FDUR || m_type == SON_FDUR || m_type == FIXED_PERIOD )
+      if ( this == ASAP_FDUR || this == SON_FDUR || this == FIXED_PERIOD )
         return false;
 
     return true;
   }
 
-  /****************************************** hashCode *******************************************/
-  @Override
-  public int hashCode()
+  /******************************************** from *********************************************/
+  public static TaskType from( String text )
   {
-    // return hash code which is hash code of type string
-    return m_type.hashCode();
-  }
+    // return task-type from string
+    if ( text.equals( TaskType.ASAP_FDUR.toString() ) )
+      return TaskType.ASAP_FDUR;
 
-  /******************************************* equals ********************************************/
-  @Override
-  public boolean equals( Object other )
-  {
-    // return true if this task-type and other task-type are same
-    if ( other instanceof TaskType )
-      return m_type == ( (TaskType) other ).m_type;
-    else
-      return false;
+    if ( text.equals( TaskType.ASAP_FWORK.toString() ) )
+      return TaskType.ASAP_FWORK;
+
+    if ( text.equals( TaskType.FIXED_PERIOD.toString() ) )
+      return TaskType.FIXED_PERIOD;
+
+    if ( text.equals( TaskType.SON_FDUR.toString() ) )
+      return TaskType.SON_FDUR;
+
+    if ( text.equals( TaskType.SON_FWORK.toString() ) )
+      return TaskType.SON_FWORK;
+
+    throw new IllegalArgumentException( "Invalid TaskType '" + text + "'" );
   }
 
 }

@@ -95,6 +95,10 @@ public class TableDisplay extends TableParent
   /*********************************** resizeCanvasScrollBars ************************************/
   public void resizeCanvasScrollBars()
   {
+    // check height & width are real before proceeding
+    if ( getHeight() == Integer.MAX_VALUE || getWidth() == Integer.MAX_VALUE )
+      return;
+
     // determine which scroll-bars should be visible
     boolean isVSBvisible = getHeight() < m_table.getTableHeight();
     int visibleWidth = isVSBvisible ? getWidth() - SCROLLBAR_SIZE : getWidth();

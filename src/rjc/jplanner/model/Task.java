@@ -100,7 +100,7 @@ public class Task implements Comparable<Task>
           m_resources = new TaskResources( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_TYPE:
-          m_type = new TaskType( xsr.getAttributeValue( i ) );
+          m_type = TaskType.from( xsr.getAttributeValue( i ) );
           break;
         case XmlLabels.XML_PRIORITY:
           m_priority = Integer.parseInt( xsr.getAttributeValue( i ) );
@@ -133,9 +133,8 @@ public class Task implements Comparable<Task>
     m_end = JPlanner.plan.getStart();
     m_predecessors = new Predecessors( "" );
     m_resources = new TaskResources();
-    m_type = new TaskType( TaskType.ASAP_FDUR );
+    m_type = TaskType.ASAP_FDUR;
     m_predecessors = new Predecessors();
-    m_gantt = new GanttData();
     m_priority = 100;
     m_indent = 0;
     m_summaryStart = 0;
@@ -419,31 +418,31 @@ public class Task implements Comparable<Task>
     // TODO Auto-generated method stub
     JPlanner.trace( "Scheduling " + this );
 
-    if ( m_type.toString() == TaskType.ASAP_FDUR )
+    if ( m_type == TaskType.ASAP_FDUR )
     {
       schedule_ASAP_FDUR();
       return;
     }
 
-    if ( m_type.toString() == TaskType.ASAP_FWORK )
+    if ( m_type == TaskType.ASAP_FWORK )
     {
       schedule_ASAP_FWORK();
       return;
     }
 
-    if ( m_type.toString() == TaskType.FIXED_PERIOD )
+    if ( m_type == TaskType.FIXED_PERIOD )
     {
       schedule_FIXED_PERIOD();
       return;
     }
 
-    if ( m_type.toString() == TaskType.SON_FDUR )
+    if ( m_type == TaskType.SON_FDUR )
     {
       schedule_SON_FDUR();
       return;
     }
 
-    if ( m_type.toString() == TaskType.SON_FWORK )
+    if ( m_type == TaskType.SON_FWORK )
     {
       schedule_SON_FWORK();
       return;
@@ -543,10 +542,12 @@ public class Task implements Comparable<Task>
       m_end = m_start;
 
     // set gantt task bar data
+    if ( m_gantt == null )
+      m_gantt = new GanttData();
     if ( isSummary() )
       m_gantt.setSummary( getStart(), getEnd() );
     else
-      m_gantt.setTask( m_start, m_end );
+      m_gantt.setSimpleTask( m_start, m_end );
 
     // set resource allocations
     m_resources.assign( this );

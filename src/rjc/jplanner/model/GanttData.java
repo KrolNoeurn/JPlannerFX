@@ -48,7 +48,7 @@ public class GanttData
   }
 
   /******************************************* setTask *******************************************/
-  public void setTask( DateTime taskStart, DateTime taskEnd )
+  public void setSimpleTask( DateTime taskStart, DateTime taskEnd )
   {
     // set gantt data for simple task
     start = taskStart;

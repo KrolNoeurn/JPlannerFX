@@ -20,6 +20,7 @@ package rjc.jplanner.gui.table;
 
 import java.util.ArrayList;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -52,12 +53,13 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static final String ELLIPSIS          = "..."; // ellipsis to show text has been truncated
-  public static final int    CELL_PADDING      = 4;     // cell padding for text left & right edges
-  protected static final int INDENT            = 14;    // cell left padding per indent level 
+  public static final String   ELLIPSIS          = "..."; // ellipsis to show text has been truncated
+  public static final int      CELL_PADDING      = 4;     // cell padding for text left & right edges
+  protected static final int   INDENT            = 14;    // cell left padding per indent level 
 
-  protected Table            m_table;                   // table displaying this table canvas
-  protected boolean          m_recentlyRedrawn = false; // set true if has table be totally redrawn recently
+  protected Table              m_table;                   // table displaying this table canvas
+  protected boolean            m_recentlyRedrawn = false; // set true if has table be totally redrawn recently
+  public SimpleIntegerProperty redrawBelowY;              // observable variable for other classes who need to know about canvas redrawing
 
   /***************************************** constructor *****************************************/
   public TableCanvas( Table table )
@@ -66,6 +68,8 @@ public class TableCanvas extends Canvas
     super();
     setFocusTraversable( true );
     m_table = table;
+    redrawBelowY = new SimpleIntegerProperty();
+    redrawBelowY.set( Integer.MAX_VALUE );
 
     // when size changes draw new bits
     widthProperty().addListener( ( observable, oldW, newW ) ->
@@ -87,7 +91,7 @@ public class TableCanvas extends Canvas
   public void redrawAll()
   {
     // redraw whole canvas
-    drawWidth( 0, (int) getWidth() );
+    drawHeight( 0, (int) getHeight() );
     m_recentlyRedrawn = true;
   }
 
@@ -183,6 +187,10 @@ public class TableCanvas extends Canvas
 
       drawHeaderCorner();
     }
+
+    // set observable variable so others classes (e.g. GanttPlot) can listen for changes
+    redrawBelowY.set( oldH - headerHeight );
+    redrawBelowY.set( Integer.MAX_VALUE );
   }
 
   /************************************* highlightFocusCell **************************************/
