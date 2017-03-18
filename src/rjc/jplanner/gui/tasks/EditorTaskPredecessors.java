@@ -16,78 +16,62 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.days;
+package rjc.jplanner.gui.tasks;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.SpinEditor;
-import rjc.jplanner.gui.table.AbstractCellEditor;
-import rjc.jplanner.model.Time;
+import rjc.jplanner.gui.XTextField;
+import rjc.jplanner.gui.table.EditorText;
+import rjc.jplanner.model.Predecessors;
+import rjc.jplanner.model.TimeSpan;
 
 /*************************************************************************************************/
-/********************* Table cell editor for day-type number of work periods *********************/
+/**************************** Table cell editor for task predecessors ****************************/
 /*************************************************************************************************/
 
-public class EditorDayNumPeriods extends AbstractCellEditor
+public class EditorTaskPredecessors extends EditorText
 {
-  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorDayNumPeriods( int columnIndex, int row )
+  public EditorTaskPredecessors( int columnIndex, int row )
   {
-    // use spin editor
+    // create editor
     super( columnIndex, row );
-    m_spin = new SpinEditor();
 
-    // determine max count of number of work periods
-    if ( JPlanner.plan.getDay( row ).getNumberOfPeriods() > 0 )
+    // only allow valid characters (\055 = -)
+    ( (XTextField) getControl() ).setAllowed( "[" + TimeSpan.VALID_UNITS + "fFsS+0123456789.,\055]*" );
+
+    // add listener to set error status
+    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
     {
-      Time end = JPlanner.plan.getDay( row ).getEnd();
-      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.getMilliseconds() ) / 60000;
-      int max = JPlanner.plan.getDay( row ).getNumberOfPeriods() + minutesToMidnight / 2;
-      m_spin.setRange( 0, max > 8 ? 8 : max, 0 );
-    }
-    else
-      m_spin.setRange( 0, 8, 0 );
+      // display error message and set editor error status
+      String error = Predecessors.errors( newText, row );
+      JPlanner.gui.setError( getControl(), error );
+    } );
 
-    m_spin.setStepPage( 1, 1 );
-    setControl( m_spin );
-  }
-
-  /******************************************* getValue ******************************************/
-  @Override
-  public Object getValue()
-  {
-    // return number of work periods value as integer
-    return m_spin.getInteger();
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // set value depending on type
-    if ( value instanceof Integer )
-      m_spin.setInteger( (int) value );
-    else
-      m_spin.setValue( (String) value );
   }
 
   /***************************************** isValueValid ****************************************/
   @Override
   public boolean isValueValid( Object value )
   {
-    // value is valid if null or converts to an integer
-    if ( value == null )
-      return true;
-
-    try
-    {
-      Integer.parseInt( (String) value );
-      return true;
-    }
-    catch ( Exception exception )
-    {
-      return false; // not valid integer
-    }
+    // value is valid if null or allowed by editor
+    return value == null || ( (XTextField) getControl() ).isAllowed( value.toString() );
   }
+
+  /******************************************* getValue ******************************************/
+  @Override
+  public Object getValue()
+  {
+    // return text as a Predecessors
+    return new Predecessors( ( (XTextField) getControl() ).getText() );
+  }
+
+  /******************************************* setValue ******************************************/
+  @Override
+  public void setValue( Object value )
+  {
+    // set editor display to value if valid task-type, otherwise react to string as if typed
+    ( (XTextField) getControl() ).setText( value.toString() );
+  }
+
 }

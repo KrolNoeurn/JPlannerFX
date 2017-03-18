@@ -426,6 +426,8 @@ public class Day
   public double workDone( Time from )
   {
     // return number of work equivalent days done from 00:00 to specified time
+    if ( m_workMS == 0 )
+      return m_work;
     return m_work * millisecondsDone( from ) / m_workMS;
   }
 

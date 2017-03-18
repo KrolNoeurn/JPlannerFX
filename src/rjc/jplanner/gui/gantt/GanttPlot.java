@@ -37,13 +37,11 @@ import rjc.jplanner.model.Task;
 
 public class GanttPlot extends Canvas
 {
-  private Gantt         m_gantt;
-  private Table         m_table;
+  private Gantt      m_gantt;
+  private Table      m_table;
 
-  private static int    m_taskHeight = 6;
-  private static int    m_arrowSize  = 4;
-
-  public static boolean ganttStretch;
+  private static int m_taskHeight = 6;
+  private static int m_arrowSize  = 4;
 
   /**************************************** constructor ******************************************/
   public GanttPlot( Gantt gantt, Table table )
@@ -86,7 +84,7 @@ public class GanttPlot extends Canvas
     // draw gantt plot
     shadeNonWorking( oldW, 0, newW - oldW, (int) getHeight() );
     drawTasks( 0, (int) getHeight() );
-    drawDependencies( 0, (int) getHeight() );
+    drawDependencies();
   }
 
   /***************************************** heightChange ****************************************/
@@ -105,8 +103,8 @@ public class GanttPlot extends Canvas
 
     // draw gantt plot
     shadeNonWorking( 0, oldH, (int) getWidth(), newH - oldH );
-    drawTasks( oldH, newH );
-    drawDependencies( oldH, newH );
+    drawTasks( oldH, newH - oldH );
+    drawDependencies();
   }
 
   /*************************************** shadeNonWorking ****************************************/
@@ -272,15 +270,19 @@ public class GanttPlot extends Canvas
     if ( w > xe - xs )
       w = xe - xs;
 
+    // draw main summary bar
     GraphicsContext gc = getGraphicsContext2D();
     gc.setFill( Colors.GANTT_SUMMARY );
     gc.fillRect( xs, y - m_taskHeight, xe - xs, m_taskHeight );
 
+    // draw start and end triangles
     gc.setStroke( Colors.GANTT_SUMMARY );
+    xs += 0.5;
+    xe -= 0.5;
     for ( int x = 0; x < w; x++ )
     {
-      gc.strokeLine( xs + x + 0.5, y + 0.5, xs + x + 0.5, y - 0.5 + m_taskHeight * ( w - x ) / w );
-      gc.strokeLine( xe - x - 0.5, y + 0.5, xe - x - 0.5, y - 0.5 + m_taskHeight * ( w - x ) / w );
+      gc.strokeLine( xs + x, y + 0.5, xs + x, y - 0.5 + m_taskHeight * ( w - x ) / w );
+      gc.strokeLine( xe - x, y + 0.5, xe - x, y - 0.5 + m_taskHeight * ( w - x ) / w );
     }
   }
 
@@ -302,9 +304,12 @@ public class GanttPlot extends Canvas
   }
 
   /*************************************** drawDependencies **************************************/
-  private void drawDependencies( int y, int h )
+  private void drawDependencies()
   {
     // draw dependencies on gantt for each task
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setStroke( Colors.GANTT_DEPENDENCY );
+
     int numTasks = JPlanner.plan.getTasksCount();
     for ( int row = 0; row < numTasks; row++ )
     {
@@ -318,7 +323,7 @@ public class GanttPlot extends Canvas
       if ( task.isNull() )
         continue;
 
-      int thisY = m_table.getYStartByRow( row ) + rh / 2;
+      int thisY = m_table.getYStartByRow( row ) + rh / 2 - m_table.getHorizontalHeaderHeight();
 
       // for each predecessor on task
       Predecessors preds = task.getPredecessors();
@@ -331,21 +336,21 @@ public class GanttPlot extends Canvas
         if ( rh <= 0 )
           continue;
 
-        int otherY = m_table.getYStartByRow( other ) + rh / 2;
+        int otherY = m_table.getYStartByRow( other ) + rh / 2 - m_table.getHorizontalHeaderHeight();
 
         switch ( pred.type )
         {
           case Predecessors.TYPE_START_FINISH:
-            drawDependencySF( xStart( pred.task ), otherY, xEnd( task ), thisY, m_gantt.x( task.getEnd() ) );
+            drawDependencySF( gc, xStart( pred.task ), otherY, xEnd( task ), thisY, m_gantt.x( task.getEnd() ) );
             break;
           case Predecessors.TYPE_START_START:
-            drawDependencySS( xStart( pred.task ), otherY, xStart( task ), thisY );
+            drawDependencySS( gc, xStart( pred.task ), otherY, xStart( task ), thisY );
             break;
           case Predecessors.TYPE_FINISH_FINISH:
-            drawDependencyFF( xEnd( pred.task ), otherY, xEnd( task ), thisY );
+            drawDependencyFF( gc, xEnd( pred.task ), otherY, xEnd( task ), thisY );
             break;
           case Predecessors.TYPE_FINISH_START:
-            drawDependencyFS( xEnd( pred.task ), otherY, xStart( task ), thisY, m_gantt.x( task.getStart() ) );
+            drawDependencyFS( gc, xEnd( pred.task ), otherY, xStart( task ), thisY, m_gantt.x( task.getStart() ) );
             break;
           default:
             throw new IllegalArgumentException( "Invalid predecessor type: " + pred.type );
@@ -376,106 +381,115 @@ public class GanttPlot extends Canvas
   }
 
   /*************************************** drawDependencyFS **************************************/
-  private void drawDependencyFS( int x1, int y1, int x2, int y2, int x2raw )
+  private void drawDependencyFS( GraphicsContext gc, int x1, int y1, int x2, int y2, int x2raw )
   {
     // draw dependency from one task-finish to another task-start
-    GraphicsContext gc = getGraphicsContext2D();
-    int sign = y1 > y2 ? -1 : 1;
+    double sign = y1 > y2 ? -1.0 : 1.0;
+    double xs = x1 + 0.5;
+    double ys = y1 - 0.5;
 
     // if task-start after or equal task-finish can draw simple arrow
     if ( x2raw >= x1 )
     {
-      int x = x2raw - x1 - 1;
-      if ( x < 3 )
-        x = 3;
+      double len = x2raw - x1 - 1.0;
+      if ( len < 3.0 )
+        len = 3.0;
 
-      gc.strokeLine( x1 + 1, y1, x1 + x, y1 );
-      x++;
-      drawArrow( x1 + x, y1 + sign, x1 + x, y2 - sign * ( m_taskHeight + 1 ) );
+      gc.strokeLine( xs, ys, xs + len, ys );
+      len++;
+      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( m_taskHeight + 1 ) );
       return;
     }
 
     // need to draw arrow double backing from later task-finish to earlier task-start
-    gc.strokeLine( x1 + 1, y1, x1 + 3, y1 );
-    gc.strokeLine( x1 + 4, y1 + sign, x1 + 4, y1 + sign * ( m_taskHeight + 3 ) );
-    gc.strokeLine( x1 + 3, y1 + sign * ( m_taskHeight + 4 ), x2 - 7, y1 + sign * ( m_taskHeight + 4 ) );
-    gc.strokeLine( x2 - 8, y1 + sign * ( m_taskHeight + 5 ), x2 - 8, y2 - sign );
-    drawArrow( x2 - 7, y2, x2 - 1, y2 );
+    double xe = x2 + 0.5;
+    double ye = y2 - 0.5;
+    gc.strokeLine( xs, ys, xs + 3, ys );
+    gc.strokeLine( xs + 4, ys + sign, xs + 4, ys + sign * ( m_taskHeight + 3 ) );
+    gc.strokeLine( xs + 3, ys + sign * ( m_taskHeight + 4 ), xe - 7, ys + sign * ( m_taskHeight + 4 ) );
+    gc.strokeLine( xe - 8, ys + sign * ( m_taskHeight + 5 ), xe - 8, ye - sign );
+    drawArrow( gc, xe - 7, ye, xe - 1, ye );
   }
 
   /*************************************** drawDependencySF **************************************/
-  private void drawDependencySF( int x1, int y1, int x2, int y2, int x2raw )
+  private void drawDependencySF( GraphicsContext gc, int x1, int y1, int x2, int y2, int x2raw )
   {
     // draw dependency from one task-start to another task-finish ===============================================
-    GraphicsContext gc = getGraphicsContext2D();
-    int sign = y1 > y2 ? -1 : 1;
+    double sign = y1 > y2 ? -1 : 1;
+    double xs = x1 - 0.5;
+    double ys = y1 - 0.5;
 
     // if task-start after or equal task-finish can draw simple arrow
     if ( x2raw <= x1 )
     {
-      int x = x2raw - x1 + 1;
-      if ( x > -3 )
-        x = -3;
+      double len = x2raw - x1 + 1.0;
+      if ( len > -3.0 )
+        len = -3.0;
 
-      gc.strokeLine( x1 - 1, y1, x1 + x, y1 );
-      x--;
-      drawArrow( x1 + x, y1 + sign, x1 + x, y2 - sign * ( m_taskHeight + 1 ) );
+      gc.strokeLine( xs, ys, xs + len, ys );
+      len--;
+      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( m_taskHeight + 1 ) );
       return;
     }
 
     // need to draw arrow double backing from later task-finish to earlier task-start
-    gc.strokeLine( x1 - 1, y1, x1 - 3, y1 );
-    gc.strokeLine( x1 - 4, y1 + sign, x1 - 4, y1 + sign * ( m_taskHeight + 3 ) );
-    gc.strokeLine( x1 - 3, y1 + sign * ( m_taskHeight + 4 ), x2 + 7, y1 + sign * ( m_taskHeight + 4 ) );
-    gc.strokeLine( x2 + 8, y1 + sign * ( m_taskHeight + 5 ), x2 + 8, y2 - sign );
-    drawArrow( x2 + 7, y2, x2 + 1, y2 );
+    double xe = x2 + 0.5;
+    double ye = y2 - 0.5;
+    gc.strokeLine( xs, ys, xs - 3, ys );
+    gc.strokeLine( xs - 4, ys + sign, xs - 4, ys + sign * ( m_taskHeight + 3 ) );
+    gc.strokeLine( xs - 3, ys + sign * ( m_taskHeight + 4 ), xe + 7, ys + sign * ( m_taskHeight + 4 ) );
+    gc.strokeLine( xe + 8, ys + sign * ( m_taskHeight + 5 ), xe + 8, ye - sign );
+    drawArrow( gc, xe + 7, ye, xe, ye );
   }
 
   /*************************************** drawDependencySS **************************************/
-  private void drawDependencySS( int x1, int y1, int x2, int y2 )
+  private void drawDependencySS( GraphicsContext gc, int x1, int y1, int x2, int y2 )
   {
     // draw dependency from one task-start to another task-start
-    GraphicsContext gc = getGraphicsContext2D();
-    int sign = y1 > y2 ? -1 : 1;
+    double sign = y1 > y2 ? -1.0 : 1.0;
+    double xs = x1 + 0.5;
+    double ys = y1 - 0.5;
+    double ye = y2 - 0.5;
 
-    int x = x1 - 3;
-    if ( x > x2 - 8 )
-      x = x2 - 8;
+    double x = xs - 3.0;
+    if ( x > x2 - 7.5 )
+      x = x2 - 7.5;
 
-    gc.strokeLine( x1 - 1, y1, x, y1 );
+    gc.strokeLine( xs - 1, ys, x, ys );
     x--;
-    gc.strokeLine( x, y1 + sign, x, y2 - sign );
-    drawArrow( x + 1, y2, x2 - 1, y2 );
+    gc.strokeLine( x, ys + sign, x, ye - sign );
+    drawArrow( gc, x + 1, ye, x2 - 0.5, ye );
   }
 
   /*************************************** drawDependencyFF **************************************/
-  private void drawDependencyFF( int x1, int y1, int x2, int y2 )
+  private void drawDependencyFF( GraphicsContext gc, int x1, int y1, int x2, int y2 )
   {
     // draw dependency from one task-finish to another task-finish
-    GraphicsContext gc = getGraphicsContext2D();
-    int sign = y1 > y2 ? -1 : 1;
+    double sign = y1 > y2 ? -1.0 : 1.0;
+    double xs = x1 + 0.5;
+    double ys = y1 - 0.5;
+    double ye = y2 - 0.5;
 
-    int x = x1 + 3;
-    if ( x < x2 + 8 )
-      x = x2 + 8;
+    double x = xs + 3.0;
+    if ( x < x2 + 8.5 )
+      x = x2 + 8.5;
 
-    gc.strokeLine( x1 + 1, y1, x, y1 );
+    gc.strokeLine( xs, ys, x, ys );
     x++;
-    gc.strokeLine( x, y1 + sign, x, y2 - sign );
-    drawArrow( x - 1, y2, x2 + 1, y2 );
+    gc.strokeLine( x, ys + sign, x, ye - sign );
+    drawArrow( gc, x - 1, ye, x2 + 0.5, ye );
   }
 
   /****************************************** drawArrow ******************************************/
-  private void drawArrow( int x1, int y1, int x2, int y2 )
+  private void drawArrow( GraphicsContext gc, double x1, double y1, double x2, double y2 )
   {
     // draw line with arrow at end
-    GraphicsContext gc = getGraphicsContext2D();
     if ( x1 == x2 )
     {
       // vertical line and arrow
       gc.strokeLine( x1, y1, x2, y2 );
       int sign = y1 > y2 ? -1 : 1;
-      int y = y2 - sign * m_arrowSize;
+      double y = y2 - sign * m_arrowSize;
 
       for ( int s = 1; s <= m_arrowSize; s++ )
       {
@@ -489,7 +503,7 @@ public class GanttPlot extends Canvas
       // horizontal line and arrow
       gc.strokeLine( x1, y1, x2, y2 );
       int sign = x1 > x2 ? -1 : 1;
-      int x = x2 - sign * m_arrowSize;
+      double x = x2 - sign * m_arrowSize;
 
       for ( int s = 1; s <= m_arrowSize; s++ )
       {

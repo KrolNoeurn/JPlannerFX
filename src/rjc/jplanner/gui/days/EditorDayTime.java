@@ -143,7 +143,7 @@ public class EditorDayTime extends AbstractCellEditor
       m_spin.setValue( (String) value );
   }
 
-  /****************************************** validValue *****************************************/
+  /***************************************** isValueValid ****************************************/
   @Override
   public boolean isValueValid( Object value )
   {

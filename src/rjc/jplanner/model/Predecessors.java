@@ -161,7 +161,7 @@ public class Predecessors
         digit++;
 
       // check start is number
-      if ( digit == 0 )
+      if ( digit < 1 || digit > 9 )
       {
         error.append( '\'' ).append( part ).append( "' does not start with a valid task number.  " );
         continue;
@@ -244,6 +244,8 @@ public class Predecessors
       }
     }
 
+    if ( error.length() < 1 )
+      return null;
     return error.toString();
   }
 

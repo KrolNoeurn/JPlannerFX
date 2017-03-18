@@ -667,6 +667,13 @@ public class MainWindow
     m_tabWidgets.forEach( tabs -> tabs.getDaysTab().getTable().relayout() );
   }
 
+  /**************************************** redrawGantts *****************************************/
+  public void redrawGantts()
+  {
+    // redraw all plan gantts (does not need calling if redrawing tasks tables)
+    m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getGantt().redraw() );
+  }
+
   /************************************** redrawTaskTables ***************************************/
   public void redrawTaskTables()
   {

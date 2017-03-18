@@ -26,18 +26,18 @@ import java.text.DecimalFormat;
 
 public class TimeSpan
 {
-  private double              m_num;
-  private char                m_units;
+  private double             m_num;
+  private char               m_units;
 
-  public static final char    UNIT_SECONDS = 'S';
-  public static final char    UNIT_MINUTES = 'M';
-  public static final char    UNIT_HOURS   = 'H';
-  public static final char    UNIT_DAYS    = 'd';
-  public static final char    UNIT_WEEKS   = 'w';
-  public static final char    UNIT_MONTHS  = 'm';
-  public static final char    UNIT_YEARS   = 'y';
-  public static final char    UNIT_DEFAULT = UNIT_DAYS;
-  private static final String VALID_UNITS  = "SMHdwmy";
+  public static final char   UNIT_SECONDS = 'S';
+  public static final char   UNIT_MINUTES = 'M';
+  public static final char   UNIT_HOURS   = 'H';
+  public static final char   UNIT_DAYS    = 'd';
+  public static final char   UNIT_WEEKS   = 'w';
+  public static final char   UNIT_MONTHS  = 'm';
+  public static final char   UNIT_YEARS   = 'y';
+  public static final char   UNIT_DEFAULT = UNIT_DAYS;
+  public static final String VALID_UNITS  = "SMHdwmy";
 
   // private inner class defining time-span number formatting
   private static final class TimeSpanFormat extends DecimalFormat

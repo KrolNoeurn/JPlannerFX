@@ -130,6 +130,8 @@ public class TasksData extends AbstractDataSource
         return new EditorTaskPriority( columnIndex, row );
       case Task.SECTION_TYPE:
         return new EditorTaskType( columnIndex, row );
+      case Task.SECTION_PRED:
+        return new EditorTaskPredecessors( columnIndex, row );
       default:
         return new EditorText( columnIndex, row );
     }

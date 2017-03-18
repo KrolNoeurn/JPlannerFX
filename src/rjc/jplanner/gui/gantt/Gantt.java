@@ -52,6 +52,8 @@ public class Gantt extends Region
   final public static int       SCROLLBAR_SIZE    = 18;
   final public static int       GANTTSCALE_HEIGHT = 15;
 
+  public static boolean         ganttStretch;
+
   /**************************************** constructor ******************************************/
   public Gantt( Table table )
   {
@@ -138,7 +140,7 @@ public class Gantt extends Region
           // TODO ..................
           break;
         case XmlLabels.XML_STRETCH:
-          GanttPlot.ganttStretch = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+          ganttStretch = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
           break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
@@ -178,7 +180,7 @@ public class Gantt extends Region
     xsw.writeAttribute( XmlLabels.XML_MSPP, Long.toString( m_millisecondsPP ) );
     xsw.writeAttribute( XmlLabels.XML_NONWORKING, "???" );
     xsw.writeAttribute( XmlLabels.XML_CURRENT, "???" );
-    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( GanttPlot.ganttStretch ) );
+    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( ganttStretch ) );
 
     // write gantt-scale display data to XML stream
     int id = 0;
@@ -293,8 +295,14 @@ public class Gantt extends Region
   /********************************************** x **********************************************/
   public int x( DateTime dt )
   {
-    // return x-coordinate for specified date-time
-    return (int) ( ( dt.getMilliseconds() - m_start.getMilliseconds() ) / m_millisecondsPP - m_scrollBar.getValue() );
+    // return x-coordinate for stretched if needed date-time
+    dt = JPlanner.plan.stretch( dt, ganttStretch );
+    long dtMilliseconds = dt.getMilliseconds();
+    long startMilliseconds = m_start.getMilliseconds();
+
+    if ( dtMilliseconds > startMilliseconds )
+      return (int) ( ( dtMilliseconds - startMilliseconds ) / m_millisecondsPP - m_scrollBar.getValue() );
+    return (int) ( ( startMilliseconds - dtMilliseconds ) / -m_millisecondsPP - m_scrollBar.getValue() );
   }
 
   /****************************************** datetime *******************************************/

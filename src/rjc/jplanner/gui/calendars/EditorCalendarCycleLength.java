@@ -62,7 +62,7 @@ public class EditorCalendarCycleLength extends AbstractCellEditor
       throw new IllegalArgumentException( "Unhandled " + value.getClass().getName() );
   }
 
-  /****************************************** validValue *****************************************/
+  /***************************************** isValueValid ****************************************/
   @Override
   public boolean isValueValid( Object value )
   {
