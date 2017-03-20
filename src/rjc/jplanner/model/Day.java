@@ -426,8 +426,6 @@ public class Day
   public double workDone( Time from )
   {
     // return number of work equivalent days done from 00:00 to specified time
-    if ( m_workMS == 0 )
-      return m_work;
     return m_work * millisecondsDone( from ) / m_workMS;
   }
 
@@ -439,6 +437,10 @@ public class Day
 
   public Time workForward( double work )
   {
+    if ( work == 0.0 )
+      return getStart();
+    if ( work == m_work )
+      return getEnd();
     return workForward( 0, work );
   }
 
@@ -455,6 +457,10 @@ public class Day
 
   public Time workBackward( double work )
   {
+    if ( work == 0.0 )
+      return getEnd();
+    if ( work == m_work )
+      return getStart();
     return workBackward( Time.MILLISECONDS_IN_DAY, work );
   }
 
@@ -489,9 +495,6 @@ public class Day
 
   public Time millisecondsForward( int from, int ms )
   {
-    if ( ms > m_workMS )
-      return null;
-
     // work forwards specified number of ms
     for ( DayWorkPeriod period : m_periods )
     {
@@ -523,9 +526,6 @@ public class Day
 
   public Time millisecondsBackward( int from, int ms )
   {
-    if ( ms > m_workMS )
-      return null;
-
     // work backwards specified number of ms
     for ( int p = m_periods.size() - 1; p >= 0; p-- )
     {
@@ -561,17 +561,17 @@ public class Day
       return time;
 
     int now = time.getMilliseconds();
-    int s = m_periods.get( 0 ).m_start.getMilliseconds();
-    if ( now <= s )
+    int start = m_periods.get( 0 ).m_start.getMilliseconds();
+    if ( now <= start )
       return Time.MIN_VALUE;
 
-    int e = m_periods.get( m_periods.size() - 1 ).m_end.getMilliseconds();
-    if ( now >= e )
+    int end = m_periods.get( m_periods.size() - 1 ).m_end.getMilliseconds();
+    if ( now >= end )
       return Time.MAX_VALUE;
 
     // stretch time component so it uses whole 24 hours
-    double scale = (double) Time.MILLISECONDS_IN_DAY / ( e - s );
-    return Time.fromMilliseconds( (int) ( scale * ( now - s ) ) );
+    double scale = (double) Time.MILLISECONDS_IN_DAY / ( end - start );
+    return Time.fromMilliseconds( (int) ( scale * ( now - start ) ) );
   }
 
   /******************************************* getIndex ******************************************/

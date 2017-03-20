@@ -21,6 +21,7 @@ package rjc.jplanner.gui;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -32,6 +33,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -107,15 +110,19 @@ public class DateTimeSelector extends Popup
     shadow.setRadius( SHADOW_RADIUS );
     getScene().getRoot().setEffect( shadow );
 
-    // toggle pop-up when parent button is pressed
-    m_parent.getButton().setOnMousePressed( event -> toggleSelector( event ) );
+    // toggle pop-up when parent button is pressed or F2 key is pressed
+    m_parent.getButton().setOnMousePressed( event -> toggleSelector() );
+    m_parent.setOnKeyPressed( event ->
+    {
+      if ( event.getCode() == KeyCode.F2 )
+        toggleSelector();
+    } );
 
     // ensure parent editor is editable when selector is hidden
     setOnHidden( event -> m_parent.setEditable( true ) );
 
     // keep parent editor and this selector synchronised
     m_parent.textProperty().addListener( ( observable, oldText, newText ) -> setDateTime( m_parent.getDateTime() ) );
-    m_calendar.setOnMouseClicked( event -> calendarMouseClicked( event ) );
     m_year.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_year ) );
     m_month.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_month ) );
     m_hours.textProperty().addListener( ( observable, oldText, newText ) -> updateParent( m_hours ) );
@@ -196,7 +203,7 @@ public class DateTimeSelector extends Popup
   }
 
   /*************************************** toggleSelector ****************************************/
-  private void toggleSelector( MouseEvent event )
+  private void toggleSelector()
   {
     // if selector open, hide, if hidden, open
     if ( isShowing() )
@@ -207,6 +214,7 @@ public class DateTimeSelector extends Popup
       Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
       show( m_parent, point.getX() - SHADOW_RADIUS + 1.0, point.getY() - SHADOW_RADIUS + 1.0 );
       arrangeSelector();
+      m_calendar.requestFocus();
     }
   }
 
@@ -250,6 +258,17 @@ public class DateTimeSelector extends Popup
     // create calendar canvas
     m_calendar = new Canvas();
     m_calendar.setHeight( 17.0 * 7.0 );
+    m_calendar.setFocusTraversable( true );
+    m_calendar.setOnKeyPressed( event -> calendarKeyPressed( event ) );
+    m_calendar.setOnKeyTyped( event -> calendarKeyTyped( event ) );
+    m_calendar.setOnMouseClicked( event -> calendarMouseClicked( event ) );
+    m_calendar.focusedProperty().addListener( ( observable, oldF, newF ) ->
+    {
+      if ( newF.booleanValue() )
+        m_calendar.setStyle( "-fx-effect: dropshadow(gaussian, #039ed3, 4, 0.75, 0, 0);" );
+      else
+        m_calendar.setStyle( "" );
+    } );
 
     // create buttons
     m_buttons = new HBox();
@@ -439,6 +458,82 @@ public class DateTimeSelector extends Popup
 
     DateTime dt = new DateTime( new Date( ld ), getTime() );
     m_parent.setDateTime( dt );
+    m_calendar.requestFocus();
+  }
+
+  /************************************ calendarKeyPressed ***************************************/
+  private void calendarKeyPressed( KeyEvent event )
+  {
+    // react to key presses
+    boolean handled = true;
+    switch ( event.getCode() )
+    {
+      case HOME:
+        int day = getDate().getDayOfMonth();
+        m_parent.setDateTime( getDateTime().plusDays( 1 - day ) );
+        break;
+
+      case END:
+        boolean leap = Year.isLeap( m_year.getInteger() );
+        int len = m_month.getMonth().length( leap );
+        day = getDate().getDayOfMonth();
+        m_parent.setDateTime( getDateTime().plusDays( len - day ) );
+        break;
+
+      case PAGE_UP:
+        m_parent.setDateTime( getDateTime().plusDays( -28 ) );
+        break;
+
+      case PAGE_DOWN:
+        m_parent.setDateTime( getDateTime().plusDays( 28 ) );
+        break;
+
+      case UP:
+      case KP_UP:
+        m_parent.setDateTime( getDateTime().plusDays( -7 ) );
+        break;
+
+      case DOWN:
+      case KP_DOWN:
+        m_parent.setDateTime( getDateTime().plusDays( 7 ) );
+        break;
+
+      case RIGHT:
+      case KP_RIGHT:
+        m_parent.setDateTime( getDateTime().plusDays( 1 ) );
+        break;
+
+      case LEFT:
+      case KP_LEFT:
+        m_parent.setDateTime( getDateTime().plusDays( -1 ) );
+        break;
+
+      default:
+        handled = false;
+        break;
+    }
+
+    // if handled then consume
+    if ( handled )
+      event.consume();
+  }
+
+  /************************************ calendarKeyPressed ***************************************/
+  private void calendarKeyTyped( KeyEvent event )
+  {
+    // reach to key typed
+    char key = event.getCharacter().charAt( 0 );
+
+    // if digit typed, move date forward until day-of-month contains typed digit
+    if ( Character.isDigit( key ) )
+    {
+      Date date = getDate();
+      do
+        date.increment();
+      while ( Integer.toString( date.getDayOfMonth() ).indexOf( key ) < 0 );
+      m_parent.setDateTime( new DateTime( date, getTime() ) );
+    }
+
   }
 
 }

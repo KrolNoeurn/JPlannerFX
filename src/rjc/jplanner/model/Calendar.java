@@ -298,6 +298,18 @@ public class Calendar
     return getDay( date ).isWorking();
   }
 
+  /***************************************** isWorking *******************************************/
+  public boolean isWorking()
+  {
+    // return whether calendar has any working days
+    for ( int num = 0; num < m_normal.size(); num++ )
+      if ( m_normal.get( num ).isWorking() && m_normal.get( num ).getWork() > 0.0 )
+        return true;
+
+    // no days are working
+    return false;
+  }
+
   /******************************************* getDay ********************************************/
   public Day getDay( Date date )
   {
@@ -509,6 +521,9 @@ public class Calendar
   private DateTime workDays( DateTime start, double work )
   {
     // return date-time from start by specified number for work equivalent days
+    if ( work == 0.0 )
+      return start;
+
     Date date = start.getDate();
     Time fromTime = start.getTime();
     Day day = getDay( date );
@@ -516,53 +531,55 @@ public class Calendar
     if ( work > 0 )
     {
       // work is positive, so go forwards in time
-      Time time = day.workForward( fromTime, work );
+      Time time = null;
+      if ( day.getNumberOfPeriods() > 0 )
+        time = day.workForward( fromTime, work );
 
       // if valid time then finished in day
       if ( time != null )
         return new DateTime( date, time );
 
       // if not valid time, move to next date
-      work -= day.workToGo( fromTime );
+      if ( day.getNumberOfPeriods() > 0 )
+        work -= day.workToGo( fromTime );
       date.increment();
       day = getDay( date );
-      while ( work >= day.getWork() )
+      while ( work > day.getWork() )
       {
-        work -= day.getWork();
+        if ( day.getNumberOfPeriods() > 0 )
+          work -= day.getWork();
         date.increment();
         day = getDay( date );
       }
 
-      if ( work == 0 )
-        return new DateTime( date, day.getStart() );
-      else
-        return new DateTime( date, day.workForward( work ) );
+      return new DateTime( date, day.workForward( work ) );
     }
     else
     {
       // work is negative, so go backwards in time
       work = -work;
-      Time time = day.workBackward( fromTime, work );
+      Time time = null;
+      if ( day.getNumberOfPeriods() > 0 )
+        time = day.workBackward( fromTime, work );
 
       // if valid time then finished in day
       if ( time != null )
         return new DateTime( date, time );
 
       // if not valid time, move to previous date
-      work -= day.workDone( fromTime );
+      if ( day.getNumberOfPeriods() > 0 )
+        work -= day.workDone( fromTime );
       date.decrement();
       day = getDay( date );
-      while ( work >= day.getWork() )
+      while ( work > day.getWork() )
       {
-        work -= day.getWork();
+        if ( day.getNumberOfPeriods() > 0 )
+          work -= day.getWork();
         date.decrement();
         day = getDay( date );
       }
 
-      if ( work == 0 )
-        return new DateTime( date, day.getEnd() );
-      else
-        return new DateTime( date, day.workBackward( work ) );
+      return new DateTime( date, day.workBackward( work ) );
     }
   }
 

@@ -40,6 +40,7 @@ public class ComboDropDown extends Popup
   private int                 m_rowDescent;
   private int                 m_rowOffset;
   private int                 m_highlighed;
+  private DropShadow          m_shadow;
 
   private static final int    BORDER = 2;
 
@@ -55,10 +56,10 @@ public class ComboDropDown extends Popup
     getContent().add( m_canvas );
 
     // add shadow
-    DropShadow shadow = new DropShadow();
-    shadow.setColor( Colors.FOCUSBLUE );
-    shadow.setRadius( 4.0 );
-    getScene().getRoot().setEffect( shadow );
+    m_shadow = new DropShadow();
+    m_shadow.setColor( Colors.FOCUSBLUE );
+    m_shadow.setRadius( 4.0 );
+    getScene().getRoot().setEffect( m_shadow );
 
     // determine row height and row text descent
     Bounds bounds = ( new Text( "Qwerty" ) ).getLayoutBounds();
@@ -72,32 +73,35 @@ public class ComboDropDown extends Popup
     m_canvas.setOnMouseReleased( event -> hide() );
 
     // toggle pop-up when parent is pressed
-    parent.setOnMousePressed( event ->
-    {
-      if ( isShowing() )
-        hide();
-      else
-      {
-        // set pop-up position and show 
-        Point2D point = parent.localToScreen( 0.0, parent.getHeight() );
-        double x = point.getX() - shadow.getRadius() + 1.0;
-        double y = point.getY() - shadow.getRadius() + 1.0;
-
-        // determine canvas size
-        m_canvas.setWidth( parent.getWidth() );
-        int height = count() * m_rowHeight + BORDER * 2;
-        Screen screen = Screen.getScreensForRectangle( x, y, 0.0, 0.0 ).get( 0 );
-        double maxY = screen.getVisualBounds().getMaxY();
-        if ( y + height > maxY )
-          height = (int) ( maxY - y - BORDER * 2 );
-        m_canvas.setHeight( height );
-        redrawCanvas();
-        show( parent, x, y );
-      }
-    } );
+    parent.setOnMousePressed( event -> toggleDropDown() );
 
     // hide pop-up when parent loses focus (e.g. when TAB pressed)
     parent.focusedProperty().addListener( ( observable, oldFocus, newFocus ) -> hide() );
+  }
+
+  /*************************************** toggleDropDown ****************************************/
+  public void toggleDropDown()
+  {
+    if ( isShowing() )
+      hide();
+    else
+    {
+      // set pop-up position and show 
+      Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
+      double x = point.getX() - m_shadow.getRadius() + 1.0;
+      double y = point.getY() - m_shadow.getRadius() + 1.0;
+
+      // determine canvas size
+      m_canvas.setWidth( m_parent.getWidth() );
+      int height = count() * m_rowHeight + BORDER * 2;
+      Screen screen = Screen.getScreensForRectangle( x, y, 0.0, 0.0 ).get( 0 );
+      double maxY = screen.getVisualBounds().getMaxY();
+      if ( y + height > maxY )
+        height = (int) ( maxY - y - BORDER * 2 );
+      m_canvas.setHeight( height );
+      redrawCanvas();
+      show( m_parent, x, y );
+    }
   }
 
   /**************************************** redrawCanvas *****************************************/

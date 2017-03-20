@@ -127,17 +127,15 @@ abstract public class AbstractCellEditor
   /******************************************** close ********************************************/
   public void close( boolean commit )
   {
-    // if commit requested, save new value to table data source & move focus
-    m_cellEditorInProgress = null;
-    if ( commit )
-      m_table.getData().setValue( m_columnIndex, m_row, getValue() );
-
-    // remove editor from table
+    // clear any error message, remove control from table, and give focus back to table
+    JPlanner.gui.setError( m_control, null );
     m_table.remove( m_control );
     m_table.requestFocus();
+    m_cellEditorInProgress = null;
 
-    // clear status-bar (e.g. error message if control was in error state)
-    JPlanner.gui.message();
+    // if commit requested, save new value to data source
+    if ( commit )
+      m_table.getData().setValue( m_columnIndex, m_row, getValue() );
   }
 
   /********************************************* open ********************************************/

@@ -120,6 +120,9 @@ public abstract class AbstractComboEditor extends XTextField
       case END:
         setSelectedIndex( getItemCount() - 1 );
         break;
+      case F2:
+        m_dropdown.toggleDropDown();
+        break;
       default:
         break;
     }

@@ -94,6 +94,10 @@ public class DaysData extends AbstractDataSource
     if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
       return Colors.DISABLED_CELL;
 
+    // if no work periods, work is disabled
+    if ( columnIndex == Day.SECTION_WORK && day.getNumberOfPeriods() == 0 )
+      return Colors.DISABLED_CELL;
+
     return Colors.NORMAL_CELL;
   }
 
@@ -101,9 +105,8 @@ public class DaysData extends AbstractDataSource
   @Override
   public AbstractCellEditor getEditor( int columnIndex, int row )
   {
-    // return null if cell is not editable, unused start/end
-    Day day = JPlanner.plan.getDay( row );
-    if ( columnIndex >= day.getNumberOfPeriods() * 2 + Day.SECTION_START1 )
+    // return null if cell is disabled
+    if ( getCellBackground( columnIndex, row ) == Colors.DISABLED_CELL )
       return null;
 
     // return editor for table body cell
@@ -141,6 +144,10 @@ public class DaysData extends AbstractDataSource
   @Override
   public Object getValue( int columnIndex, int row )
   {
+    // return null if cell is disabled
+    if ( getCellBackground( columnIndex, row ) == Colors.DISABLED_CELL )
+      return null;
+
     // return cell value
     return JPlanner.plan.getDay( row ).getValue( columnIndex );
   }
@@ -151,6 +158,8 @@ public class DaysData extends AbstractDataSource
   {
     // get value to be displayed
     Object value = getValue( columnIndex, row );
+    if ( value == null )
+      return null;
 
     // convert times into string using "HH:MM" formats
     if ( value instanceof Time )
@@ -161,7 +170,7 @@ public class DaysData extends AbstractDataSource
       return String.format( "%.2f", value );
 
     // return cell display text
-    return ( value == null ? null : value.toString() );
+    return value.toString();
   }
 
   /********************************** defaultTableModifications **********************************/

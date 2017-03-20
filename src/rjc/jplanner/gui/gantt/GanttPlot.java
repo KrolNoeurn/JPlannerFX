@@ -318,9 +318,9 @@ public class GanttPlot extends Canvas
       if ( rh <= 0 )
         continue;
 
-      // if null task, skip row
+      // if no gantt-data, skip row
       Task task = JPlanner.plan.getTask( row );
-      if ( task.isNull() )
+      if ( task.getGanttData() == null )
         continue;
 
       int thisY = m_table.getYStartByRow( row ) + rh / 2 - m_table.getHorizontalHeaderHeight();
@@ -329,11 +329,11 @@ public class GanttPlot extends Canvas
       Predecessors preds = task.getPredecessors();
       for ( int p = 0; p < preds.getCount(); p++ )
       {
-        // if hidden, skip predecessor
+        // if hidden or no gantt-data, skip predecessor
         Predecessor pred = preds.get( p );
         int other = pred.task.getIndex();
         rh = m_table.getRowHeight( other );
-        if ( rh <= 0 )
+        if ( rh <= 0 || pred.task.getGanttData() == null )
           continue;
 
         int otherY = m_table.getYStartByRow( other ) + rh / 2 - m_table.getHorizontalHeaderHeight();

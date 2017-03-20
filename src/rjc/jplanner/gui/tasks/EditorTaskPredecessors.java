@@ -38,7 +38,7 @@ public class EditorTaskPredecessors extends EditorText
     super( columnIndex, row );
 
     // only allow valid characters (\055 = -)
-    ( (XTextField) getControl() ).setAllowed( "[" + TimeSpan.VALID_UNITS + "fFsS+0123456789.,\055]*" );
+    ( (XTextField) getControl() ).setAllowed( "[-+., fFsS0123456789" + TimeSpan.VALID_UNITS + "]*" );
 
     // add listener to set error status
     ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
@@ -63,15 +63,7 @@ public class EditorTaskPredecessors extends EditorText
   public Object getValue()
   {
     // return text as a Predecessors
-    return new Predecessors( ( (XTextField) getControl() ).getText() );
-  }
-
-  /******************************************* setValue ******************************************/
-  @Override
-  public void setValue( Object value )
-  {
-    // set editor display to value if valid task-type, otherwise react to string as if typed
-    ( (XTextField) getControl() ).setText( value.toString() );
+    return new Predecessors( (String) super.getValue() );
   }
 
 }

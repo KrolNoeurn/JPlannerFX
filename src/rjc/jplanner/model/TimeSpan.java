@@ -91,7 +91,12 @@ public class TimeSpan
         throw new IllegalArgumentException( "Invalid units '" + str + "'" );
     }
 
-    // set number rounding to 
+    // check remaining string to be simple number
+    for ( int c = 0; c < str.length(); c++ )
+      if ( "0123456789.+-".indexOf( str.charAt( c ) ) < 0 )
+        throw new IllegalArgumentException( "Invalid number '" + str + "'" );
+
+    // set number rounding to 2 decimal places
     m_num = Math.rint( Double.parseDouble( str ) * 100.0 ) / 100.0;
   }
 

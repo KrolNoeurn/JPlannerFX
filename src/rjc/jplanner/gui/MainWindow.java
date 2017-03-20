@@ -53,6 +53,7 @@ import rjc.jplanner.XmlLabels;
 import rjc.jplanner.command.UndoStack;
 import rjc.jplanner.gui.plan.PlanNotes;
 import rjc.jplanner.gui.plan.PlanProperties;
+import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Plan;
 
@@ -705,7 +706,15 @@ public class MainWindow
   /****************************************** schedule *******************************************/
   public void schedule()
   {
-    // schedule the plan, then redraw task tables and gantt to show result
+    // check plan default-calendar is working before starting re-schedule
+    Calendar cal = JPlanner.plan.getDefaultcalendar();
+    if ( !cal.isWorking() )
+    {
+      setError( m_statusBar, "Default calendar '" + cal.getName() + "' has no working periods." );
+      return;
+    }
+
+    // schedule the plan, then redraw task tables (which also triggers gantt redraws) to show result
     JPlanner.plan.schedule();
     redrawTaskTables();
   }
