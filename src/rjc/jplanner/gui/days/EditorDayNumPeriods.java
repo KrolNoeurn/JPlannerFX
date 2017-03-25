@@ -42,7 +42,7 @@ public class EditorDayNumPeriods extends AbstractCellEditor
     if ( JPlanner.plan.getDay( row ).getNumberOfPeriods() > 0 )
     {
       Time end = JPlanner.plan.getDay( row ).getEnd();
-      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.getMilliseconds() ) / 60000;
+      int minutesToMidnight = ( Time.MILLISECONDS_IN_DAY - end.getDayMilliseconds() ) / 60000;
       int max = JPlanner.plan.getDay( row ).getNumberOfPeriods() + minutesToMidnight / 2;
       m_spin.setRange( 0, max > 8 ? 8 : max, 0 );
     }

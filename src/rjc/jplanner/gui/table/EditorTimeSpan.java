@@ -100,10 +100,10 @@ public class EditorTimeSpan extends AbstractCellEditor
 
   /********************************************* open ********************************************/
   @Override
-  public void open( Table table, Object value, MoveDirection move )
+  public void open( Table table, Object value )
   {
     // open cell editor
-    super.open( table, value, move );
+    super.open( table, value );
 
     // add listener to react to user typing new TimeSpan units
     m_spin.setOnKeyTyped( event ->

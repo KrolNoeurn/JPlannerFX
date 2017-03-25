@@ -60,14 +60,14 @@ public class DateTime implements Comparable<DateTime>
     int split = str.indexOf( 'T' );
     Date date = Date.fromString( str.substring( 0, split ) );
     Time time = Time.fromString( str.substring( split + 1, str.length() ) );
-    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getDayMilliseconds();
   }
 
   /***************************************** constructor *****************************************/
   public DateTime( Date date, Time time )
   {
     // constructor
-    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getDayMilliseconds();
   }
 
   /***************************************** constructor *****************************************/
@@ -76,7 +76,7 @@ public class DateTime implements Comparable<DateTime>
     // constructor
     Date date = new Date( dt.toLocalDate() );
     Time time = new Time( dt.toLocalTime() );
-    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getMilliseconds();
+    m_milliseconds = date.getEpochday() * MILLISECONDS_IN_DAY + time.getDayMilliseconds();
   }
 
   /****************************************** toString *******************************************/

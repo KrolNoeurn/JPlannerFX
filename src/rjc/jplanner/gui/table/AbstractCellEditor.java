@@ -40,7 +40,6 @@ abstract public class AbstractCellEditor
   private Table                     m_table;
   private int                       m_columnIndex;
   private int                       m_row;
-  private MoveDirection             m_moveDirection;
 
   private Control                   m_control;             // prime control that has focus
 
@@ -128,10 +127,10 @@ abstract public class AbstractCellEditor
   public void close( boolean commit )
   {
     // clear any error message, remove control from table, and give focus back to table
+    m_cellEditorInProgress = null;
     JPlanner.gui.setError( m_control, null );
     m_table.remove( m_control );
     m_table.requestFocus();
-    m_cellEditorInProgress = null;
 
     // if commit requested, save new value to data source
     if ( commit )
@@ -139,7 +138,7 @@ abstract public class AbstractCellEditor
   }
 
   /********************************************* open ********************************************/
-  public void open( Table table, Object value, MoveDirection move )
+  public void open( Table table, Object value )
   {
     // check editor is set
     if ( m_control == null )
@@ -147,7 +146,6 @@ abstract public class AbstractCellEditor
 
     // set editor position & size
     m_table = table;
-    m_moveDirection = move;
 
     int w = m_table.getWidthByColumnIndex( m_columnIndex ) + 1;
     int h = m_table.getRowHeight( m_row ) + 1;

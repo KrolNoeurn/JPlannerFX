@@ -607,7 +607,7 @@ public class TableEvents extends TableCanvas
 
     // open editor if one available
     if ( editor != null && editor.isValueValid( value ) )
-      editor.open( m_table, value, MoveDirection.DOWN );
+      editor.open( m_table, value );
   }
 
   /****************************************** moveFocus ******************************************/

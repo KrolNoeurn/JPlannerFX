@@ -71,7 +71,7 @@ public class Tasks extends ArrayList<Task>
   {
     // initialise list with default tasks (including special task 0)
     clear();
-    for ( int count = 0; count <= 2000; count++ )
+    for ( int count = 0; count <= 200; count++ )
       add( new Task() );
 
     setupTaskZero();

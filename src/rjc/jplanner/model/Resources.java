@@ -40,7 +40,7 @@ public class Resources extends ArrayList<Resource>
   {
     // initialise list with default resources (including special resource 0)
     clear();
-    for ( int count = 0; count <= 10; count++ )
+    for ( int count = 0; count <= 100; count++ )
       add( new Resource() );
   }
 

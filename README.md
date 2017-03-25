@@ -47,5 +47,5 @@ java -jar JPlannerFX.jar
 ## Built With
 
 * [Java](https://www.oracle.com/java/) - General-purpose computer programming language
-* [JavaFX](https://docs.oracle.com/javafx/) - Used to generate interactive graphical interface 
-* [Eclipse](https://www.eclipse.org) - Integrated development environment (IDE) used to develop the application
+* [JavaFX](https://docs.oracle.com/javafx/) - Java software library used to generate the application's interactive graphical user interface 
+* [Eclipse](https://www.eclipse.org/ide/) - Integrated development environment (IDE) used to develop the application

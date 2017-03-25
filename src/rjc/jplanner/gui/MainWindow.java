@@ -101,7 +101,7 @@ public class MainWindow
 
     // construct main application window
     JPLANNER_ICON = new Image( getClass().getResourceAsStream( "jplanner.png" ) );
-    Scene scene = new Scene( grid, 800, 500, Colors.GENERAL_BACKGROUND );
+    Scene scene = new Scene( grid, 763, 530, Colors.GENERAL_BACKGROUND );
     stage.setScene( scene );
     stage.setTitle( "JPlannerFX" );
     stage.show();

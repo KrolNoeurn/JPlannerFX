@@ -72,10 +72,10 @@ public class Time
     m_milliseconds = hours * 3600_000 + mins * 60_000 + secs * 1000 + ms;
   }
 
-  /*************************************** getMilliseconds ***************************************/
-  public int getMilliseconds()
+  /************************************* getDayMilliseconds **************************************/
+  public int getDayMilliseconds()
   {
-    // return int number of milliseconds from start of day
+    // return number of milliseconds from start of day
     return m_milliseconds;
   }
 
@@ -217,8 +217,8 @@ public class Time
     return m_milliseconds / 1000 % 60;
   }
 
-  /******************************************** getMs ********************************************/
-  public int getMs()
+  /*************************************** getMilliseconds ***************************************/
+  public int getMilliseconds()
   {
     // return milliseconds fraction of seconds (0 to 999 inclusive)
     return m_milliseconds % 1000;

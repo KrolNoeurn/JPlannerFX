@@ -50,13 +50,13 @@ public class EditorDayTime extends AbstractCellEditor
     Day day = JPlanner.plan.daytypes.get( row );
     if ( columnIndex > Day.SECTION_START1 )
     {
-      m_min = ( (Time) day.getValue( columnIndex - 1 ) ).getMilliseconds();
+      m_min = ( (Time) day.getValue( columnIndex - 1 ) ).getDayMilliseconds();
       m_min += 60000;
     }
     int num = day.getNumberOfPeriods();
     if ( columnIndex < Day.SECTION_START1 + 2 * num - 1 )
     {
-      m_max = ( (Time) day.getValue( columnIndex + 1 ) ).getMilliseconds();
+      m_max = ( (Time) day.getValue( columnIndex + 1 ) ).getDayMilliseconds();
       m_max -= 60000;
     }
 
@@ -109,7 +109,7 @@ public class EditorDayTime extends AbstractCellEditor
     }
 
     // check time is between min & max
-    if ( time.getMilliseconds() < m_min || time.getMilliseconds() > m_max )
+    if ( time.getDayMilliseconds() < m_min || time.getDayMilliseconds() > m_max )
       return "Time not between " + Time.fromMilliseconds( m_min ).toStringShort() + " and "
           + Time.fromMilliseconds( m_max ).toStringShort();
 

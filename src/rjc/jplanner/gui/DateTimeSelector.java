@@ -78,11 +78,11 @@ public class DateTimeSelector extends Popup
   private SpinEditor          m_secs;
   private SpinEditor          m_millisecs;
 
-  private Button              m_today;
-  private Button              m_start;
-  private Button              m_end;
-  private Button              m_forward;
-  private Button              m_back;
+  private Button              m_today;             // set date to today, without changing time
+  private Button              m_start;             // set time to working start of day, without changing date
+  private Button              m_end;               // set time to working end of day, without changing date
+  private Button              m_forward;           // move date-time forward to next working period boundary
+  private Button              m_back;              // move date-time back to next working period boundary
 
   private GraphicsContext     m_gc;
   private double              m_columnWidth;
@@ -172,7 +172,7 @@ public class DateTimeSelector extends Popup
     m_hours.setInteger( dt.getTime().getHours() );
     m_mins.setInteger( dt.getTime().getMinutes() );
     m_secs.setInteger( dt.getTime().getSeconds() );
-    m_millisecs.setInteger( dt.getTime().getMs() );
+    m_millisecs.setInteger( dt.getTime().getMilliseconds() );
     m_ignoreUpdates = false;
     drawCalendar();
   }
@@ -284,7 +284,7 @@ public class DateTimeSelector extends Popup
     // add button actions
     m_today.setOnAction( event -> m_parent.setDateTime( new DateTime( Date.now(), getTime() ) ) );
 
-    m_back.setOnAction( event -> JPlanner.trace( "BACK" ) );
+    m_back.setOnAction( event -> m_parent.setDateTime( back() ) );
 
     m_start.setOnAction( event ->
     {
@@ -304,7 +304,7 @@ public class DateTimeSelector extends Popup
         m_parent.setDateTime( new DateTime( getDate(), Time.MAX_VALUE ) );
     } );
 
-    m_forward.setOnAction( event -> JPlanner.trace( "FORWARD" ) );
+    m_forward.setOnAction( event -> m_parent.setDateTime( forward() ) );
 
     // populate pane
     m_pane = new Pane();
@@ -312,6 +312,59 @@ public class DateTimeSelector extends Popup
     m_pane.setBackground( BACKGROUND );
     m_pane.setBorder( BORDER );
     getContent().add( m_pane );
+  }
+
+  /******************************************* forward *******************************************/
+  private DateTime forward()
+  {
+    // return date-time forward to next working period boundary
+    Calendar cal = JPlanner.gui.getPropertiesPane().getCalendar();
+    Date date = getDate();
+    Day day = cal.getDay( date );
+    int ms = getTime().getDayMilliseconds();
+    int num = day.getNumberOfPeriods();
+
+    // loop around any working periods in day
+    for ( int period = 0; period < num; period++ )
+    {
+      if ( ms < day.getStart( period ).getDayMilliseconds() )
+        return new DateTime( date, day.getStart( period ) );
+      if ( ms < day.getEnd( period ).getDayMilliseconds() )
+        return new DateTime( date, day.getEnd( period ) );
+    }
+
+    // after final work period
+    return cal.getWorkDateTimeUp( getDateTime() );
+  }
+
+  /******************************************** back *********************************************/
+  private DateTime back()
+  {
+    // return date-time back to next working period boundary
+    Calendar cal = JPlanner.gui.getPropertiesPane().getCalendar();
+
+    // if at beginning of day, move back 1ms to go to previous day
+    int ms = getTime().getDayMilliseconds();
+    if ( ms == 0 )
+    {
+      m_parent.setDateTime( getDateTime().plusMilliseconds( -1 ) );
+      ms = getTime().getDayMilliseconds();
+    }
+    Date date = getDate();
+    Day day = cal.getDay( date );
+    int num = day.getNumberOfPeriods();
+
+    // loop around any working periods in day
+    for ( int period = num - 1; period >= 0; period-- )
+    {
+      if ( ms > day.getEnd( period ).getDayMilliseconds() )
+        return new DateTime( date, day.getEnd( period ) );
+      if ( ms > day.getStart( period ).getDayMilliseconds() )
+        return new DateTime( date, day.getStart( period ) );
+    }
+
+    // before first work period
+    return cal.getWorkDateTimeDown( getDateTime() );
   }
 
   /************************************* createSpinEditor ****************************************/
@@ -506,6 +559,13 @@ public class DateTimeSelector extends Popup
       case LEFT:
       case KP_LEFT:
         m_parent.setDateTime( getDateTime().plusDays( -1 ) );
+        break;
+
+      case ENTER:
+      case ESCAPE:
+        handled = false;
+        if ( isShowing() )
+          toggleSelector();
         break;
 
       default:
