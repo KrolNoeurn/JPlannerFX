@@ -31,7 +31,7 @@ import rjc.jplanner.JPlanner;
 /***************** Pane to display number of tasks/resources/calendars/day-types *****************/
 /*************************************************************************************************/
 
-public class NumberOf extends Pane
+class NumberOf extends Pane
 {
   private Canvas m_canvas = new Canvas(); // canvas to display group box and contents
 

@@ -35,7 +35,7 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 /****************************** Main JPlanner application menu bar *******************************/
 /*************************************************************************************************/
 
-public class Menus extends MenuBar
+class Menus extends MenuBar
 {
   // public variables
   public CheckMenuItem viewUndoStack;

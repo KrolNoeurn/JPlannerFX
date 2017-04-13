@@ -27,7 +27,7 @@ import rjc.jplanner.model.Time;
 /********************* Table cell editor for day-type number of work periods *********************/
 /*************************************************************************************************/
 
-public class EditorDayNumPeriods extends AbstractCellEditor
+class EditorDayNumPeriods extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
 

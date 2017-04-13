@@ -27,10 +27,10 @@ import rjc.jplanner.model.TaskType;
 /******************************** Table cell editor for task type ********************************/
 /*************************************************************************************************/
 
-public class EditorTaskType extends AbstractCellEditor
+class EditorTaskType extends AbstractCellEditor
 {
   // extended version of AbstractComboEditor with list of calendars
-  public class TaskTypeCombo extends AbstractComboEditor
+  private class TaskTypeCombo extends AbstractComboEditor
   {
     /**************************************** getItemCount *****************************************/
     @Override
@@ -58,7 +58,7 @@ public class EditorTaskType extends AbstractCellEditor
 
   }
 
-  TaskTypeCombo m_combo; // combo editor
+  private TaskTypeCombo m_combo; // combo editor
 
   /**************************************** constructor ******************************************/
   public EditorTaskType( int columnIndex, int row )

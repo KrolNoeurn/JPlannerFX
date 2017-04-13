@@ -36,7 +36,7 @@ import rjc.jplanner.model.Calendar;
 /**************************** Table data source for showing calendars ****************************/
 /*************************************************************************************************/
 
-public class CalendarsData extends AbstractDataSource
+class CalendarsData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/

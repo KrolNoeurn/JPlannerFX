@@ -42,7 +42,7 @@ import rjc.jplanner.model.Task;
 /****************************** Table data source for showing tasks ******************************/
 /*************************************************************************************************/
 
-public class TasksData extends AbstractDataSource
+class TasksData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/

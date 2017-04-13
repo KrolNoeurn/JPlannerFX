@@ -28,7 +28,7 @@ import rjc.jplanner.gui.XScrollBar;
 /*********************** JavaFX table display with canvas and scroll bars ************************/
 /*************************************************************************************************/
 
-public class TableDisplay extends TableParent
+class TableDisplay extends TableParent
 {
   protected ScrollBar m_vScrollBar;       // vertical scroll bar
   protected ScrollBar m_hScrollBar;       // horizontal scroll bar

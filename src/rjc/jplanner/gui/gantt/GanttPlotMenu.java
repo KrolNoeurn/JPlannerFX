@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.gantt;
 
+import javafx.event.ActionEvent;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -30,36 +31,27 @@ import rjc.jplanner.model.DateTime;
 /********************************* Context menu for Gantt plots **********************************/
 /*************************************************************************************************/
 
-public class GanttPlotMenu extends ContextMenu
+class GanttPlotMenu extends ContextMenu
 {
   private static GanttPlotMenu m_menu;
   private static int           m_x;
 
   /**************************************** constructor ******************************************/
-  public GanttPlotMenu()
+  private GanttPlotMenu()
   {
     // create the gantt context menu
 
     // zoom in
     MenuItem zoomIn = new MenuItem( "Zoom in" );
-    zoomIn.setOnAction( event ->
-    {
-      Gantt gantt = ( (GanttPlot) this.getOwnerNode() ).getGantt();
-      DateTime dt = gantt.datetime( m_x );
-      gantt.setMsPP( ( gantt.getMsPP() * 2L ) / 3L );
-      gantt.centre( dt );
-      //gantt.redraw();
-
-      // TODO zoom in centred around mouse x
-    } );
+    zoomIn.setOnAction( event -> zoomIn( event ) );
 
     // zoom out
     MenuItem zoomOut = new MenuItem( "Zoom out" );
-    zoomOut.setOnAction( event -> JPlanner.trace( "NOT IMPLEMENTED" ) );
+    zoomOut.setOnAction( event -> zoomOut( event ) );
 
     // zoom fit
     MenuItem zoomFit = new MenuItem( "Zoom fit" );
-    zoomFit.setOnAction( event -> JPlanner.trace( "NOT IMPLEMENTED" ) );
+    zoomFit.setOnAction( event -> zoomFit() );
 
     // stretch tasks
     MenuItem stretch = new MenuItem( "Stretch tasks" );
@@ -86,6 +78,60 @@ public class GanttPlotMenu extends ContextMenu
     AbstractCellEditor.endEditing();
     m_x = (int) event.getX();
     m_menu.show( gantt, event.getScreenX(), event.getScreenY() );
+  }
+
+  /******************************************* zoomFit *******************************************/
+  private void zoomFit()
+  {
+    // determine plan start
+    DateTime start = JPlanner.plan.getEarliestTaskStart();
+    if ( start == null )
+      start = JPlanner.plan.getStart();
+
+    // if possible buffer of 1% of width plus 10 pixels given at each end of gantt
+    Gantt gantt = ( (GanttPlot) this.getOwnerNode() ).getGantt();
+    double width = gantt.getWidth();
+    double buffer = width / 100.0 + 10.0;
+    if ( width < 4.0 * buffer )
+      buffer = width / 4.0;
+    JPlanner.trace( "GANTT WIDTH = " + width, buffer );
+
+    // determine plan end and suitable milliseconds-per-pixel
+    DateTime end = JPlanner.plan.getLatestTaskEnd();
+    long mspp = 3600 * 3000;
+    if ( end == null || end == start )
+      end = start;
+    else
+    {
+      long ms = end.getMilliseconds() - start.getMilliseconds();
+      mspp = (long) ( ms / ( width - buffer - buffer ) );
+    }
+
+    // update gantt and redraw
+    gantt.setMsPP( mspp );
+    gantt.setStart( start.plusMilliseconds( (long) ( -10 * mspp ) ) );
+    gantt.setEnd( end.plusMilliseconds( (long) ( buffer * mspp ) ) );
+    gantt.redraw();
+  }
+
+  /******************************************* zoomIn ********************************************/
+  private void zoomIn( ActionEvent event )
+  {
+    JPlanner.trace( "NOT IMPLEMENTED", event );
+
+    Gantt gantt = ( (GanttPlot) this.getOwnerNode() ).getGantt();
+    DateTime dt = gantt.datetime( m_x );
+    gantt.setMsPP( ( gantt.getMsPP() * 2L ) / 3L );
+    gantt.centre( dt );
+    //gantt.redraw();
+
+    // TODO zoom in centred around mouse x
+  }
+
+  /******************************************* zoomOut ********************************************/
+  private void zoomOut( ActionEvent event )
+  {
+    JPlanner.trace( "NOT IMPLEMENTED", event );
   }
 
 }

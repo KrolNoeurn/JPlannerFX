@@ -34,7 +34,7 @@ import rjc.jplanner.model.Resource;
 /**************************** Table data source for showing resources ****************************/
 /*************************************************************************************************/
 
-public class ResourcesData extends AbstractDataSource
+class ResourcesData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/

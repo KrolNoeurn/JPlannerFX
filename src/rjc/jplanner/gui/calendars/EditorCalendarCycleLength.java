@@ -25,7 +25,7 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 /************************** Table cell editor for calendar cycle length **************************/
 /*************************************************************************************************/
 
-public class EditorCalendarCycleLength extends AbstractCellEditor
+class EditorCalendarCycleLength extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
 

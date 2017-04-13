@@ -34,7 +34,7 @@ import rjc.jplanner.model.DateTime.Interval;
 /********************************* Context menu for Gantt scales *********************************/
 /*************************************************************************************************/
 
-public class GanttScaleMenu extends ContextMenu
+class GanttScaleMenu extends ContextMenu
 {
   private static GanttScaleMenu m_menu;
 
@@ -55,7 +55,7 @@ public class GanttScaleMenu extends ContextMenu
   }
 
   /**************************************** constructor ******************************************/
-  public GanttScaleMenu()
+  private GanttScaleMenu()
   {
     // create the gantt context menu
     getItems().addAll( yearMenu(), halfYearMenu(), quarterYearMenu(), monthMenu(), weekMenu(), dayMenu() );

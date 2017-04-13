@@ -26,7 +26,7 @@ import rjc.jplanner.gui.table.EditorText;
 /**************************** Table cell editor for resource initials ****************************/
 /*************************************************************************************************/
 
-public class EditorResourceInitials extends EditorText
+class EditorResourceInitials extends EditorText
 {
 
   /**************************************** constructor ******************************************/

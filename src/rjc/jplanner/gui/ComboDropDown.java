@@ -32,7 +32,7 @@ import javafx.stage.Screen;
 /********************* Pop-up window to display AbstractCombo drop-down list *********************/
 /*************************************************************************************************/
 
-public class ComboDropDown extends Popup
+class ComboDropDown extends Popup
 {
   private AbstractComboEditor m_parent;
   private Canvas              m_canvas;

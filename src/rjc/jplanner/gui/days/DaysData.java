@@ -34,7 +34,7 @@ import rjc.jplanner.model.Time;
 /**************************** Table data source for showing day-types ****************************/
 /*************************************************************************************************/
 
-public class DaysData extends AbstractDataSource
+class DaysData extends AbstractDataSource
 {
 
   /************************************** getColumnCount *****************************************/

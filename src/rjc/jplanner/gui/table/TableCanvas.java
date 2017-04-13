@@ -36,10 +36,10 @@ import rjc.jplanner.gui.table.Table.Alignment;
 /***************************** Displays data in gui scrollable table *****************************/
 /*************************************************************************************************/
 
-public class TableCanvas extends Canvas
+class TableCanvas extends Canvas
 {
   // structure that contains one line of text to be drawn in cell
-  public class TextLine
+  private class TextLine
   {
     public String  txt;
     public double  x;
@@ -53,8 +53,8 @@ public class TableCanvas extends Canvas
     }
   }
 
-  public static final String   ELLIPSIS          = "..."; // ellipsis to show text has been truncated
-  public static final int      CELL_PADDING      = 4;     // cell padding for text left & right edges
+  static final String          ELLIPSIS          = "..."; // ellipsis to show text has been truncated
+  static final int             CELL_PADDING      = 4;     // cell padding for text left & right edges
   protected static final int   INDENT            = 14;    // cell left padding per indent level 
 
   protected Table              m_table;                   // table displaying this table canvas

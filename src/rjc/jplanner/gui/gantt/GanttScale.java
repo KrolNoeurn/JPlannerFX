@@ -36,7 +36,7 @@ import rjc.jplanner.model.DateTime.Interval;
 /************************* GanttScale provides a scale for the gantt plot ************************/
 /*************************************************************************************************/
 
-public class GanttScale extends Canvas
+class GanttScale extends Canvas
 {
   private Gantt    m_gantt;
   private Interval m_interval;

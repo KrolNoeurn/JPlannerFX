@@ -29,7 +29,7 @@ import rjc.jplanner.model.Time;
 /******************* Table cell editor for day-type period start-or-end time *********************/
 /*************************************************************************************************/
 
-public class EditorDayTime extends AbstractCellEditor
+class EditorDayTime extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
   int        m_min;  // minimum valid time in milliseconds

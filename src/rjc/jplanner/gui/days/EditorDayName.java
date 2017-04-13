@@ -26,7 +26,7 @@ import rjc.jplanner.gui.table.EditorText;
 /****************************** Table cell editor for day-type name ******************************/
 /*************************************************************************************************/
 
-public class EditorDayName extends EditorText
+class EditorDayName extends EditorText
 {
 
   /**************************************** constructor ******************************************/

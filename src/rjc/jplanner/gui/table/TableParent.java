@@ -30,7 +30,7 @@ import javafx.util.Duration;
 /************************* JavaFX parent node for JPlanner custom tables *************************/
 /*************************************************************************************************/
 
-public class TableParent extends Parent
+class TableParent extends Parent
 {
   private int      m_height;    // table node height
   private int      m_width;     // table node width

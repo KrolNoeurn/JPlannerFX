@@ -66,7 +66,7 @@ public class CommandTaskSetValue implements IUndoCommand
 
     // if initials and old value was null, update properties so it shows new count of tasks
     if ( m_section == Task.SECTION_TITLE && m_oldValue == null )
-      updates |= UPDATE_PROPERTIES;
+      updates |= UPDATE_PROPERTIES | RESCHEDULE;
 
     // if updating field other than title/comment/cost, trigger re-schedule
     if ( m_section != Task.SECTION_TITLE && m_section != Task.SECTION_COMMENT && m_section != Task.SECTION_COST )

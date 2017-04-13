@@ -35,7 +35,7 @@ import rjc.jplanner.model.Task;
 /***************** GanttPlot provides a view of the plan tasks and dependencies ******************/
 /*************************************************************************************************/
 
-public class GanttPlot extends Canvas
+class GanttPlot extends Canvas
 {
   private Gantt      m_gantt;
   private Table      m_table;

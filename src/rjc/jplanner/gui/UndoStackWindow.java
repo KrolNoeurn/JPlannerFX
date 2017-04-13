@@ -34,7 +34,7 @@ import rjc.jplanner.JPlanner;
 /**************************** Window for plan undo-stack command list ****************************/
 /*************************************************************************************************/
 
-public class UndoStackWindow extends Stage
+class UndoStackWindow extends Stage
 {
   private Canvas     m_canvas       = new Canvas();
   private ScrollBar  m_scrollbar    = new ScrollBar();

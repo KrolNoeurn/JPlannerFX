@@ -25,7 +25,7 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 /****************************** Table cell editor for day-type work ******************************/
 /*************************************************************************************************/
 
-public class EditorDayWork extends AbstractCellEditor
+class EditorDayWork extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
 

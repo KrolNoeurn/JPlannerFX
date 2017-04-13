@@ -26,10 +26,10 @@ import java.util.TreeMap;
 /************************** Resource work (quantity and time) on tasks ***************************/
 /*************************************************************************************************/
 
-public class ResourceWork
+class ResourceWork
 {
   // struct that contains date-time and number
-  public class DateTimeNumber
+  private class DateTimeNumber
   {
     public DateTime dt;  // date-time
     public double   num; // number
@@ -48,7 +48,7 @@ public class ResourceWork
   }
 
   // struct that contains one resource allocation record
-  public class Alloc
+  private class Alloc
   {
     public DateTime end;  // date-time
     public double   num;  // number

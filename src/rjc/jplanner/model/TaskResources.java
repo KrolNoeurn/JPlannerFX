@@ -27,10 +27,10 @@ import rjc.jplanner.JPlanner;
 /************************* Resources assigned to single task within plan *************************/
 /*************************************************************************************************/
 
-public class TaskResources
+class TaskResources
 {
   // structure that contains one task resource assignment
-  public class Assignment
+  private class Assignment
   {
     public String tag; // initials or name or org or group or alias or role etc
     public float  max; // 0 (zero) means unlimited

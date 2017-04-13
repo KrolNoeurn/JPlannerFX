@@ -123,8 +123,8 @@ public class Calendar
       m_normal.add( nonWorking );
       m_normal.add( fullTime );
 
-      m_exceptions.put( new Date( 2016, 12, 26 ), nonWorking );
-      m_exceptions.put( new Date( 2016, 12, 27 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 12, 25 ), nonWorking );
+      m_exceptions.put( new Date( 2017, 12, 26 ), nonWorking );
     }
     else
     {

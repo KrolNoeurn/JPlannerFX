@@ -30,7 +30,7 @@ import javafx.scene.input.ScrollEvent;
 /**************************** Spin editor for selecting month-of-year ****************************/
 /*************************************************************************************************/
 
-public class MonthSpinEditor extends XTextField
+class MonthSpinEditor extends XTextField
 {
   private Month      m_month;        // month being displayed
   private SpinEditor m_year;         // spin editor showing year

@@ -224,6 +224,7 @@ public class Gantt extends Region
   public void redraw()
   {
     // redraw whole gantt
+    checkScrollbar();
     for ( GanttScale scale : m_scales )
       scale.redraw();
     m_plot.redraw();

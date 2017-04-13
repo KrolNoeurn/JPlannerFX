@@ -28,7 +28,7 @@ import rjc.jplanner.model.TimeSpan;
 /**************************** Table cell editor for task predecessors ****************************/
 /*************************************************************************************************/
 
-public class EditorTaskPredecessors extends EditorText
+class EditorTaskPredecessors extends EditorText
 {
 
   /**************************************** constructor ******************************************/

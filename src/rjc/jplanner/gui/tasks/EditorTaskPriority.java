@@ -25,7 +25,7 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 /****************************** Table cell editor for task priority ******************************/
 /*************************************************************************************************/
 
-public class EditorTaskPriority extends AbstractCellEditor
+class EditorTaskPriority extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
 
