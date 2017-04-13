@@ -65,7 +65,6 @@ public class TableCanvas extends Canvas
   public TableCanvas( Table table )
   {
     // setup table canvas
-    super();
     setFocusTraversable( true );
     m_table = table;
     redrawBelowY = new SimpleIntegerProperty();

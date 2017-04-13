@@ -34,7 +34,6 @@ public class DateTimeEditor extends XTextField
   public DateTimeEditor()
   {
     // construct editor
-    super();
     setButtonType( ButtonType.DOWN );
 
     // react to editor text changes

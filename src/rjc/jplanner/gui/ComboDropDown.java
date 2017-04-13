@@ -48,7 +48,6 @@ public class ComboDropDown extends Popup
   public ComboDropDown( AbstractComboEditor parent )
   {
     // create pop-up window to display drop-down list
-    super();
     m_parent = parent;
     m_canvas = new Canvas();
     setAutoHide( true );

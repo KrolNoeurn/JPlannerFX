@@ -89,8 +89,8 @@ public class Gantt extends Region
 
     // set sensible start, mspp and end
     setStart( new DateTime( JPlanner.plan.getStart().getMilliseconds() - 300000000L ) );
-    setMsPP( 3600 * 6000 );
     setEnd( new DateTime( m_start.getMilliseconds() + m_millisecondsPP * (long) getWidth() ) );
+    setMsPP( 3600 * 6000 );
 
     // set scroll-bar height & value
     m_scrollBar.setMinHeight( SCROLLBAR_SIZE );
@@ -270,15 +270,24 @@ public class Gantt extends Region
     m_plot.setWidth( newWidth );
 
     // set scroll-bar width
+    checkScrollbar();
+  }
+
+  /***************************************** checkScrollbar *****************************************/
+  private void checkScrollbar()
+  {
+    // check scroll-bar visibility, size and settings
     int ganttWidth = (int) ( ( m_end.getMilliseconds() - m_start.getMilliseconds() ) / m_millisecondsPP );
-    if ( ganttWidth > newWidth )
+    int visibleWidth = (int) getWidth();
+    if ( ganttWidth > visibleWidth )
     {
       m_scrollBar.setVisible( true );
-      m_scrollBar.setMinWidth( newWidth );
+      m_scrollBar.setMinWidth( visibleWidth );
+      m_scrollBar.setMaxWidth( visibleWidth );
 
-      double max = ganttWidth - newWidth;
+      double max = ganttWidth - visibleWidth;
       m_scrollBar.setMax( max );
-      m_scrollBar.setVisibleAmount( max * newWidth / ganttWidth );
+      m_scrollBar.setVisibleAmount( max * visibleWidth / ganttWidth );
 
       if ( m_scrollBar.getValue() > max )
         m_scrollBar.setValue( max );
@@ -310,6 +319,21 @@ public class Gantt extends Region
   {
     // return date-time for specified x-coordinate
     return m_start.plusMilliseconds( (long) ( x + m_scrollBar.getValue() ) * m_millisecondsPP );
+  }
+
+  /******************************************* centre ********************************************/
+  public void centre( DateTime dt )
+  {
+    // scroll if able so date-time is at centre of gantt
+    if ( m_scrollBar.isVisible() )
+    {
+      int delta = x( dt ) - ( (int) getWidth() ) / 2;
+      m_scrollBar.setValue( delta - m_scrollBar.getValue() );
+      //int newValue = (int) m_scrollBar.getValue() - delta;
+      //JPlanner.trace( delta );
+
+      // TODO middle of doing this .....................
+    }
   }
 
 }

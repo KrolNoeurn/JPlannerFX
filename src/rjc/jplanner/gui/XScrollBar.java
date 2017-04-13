@@ -34,7 +34,6 @@ public class XScrollBar extends ScrollBar
   public XScrollBar( Table table )
   {
     // create scroll bar and record table
-    super();
     m_table = table;
   }
 

@@ -58,6 +58,15 @@ public class GanttPlot extends Canvas
       if ( newY.doubleValue() < getHeight() )
         heightChange( newY.intValue(), (int) getHeight() );
     } );
+
+    setOnContextMenuRequested( event -> GanttPlotMenu.open( this, event ) );
+  }
+
+  /****************************************** getGantt *******************************************/
+  public Gantt getGantt()
+  {
+    // return gantt containing with this plot
+    return m_gantt;
   }
 
   /******************************************* redraw ********************************************/
@@ -414,7 +423,7 @@ public class GanttPlot extends Canvas
   /*************************************** drawDependencySF **************************************/
   private void drawDependencySF( GraphicsContext gc, int x1, int y1, int x2, int y2, int x2raw )
   {
-    // draw dependency from one task-start to another task-finish ===============================================
+    // draw dependency from one task-start to another task-finish
     double sign = y1 > y2 ? -1 : 1;
     double xs = x1 - 0.5;
     double ys = y1 - 0.5;

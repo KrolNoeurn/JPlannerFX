@@ -52,14 +52,14 @@ public class GanttScale extends Canvas
     m_format = format;
 
     widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
+    setOnContextMenuRequested( event -> GanttScaleMenu.open( this, event ) );
   }
 
   /**************************************** constructor ******************************************/
   public GanttScale( Gantt gantt, XMLStreamReader xsr )
   {
     // adopt gantt-scale display data from XML stream
-    super( 0.0, Gantt.GANTTSCALE_HEIGHT );
-    m_gantt = gantt;
+    this( gantt, Interval.YEAR, "yy" );
 
     for ( int i = 0; i < xsr.getAttributeCount(); i++ )
       switch ( xsr.getAttributeLocalName( i ) )
@@ -76,8 +76,6 @@ public class GanttScale extends Canvas
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
           break;
       }
-
-    widthProperty().addListener( ( observable, oldW, newW ) -> widthChange( oldW.intValue(), newW.intValue() ) );
   }
 
   /****************************************** writeXML *******************************************/

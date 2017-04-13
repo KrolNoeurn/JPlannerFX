@@ -46,7 +46,6 @@ public class TimeSpan
 
     public TimeSpanFormat()
     {
-      super();
       applyPattern( "0" );
       setMaximumFractionDigits( 2 );
     }

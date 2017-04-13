@@ -45,11 +45,9 @@ public class MainTabWidget extends TabPane
   public MainTabWidget( boolean showPlanTab )
   {
     // construct main tab widget
-    super();
-
-    // create and add plan tab only if requested
     if ( showPlanTab )
     {
+      // create and add plan tab only if requested
       m_tabPlan = new PlanTab( "Plan" );
       getTabs().add( m_tabPlan );
     }

@@ -50,12 +50,10 @@ public class XTextField extends TextField
   /**************************************** constructor ******************************************/
   public XTextField()
   {
-    // create enhanced text field control
-    super();
-
-    // if min & max width set, increase editor width if needed to show whole text
+    // create enhanced text field control 
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
+      // if min & max width set, increase editor width if needed to show whole text
       if ( m_minWidth > 0.0 && m_maxWidth > m_minWidth )
       {
         Text text = new Text( newText );

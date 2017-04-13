@@ -52,10 +52,7 @@ public class Menus extends MenuBar
   /**************************************** constructor ******************************************/
   public Menus()
   {
-    // construct main menu bar
-    super();
-
-    // top level menus
+    // construct main window menu bar
     Menu menuFile = fileMenu();
     Menu menuEdit = editMenu();
     Menu menuReport = reportMenu();

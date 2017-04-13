@@ -98,7 +98,6 @@ public class DateTimeSelector extends Popup
   public DateTimeSelector( DateTimeEditor parent )
   {
     // create pop-up window to display date-time selection widgets
-    super();
     m_parent = parent;
     setAutoHide( true );
     setConsumeAutoHidingEvents( false );

@@ -37,7 +37,6 @@ public abstract class AbstractComboEditor extends XTextField
   public AbstractComboEditor()
   {
     // construct combo box
-    super();
     setEditable( false );
     setButtonType( ButtonType.DOWN );
     m_dropdown = new ComboDropDown( this );

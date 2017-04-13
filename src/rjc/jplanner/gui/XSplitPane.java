@@ -23,7 +23,7 @@ import javafx.scene.layout.Region;
 import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
-/***************** Extended version of SplitPane with preferred left node width ******************/
+/*************** Extended version of SplitPane with preferred left-most node width ***************/
 /*************************************************************************************************/
 
 public class XSplitPane extends SplitPane
@@ -36,6 +36,7 @@ public class XSplitPane extends SplitPane
   /**************************************** constructor ******************************************/
   public XSplitPane( Region... regions )
   {
+    // create enhanced split-pane
     super( regions );
     setMinWidth( 0.0 );
 
@@ -64,7 +65,7 @@ public class XSplitPane extends SplitPane
   /**************************************** constructor ******************************************/
   public XSplitPane( Table table, Region... regions )
   {
-    super();
+    // create enhanced split-pane
     getItems().add( table );
     getItems().addAll( regions );
     setMinWidth( 0.0 );

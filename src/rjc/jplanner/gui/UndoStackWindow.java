@@ -47,7 +47,6 @@ public class UndoStackWindow extends Stage
   public UndoStackWindow()
   {
     // create undo-stack window
-    super();
     setTitle( "Undostack" );
     setWidth( 250.0 );
     setHeight( 200.0 );

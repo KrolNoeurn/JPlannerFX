@@ -38,7 +38,6 @@ public class PlanNotes extends GridPane
   public PlanNotes()
   {
     // setup notes panel
-    super();
     setVgap( 5.0 );
     setPadding( new Insets( 5.0 ) );
     setMinWidth( 0.0 );
