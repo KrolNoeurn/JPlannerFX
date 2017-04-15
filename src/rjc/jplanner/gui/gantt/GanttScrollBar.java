@@ -16,78 +16,70 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui;
+package rjc.jplanner.gui.gantt;
 
-import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
-import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
 /*************** Extended version of ScrollBar with special increment & decrement ****************/
 /*************************************************************************************************/
 
-public class XScrollBar extends ScrollBar
+class GanttScrollBar extends ScrollBar
 {
-  private Table m_table; // table definition
+  private Gantt               m_gantt;        // gantt definition
+
+  private final static double INCREMENT = 8.0;
 
   /**************************************** constructor ******************************************/
-  public XScrollBar( Table table )
+  public GanttScrollBar( Gantt gantt )
   {
     // create scroll bar and record table
-    m_table = table;
+    m_gantt = gantt;
+
+    // prevent value becoming min or max because this prevents decrement() or increment() being called
+    setMin( -1e-6 );
+    valueProperty().addListener( ( observable, oldValue, newValue ) ->
+    {
+      if ( getValue() == getMax() )
+        setValue( getMax() - 1e-6 );
+      if ( getValue() == getMin() )
+        setValue( getMin() + 1e-6 );
+    } );
   }
 
   /****************************************** increment ******************************************/
   @Override
   public void increment()
   {
-    // increase scroll bar value to next table cell boundary
-    if ( getOrientation() == Orientation.HORIZONTAL )
+    // make gantt end later if scroll-bar at maximum
+    if ( getValue() + INCREMENT > getMax() )
     {
-      int columnPos = m_table.getColumnPositionAtX( m_table.getVerticalHeaderWidth() );
-      int newx = m_table.getXStartByColumnPosition( columnPos );
-      while ( newx <= m_table.getVerticalHeaderWidth() )
-        newx += m_table.getWidthByColumnPosition( columnPos++ );
-
-      double value = getValue() + newx - m_table.getVerticalHeaderWidth();
-      m_table.animate( valueProperty(), (int) ( value < getMax() ? value : getMax() ), 100 );
+      long ms = (long) ( ( getValue() + INCREMENT - getMax() ) * m_gantt.getMsPP() );
+      m_gantt.setEnd( m_gantt.getEnd().plusMilliseconds( ms ) );
+      m_gantt.checkScrollbar();
+      setValue( getMax() );
     }
     else
-    {
-      int row = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() );
-      int newy = m_table.getYStartByRow( row );
-      while ( newy <= m_table.getHorizontalHeaderHeight() )
-        newy += m_table.getRowHeight( row++ );
-
-      double value = getValue() + newy - m_table.getHorizontalHeaderHeight();
-      m_table.animate( valueProperty(), (int) ( value < getMax() ? value : getMax() ), 100 );
-    }
+      setValue( getValue() + INCREMENT );
   }
 
   /****************************************** decrement ******************************************/
   @Override
   public void decrement()
   {
-    // decrease scroll bar value to next table cell boundary
-    if ( getOrientation() == Orientation.HORIZONTAL )
+    // make gantt start earlier if scroll-bar at minimum
+    if ( getValue() - INCREMENT < getMin() )
     {
-      int columnPos = m_table.getColumnPositionAtX( m_table.getVerticalHeaderWidth() - 1 );
-      int newx = m_table.getXStartByColumnPosition( columnPos );
-
-      double value = getValue() + newx - m_table.getVerticalHeaderWidth();
-      m_table.animate( valueProperty(), (int) ( value > 0.0 ? value : 0 ), 100 );
+      long ms = (long) ( ( getValue() - INCREMENT - getMin() ) * m_gantt.getMsPP() );
+      m_gantt.setStart( m_gantt.getStart().plusMilliseconds( ms ) );
+      m_gantt.checkScrollbar();
+      setValue( getMin() );
     }
     else
-    {
-      int row = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() - 1 );
-      int newy = m_table.getYStartByRow( row );
-
-      double value = getValue() + newy - m_table.getHorizontalHeaderHeight();
-      m_table.animate( valueProperty(), (int) ( value > 0.0 ? value : 0 ), 100 );
-    }
+      setValue( getValue() - INCREMENT );
   }
 
-  /**************************************** constructor ******************************************/
+  /****************************************** toString *******************************************/
   @Override
   public String toString()
   {

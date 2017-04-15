@@ -314,8 +314,9 @@ public class Calendar
   public Day getDay( Date date )
   {
     // if exception exists return it, otherwise return normal cycle day
-    if ( m_exceptions.containsKey( date ) )
-      return m_exceptions.get( date );
+    Day day = m_exceptions.get( date );
+    if ( day != null )
+      return day;
 
     int normal = ( date.getEpochday() - m_cycleAnchor.getEpochday() ) % m_normal.size();
     if ( normal < 0 )

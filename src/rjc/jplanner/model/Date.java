@@ -259,9 +259,22 @@ public class Date
   }
 
   /******************************************* equals ********************************************/
-  public boolean equals( Date other )
+  @Override
+  public boolean equals( Object other )
   {
-    return m_epochday == other.m_epochday;
+    // return true if other object represents same date
+    if ( other != null && other instanceof Date )
+      return m_epochday == ( (Date) other ).m_epochday;
+
+    return false;
+  }
+
+  /****************************************** hashCode ******************************************/
+  @Override
+  public int hashCode()
+  {
+    // date hash code is simply the epoch day number
+    return m_epochday;
   }
 
   /****************************************** localDate ******************************************/

@@ -330,9 +330,22 @@ public class DateTime implements Comparable<DateTime>
   }
 
   /******************************************* equals ********************************************/
-  public boolean equals( DateTime other )
+  @Override
+  public boolean equals( Object other )
   {
-    return m_milliseconds == other.m_milliseconds;
+    // return true if other object represents same date-time
+    if ( other != null && other instanceof DateTime )
+      return m_milliseconds == ( (DateTime) other ).m_milliseconds;
+
+    return false;
+  }
+
+  /****************************************** hashCode ******************************************/
+  @Override
+  public int hashCode()
+  {
+    // date-time hash code is based on the millisecond value
+    return (int) ( m_milliseconds ^ ( m_milliseconds >>> 32 ) );
   }
 
   /****************************************** compareTo ******************************************/

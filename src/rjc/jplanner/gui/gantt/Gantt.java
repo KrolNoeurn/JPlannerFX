@@ -49,10 +49,10 @@ public class Gantt extends Region
   private DateTime              m_end;                 // gantt end date-time for determining scroll bar
   private long                  m_millisecondsPP;      // milliseconds per pixel
 
+  boolean                       stretch;               // whether to stretch working time to full day
+
   final public static int       SCROLLBAR_SIZE    = 18;
   final public static int       GANTTSCALE_HEIGHT = 15;
-
-  public static boolean         ganttStretch;
 
   /**************************************** constructor ******************************************/
   public Gantt( Table table )
@@ -60,7 +60,7 @@ public class Gantt extends Region
     // create default gantt 
     m_plot = new GanttPlot( this, table );
     m_scales = new ArrayList<GanttScale>();
-    m_scrollBar = new ScrollBar();
+    m_scrollBar = new GanttScrollBar( this );
     setDefault();
 
     // add nodes to region
@@ -90,7 +90,8 @@ public class Gantt extends Region
     // set sensible start, mspp and end
     setStart( new DateTime( JPlanner.plan.getStart().getMilliseconds() - 300000000L ) );
     setEnd( new DateTime( m_start.getMilliseconds() + m_millisecondsPP * (long) getWidth() ) );
-    setMsPP( 3600 * 6000 );
+    setMsPP( 3600 * 3000 );
+    stretch = true;
 
     // set scroll-bar height & value
     m_scrollBar.setMinHeight( SCROLLBAR_SIZE );
@@ -140,7 +141,10 @@ public class Gantt extends Region
           // TODO ..................
           break;
         case XmlLabels.XML_STRETCH:
-          ganttStretch = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+          stretch = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+          break;
+        case XmlLabels.XML_SCROLL:
+          m_scrollBar.setValue( Double.parseDouble( xsr.getAttributeValue( i ) ) );
           break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
@@ -180,7 +184,8 @@ public class Gantt extends Region
     xsw.writeAttribute( XmlLabels.XML_MSPP, Long.toString( m_millisecondsPP ) );
     xsw.writeAttribute( XmlLabels.XML_NONWORKING, "???" );
     xsw.writeAttribute( XmlLabels.XML_CURRENT, "???" );
-    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( ganttStretch ) );
+    xsw.writeAttribute( XmlLabels.XML_STRETCH, Boolean.toString( stretch ) );
+    xsw.writeAttribute( XmlLabels.XML_SCROLL, Double.toString( m_scrollBar.getValue() ) );
 
     // write gantt-scale display data to XML stream
     int id = 0;
@@ -199,11 +204,25 @@ public class Gantt extends Region
     m_start = start;
   }
 
+  /****************************************** getStart *******************************************/
+  public DateTime getStart()
+  {
+    // return start for gantt
+    return m_start;
+  }
+
   /******************************************* setEnd ********************************************/
   public void setEnd( DateTime end )
   {
     // set end for gantt
     m_end = end;
+  }
+
+  /******************************************* getEnd ********************************************/
+  public DateTime getEnd()
+  {
+    // return end for gantt
+    return m_end;
   }
 
   /******************************************* setMsPP *******************************************/
@@ -275,7 +294,7 @@ public class Gantt extends Region
   }
 
   /***************************************** checkScrollbar *****************************************/
-  private void checkScrollbar()
+  void checkScrollbar()
   {
     // check scroll-bar visibility, size and settings
     int ganttWidth = (int) ( ( m_end.getMilliseconds() - m_start.getMilliseconds() ) / m_millisecondsPP );
@@ -306,7 +325,8 @@ public class Gantt extends Region
   public int x( DateTime dt )
   {
     // return x-coordinate for stretched if needed date-time
-    dt = JPlanner.plan.stretch( dt, ganttStretch );
+    if ( stretch )
+      dt = JPlanner.plan.stretch( dt );
     long dtMilliseconds = dt.getMilliseconds();
     long startMilliseconds = m_start.getMilliseconds();
 
@@ -326,14 +346,11 @@ public class Gantt extends Region
   public void centre( DateTime dt )
   {
     // scroll if able so date-time is at centre of gantt
+    checkScrollbar();
     if ( m_scrollBar.isVisible() )
     {
-      int delta = x( dt ) - ( (int) getWidth() ) / 2;
-      m_scrollBar.setValue( delta - m_scrollBar.getValue() );
-      //int newValue = (int) m_scrollBar.getValue() - delta;
-      //JPlanner.trace( delta );
-
-      // TODO middle of doing this .....................
+      long deltaMS = dt.getMilliseconds() - datetime( (int) ( getWidth() / 2.0 ) ).getMilliseconds();
+      m_scrollBar.setValue( m_scrollBar.getValue() + deltaMS / m_millisecondsPP );
     }
   }
 

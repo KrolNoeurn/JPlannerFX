@@ -225,10 +225,22 @@ public class Time
   }
 
   /******************************************* equals ********************************************/
-  public boolean equals( Time other )
+  @Override
+  public boolean equals( Object other )
   {
-    // return true if equal
-    return m_milliseconds == other.m_milliseconds;
+    // return true if other object represents same time
+    if ( other != null && other instanceof Time )
+      return m_milliseconds == ( (Time) other ).m_milliseconds;
+
+    return false;
+  }
+
+  /****************************************** hashCode ******************************************/
+  @Override
+  public int hashCode()
+  {
+    // time hash code is simply the day milliseconds
+    return m_milliseconds;
   }
 
   /*************************************** addMilliseconds ***************************************/

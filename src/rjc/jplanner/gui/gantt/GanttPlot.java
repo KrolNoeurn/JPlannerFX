@@ -37,11 +37,11 @@ import rjc.jplanner.model.Task;
 
 class GanttPlot extends Canvas
 {
-  private Gantt      m_gantt;
-  private Table      m_table;
+  private Gantt            m_gantt;
+  private Table            m_table;
 
-  private static int m_taskHeight = 6;
-  private static int m_arrowSize  = 4;
+  final private static int TASKHEIGHT = 6;
+  final private static int ARROWSIZE  = 4;
 
   /**************************************** constructor ******************************************/
   public GanttPlot( Gantt gantt, Table table )
@@ -217,7 +217,7 @@ class GanttPlot extends Canvas
     for ( int period = 0; period < gd.value.size(); period++ )
       if ( gd.value.get( period ) > scale )
         scale = gd.value.get( period );
-    scale *= m_taskHeight;
+    scale *= TASKHEIGHT;
 
     // set pen and fill colours
     GraphicsContext gc = getGraphicsContext2D();
@@ -275,14 +275,14 @@ class GanttPlot extends Canvas
     if ( xe <= xs )
       xe = xs + 1.0;
 
-    double w = m_taskHeight;
+    double w = TASKHEIGHT;
     if ( w > xe - xs )
       w = xe - xs;
 
     // draw main summary bar
     GraphicsContext gc = getGraphicsContext2D();
     gc.setFill( Colors.GANTT_SUMMARY );
-    gc.fillRect( xs, y - m_taskHeight, xe - xs, m_taskHeight );
+    gc.fillRect( xs, y - TASKHEIGHT, xe - xs, TASKHEIGHT );
 
     // draw start and end triangles
     gc.setStroke( Colors.GANTT_SUMMARY );
@@ -290,8 +290,8 @@ class GanttPlot extends Canvas
     xe -= 0.5;
     for ( int x = 0; x < w; x++ )
     {
-      gc.strokeLine( xs + x, y + 0.5, xs + x, y - 0.5 + m_taskHeight * ( w - x ) / w );
-      gc.strokeLine( xe - x, y + 0.5, xe - x, y - 0.5 + m_taskHeight * ( w - x ) / w );
+      gc.strokeLine( xs + x, y + 0.5, xs + x, y - 0.5 + TASKHEIGHT * ( w - x ) / w );
+      gc.strokeLine( xe - x, y + 0.5, xe - x, y - 0.5 + TASKHEIGHT * ( w - x ) / w );
     }
   }
 
@@ -300,12 +300,12 @@ class GanttPlot extends Canvas
   {
     // draw diamond shaped milestone marker
     double x = m_gantt.x( gd.start ) + 0.5;
-    double size = m_taskHeight - 0.5;
+    double size = TASKHEIGHT - 0.5;
 
     GraphicsContext gc = getGraphicsContext2D();
     gc.setStroke( Colors.GANTT_MILESTONE );
     gc.strokeLine( x, y - size, x, y + size - 1 );
-    for ( int h = 1; h <= m_taskHeight - 1; h++ )
+    for ( int h = 1; h <= TASKHEIGHT - 1; h++ )
     {
       gc.strokeLine( x + h, y - size + h, x + h, y + size - h - 1 );
       gc.strokeLine( x - h, y - size + h, x - h, y + size - h - 1 );
@@ -374,7 +374,7 @@ class GanttPlot extends Canvas
   {
     // return x of task start compensated if milestone
     if ( task.getGanttData().isMilestone() )
-      return m_gantt.x( task.getStart() ) - m_taskHeight;
+      return m_gantt.x( task.getStart() ) - TASKHEIGHT;
     else
       return m_gantt.x( task.getStart() );
   }
@@ -384,7 +384,7 @@ class GanttPlot extends Canvas
   {
     // return x of task end compensated if milestone
     if ( task.getGanttData().isMilestone() )
-      return m_gantt.x( task.getEnd() ) + m_taskHeight;
+      return m_gantt.x( task.getEnd() ) + TASKHEIGHT;
     else
       return m_gantt.x( task.getEnd() );
   }
@@ -406,7 +406,7 @@ class GanttPlot extends Canvas
 
       gc.strokeLine( xs, ys, xs + len, ys );
       len++;
-      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( m_taskHeight + 1 ) );
+      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( TASKHEIGHT + 1 ) );
       return;
     }
 
@@ -414,9 +414,9 @@ class GanttPlot extends Canvas
     double xe = x2 + 0.5;
     double ye = y2 - 0.5;
     gc.strokeLine( xs, ys, xs + 3, ys );
-    gc.strokeLine( xs + 4, ys + sign, xs + 4, ys + sign * ( m_taskHeight + 3 ) );
-    gc.strokeLine( xs + 3, ys + sign * ( m_taskHeight + 4 ), xe - 7, ys + sign * ( m_taskHeight + 4 ) );
-    gc.strokeLine( xe - 8, ys + sign * ( m_taskHeight + 5 ), xe - 8, ye - sign );
+    gc.strokeLine( xs + 4, ys + sign, xs + 4, ys + sign * ( TASKHEIGHT + 3 ) );
+    gc.strokeLine( xs + 3, ys + sign * ( TASKHEIGHT + 4 ), xe - 7, ys + sign * ( TASKHEIGHT + 4 ) );
+    gc.strokeLine( xe - 8, ys + sign * ( TASKHEIGHT + 5 ), xe - 8, ye - sign );
     drawArrow( gc, xe - 7, ye, xe - 1, ye );
   }
 
@@ -437,7 +437,7 @@ class GanttPlot extends Canvas
 
       gc.strokeLine( xs, ys, xs + len, ys );
       len--;
-      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( m_taskHeight + 1 ) );
+      drawArrow( gc, xs + len, ys + sign, xs + len, y2 - 0.5 - sign * ( TASKHEIGHT + 1 ) );
       return;
     }
 
@@ -445,9 +445,9 @@ class GanttPlot extends Canvas
     double xe = x2 + 0.5;
     double ye = y2 - 0.5;
     gc.strokeLine( xs, ys, xs - 3, ys );
-    gc.strokeLine( xs - 4, ys + sign, xs - 4, ys + sign * ( m_taskHeight + 3 ) );
-    gc.strokeLine( xs - 3, ys + sign * ( m_taskHeight + 4 ), xe + 7, ys + sign * ( m_taskHeight + 4 ) );
-    gc.strokeLine( xe + 8, ys + sign * ( m_taskHeight + 5 ), xe + 8, ye - sign );
+    gc.strokeLine( xs - 4, ys + sign, xs - 4, ys + sign * ( TASKHEIGHT + 3 ) );
+    gc.strokeLine( xs - 3, ys + sign * ( TASKHEIGHT + 4 ), xe + 7, ys + sign * ( TASKHEIGHT + 4 ) );
+    gc.strokeLine( xe + 8, ys + sign * ( TASKHEIGHT + 5 ), xe + 8, ye - sign );
     drawArrow( gc, xe + 7, ye, xe, ye );
   }
 
@@ -498,9 +498,9 @@ class GanttPlot extends Canvas
       // vertical line and arrow
       gc.strokeLine( x1, y1, x2, y2 );
       int sign = y1 > y2 ? -1 : 1;
-      double y = y2 - sign * m_arrowSize;
+      double y = y2 - sign * ARROWSIZE;
 
-      for ( int s = 1; s <= m_arrowSize; s++ )
+      for ( int s = 1; s <= ARROWSIZE; s++ )
       {
         y2 -= sign;
         gc.strokeLine( x2 + s, y, x2 + s, y2 );
@@ -512,9 +512,9 @@ class GanttPlot extends Canvas
       // horizontal line and arrow
       gc.strokeLine( x1, y1, x2, y2 );
       int sign = x1 > x2 ? -1 : 1;
-      double x = x2 - sign * m_arrowSize;
+      double x = x2 - sign * ARROWSIZE;
 
-      for ( int s = 1; s <= m_arrowSize; s++ )
+      for ( int s = 1; s <= ARROWSIZE; s++ )
       {
         x2 -= sign;
         gc.strokeLine( x, y2 + s, x2, y2 + s );

@@ -28,7 +28,6 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyCombination.Modifier;
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.gantt.Gantt;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
@@ -209,15 +208,7 @@ class Menus extends MenuBar
     MenuItem viewNewWindow = new MenuItem( "New Window..." );
     viewNewWindow.setOnAction( event -> JPlanner.gui.newWindow() );
 
-    CheckMenuItem viewStretch = new CheckMenuItem( "Stretch tasks" );
-    viewStretch.setSelected( Gantt.ganttStretch );
-    viewStretch.setOnAction( event ->
-    {
-      Gantt.ganttStretch = viewStretch.isSelected();
-      JPlanner.gui.redrawGantts();
-    } );
-
-    menu.getItems().addAll( viewUndoStack, viewNewWindow, new SeparatorMenuItem(), viewStretch );
+    menu.getItems().addAll( viewUndoStack, viewNewWindow );
     return menu;
   }
 

@@ -30,7 +30,7 @@ import rjc.jplanner.model.Day;
 
 public class EditorSelectDay extends AbstractCellEditor
 {
-  public class DayCombo extends AbstractComboEditor
+  private class DayCombo extends AbstractComboEditor
   {
 
     /**************************************** getItemCount *****************************************/

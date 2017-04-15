@@ -24,7 +24,7 @@ import rjc.jplanner.gui.table.EditorText;
 /*************************** Table cell editor for calendar exceptions ***************************/
 /*************************************************************************************************/
 
-public class EditorCalendarExceptions extends EditorText
+class EditorCalendarExceptions extends EditorText
 {
 
   /**************************************** constructor ******************************************/
