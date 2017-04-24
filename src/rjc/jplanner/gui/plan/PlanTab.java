@@ -45,11 +45,7 @@ public class PlanTab extends Tab
       if ( newValue )
         setContent( split );
       else
-      {
         setContent( null );
-        m_properties.updatePlan();
-        m_notes.updatePlan();
-      }
     } );
   }
 

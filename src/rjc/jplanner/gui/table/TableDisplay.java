@@ -205,7 +205,8 @@ class TableDisplay extends TableParent
   {
     // trigger simple complete redraw of table canvas
     AbstractCellEditor.endEditing();
-    m_canvas.redrawAll();
+    if ( getHeight() > 0 && getWidth() > 0 )
+      m_canvas.redrawTableCanvas();
 
     // ensure reorder marker if exists is correctly positioned due to scrolling
     m_canvas.setMarkerPosition();

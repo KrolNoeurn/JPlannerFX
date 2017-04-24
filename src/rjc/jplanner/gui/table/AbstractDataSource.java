@@ -166,4 +166,11 @@ abstract public class AbstractDataSource
     // perform table data source default table modifications
   }
 
+  /**************************************** getMoveEndRow ****************************************/
+  public int getMoveEndRow( int startRow )
+  {
+    // return move end row (for example bottom of summary) for given start row, or -1 if moving rows not allowed 
+    return -1;
+  }
+
 }

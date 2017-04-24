@@ -24,7 +24,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
-import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import rjc.jplanner.JPlanner;
@@ -42,7 +41,7 @@ public class Gantt extends Region
 {
   private ArrayList<GanttScale> m_scales;              // list of gantt-scales
   private GanttPlot             m_plot;                // gantt plot
-  private ScrollBar             m_scrollBar;           // horizontal scroll bar
+  private GanttScrollBar        m_scrollBar;           // horizontal scroll bar
   private XSplitPane            m_split;               // split-pane displaying this gantt
 
   private DateTime              m_start;               // gantt start date-time
@@ -242,6 +241,10 @@ public class Gantt extends Region
   /******************************************* redraw ********************************************/
   public void redraw()
   {
+    // if height is over large, do nothing
+    if ( getHeight() > Screen.getPrimary().getVisualBounds().getHeight() * 10.0 )
+      return;
+
     // redraw whole gantt
     checkScrollbar();
     for ( GanttScale scale : m_scales )
@@ -253,7 +256,7 @@ public class Gantt extends Region
   private void heightChange( int oldHeight, int newHeight )
   {
     // if new height is over large, do nothing
-    if ( newHeight > Screen.getPrimary().getVisualBounds().getHeight() * 10 )
+    if ( newHeight > Screen.getPrimary().getVisualBounds().getHeight() * 10.0 )
       return;
 
     // set gantt-scales vertical positions

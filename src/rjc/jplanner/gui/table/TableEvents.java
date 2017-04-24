@@ -18,7 +18,6 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
@@ -50,8 +49,8 @@ public class TableEvents extends TableCanvas
   private int                 m_mouseY;                         // last mouse move/drag y
   private int                 m_mouseCPos;                      // last mouse move or reorder column position
   private int                 m_mouseRow;                       // last mouse move or reorder row position
-  private int                 m_focusCPos     = -999999999;     // column position of focus cell
-  private int                 m_focusRow      = -999999999;     // row of focus cell
+  private int                 m_editCPos      = -999999999;     // column position of edit cell
+  private int                 m_editRow       = -999999999;     // row of edit cell
   private int                 m_selectCPos    = -999999999;     // column position of last selected cell or column
   private int                 m_selectRow     = -999999999;     // row of last selected cell or row
   private int                 m_index         = -1;             // column or row index for resize or reorder
@@ -99,33 +98,33 @@ public class TableEvents extends TableCanvas
     return m_selectCPos;
   }
 
-  /*************************************** getFocusCellRow ***************************************/
-  public int getFocusCellRow()
+  /*************************************** getEditCellRow ****************************************/
+  public int getEditCellRow()
   {
-    // return row of cell with current focus
-    return m_focusRow;
+    // return row of cell with current editor focus
+    return m_editRow;
   }
 
-  /********************************** getFocusCellColumnPosition *********************************/
-  public int getFocusCellColumnPosition()
+  /********************************** getEditCellColumnPosition **********************************/
+  public int getEditCellColumnPosition()
   {
-    // return column of cell with current focus
-    return m_focusCPos;
+    // return column of cell with current editor focus
+    return m_editCPos;
   }
 
-  /*************************************** setFocusCellRow ***************************************/
-  public void setFocusCellRow( int row )
+  /*************************************** setEditCellRow ****************************************/
+  public void setEditCellRow( int row )
   {
-    // set row of cell with current focus
-    m_focusRow = row;
+    // set row of cell with current editor focus
+    m_editRow = row;
     m_selectRow = row;
   }
 
-  /********************************** setFocusCellColumnPosition *********************************/
-  public void setFocusCellColumnPosition( int columnPos )
+  /********************************** setEditCellColumnPosition **********************************/
+  public void setEditCellColumnPosition( int columnPos )
   {
-    // set column of cell with current focus
-    m_focusCPos = columnPos;
+    // set column of cell with current editor focus
+    m_editCPos = columnPos;
     m_selectCPos = columnPos;
   }
 
@@ -241,97 +240,38 @@ public class TableEvents extends TableCanvas
   private void mouseReleased( MouseEvent event )
   {
     // handle down arrow
-    if ( getCursor() == CURSOR_DOWNARROW )
+    if ( getCursor() == CURSOR_DOWNARROW && m_reorderMarker != null )
     {
-      if ( m_reorderMarker != null )
-      {
-        // handle column reorder completion
-        m_table.stopAnimation();
-        m_table.remove( m_reorderSlider );
-        m_table.remove( m_reorderMarker );
-        m_reorderSlider = null;
-        m_reorderMarker = null;
+      // handle column reorder completion
+      m_table.stopAnimation();
+      m_table.remove( m_reorderSlider );
+      m_table.remove( m_reorderMarker );
+      m_reorderSlider = null;
+      m_reorderMarker = null;
 
-        int oldPos = m_table.getColumnPositionByIndex( m_index );
-        if ( m_mouseCPos < oldPos )
-          m_table.moveColumn( oldPos, m_mouseCPos );
-        if ( m_mouseCPos > oldPos + 1 )
-          m_table.moveColumn( oldPos, m_mouseCPos - 1 );
-        redrawAll();
-      }
-      else
-      {
-        // handle column select
-        int column1 = m_mouseCPos;
-        int column2 = m_mouseCPos;
-        boolean select = true;
-
-        if ( !event.isControlDown() && !event.isShiftDown() )
-          m_table.clearAllSelection();
-
-        if ( event.isShiftDown() && m_focusCPos >= 0 )
-        {
-          column1 = Math.min( m_mouseCPos, m_focusCPos );
-          column2 = Math.max( m_mouseCPos, m_focusCPos );
-        }
-
-        if ( event.isControlDown() && !event.isShiftDown() )
-          select = !m_table.isColumnAllSelected( m_mouseCPos );
-
-        m_focusCPos = m_mouseCPos;
-        m_focusRow = m_table.getRowAtY( m_table.getHorizontalHeaderHeight() + PROXIMITY );
-        for ( int column = column1; column <= column2; column++ )
-          m_table.setColumnSelection( column, select );
-        redrawAll();
-      }
+      int oldPos = m_table.getColumnPositionByIndex( m_index );
+      if ( m_mouseCPos < oldPos )
+        m_table.moveColumn( oldPos, m_mouseCPos );
+      if ( m_mouseCPos > oldPos + 1 )
+        m_table.moveColumn( oldPos, m_mouseCPos - 1 );
+      redrawTableCanvas();
     }
 
     // handle right arrow
-    if ( getCursor() == CURSOR_RIGHTARROW )
+    if ( getCursor() == CURSOR_RIGHTARROW && m_reorderMarker != null )
     {
-      if ( m_reorderMarker != null )
-      {
-        // handle row reorder completion
-        m_table.stopAnimation();
-        m_table.remove( m_reorderSlider );
-        m_table.remove( m_reorderMarker );
-        m_reorderSlider = null;
-        m_reorderMarker = null;
+      // handle row reorder completion
+      m_table.stopAnimation();
+      m_table.remove( m_reorderSlider );
+      m_table.remove( m_reorderMarker );
+      m_reorderSlider = null;
+      m_reorderMarker = null;
 
-        if ( m_mouseRow < m_index )
-          m_table.moveRow( m_index, m_mouseRow );
-        if ( m_mouseRow > m_index + 1 )
-          m_table.moveRow( m_index, m_mouseRow - 1 );
-        redrawAll();
-      }
-      else
-      {
-        // handle row select
-        if ( event.isAltDown() )
-          return;
-
-        int row1 = m_mouseRow;
-        int row2 = m_mouseRow;
-        boolean select = true;
-
-        if ( !event.isControlDown() && !event.isShiftDown() )
-          m_table.clearAllSelection();
-
-        if ( event.isShiftDown() && m_focusRow >= 0 )
-        {
-          row1 = Math.min( m_mouseRow, m_focusRow );
-          row2 = Math.max( m_mouseRow, m_focusRow );
-        }
-
-        if ( event.isControlDown() && !event.isShiftDown() )
-          select = !m_table.isRowAllSelected( m_mouseRow );
-
-        m_focusCPos = m_table.getColumnPositionAtX( m_table.getVerticalHeaderWidth() + PROXIMITY );
-        m_focusRow = m_mouseRow;
-        for ( int row = row1; row <= row2; row++ )
-          m_table.setRowSelection( row, select );
-        redrawAll();
-      }
+      if ( m_mouseRow < m_index )
+        m_table.moveRow( m_index, m_mouseRow );
+      if ( m_mouseRow > m_index + 1 )
+        m_table.moveRow( m_index, m_mouseRow - 1 );
+      redrawTableCanvas();
     }
 
   }
@@ -339,8 +279,9 @@ public class TableEvents extends TableCanvas
   /**************************************** mousePressed *****************************************/
   private void mousePressed( MouseEvent event )
   {
-    // request focus for the table (and so close any active cell editors)
-    Platform.runLater( () -> requestFocus() );
+    // request focus and consume event so tab-pane does not re-take focus
+    requestFocus();
+    event.consume();
 
     // handle cross cursor
     if ( getCursor() == CURSOR_CROSS && event.isPrimaryButtonDown() && !event.isAltDown() )
@@ -348,8 +289,46 @@ public class TableEvents extends TableCanvas
         // update selection rectangle
         moveSelect( m_mouseCPos, m_mouseRow, !event.isControlDown() );
       else
-        // move focus
-        moveFocus( m_mouseCPos, m_mouseRow, !event.isControlDown() );
+        // move editor
+        moveEdit( m_mouseCPos, m_mouseRow, !event.isControlDown() );
+
+    // handle right arrow
+    if ( getCursor() == CURSOR_RIGHTARROW && event.isPrimaryButtonDown() && !event.isAltDown() )
+    {
+      // if control not down, clear all previous selections
+      if ( !event.isControlDown() )
+        m_table.clearAllSelection();
+
+      // if invalid or shift not down, position editor on row
+      if ( m_editRow < 0 || !event.isShiftDown() )
+        m_editRow = m_mouseRow;
+
+      // position editor and select rows
+      m_editCPos = m_table.getVisibleColumnPositionRight( -1 );
+      m_selectRow = m_mouseRow;
+      m_selectCPos = m_table.getVisibleColumnPositionLeft( m_table.getData().getColumnCount() );
+      m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, true );
+      redrawTableCanvas();
+    }
+
+    // handle down arrow
+    if ( getCursor() == CURSOR_DOWNARROW && event.isPrimaryButtonDown() && !event.isAltDown() )
+    {
+      // if control not down, clear all previous selections
+      if ( !event.isControlDown() )
+        m_table.clearAllSelection();
+
+      // if invalid or shift not down, position editor on row
+      if ( m_editCPos < 0 || !event.isShiftDown() )
+        m_editCPos = m_mouseCPos;
+
+      // position editor and select rows
+      m_editRow = m_table.getVisibleRowBelow( -1 );
+      m_selectRow = m_table.getVisibleRowAbove( m_table.getData().getRowCount() );
+      m_selectCPos = m_mouseCPos;
+      m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, true );
+      redrawTableCanvas();
+    }
   }
 
   /**************************************** mouseClicked *****************************************/
@@ -380,7 +359,7 @@ public class TableEvents extends TableCanvas
 
       // redraw table from mouse y downwards
       m_table.resizeCanvasScrollBars();
-      moveFocus( m_mouseCPos, m_mouseRow, true );
+      moveEdit( m_mouseCPos, m_mouseRow, true );
     }
 
   }
@@ -393,19 +372,19 @@ public class TableEvents extends TableCanvas
     if ( !Character.isISOControl( key ) )
       openCellEditor( event.getCharacter() );
 
-    // move focus up or down when carriage return typed
+    // move editor up or down when carriage return typed
     if ( key == '\r' )
       if ( event.isShiftDown() )
-        moveFocus( MoveDirection.UP );
+        moveEdit( MoveDirection.UP );
       else
-        moveFocus( MoveDirection.DOWN );
+        moveEdit( MoveDirection.DOWN );
 
-    // move focus right or left when tab typed
+    // move editor right or left when tab typed
     if ( key == '\t' )
       if ( event.isShiftDown() )
-        moveFocus( MoveDirection.LEFT );
+        moveEdit( MoveDirection.LEFT );
       else
-        moveFocus( MoveDirection.RIGHT );
+        moveEdit( MoveDirection.RIGHT );
   }
 
   /***************************************** moveSelect ******************************************/
@@ -415,31 +394,40 @@ public class TableEvents extends TableCanvas
     if ( clearAll )
       m_table.clearAllSelection();
     else
-      m_table.select( m_focusCPos, m_focusRow, m_selectCPos, m_selectRow, false );
+      m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, false );
+
+    // only scroll to new select cell if old select cell was at least partially visible
+    int x = m_table.getXStartByColumnPosition( m_selectCPos );
+    int y = m_table.getYStartByRow( m_selectRow );
+    int w = m_table.getWidthByColumnPosition( m_selectCPos );
+    int h = m_table.getRowHeight( m_selectRow );
+    boolean scroll = x < getWidth() && x + w > m_table.getVerticalHeaderWidth() && y < getHeight()
+        && y + h > m_table.getHorizontalHeaderHeight();
 
     m_selectCPos = columnPos;
     m_selectRow = row;
 
-    m_table.select( m_focusCPos, m_focusRow, m_selectCPos, m_selectRow, true );
-    m_table.scrollTo( m_selectCPos, m_selectRow );
-    redrawAll();
+    m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, true );
+    if ( scroll )
+      m_table.scrollTo( m_selectCPos, m_selectRow );
+    redrawTableCanvas();
   }
 
-  /****************************************** moveFocus ******************************************/
-  private void moveFocus( int columnPos, int row, boolean clearAll )
+  /****************************************** moveEdit *******************************************/
+  private void moveEdit( int columnPos, int row, boolean clearAll )
   {
-    // clear all selections, move focus and select 
+    // clear all selections, move edit and select 
     if ( clearAll )
       m_table.clearAllSelection();
 
-    m_focusCPos = columnPos;
-    m_focusRow = row;
+    m_editCPos = columnPos;
+    m_editRow = row;
     m_selectCPos = columnPos;
     m_selectRow = row;
 
-    m_table.select( m_focusCPos, m_focusRow, true );
-    m_table.scrollTo( m_focusCPos, m_focusRow );
-    redrawAll();
+    m_table.select( m_editCPos, m_editRow, true );
+    m_table.scrollTo( m_editCPos, m_editRow );
+    redrawTableCanvas();
   }
 
   /****************************************** keyPressed *****************************************/
@@ -466,9 +454,9 @@ public class TableEvents extends TableCanvas
         else
         {
           if ( control )
-            moveFocus( column, row, true );
+            moveEdit( column, row, true );
           else
-            moveFocus( column, m_focusRow, true );
+            moveEdit( column, m_editRow, true );
         }
         break;
 
@@ -486,14 +474,14 @@ public class TableEvents extends TableCanvas
         else
         {
           if ( control )
-            moveFocus( column, row, true );
+            moveEdit( column, row, true );
           else
-            moveFocus( column, m_focusRow, true );
+            moveEdit( column, m_editRow, true );
         }
         break;
 
       case PAGE_UP:
-        int y = m_table.getYStartByRow( m_focusRow ) + m_table.getRowHeight( m_focusRow ) / 2;
+        int y = m_table.getYStartByRow( m_editRow ) + m_table.getRowHeight( m_editRow ) / 2;
         double value = m_table.m_vScrollBar.getValue() - m_table.m_vScrollBar.getBlockIncrement();
         if ( value < 0.0 )
           value = 0.0;
@@ -502,11 +490,11 @@ public class TableEvents extends TableCanvas
         if ( shift )
           moveSelect( m_selectCPos, row, false );
         else
-          moveFocus( m_focusCPos, row, true );
+          moveEdit( m_editCPos, row, true );
         break;
 
       case PAGE_DOWN:
-        y = m_table.getYStartByRow( m_focusRow ) + m_table.getRowHeight( m_focusRow ) / 2;
+        y = m_table.getYStartByRow( m_editRow ) + m_table.getRowHeight( m_editRow ) / 2;
         value = m_table.m_vScrollBar.getValue() + m_table.m_vScrollBar.getBlockIncrement();
         if ( value > m_table.m_vScrollBar.getMax() )
           value = m_table.m_vScrollBar.getMax();
@@ -515,7 +503,7 @@ public class TableEvents extends TableCanvas
         if ( shift )
           moveSelect( m_selectCPos, row, false );
         else
-          moveFocus( m_focusCPos, row, true );
+          moveEdit( m_editCPos, row, true );
         break;
 
       case UP:
@@ -523,11 +511,11 @@ public class TableEvents extends TableCanvas
         if ( control && shift )
           m_selectRow = m_table.getVisibleRowBelow( -1 );
         if ( control && !shift )
-          m_focusRow = m_table.getVisibleRowBelow( -1 );
+          m_editRow = m_table.getVisibleRowBelow( -1 );
         if ( shift )
           moveSelect( m_selectCPos, m_table.getVisibleRowAbove( m_selectRow ), control );
         else
-          moveFocus( m_focusCPos, m_table.getVisibleRowAbove( m_focusRow ), true );
+          moveEdit( m_editCPos, m_table.getVisibleRowAbove( m_editRow ), true );
         break;
 
       case DOWN:
@@ -535,11 +523,11 @@ public class TableEvents extends TableCanvas
         if ( control && shift )
           m_selectRow = m_table.getVisibleRowAbove( m_table.getData().getRowCount() );
         if ( control && !shift )
-          m_focusRow = m_table.getVisibleRowAbove( m_table.getData().getRowCount() );
+          m_editRow = m_table.getVisibleRowAbove( m_table.getData().getRowCount() );
         if ( shift )
           moveSelect( m_selectCPos, m_table.getVisibleRowBelow( m_selectRow ), control );
         else
-          moveFocus( m_focusCPos, m_table.getVisibleRowBelow( m_focusRow ), true );
+          moveEdit( m_editCPos, m_table.getVisibleRowBelow( m_editRow ), true );
         break;
 
       case RIGHT:
@@ -547,11 +535,11 @@ public class TableEvents extends TableCanvas
         if ( control && shift )
           m_selectCPos = m_table.getVisibleColumnPositionLeft( m_table.getData().getColumnCount() );
         if ( control && !shift )
-          m_focusCPos = m_table.getVisibleColumnPositionLeft( m_table.getData().getColumnCount() );
+          m_editCPos = m_table.getVisibleColumnPositionLeft( m_table.getData().getColumnCount() );
         if ( shift )
           moveSelect( m_table.getVisibleColumnPositionRight( m_selectCPos ), m_selectRow, control );
         else
-          moveFocus( m_table.getVisibleColumnPositionRight( m_focusCPos ), m_focusRow, true );
+          moveEdit( m_table.getVisibleColumnPositionRight( m_editCPos ), m_editRow, true );
         break;
 
       case LEFT:
@@ -559,11 +547,11 @@ public class TableEvents extends TableCanvas
         if ( control && shift )
           m_selectCPos = m_table.getVisibleColumnPositionRight( -1 );
         if ( control && !shift )
-          m_focusCPos = m_table.getVisibleColumnPositionRight( -1 );
+          m_editCPos = m_table.getVisibleColumnPositionRight( -1 );
         if ( shift )
           moveSelect( m_table.getVisibleColumnPositionLeft( m_selectCPos ), m_selectRow, control );
         else
-          moveFocus( m_table.getVisibleColumnPositionLeft( m_focusCPos ), m_focusRow, true );
+          moveEdit( m_table.getVisibleColumnPositionLeft( m_editCPos ), m_editRow, true );
         break;
 
       case F2:
@@ -592,17 +580,17 @@ public class TableEvents extends TableCanvas
   private void openCellEditor( Object value )
   {
     // only open editor if a suitable cell is selected
-    if ( m_focusCPos < 0 || m_focusRow < 0 || m_focusCPos >= m_table.getData().getColumnCount()
-        || m_focusRow >= m_table.getData().getRowCount() || m_table.getRowHeight( m_focusRow ) < 2 )
+    if ( m_editCPos < 0 || m_editRow < 0 || m_editCPos >= m_table.getData().getColumnCount()
+        || m_editRow >= m_table.getData().getRowCount() || m_table.getRowHeight( m_editRow ) < 2 )
       return;
 
     // scroll to cell
-    m_table.scrollTo( m_focusCPos, m_focusRow );
+    m_table.scrollTo( m_editCPos, m_editRow );
     m_table.finishAnimation();
 
     // open cell editor for currently selected table cell
-    int columnIndex = m_table.getColumnIndexByPosition( m_focusCPos );
-    int row = m_focusRow;
+    int columnIndex = m_table.getColumnIndexByPosition( m_editCPos );
+    int row = m_editRow;
     AbstractCellEditor editor = m_table.getData().getEditor( columnIndex, row );
 
     // open editor if one available
@@ -610,20 +598,20 @@ public class TableEvents extends TableCanvas
       editor.open( m_table, value );
   }
 
-  /****************************************** moveFocus ******************************************/
-  public void moveFocus( MoveDirection direction )
+  /****************************************** moveEdit *******************************************/
+  public void moveEdit( MoveDirection direction )
   {
-    // move focus in specified direction
+    // move editor in specified direction
     if ( direction == MoveDirection.DOWN )
-      m_focusRow = m_table.getVisibleRowBelow( m_focusRow );
+      m_editRow = m_table.getVisibleRowBelow( m_editRow );
     if ( direction == MoveDirection.UP )
-      m_focusRow = m_table.getVisibleRowAbove( m_focusRow );
+      m_editRow = m_table.getVisibleRowAbove( m_editRow );
     if ( direction == MoveDirection.LEFT )
-      m_focusCPos = m_table.getVisibleColumnPositionLeft( m_focusCPos );
+      m_editCPos = m_table.getVisibleColumnPositionLeft( m_editCPos );
     if ( direction == MoveDirection.RIGHT )
-      m_focusCPos = m_table.getVisibleColumnPositionRight( m_focusCPos );
+      m_editCPos = m_table.getVisibleColumnPositionRight( m_editCPos );
 
-    moveFocus( m_focusCPos, m_focusRow, true );
+    moveEdit( m_editCPos, m_editRow, true );
   }
 
   /***************************************** scrollTable *****************************************/
@@ -768,13 +756,18 @@ public class TableEvents extends TableCanvas
   /************************************** rowReorderDragged **************************************/
   private void rowReorderDragged()
   {
+    // if row reordering is not wanted, return without doing anything
+    int endRow = m_table.getData().getMoveEndRow( m_mouseRow );
+    if ( endRow < 0 )
+      return;
+
     // is a reorder already in progress
     if ( m_reorderSlider == null )
     {
       // start reorder
       m_offset = m_mouseY - m_table.getYStartByRow( m_mouseRow );
       m_table.clearAllSelection();
-      redrawAll();
+      redrawTableCanvas();
 
       // create reorder slider (translucent cell header)
       int h = m_table.getRowHeight( m_mouseRow );
@@ -812,7 +805,7 @@ public class TableEvents extends TableCanvas
       int index = m_table.getColumnIndexByPosition( m_mouseCPos );
       m_offset = m_mouseX - m_table.getXStartByColumnPosition( m_mouseCPos );
       m_table.clearAllSelection();
-      redrawAll();
+      redrawTableCanvas();
 
       // create reorder slider (translucent cell header)
       int w = m_table.getWidthByColumnIndex( index );

@@ -33,6 +33,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
+import javafx.collections.ObservableList;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -149,6 +152,31 @@ public class MainWindow
       else
         m_menus.menuTasks.setDisable( true );
     } );
+
+    // when focus leaves plan properties or notes, check for any plan updates
+    scene.focusOwnerProperty().addListener( ( property, oldNode, newNode ) ->
+    {
+      if ( isChildNode( m_mainTabWidget.getPlanTab().getPlanProperties(), oldNode ) )
+        getPropertiesPane().updatePlan();
+      if ( isChildNode( m_mainTabWidget.getPlanTab().getPlanNotes(), oldNode ) )
+        getNotesPane().updatePlan();
+    } );
+  }
+
+  /**************************************** isChildNode ******************************************/
+  public static boolean isChildNode( Parent parent, Node node )
+  {
+    // return true if node is child of parent or child of a parent child
+    ObservableList<Node> children = parent.getChildrenUnmodifiable();
+    if ( children.contains( node ) )
+      return true;
+
+    for ( Node child : children )
+      if ( child instanceof Parent )
+        if ( isChildNode( (Parent) child, node ) )
+          return true;
+
+    return false;
   }
 
   /****************************************** message ********************************************/

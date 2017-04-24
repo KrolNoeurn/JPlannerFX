@@ -134,7 +134,6 @@ public class Table extends TableDisplay
     calculateBodyHeight();
     calculateBodyWidth();
     resizeCanvasScrollBars();
-    redraw();
   }
 
   /************************************ calculateBodyHeight **************************************/
@@ -623,11 +622,19 @@ public class Table extends TableDisplay
   /******************************************* select *******************************************/
   public void select( int columnPos1, int row1, int columnPos2, int row2, boolean selected )
   {
-    // set whether specified table region is selected
+    // ensure column and row positions are within bounds
+    columnPos1 = clamp( columnPos1, 0, m_data.getColumnCount() - 1 );
+    columnPos2 = clamp( columnPos2, 0, m_data.getColumnCount() - 1 );
+    row1 = clamp( row1, 0, m_data.getRowCount() - 1 );
+    row2 = clamp( row2, 0, m_data.getRowCount() - 1 );
+
+    // determine min & max positions
     int c1 = Math.min( columnPos1, columnPos2 );
     int c2 = Math.max( columnPos1, columnPos2 );
     int r1 = Math.min( row1, row2 );
     int r2 = Math.max( row1, row2 );
+
+    // set whether specified table region is selected
     for ( int column = c1; column <= c2; column++ )
       for ( int row = r1; row <= r2; row++ )
       {
@@ -636,6 +643,11 @@ public class Table extends TableDisplay
         else
           m_selected.remove( column * SELECT_HASH + row );
       }
+  }
+
+  public static int clamp( int val, int min, int max )
+  {
+    return Math.max( min, Math.min( max, val ) );
   }
 
   /*************************************** setRowSelection ***************************************/
@@ -679,9 +691,9 @@ public class Table extends TableDisplay
   /****************************************** writeXML *******************************************/
   public void writeXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
-    // write focus cell
-    xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( getCanvas().getFocusCellColumnPosition() ) );
-    xsw.writeAttribute( XmlLabels.XML_ROW, Integer.toString( getCanvas().getFocusCellRow() ) );
+    // write editor cell
+    xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( getCanvas().getEditCellColumnPosition() ) );
+    xsw.writeAttribute( XmlLabels.XML_ROW, Integer.toString( getCanvas().getEditCellRow() ) );
 
     // write column widths (all)
     xsw.writeStartElement( XmlLabels.XML_COLUMNS );
@@ -746,10 +758,10 @@ public class Table extends TableDisplay
       switch ( xsr.getAttributeLocalName( i ) )
       {
         case XmlLabels.XML_COLUMN:
-          getCanvas().setFocusCellColumnPosition( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          getCanvas().setEditCellColumnPosition( Integer.parseInt( xsr.getAttributeValue( i ) ) );
           break;
         case XmlLabels.XML_ROW:
-          getCanvas().setFocusCellRow( Integer.parseInt( xsr.getAttributeValue( i ) ) );
+          getCanvas().setEditCellRow( Integer.parseInt( xsr.getAttributeValue( i ) ) );
           break;
         default:
           JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );

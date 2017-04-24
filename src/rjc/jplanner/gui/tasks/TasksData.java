@@ -236,4 +236,16 @@ class TasksData extends AbstractDataSource
     return outdent;
   }
 
+  /**************************************** getMoveEndRow ****************************************/
+  @Override
+  public int getMoveEndRow( int startRow )
+  {
+    // if summary return summary end, otherwise same row
+    int end = JPlanner.plan.getTask( startRow ).getSummaryEnd();
+    if ( end > 0 )
+      return end;
+
+    return startRow;
+  }
+
 }
