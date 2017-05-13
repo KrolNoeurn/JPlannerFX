@@ -94,14 +94,27 @@ public class JPlanner extends Application
   }
 
   /******************************************* stack *********************************************/
-  public static void stack()
+  public static void stack( Object... objects )
   {
+    // prints space separated objects in string representation prefixed by date-time
+    StringBuilder str = new StringBuilder();
+    for ( Object obj : objects )
+    {
+      if ( obj == null )
+        str.append( "null " );
+      else if ( obj instanceof String )
+        str.append( "\"" + obj + "\" " );
+      else if ( obj instanceof Character )
+        str.append( "'" + obj + "' " );
+      else
+        str.append( obj + " " );
+    }
+    System.out.println( DateTime.now() + " " + str.toString() );
+
     // prints stack
     StackTraceElement[] stack = new Throwable().getStackTrace();
-    System.out.println( DateTime.now() + "======================= STACK =======================" );
     for ( int i = 1; i < stack.length; i++ )
       System.out.println( "\t" + stack[i] );
-    System.out.println( DateTime.now() + "===================== STACK END =====================" );
   }
 
   /******************************************* caller *******************************************/
@@ -118,7 +131,7 @@ public class JPlanner extends Application
   public static String clean( String txt )
   {
     // returns a clean string
-    return txt.trim().replaceAll( "\\s", " " ).replaceAll( "(\\s{2,})", " " );
+    return txt.trim().replaceAll( "(\\s+)", " " );
   }
 
   /*************************************** tool-tip hack *****************************************

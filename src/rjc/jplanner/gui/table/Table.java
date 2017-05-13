@@ -37,7 +37,7 @@ import rjc.jplanner.XmlLabels;
 
 public class Table extends TableDisplay
 {
-  private AbstractDataSource    m_data;                                           // data source for the table
+  private AbstractDataSource    m_data;                                             // data source for the table
 
   private int                   m_defaultRowHeight;
   private int                   m_defaultColumnWidth;
@@ -46,23 +46,25 @@ public class Table extends TableDisplay
   private int                   m_hHeaderHeight;
   private int                   m_vHeaderWidth;
 
-  private int                   m_bodyWidth;                                      // body cells total width (excludes header)
-  private int                   m_bodyHeight;                                     // body cells total height (excludes header)
+  private int                   m_bodyWidth;                                        // body cells total width (excludes header)
+  private int                   m_bodyHeight;                                       // body cells total height (excludes header)
 
   // all columns have default widths, and rows default heights, except those in these maps, -ve means hidden
-  private Map<Integer, Integer> m_columnWidths  = new HashMap<Integer, Integer>();
-  private Map<Integer, Integer> m_rowHeights    = new HashMap<Integer, Integer>();
-  private ArrayList<Integer>    m_rowYStarts    = new ArrayList<Integer>();
+  private Map<Integer, Integer> m_columnWidths    = new HashMap<Integer, Integer>();
+  private Map<Integer, Integer> m_rowHeights      = new HashMap<Integer, Integer>();
+  private ArrayList<Integer>    m_rowYStarts      = new ArrayList<Integer>();
 
   // set of collapsed rows (only used for collapsed tasks)
-  private Set<Integer>          m_rowCollapsed  = new HashSet<Integer>();
+  private Set<Integer>          m_rowCollapsed    = new HashSet<Integer>();
 
   // array with mapping from position to index
-  private ArrayList<Integer>    m_columnIndexes = new ArrayList<Integer>();
+  private ArrayList<Integer>    m_columnIndexes   = new ArrayList<Integer>();
 
   // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + row
-  private static final int      SELECT_HASH     = 9999;
-  private Set<Integer>          m_selected      = new HashSet<Integer>();
+  private static final int      SELECT_HASH       = 9999;
+  private Set<Integer>          m_selectedCells   = new HashSet<Integer>();
+  private Set<Integer>          m_selectedRows    = new HashSet<Integer>();
+  private Set<Integer>          m_selectedColumns = new HashSet<Integer>();
 
   public static enum Alignment// alignment of text to be drawn in cell
   {
@@ -95,8 +97,7 @@ public class Table extends TableDisplay
     m_columnWidths.clear();
     m_rowHeights.clear();
     m_rowCollapsed.clear();
-    m_selected.clear();
-    m_columnIndexes.clear();
+    clearAllSelection();
 
     // prepare row-y-start array with row 0 starting at y=0
     m_rowYStarts.clear();
@@ -104,6 +105,7 @@ public class Table extends TableDisplay
     m_rowYStarts.add( 0 );
 
     // initialise column position to index mapping
+    m_columnIndexes.clear();
     int count = m_data.getColumnCount();
     for ( int column = 0; column < count; column++ )
       m_columnIndexes.add( column );
@@ -546,41 +548,69 @@ public class Table extends TableDisplay
   public void clearAllSelection()
   {
     // clear selection from all cells
-    m_selected.clear();
-  }
-
-  /**************************************** selectionCount ***************************************/
-  public int selectionCount()
-  {
-    // return number of selected cells
-    return m_selected.size();
+    m_selectedCells.clear();
+    m_selectedRows.clear();
+    m_selectedColumns.clear();
   }
 
   /***************************************** isSelected ******************************************/
   public boolean isSelected( int columnPos, int row )
   {
+    // return true if specified row is selected
+    if ( m_selectedRows.contains( row ) )
+      return true;
+
+    // return true if specified column-position is selected
+    if ( m_selectedColumns.contains( columnPos ) )
+      return true;
+
     // return true if specified body cell is selected
-    return m_selected.contains( columnPos * SELECT_HASH + row );
+    return m_selectedCells.contains( columnPos * SELECT_HASH + row );
   }
 
   /************************************ doesRowHaveSelection *************************************/
   public boolean doesRowHaveSelection( int row )
   {
+    // return true if any column selected
+    if ( !m_selectedColumns.isEmpty() )
+      return true;
+
+    // return true if specified row is selected
+    if ( m_selectedRows.contains( row ) )
+      return true;
+
     // return true if any selected body cells on specified row
-    for ( int hash : m_selected )
+    for ( int hash : m_selectedCells )
       if ( hash % SELECT_HASH == row )
         return true;
 
     return false;
   }
 
-  /************************************** isRowAllSelected ***************************************/
-  public boolean isRowAllSelected( int row )
+  /**************************************** isRowSelected ****************************************/
+  public boolean isRowSelected( int row )
   {
-    // return true if every body cell in row is selected
-    int num = getData().getColumnCount();
-    for ( int columnPos = 0; columnPos < num; columnPos++ )
-      if ( !isSelected( columnPos, row ) )
+    // return true if specified row is selected
+    if ( m_selectedRows.contains( row ) )
+      return true;
+
+    // return true if all visible columns selected
+    int count = getData().getColumnCount();
+    boolean all = true;
+    for ( int columnPos = 0; columnPos < count; columnPos++ )
+      if ( m_columnWidths.getOrDefault( m_columnIndexes.get( columnPos ), m_defaultColumnWidth ) > 0
+          && !m_selectedColumns.contains( columnPos ) )
+      {
+        all = false;
+        break;
+      }
+    if ( all )
+      return true;
+
+    // return true if every visible body cell in row is selected
+    for ( int columnPos = 0; columnPos < count; columnPos++ )
+      if ( m_columnWidths.getOrDefault( m_columnIndexes.get( columnPos ), m_defaultColumnWidth ) > 0
+          && !isSelected( columnPos, row ) )
         return false;
 
     return true;
@@ -589,21 +619,44 @@ public class Table extends TableDisplay
   /*********************************** doesColumnHaveSelection ***********************************/
   public boolean doesColumnHaveSelection( int columnPos )
   {
+    // return true if any row selected
+    if ( !m_selectedRows.isEmpty() )
+      return true;
+
+    // return true if specified column-position is selected
+    if ( m_selectedColumns.contains( columnPos ) )
+      return true;
+
     // return true if any selected body cells on specified column
-    for ( int hash : m_selected )
+    for ( int hash : m_selectedCells )
       if ( hash / SELECT_HASH == columnPos )
         return true;
 
     return false;
   }
 
-  /************************************* isColumnAllSelected *************************************/
-  public boolean isColumnAllSelected( int columnPos )
+  /************************************** isColumnSelected ***************************************/
+  public boolean isColumnSelected( int columnPos )
   {
-    // return true if every body cell in column is selected
-    int num = getData().getRowCount();
-    for ( int row = 0; row < num; row++ )
-      if ( !isSelected( columnPos, row ) )
+    // return true if specified column-position is selected
+    if ( m_selectedColumns.contains( columnPos ) )
+      return true;
+
+    // return true if all visible rows selected
+    int count = getData().getRowCount();
+    boolean all = true;
+    for ( int row = 0; row < count; row++ )
+      if ( m_rowHeights.getOrDefault( row, m_defaultRowHeight ) > 0 && !m_selectedRows.contains( row ) )
+      {
+        all = false;
+        break;
+      }
+    if ( all )
+      return true;
+
+    // return true if every visible body cell in column is selected
+    for ( int row = 0; row < count; row++ )
+      if ( m_rowHeights.getOrDefault( row, m_defaultRowHeight ) > 0 && !isSelected( columnPos, row ) )
         return false;
 
     return true;
@@ -614,9 +667,52 @@ public class Table extends TableDisplay
   {
     // set whether specified body cell is selected
     if ( selected )
-      m_selected.add( columnPos * SELECT_HASH + row );
+      m_selectedCells.add( columnPos * SELECT_HASH + row );
     else
-      m_selected.remove( columnPos * SELECT_HASH + row );
+      m_selectedCells.remove( columnPos * SELECT_HASH + row );
+  }
+
+  /***************************************** selectRows ******************************************/
+  public void selectRows( int row1, int row2, boolean selected )
+  {
+    // ensure row positions are within bounds
+    row1 = clamp( row1, 0, m_data.getRowCount() - 1 );
+    row2 = clamp( row2, 0, m_data.getRowCount() - 1 );
+
+    // determine min & max positions
+    int r1 = Math.min( row1, row2 );
+    int r2 = Math.max( row1, row2 );
+
+    for ( int row = r1; row <= r2; row++ )
+    {
+      // set whether specified table row is selected
+      if ( selected )
+        m_selectedRows.add( row );
+      else
+        m_selectedRows.remove( row );
+    }
+  }
+
+  /**************************************** selectColumns ****************************************/
+  public void selectColumns( int columnPos1, int columnPos2, boolean selected )
+  {
+    // ensure column and row positions are within bounds
+    columnPos1 = clamp( columnPos1, 0, m_data.getColumnCount() - 1 );
+    columnPos2 = clamp( columnPos2, 0, m_data.getColumnCount() - 1 );
+
+    // determine min & max positions
+    int c1 = Math.min( columnPos1, columnPos2 );
+    int c2 = Math.max( columnPos1, columnPos2 );
+
+    // set whether specified table region is selected
+    for ( int column = c1; column <= c2; column++ )
+    {
+      // set whether specified table column is selected
+      if ( selected )
+        m_selectedColumns.add( column );
+      else
+        m_selectedColumns.remove( column );
+    }
   }
 
   /******************************************* select *******************************************/
@@ -639,9 +735,9 @@ public class Table extends TableDisplay
       for ( int row = r1; row <= r2; row++ )
       {
         if ( selected )
-          m_selected.add( column * SELECT_HASH + row );
+          m_selectedCells.add( column * SELECT_HASH + row );
         else
-          m_selected.remove( column * SELECT_HASH + row );
+          m_selectedCells.remove( column * SELECT_HASH + row );
       }
   }
 
@@ -650,39 +746,13 @@ public class Table extends TableDisplay
     return Math.max( min, Math.min( max, val ) );
   }
 
-  /*************************************** setRowSelection ***************************************/
-  public void setRowSelection( int row, boolean selected )
-  {
-    // set whether specified table row is selected
-    int num = getData().getColumnCount();
-    if ( selected )
-      for ( int columnPos = 0; columnPos < num; columnPos++ )
-        m_selected.add( columnPos * SELECT_HASH + row );
-    else
-      for ( int columnPos = 0; columnPos < num; columnPos++ )
-        m_selected.remove( columnPos * SELECT_HASH + row );
-  }
-
-  /************************************* setColumnSelection **************************************/
-  public void setColumnSelection( int columnPos, boolean selected )
-  {
-    // set whether specified table column is selected
-    int num = getData().getRowCount();
-    if ( selected )
-      for ( int row = 0; row < num; row++ )
-        m_selected.add( columnPos * SELECT_HASH + row );
-    else
-      for ( int row = 0; row < num; row++ )
-        m_selected.remove( columnPos * SELECT_HASH + row );
-  }
-
   /*************************************** getSelectedRows ***************************************/
   public Set<Integer> getSelectedRows()
   {
     // return set of selected row indexes
     Set<Integer> rows = new HashSet<Integer>();
 
-    for ( int hash : m_selected )
+    for ( int hash : m_selectedCells )
       rows.add( hash % SELECT_HASH );
 
     return rows;
@@ -709,7 +779,11 @@ public class Table extends TableDisplay
       if ( width != m_defaultColumnWidth )
         xsw.writeAttribute( XmlLabels.XML_WIDTH, Integer.toString( width ) );
 
-      xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( getColumnPositionByIndex( columnIndex ) ) );
+      int columnPos = getColumnPositionByIndex( columnIndex );
+      xsw.writeAttribute( XmlLabels.XML_POSITION, Integer.toString( columnPos ) );
+
+      if ( isColumnSelected( columnPos ) )
+        xsw.writeAttribute( XmlLabels.XML_SELECTED, Boolean.toString( true ) );
     }
     xsw.writeEndElement(); // XML_COLUMNS
 
@@ -723,7 +797,7 @@ public class Table extends TableDisplay
       int height = m_rowHeights.getOrDefault( row, m_defaultRowHeight );
       boolean collapsed = m_rowCollapsed.contains( row );
 
-      if ( height != m_defaultRowHeight || collapsed )
+      if ( height != m_defaultRowHeight || collapsed || isRowSelected( row ) )
       {
         xsw.writeEmptyElement( XmlLabels.XML_ROW );
         xsw.writeAttribute( XmlLabels.XML_ID, Integer.toString( row ) );
@@ -733,12 +807,15 @@ public class Table extends TableDisplay
 
         if ( collapsed )
           xsw.writeAttribute( XmlLabels.XML_COLLAPSED, "true" );
+
+        if ( isRowSelected( row ) )
+          xsw.writeAttribute( XmlLabels.XML_SELECTED, Boolean.toString( true ) );
       }
     }
     xsw.writeEndElement(); // XML_ROWS
 
     // write any selected cells
-    for ( int hash : m_selected )
+    for ( int hash : m_selectedCells )
     {
       xsw.writeEmptyElement( XmlLabels.XML_SELECTED );
       xsw.writeAttribute( XmlLabels.XML_COLUMN, Integer.toString( hash / SELECT_HASH ) );
@@ -815,13 +892,20 @@ public class Table extends TableDisplay
       }
 
     // read XML individual columns
+    ArrayList<Integer> selectedIndex = new ArrayList<Integer>();
+    boolean selected;
     while ( xsr.hasNext() )
     {
       xsr.next();
 
       // if reached end of columns data, exit loop
       if ( xsr.isEndElement() && xsr.getLocalName().equals( XmlLabels.XML_COLUMNS ) )
+      {
+        // select columns from indexes to positions
+        selectedIndex.forEach(
+            index -> selectColumns( getColumnPositionByIndex( index ), getColumnPositionByIndex( index ), true ) );
         break;
+      }
 
       if ( xsr.isStartElement() )
         switch ( xsr.getLocalName() )
@@ -841,6 +925,11 @@ public class Table extends TableDisplay
                   break;
                 case XmlLabels.XML_POSITION:
                   m_columnIndexes.set( Integer.parseInt( xsr.getAttributeValue( i ) ), id );
+                  break;
+                case XmlLabels.XML_SELECTED:
+                  selected = Boolean.parseBoolean( xsr.getAttributeValue( i ) );
+                  if ( selected )
+                    selectedIndex.add( id );
                   break;
                 default:
                   JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
@@ -904,6 +993,9 @@ public class Table extends TableDisplay
                 case XmlLabels.XML_COLLAPSED:
                   if ( Boolean.parseBoolean( xsr.getAttributeValue( i ) ) )
                     m_rowCollapsed.add( id );
+                  break;
+                case XmlLabels.XML_SELECTED:
+                  selectRows( id, id, Boolean.parseBoolean( xsr.getAttributeValue( i ) ) );
                   break;
                 default:
                   JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
