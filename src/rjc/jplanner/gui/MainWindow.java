@@ -255,10 +255,11 @@ public class MainWindow
 
     // update gui
     resetGui();
-    relayoutTaskTables();
-    relayoutResourceTables();
-    relayoutCalendarTables();
-    relayoutDayTypeTables();
+    redrawTaskTables();
+    redrawGantts();
+    redrawResourceTables();
+    redrawCalendarTables();
+    redrawDayTypeTables();
     message( "New plan" );
     return true;
   }

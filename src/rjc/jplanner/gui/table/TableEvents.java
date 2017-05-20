@@ -151,7 +151,7 @@ public class TableEvents extends TableCanvas
       // if column is selected, set cursor to move
       if ( m_table.isColumnSelected( m_mouseCPos ) )
       {
-        setCursor( Cursors.MOVE );
+        setCursor( Cursors.H_MOVE );
         return;
       }
 
@@ -178,7 +178,7 @@ public class TableEvents extends TableCanvas
       // if row is selected, set cursor to move
       if ( m_table.isRowSelected( m_mouseRow ) )
       {
-        setCursor( Cursors.MOVE );
+        setCursor( Cursors.V_MOVE );
         return;
       }
 
@@ -253,10 +253,8 @@ public class TableEvents extends TableCanvas
       return;
     }
 
-    JPlanner.trace( m_mouseX, m_mouseY, getCursor() == Cursors.MOVE );
-
     // ######### handle column reorder
-    if ( getCursor() == Cursors.MOVE && m_mouseY < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == Cursors.H_MOVE )
     {
       m_mouseX = (int) event.getX();
       columnReorderDragged();
@@ -264,7 +262,7 @@ public class TableEvents extends TableCanvas
     }
 
     // ######### handle row reorder
-    if ( getCursor() == Cursors.MOVE && m_mouseX < m_table.getVerticalHeaderWidth() )
+    if ( getCursor() == Cursors.V_MOVE )
     {
       m_mouseY = (int) event.getY();
       rowReorderDragged();
@@ -284,7 +282,7 @@ public class TableEvents extends TableCanvas
     }
 
     // ######### check if column reordering
-    if ( m_mouseY < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == Cursors.H_MOVE )
     {
       // handle column reorder completion
       m_table.stopAnimation();
@@ -371,11 +369,11 @@ public class TableEvents extends TableCanvas
     }
 
     // ######### handle column reorder
-    if ( getCursor() == Cursors.MOVE && m_mouseY < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == Cursors.H_MOVE )
       columnReorderDragged();
 
     // ######### handle row reorder
-    if ( getCursor() == Cursors.MOVE && m_mouseX < m_table.getVerticalHeaderWidth() )
+    if ( getCursor() == Cursors.V_MOVE )
       rowReorderDragged();
 
     // ######### select whole table if headers corner
@@ -673,7 +671,7 @@ public class TableEvents extends TableCanvas
   private void scrollTable()
   {
     // determine whether table needs to be scrolled to make reorder marker visible
-    if ( m_mouseY < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == Cursors.H_MOVE )
     {
       // vertical marker
       if ( m_mouseX < m_table.getVerticalHeaderWidth() )
@@ -747,7 +745,7 @@ public class TableEvents extends TableCanvas
     gc.setLineWidth( 3.0 );
     gc.setStroke( Color.RED );
 
-    if ( m_mouseY < m_table.getHorizontalHeaderHeight() )
+    if ( getCursor() == Cursors.H_MOVE )
     {
       double h = Math.min( m_table.getBodyHeight() + m_table.getHorizontalHeaderHeight(), getHeight() );
       marker.setWidth( 5.0 );
@@ -770,7 +768,7 @@ public class TableEvents extends TableCanvas
   {
     // ensure reorder marker position and visibility is correct
     if ( m_reorderMarker != null )
-      if ( m_mouseY < m_table.getHorizontalHeaderHeight() )
+      if ( getCursor() == Cursors.H_MOVE )
       {
         // vertical reorder marker
         m_mouseCPos = m_table.getColumnPositionAtX( m_mouseX );

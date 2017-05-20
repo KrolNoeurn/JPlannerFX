@@ -38,16 +38,17 @@ import rjc.jplanner.model.Plan;
 
 public class JPlanner extends Application
 {
-  public static Plan         plan;             // globally accessible plan
-  public static MainWindow   gui;              // globally accessible main-window
+  public static Plan         plan;                    // globally accessible plan
+  public static MainWindow   gui;                     // globally accessible main-window
 
   public static final String ERROR   = "error";
-  public static final String VERSION = "";
+  public static final String VERSION = "v0.0.2-alpha";
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
   {
     // main entry point for application startup
+    trace( "JPlannerFX VERSION = '" + VERSION + "'" );
     trace( "################################# Java properties #################################" );
     for ( Object property : new TreeSet<Object>( System.getProperties().keySet() ) )
       trace( property + " = '" + System.getProperty( property.toString() ) + "'" );
@@ -134,29 +135,4 @@ public class JPlanner extends Application
     return txt.trim().replaceAll( "(\\s+)", " " );
   }
 
-  /*************************************** tool-tip hack *****************************************
-  static
-  {
-    // hack tool-tip durations behaviour (temporary until Java 9) - has stopped working?
-    try
-    {
-      Tooltip obj = new Tooltip();
-      Class<?> clazz = obj.getClass().getDeclaredClasses()[1];
-      Constructor<?> constructor = clazz.getDeclaredConstructor( Duration.class, Duration.class, Duration.class,
-          boolean.class );
-      constructor.setAccessible( true );
-      Object tooltipBehavior = constructor.newInstance( new Duration( 100 ), //open
-          new Duration( 60000 ), //visible
-          new Duration( 200 ), //close
-          false );
-      Field fieldBehavior = obj.getClass().getDeclaredField( "BEHAVIOR" );
-      fieldBehavior.setAccessible( true );
-      fieldBehavior.set( obj, tooltipBehavior );
-    }
-    catch ( Exception exception )
-    {
-      trace( exception );
-    }
-  }
-  ***/
 }

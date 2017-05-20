@@ -118,6 +118,7 @@ public class Table extends TableDisplay
     m_data.defaultTableModifications( this );
 
     // set scroll bar
+    resizeCanvasScrollBars();
     m_vScrollBar.setValue( 0.0 );
     m_hScrollBar.setValue( 0.0 );
   }

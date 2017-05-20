@@ -30,12 +30,13 @@ public final class Cursors
 {
   public static final Cursor H_RESIZE   = Cursor.H_RESIZE;
   public static final Cursor V_RESIZE   = Cursor.V_RESIZE;
-  public static final Cursor MOVE       = Cursor.MOVE;
   public static final Cursor DEFAULT    = Cursor.DEFAULT;
 
   public static final Cursor DOWNARROW  = makeCursor( "arrowdown.png", 7, 16 );
   public static final Cursor RIGHTARROW = makeCursor( "arrowright.png", 16, 24 );
   public static final Cursor CROSS      = makeCursor( "cross.png", 16, 20 );
+  public static final Cursor H_MOVE     = makeCursor( "move.png", 16, 16 );
+  public static final Cursor V_MOVE     = makeCursor( "move.png", 16, 16 );
 
   /***************************************** makeCursor ******************************************/
   private static Cursor makeCursor( String file, int x, int y )
