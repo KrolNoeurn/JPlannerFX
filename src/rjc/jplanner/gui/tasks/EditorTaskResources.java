@@ -16,45 +16,42 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.resources;
+package rjc.jplanner.gui.tasks;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.EditorText;
+import rjc.jplanner.model.TaskResources;
 
 /*************************************************************************************************/
-/**************************** Table cell editor for resource initials ****************************/
+/***************************** Table cell editor for task resources ******************************/
 /*************************************************************************************************/
 
-class EditorResourceInitials extends EditorText
+public class EditorTaskResources extends EditorText
 {
 
   /**************************************** constructor ******************************************/
-  public EditorResourceInitials( int columnIndex, int row )
+  public EditorTaskResources( int columnIndex, int row )
   {
     // create editor
     super( columnIndex, row );
 
-    // allow any non-whitespace characters except square brackets and comma
-    setAllowed( "^[^\\s\\[\\],]*$" );
-
     // add listener to set error status
     ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
     {
-      // length must be between 1 and 20 characters long
-      String error = null;
-      int len = newText.length();
-      if ( len < 1 || len > 20 )
-        error = "Name length not between 1 and 20 characters";
-
-      // initials should be unique
-      if ( JPlanner.plan.resources.isDuplicateInitials( newText, row ) )
-        error = "Name not unique";
-
       // display error message and set editor error status
+      String error = TaskResources.errors( newText );
       JPlanner.gui.setError( getControl(), error );
     } );
 
+  }
+
+  /******************************************* getValue ******************************************/
+  @Override
+  public Object getValue()
+  {
+    // return text as a Predecessors
+    return new TaskResources( (String) super.getValue() );
   }
 
 }

@@ -53,4 +53,19 @@ public class EditorText extends AbstractCellEditor
     ( (XTextField) getControl() ).positionCaret( str.length() );
   }
 
+  /****************************************** setAllowed *****************************************/
+  public void setAllowed( String regex )
+  {
+    // regular expression that limits what can be entered into editor
+    ( (XTextField) getControl() ).setAllowed( regex );
+  }
+
+  /***************************************** isValueValid ****************************************/
+  @Override
+  public boolean isValueValid( Object value )
+  {
+    // value is valid if null or allowed by editor
+    return value == null || ( (XTextField) getControl() ).isAllowed( value.toString() );
+  }
+
 }

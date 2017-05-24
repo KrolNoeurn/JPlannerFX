@@ -111,8 +111,13 @@ class ResourcesData extends AbstractDataSource
         return new EditorResourceInitials( columnIndex, row );
       case Resource.SECTION_CALENDAR:
         return new EditorSelectCalendar( columnIndex, row );
-      default:
+      case Resource.SECTION_COMMENT:
         return new EditorText( columnIndex, row );
+      default:
+        // default editor is fine except do not allow square brackets or comma
+        EditorText editor = new EditorText( columnIndex, row );
+        editor.setAllowed( "^[^\\[\\],]*$" );
+        return editor;
     }
   }
 

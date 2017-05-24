@@ -27,7 +27,7 @@ import rjc.jplanner.JPlanner;
 /************************* Resources assigned to single task within plan *************************/
 /*************************************************************************************************/
 
-class TaskResources
+public class TaskResources
 {
   // structure that contains one task resource assignment
   private class Assignment
@@ -73,6 +73,21 @@ class TaskResources
       ass.max = Float.parseFloat( max );
       m_res.add( ass );
     }
+  }
+
+  /**************************************** constructor ******************************************/
+  public TaskResources( TaskResources tr, String oldTag, String newTag )
+  {
+    // replace old tag with new tag
+    m_res = new ArrayList<Assignment>();
+    tr.m_res.forEach( oldAssignment ->
+    {
+      Assignment newAssignment = new Assignment();
+      newAssignment.tag = oldAssignment.tag.equals( oldTag ) ? newTag : oldAssignment.tag;
+      newAssignment.max = oldAssignment.max;
+      m_res.add( newAssignment );
+    } );
+
   }
 
   /***************************************** toString ********************************************/
@@ -147,7 +162,20 @@ class TaskResources
 
     }
 
+    if ( error.length() < 1 )
+      return null;
     return error.toString();
+  }
+
+  /***************************************** containsTag *****************************************/
+  public boolean containsTag( String tag )
+  {
+    // return true if resources assigned to task includes this tag
+    for ( Assignment ass : m_res )
+      if ( ass.tag.equals( tag ) )
+        return true;
+
+    return false;
   }
 
   /******************************************** assign *******************************************/
@@ -156,7 +184,7 @@ class TaskResources
     // TODO Auto-generated method stub !!!!!!!!!!!!!!!!!!!!!
     for ( Assignment ass : m_res )
     {
-      ArrayList<Resource> res = JPlanner.plan.resources.listForTag( ass.tag );
+      ArrayList<Resource> res = JPlanner.plan.resources.getResourceList( ass.tag );
 
     }
 

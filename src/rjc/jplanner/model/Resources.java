@@ -109,16 +109,31 @@ public class Resources extends ArrayList<Resource>
       res.m_work.clear();
   }
 
-  /****************************************** listForTag *****************************************/
-  public ArrayList<Resource> listForTag( String tag )
+  /*************************************** getResourceList ***************************************/
+  public ArrayList<Resource> getResourceList( String tag )
   {
-    // TODO Auto-generated method stub
+    // return list of resources that have this tag
     ArrayList<Resource> list = new ArrayList<Resource>();
     for ( Resource res : this )
       if ( res.isAssignable( tag ) )
         list.add( res );
 
     return list;
+  }
+
+  /***************************************** isTagUnique *****************************************/
+  public boolean isTagUnique( String tag )
+  {
+    // return true if tag used only once or less
+    int count = 0;
+    for ( Resource res : this )
+    {
+      count += res.getTagCount( tag );
+      if ( count > 1 )
+        return false;
+    }
+
+    return true;
   }
 
   /************************************* isDuplicateInitials *************************************/

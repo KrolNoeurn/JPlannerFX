@@ -18,8 +18,13 @@
 
 package rjc.jplanner.command;
 
+import java.util.HashMap;
+
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Resource;
+import rjc.jplanner.model.Task;
+import rjc.jplanner.model.TaskResources;
 
 /*************************************************************************************************/
 /****************************** UndoCommand for updating resources *******************************/
@@ -27,10 +32,12 @@ import rjc.jplanner.model.Resource;
 
 public class CommandResourceSetValue implements IUndoCommand
 {
-  private Resource m_res;      // resource in plan
-  private int      m_section;  // section number
-  private Object   m_newValue; // new value after command
-  private Object   m_oldValue; // old value before command
+  private Resource                     m_res;      // resource in plan
+  private int                          m_section;  // section number
+  private Object                       m_oldValue; // old value before command
+  private Object                       m_newValue; // new value after command
+  private HashMap<Task, TaskResources> m_oldTRs;   // old task TaskResources before command
+  private HashMap<Task, TaskResources> m_newTRs;   // new task TaskResources after command
 
   /**************************************** constructor ******************************************/
   public CommandResourceSetValue( Resource res, int section, Object newValue, Object oldValue )
@@ -40,6 +47,26 @@ public class CommandResourceSetValue implements IUndoCommand
     m_section = section;
     m_newValue = newValue;
     m_oldValue = oldValue;
+
+    // if unique resource tag changed, check if TaskResources also need to change
+    if ( section <= Resource.SECTION_ALIAS )
+    {
+      String oldTag = (String) oldValue;
+      if ( JPlanner.plan.resources.isTagUnique( oldTag ) )
+      {
+        // old tag is unique so need to check TaskResources
+        m_oldTRs = JPlanner.plan.tasks.getTaskResources( oldTag );
+        if ( m_oldTRs.isEmpty() )
+          m_oldTRs = null;
+        else
+        {
+          String newTag = (String) newValue;
+          m_newTRs = new HashMap<Task, TaskResources>();
+          m_oldTRs.forEach( ( task, tr ) -> m_newTRs.put( task, new TaskResources( tr, oldTag, newTag ) ) );
+        }
+      }
+    }
+
   }
 
   /******************************************* redo **********************************************/
@@ -48,6 +75,10 @@ public class CommandResourceSetValue implements IUndoCommand
   {
     // action command
     m_res.setValue( m_section, m_newValue );
+
+    // update if any need task TaskResources
+    if ( m_newTRs != null )
+      m_newTRs.forEach( ( task, tr ) -> task.setValue( Task.SECTION_RES, tr ) );
   }
 
   /******************************************* undo **********************************************/
@@ -56,6 +87,10 @@ public class CommandResourceSetValue implements IUndoCommand
   {
     // revert command
     m_res.setValue( m_section, m_oldValue );
+
+    // restore if any need task TaskResources
+    if ( m_oldTRs != null )
+      m_oldTRs.forEach( ( task, tr ) -> task.setValue( Task.SECTION_RES, tr ) );
   }
 
   /****************************************** update *********************************************/
@@ -64,6 +99,10 @@ public class CommandResourceSetValue implements IUndoCommand
   {
     // update resources tables
     int updates = UPDATE_RESOURCES;
+
+    // if updating TaskResources, update tasks table
+    if ( m_newTRs != null )
+      updates |= UPDATE_TASKS;
 
     // if initials and old value was null, update properties so it shows new count of resources
     if ( m_section == Resource.SECTION_INITIALS && m_oldValue == null )

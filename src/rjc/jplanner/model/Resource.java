@@ -353,4 +353,25 @@ public class Resource
     return m_initials;
   }
 
+  /***************************************** getTagCount *****************************************/
+  public int getTagCount( String tag )
+  {
+    // return count of number of times specified tag is used
+    int count = 0;
+    if ( tag.equals( m_initials ) )
+      count++;
+    if ( tag.equals( m_name ) )
+      count++;
+    if ( tag.equals( m_org ) )
+      count++;
+    if ( tag.equals( m_group ) )
+      count++;
+    if ( tag.equals( m_role ) )
+      count++;
+    if ( tag.equals( m_alias ) )
+      count++;
+
+    return count;
+  }
+
 }

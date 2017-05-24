@@ -37,8 +37,8 @@ class EditorTaskPredecessors extends EditorText
     // create editor
     super( columnIndex, row );
 
-    // only allow valid characters (\055 = -)
-    ( (XTextField) getControl() ).setAllowed( "[-+., fFsS0123456789" + TimeSpan.VALID_UNITS + "]*" );
+    // only allow valid characters
+    setAllowed( "[-+., fFsS0123456789" + TimeSpan.VALID_UNITS + "]*" );
 
     // add listener to set error status
     ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
@@ -48,14 +48,6 @@ class EditorTaskPredecessors extends EditorText
       JPlanner.gui.setError( getControl(), error );
     } );
 
-  }
-
-  /***************************************** isValueValid ****************************************/
-  @Override
-  public boolean isValueValid( Object value )
-  {
-    // value is valid if null or allowed by editor
-    return value == null || ( (XTextField) getControl() ).isAllowed( value.toString() );
   }
 
   /******************************************* getValue ******************************************/

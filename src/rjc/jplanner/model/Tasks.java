@@ -309,12 +309,27 @@ public class Tasks extends ArrayList<Task>
     return list;
   }
 
-  /************************************** restorePredecessors **************************************/
+  /************************************* restorePredecessors *************************************/
   public void restorePredecessors( PredecessorsList list )
   {
     // restore cleaned predecessors
     for ( HashMap.Entry<Integer, String> entry : list.entrySet() )
       get( entry.getKey() ).setValue( Task.SECTION_PRED, entry.getValue() );
+  }
+
+  /************************************** getTaskResources ***************************************/
+  public HashMap<Task, TaskResources> getTaskResources( String tag )
+  {
+    // return map of tasks and TaskResources that use the tag
+    HashMap<Task, TaskResources> map = new HashMap<Task, TaskResources>();
+    for ( Task task : this )
+    {
+      TaskResources tr = (TaskResources) task.getValue( Task.SECTION_RES );
+      if ( tr != null && tr.containsTag( tag ) )
+        map.put( task, tr );
+    }
+
+    return map;
   }
 
 }

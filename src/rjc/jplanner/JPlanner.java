@@ -38,11 +38,11 @@ import rjc.jplanner.model.Plan;
 
 public class JPlanner extends Application
 {
-  public static Plan         plan;                    // globally accessible plan
-  public static MainWindow   gui;                     // globally accessible main-window
+  public static Plan         plan;             // globally accessible plan
+  public static MainWindow   gui;              // globally accessible main-window
 
   public static final String ERROR   = "error";
-  public static final String VERSION = "v0.0.2-alpha";
+  public static final String VERSION = "";
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
