@@ -49,6 +49,7 @@ public class Plan
   public Resources            resources;                // list of plan resources
   public Calendars            calendars;                // list of plan calendars
   public Days                 daytypes;                 // list of plan day types
+  public Work                 work;                     // work done by resources on tasks
 
   private static final String NOTES_CR  = "#%NCR!£%#";  // because XMLStreamWriter doesn't encode new-lines correctly
   private static final String NOTES_TAB = "#%NTAB!£%#"; // because XMLStreamWriter doesn't encode tabs correctly
@@ -61,6 +62,7 @@ public class Plan
     resources = new Resources();
     calendars = new Calendars();
     daytypes = new Days();
+    work = new Work();
 
     m_undostack = new UndoStack();
 
@@ -534,7 +536,7 @@ public class Plan
   {
     // schedule the plan!
     JPlanner.trace( "============================== SCHEDULE started ==============================" );
-    resources.clearAllocations();
+    work.clear();
     tasks.schedule();
     JPlanner.trace( "============================== SCHEDULE finished ==============================" );
   }

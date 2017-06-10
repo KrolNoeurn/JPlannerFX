@@ -36,20 +36,20 @@ public class TaskResources
     public float  max; // 0 (zero) means unlimited
   }
 
-  ArrayList<Assignment> m_res; // list of resource assignments in original string format
+  ArrayList<Assignment> m_assignments; // list of resource assignments in original string format
 
   /**************************************** constructor ******************************************/
   public TaskResources()
   {
     // empty assignment list
-    m_res = new ArrayList<Assignment>();
+    m_assignments = new ArrayList<Assignment>();
   }
 
   /**************************************** constructor ******************************************/
   public TaskResources( String text )
   {
     // split text into individual assignments
-    m_res = new ArrayList<Assignment>();
+    m_assignments = new ArrayList<Assignment>();
     String tag;
     String max;
     for ( String part : text.split( "," ) )
@@ -68,10 +68,10 @@ public class TaskResources
         max = "0";
       }
 
-      Assignment ass = new Assignment();
-      ass.tag = tag;
-      ass.max = Float.parseFloat( max );
-      m_res.add( ass );
+      Assignment assignment = new Assignment();
+      assignment.tag = tag;
+      assignment.max = Float.parseFloat( max );
+      m_assignments.add( assignment );
     }
   }
 
@@ -79,13 +79,13 @@ public class TaskResources
   public TaskResources( TaskResources tr, String oldTag, String newTag )
   {
     // replace old tag with new tag
-    m_res = new ArrayList<Assignment>();
-    tr.m_res.forEach( oldAssignment ->
+    m_assignments = new ArrayList<Assignment>();
+    tr.m_assignments.forEach( oldAssignment ->
     {
       Assignment newAssignment = new Assignment();
       newAssignment.tag = oldAssignment.tag.equals( oldTag ) ? newTag : oldAssignment.tag;
       newAssignment.max = oldAssignment.max;
-      m_res.add( newAssignment );
+      m_assignments.add( newAssignment );
     } );
 
   }
@@ -95,7 +95,7 @@ public class TaskResources
   public String toString()
   {
     // if no assignments, return empty string
-    if ( m_res.isEmpty() )
+    if ( m_assignments.isEmpty() )
       return "";
 
     StringBuilder str = new StringBuilder();
@@ -103,13 +103,13 @@ public class TaskResources
     df.setMaximumFractionDigits( 4 );
 
     // build up string equivalent
-    for ( Assignment ass : m_res )
+    for ( Assignment assignment : m_assignments )
     {
-      str.append( ass.tag );
-      if ( ass.max > 0.0 )
+      str.append( assignment.tag );
+      if ( assignment.max > 0.0 )
       {
         str.append( '[' );
-        str.append( df.format( ass.max ) );
+        str.append( df.format( assignment.max ) );
         str.append( ']' );
       }
       str.append( ", " );
@@ -146,7 +146,7 @@ public class TaskResources
         max = "1";
       }
 
-      if ( !JPlanner.plan.resources.isAssignable( tag ) )
+      if ( !JPlanner.plan.resources.isTagValid( tag ) )
         error.append( '\'' ).append( tag ).append( "' is not an assignable resource.  " );
 
       try
@@ -171,8 +171,8 @@ public class TaskResources
   public boolean containsTag( String tag )
   {
     // return true if resources assigned to task includes this tag
-    for ( Assignment ass : m_res )
-      if ( ass.tag.equals( tag ) )
+    for ( Assignment assignment : m_assignments )
+      if ( assignment.tag.equals( tag ) )
         return true;
 
     return false;
@@ -182,9 +182,9 @@ public class TaskResources
   public void assign( Task task )
   {
     // TODO Auto-generated method stub !!!!!!!!!!!!!!!!!!!!!
-    for ( Assignment ass : m_res )
+    for ( Assignment assignment : m_assignments )
     {
-      ArrayList<Resource> res = JPlanner.plan.resources.getResourceList( ass.tag );
+      ArrayList<Resource> res = JPlanner.plan.resources.getResourceList( assignment.tag );
 
     }
 

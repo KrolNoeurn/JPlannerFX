@@ -177,14 +177,15 @@ public class Tasks extends ArrayList<Task>
   {
     // first construct list of tasks in correct order
     ArrayList<Task> scheduleList = new ArrayList<Task>();
-    for ( int index = 1; index < size(); index++ )
-      if ( !get( index ).isNull() )
-        scheduleList.add( get( index ) );
+    forEach( task ->
+    {
+      if ( !task.isNull() )
+        scheduleList.add( task );
+    } );
     Collections.sort( scheduleList );
 
     // schedule tasks in this order
-    for ( int index = 0; index < scheduleList.size(); index++ )
-      scheduleList.get( index ).schedule();
+    scheduleList.forEach( task -> task.schedule() );
   }
 
   /****************************************** canIndent ******************************************/

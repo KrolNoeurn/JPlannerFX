@@ -114,7 +114,7 @@ class ResourcesData extends AbstractDataSource
       case Resource.SECTION_COMMENT:
         return new EditorText( columnIndex, row );
       default:
-        // default editor is fine except do not allow square brackets or comma
+        // default text editor is fine for other columns except do not allow square brackets or comma
         EditorText editor = new EditorText( columnIndex, row );
         editor.setAllowed( "^[^\\[\\],]*$" );
         return editor;

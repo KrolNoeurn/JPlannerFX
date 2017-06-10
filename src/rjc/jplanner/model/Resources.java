@@ -90,44 +90,34 @@ public class Resources extends ArrayList<Resource>
     xsw.writeEndElement(); // XML_RES_DATA
   }
 
-  /***************************************** isAssignable ****************************************/
-  public boolean isAssignable( String tag )
+  /****************************************** isTagValid *****************************************/
+  public boolean isTagValid( String tag )
   {
-    // return true only if any tag is recognised as an assignable resource
+    // check tag is not null
+    if ( tag == null )
+      throw new NullPointerException( "Tag is null!" );
+
+    // return true only if any tag is used by a resource
     for ( Resource res : this )
-      if ( res.isAssignable( tag ) )
+      if ( res.hasTag( tag ) )
         return true;
 
     return false;
   }
 
-  /*************************************** clearAllocations **************************************/
-  public void clearAllocations()
-  {
-    // remove work allocations from all resources
-    for ( Resource res : this )
-      res.m_work.clear();
-  }
-
-  /*************************************** getResourceList ***************************************/
-  public ArrayList<Resource> getResourceList( String tag )
-  {
-    // return list of resources that have this tag
-    ArrayList<Resource> list = new ArrayList<Resource>();
-    for ( Resource res : this )
-      if ( res.isAssignable( tag ) )
-        list.add( res );
-
-    return list;
-  }
-
   /***************************************** isTagUnique *****************************************/
   public boolean isTagUnique( String tag )
   {
+    // check tag is not null
+    if ( tag == null )
+      throw new NullPointerException( "Tag is null!" );
+
     // return true if tag used only once or less
     int count = 0;
     for ( Resource res : this )
     {
+      if ( res.isNull() )
+        continue;
       count += res.getTagCount( tag );
       if ( count > 1 )
         return false;
@@ -136,19 +126,41 @@ public class Resources extends ArrayList<Resource>
     return true;
   }
 
-  /************************************* isDuplicateInitials *************************************/
-  public boolean isDuplicateInitials( String txt, int skip )
+  /*************************************** getResourceList ***************************************/
+  public ArrayList<Resource> getResourceList( String tag )
   {
-    // return true if txt is a duplicate another resource initials
+    // return list of resources that have this tag
+    ArrayList<Resource> list = new ArrayList<Resource>();
+    for ( Resource res : this )
+      if ( res.hasTag( tag ) )
+        list.add( res );
+
+    return list;
+  }
+
+  /************************************** isInitialsUnique ***************************************/
+  public boolean isInitialsUnique( String initials, int index )
+  {
+    // return true if initials are unique (excluding indexed resource's initials)
     for ( int i = 0; i < size(); i++ )
     {
-      if ( i == skip )
-        continue;
-      if ( txt.equals( get( i ).getInitials() ) )
-        return true;
+      Resource res = get( i );
+
+      if ( i != index && initials.equals( res.getInitials() ) )
+        return false;
+      if ( initials.equals( res.getValue( Resource.SECTION_NAME ) ) )
+        return false;
+      if ( initials.equals( res.getValue( Resource.SECTION_ORG ) ) )
+        return false;
+      if ( initials.equals( res.getValue( Resource.SECTION_GROUP ) ) )
+        return false;
+      if ( initials.equals( res.getValue( Resource.SECTION_ROLE ) ) )
+        return false;
+      if ( initials.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
+        return false;
     }
 
-    return false;
+    return true;
   }
 
 }

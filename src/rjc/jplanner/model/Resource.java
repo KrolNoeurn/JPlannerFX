@@ -44,8 +44,6 @@ public class Resource
   private Calendar        m_calendar;           // calendar for resource
   private String          m_comment;            // free text
 
-  public ResourceWork     m_work;               // resource work on specified tasks
-
   public static final int SECTION_INITIALS = 0;
   public static final int SECTION_NAME     = 1;
   public static final int SECTION_ORG      = 2;
@@ -65,7 +63,6 @@ public class Resource
   {
     // initialise private variables
     m_availability = 1.0;
-    m_work = new ResourceWork( this );
   }
 
   /**************************************** constructor ******************************************/
@@ -124,7 +121,7 @@ public class Resource
   public String toStringShort()
   {
     // short string summary
-    return "Resource@" + Integer.toHexString( hashCode() ) + " [" + m_initials + "]";
+    return "Resource@" + Integer.toHexString( hashCode() ) + "[" + m_initials + "]";
   }
 
   /****************************************** toString *******************************************/
@@ -132,7 +129,7 @@ public class Resource
   public String toString()
   {
     // string summary
-    return "Resource@" + Integer.toHexString( hashCode() ) + " [" + m_initials + ", " + m_name + ", " + m_org + ", "
+    return "Resource@" + Integer.toHexString( hashCode() ) + "[" + m_initials + ", " + m_name + ", " + m_org + ", "
         + m_group + ", " + m_role + ", " + m_alias + ", " + m_start + ", " + m_end + ", " + m_availability + "]";
   }
 
@@ -216,7 +213,7 @@ public class Resource
     else if ( section == SECTION_CALENDAR )
       m_calendar = (Calendar) newValue;
 
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
+    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!! m_start + m_end + m_avail + m_cost
 
     else
       throw new IllegalArgumentException( "Section=" + section );
@@ -310,17 +307,6 @@ public class Resource
     return JPlanner.plan.getIndex( this );
   }
 
-  /***************************************** isAssignable ****************************************/
-  public boolean isAssignable( String tag )
-  {
-    // return true only if any tag is recognised as a resource reference
-    if ( tag.equals( m_initials ) || tag.equals( m_name ) || tag.equals( m_org ) || tag.equals( m_group )
-        || tag.equals( m_role ) || tag.equals( m_alias ) )
-      return true;
-
-    return false;
-  }
-
   /****************************************** getStart *******************************************/
   public DateTime getStart()
   {
@@ -346,11 +332,40 @@ public class Resource
     return m_availability;
   }
 
+  /**************************************** getAvailable *****************************************/
+  public double getAvailable( Date date )
+  {
+    // return the number of these resource's available at specified date-time
+    int dateEpoch = date.getEpochday();
+    if ( dateEpoch < m_start.getEpochday() || dateEpoch > m_end.getEpochday() )
+      return 0.0;
+
+    return m_availability;
+  }
+
+  /**************************************** getAvailable *****************************************/
+  public double getAvailable( DateTime dt )
+  {
+    // return the number of these resource's available at specified date-time
+    return getAvailable( dt.getDate() );
+  }
+
   /***************************************** getInitials *****************************************/
   public String getInitials()
   {
     // return the resource's initials
     return m_initials;
+  }
+
+  /******************************************* hasTag ********************************************/
+  public boolean hasTag( String tag )
+  {
+    // return true is tag matches a resource field
+    if ( tag.equals( m_initials ) || tag.equals( m_name ) || tag.equals( m_org ) || tag.equals( m_group )
+        || tag.equals( m_role ) || tag.equals( m_alias ) )
+      return true;
+
+    return false;
   }
 
   /***************************************** getTagCount *****************************************/

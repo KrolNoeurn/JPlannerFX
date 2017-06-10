@@ -54,6 +54,13 @@ public class DateTime implements Comparable<DateTime>
   }
 
   /***************************************** constructor *****************************************/
+  public DateTime( DateTime dt )
+  {
+    // constructor
+    m_milliseconds = dt.m_milliseconds;
+  }
+
+  /***************************************** constructor *****************************************/
   public DateTime( String str )
   {
     // constructor, date must be split from time by a space

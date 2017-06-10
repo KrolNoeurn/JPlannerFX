@@ -418,6 +418,16 @@ public class Task implements Comparable<Task>
     // TODO Auto-generated method stub
     JPlanner.trace( "Scheduling " + this );
 
+    // if summary no scheduling needed, just create gantt data
+    if ( isSummary() )
+    {
+      if ( m_gantt == null )
+        m_gantt = new GanttData();
+      m_gantt.setSummary( getStart(), getEnd() );
+      m_resources.assign( this );
+      return;
+    }
+
     if ( m_type == TaskType.ASAP_FDUR )
     {
       schedule_ASAP_FDUR();
@@ -468,8 +478,13 @@ public class Task implements Comparable<Task>
   /*********************************** schedule_FIXED_PERIOD *************************************/
   private void schedule_FIXED_PERIOD()
   {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
+    // ignore predecessors, no scheduling, set gantt task bar data
+    if ( m_gantt == null )
+      m_gantt = new GanttData();
+    m_gantt.setSimpleTask( m_start, m_end );
+
+    // set resource allocations
+    m_resources.assign( this );
   }
 
   /************************************* schedule_ASAP_FWORK *************************************/
@@ -544,10 +559,7 @@ public class Task implements Comparable<Task>
     // set gantt task bar data
     if ( m_gantt == null )
       m_gantt = new GanttData();
-    if ( isSummary() )
-      m_gantt.setSummary( getStart(), getEnd() );
-    else
-      m_gantt.setSimpleTask( m_start, m_end );
+    m_gantt.setSimpleTask( m_start, m_end );
 
     // set resource allocations
     m_resources.assign( this );
@@ -600,23 +612,27 @@ public class Task implements Comparable<Task>
   /******************************************* getWork *******************************************/
   public TimeSpan getWork()
   {
-    // return task or summary work time-span
+    // return work done on task or summary including sub-tasks
     if ( isSummary() )
-    {
-      // TODO return JPlanner.plan.resources.work( this );
-
+      // TODO somehow!
       return new TimeSpan();
-    }
 
-    return m_work;
+    // if a fixed work type task, return task specified work
+    if ( m_type == TaskType.ASAP_FWORK || m_type == TaskType.SON_FWORK )
+      return m_work;
+
+    // otherwise return calculated work
+    return JPlanner.plan.work.getWork( this );
   }
 
   /***************************************** getDuration *****************************************/
   public TimeSpan getDuration()
   {
-    // return task or summary work time-span
+    // return task or summary duration time-span
     if ( isSummary() )
       return JPlanner.plan.getDefaultcalendar().workBetween( getStart(), getEnd() );
+    if ( m_type == TaskType.FIXED_PERIOD )
+      return JPlanner.plan.getDefaultcalendar().workBetween( m_start, m_end );
 
     return m_duration;
   }
@@ -714,8 +730,8 @@ public class Task implements Comparable<Task>
       return false;
 
     if ( isSummary() )
-      if ( section == SECTION_DURATION || section == SECTION_START || section == SECTION_END
-          || section == SECTION_WORK )
+      if ( section == SECTION_DURATION || section == SECTION_START || section == SECTION_END || section == SECTION_WORK
+          || section == SECTION_TYPE || section == SECTION_PRIORITY )
         return false;
 
     return m_type.isSectionEditable( section );

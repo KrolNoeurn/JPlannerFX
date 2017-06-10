@@ -52,7 +52,7 @@ public class CommandResourceSetValue implements IUndoCommand
     if ( section <= Resource.SECTION_ALIAS )
     {
       String oldTag = (String) oldValue;
-      if ( JPlanner.plan.resources.isTagUnique( oldTag ) )
+      if ( oldTag != null && JPlanner.plan.resources.isTagUnique( oldTag ) )
       {
         // old tag is unique so need to check TaskResources
         m_oldTRs = JPlanner.plan.tasks.getTaskResources( oldTag );

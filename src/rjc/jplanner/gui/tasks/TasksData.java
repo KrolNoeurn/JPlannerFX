@@ -250,4 +250,18 @@ class TasksData extends AbstractDataSource
     return startRow;
   }
 
+  /***************************************** getCellText *****************************************/
+  @Override
+  public String getCellText( int columnIndex, int row )
+  {
+    // if summary return special cell text
+    if ( columnIndex == Task.SECTION_TYPE && JPlanner.plan.getTask( row ).isSummary() )
+      return "Summary";
+    if ( columnIndex == Task.SECTION_PRIORITY && JPlanner.plan.getTask( row ).isSummary() )
+      return "-";
+
+    // otherwise return default cell text
+    return super.getCellText( columnIndex, row );
+  }
+
 }

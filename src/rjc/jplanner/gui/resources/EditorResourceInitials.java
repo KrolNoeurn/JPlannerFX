@@ -45,16 +45,18 @@ class EditorResourceInitials extends EditorText
       String error = null;
       int len = newText.length();
       if ( len < 1 || len > 20 )
-        error = "Name length not between 1 and 20 characters";
+        error = "Initials length not between 1 and 20 characters";
 
       // initials should be unique
-      if ( JPlanner.plan.resources.isDuplicateInitials( newText, row ) )
-        error = "Name not unique";
+      if ( !JPlanner.plan.resources.isInitialsUnique( newText, row ) )
+        error = "Initials not unique";
 
       // display error message and set editor error status
       JPlanner.gui.setError( getControl(), error );
     } );
 
+    // set initial value to ensure text property listener is triggered is start value is zero length 
+    this.setValue( "?" );
   }
 
 }

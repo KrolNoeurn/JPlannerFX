@@ -183,6 +183,10 @@ public class Day
   /******************************************* getWork *******************************************/
   public double getWork()
   {
+    // if no work periods then always return zero
+    if ( m_workMS == 0 )
+      return 0.0;
+
     return m_work;
   }
 
@@ -264,7 +268,10 @@ public class Day
       m_work = (double) newValue;
 
     else if ( section == SECTION_PERIODS )
+    {
       m_periods = (ArrayList<DayWorkPeriod>) newValue;
+      calcWorkMS();
+    }
 
     else if ( section >= SECTION_START1 )
     {
@@ -273,6 +280,7 @@ public class Day
         m_periods.get( section / 2 ).m_start = (Time) newValue;
       else
         m_periods.get( section / 2 ).m_end = (Time) newValue;
+      calcWorkMS();
     }
 
     else
@@ -426,6 +434,9 @@ public class Day
   public double workDone( Time from )
   {
     // return number of work equivalent days done from 00:00 to specified time
+    if ( m_workMS == 0 )
+      return 0.0;
+
     return m_work * millisecondsDone( from ) / m_workMS;
   }
 
