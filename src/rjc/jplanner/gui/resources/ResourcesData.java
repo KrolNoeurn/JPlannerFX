@@ -22,9 +22,11 @@ import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
 import rjc.jplanner.gui.Colors;
+import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.calendars.EditorSelectCalendar;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.AbstractDataSource;
+import rjc.jplanner.gui.table.EditorDate;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
@@ -113,10 +115,27 @@ class ResourcesData extends AbstractDataSource
         return new EditorSelectCalendar( columnIndex, row );
       case Resource.SECTION_COMMENT:
         return new EditorText( columnIndex, row );
+      case Resource.SECTION_AVAIL:
+        return new EditorAvailable( columnIndex, row );
+      case Resource.SECTION_START:
+      case Resource.SECTION_END:
+        return new EditorDate( columnIndex, row );
       default:
-        // default text editor is fine for other columns except do not allow square brackets or comma
+        // default text editor is fine for other columns except do not allow initials duplicates, square brackets or comma
         EditorText editor = new EditorText( columnIndex, row );
         editor.setAllowed( "^[^\\[\\],]*$" );
+
+        ( (XTextField) editor.getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+        {
+          // must not be an initials duplicate
+          String error = null;
+          if ( !JPlanner.plan.resources.isInitialsUnique( newText, -1 ) )
+            error = "Must not match any resource initials";
+
+          // display error message and set editor error status
+          JPlanner.gui.setError( editor.getControl(), error );
+        } );
+
         return editor;
     }
   }

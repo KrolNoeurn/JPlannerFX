@@ -21,6 +21,8 @@ package rjc.jplanner.model;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import rjc.jplanner.JPlanner;
+
 /*************************************************************************************************/
 /************************************ Date (with no timezone) ************************************/
 /*************************************************************************************************/
@@ -282,6 +284,26 @@ public class Date
   {
     // return LocalData equivalent of date
     return LocalDate.ofEpochDay( m_epochday );
+  }
+
+  /******************************************** parse ********************************************/
+  public static Date parse( String text, String format )
+  {
+    // return date if text can be parsed, otherwise return null
+    Date date = null;
+
+    try
+    {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern( format );
+      LocalDate ldate = LocalDate.parse( text, formatter );
+      date = new Date( ldate );
+    }
+    catch ( Exception exception )
+    {
+      JPlanner.trace( text, format, exception );
+    }
+
+    return date;
   }
 
 }

@@ -25,6 +25,7 @@ import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.text.Text;
 
 /*************************************************************************************************/
@@ -33,11 +34,12 @@ import javafx.scene.text.Text;
 
 public class XTextField extends TextField
 {
-  private Pattern          m_allowed;             // pattern defining text allowed to be entered
-  private double           m_minWidth;            // minimum width for editor in pixels
-  private double           m_maxWidth;            // maximum width for editor in pixels
-  private ButtonType       m_buttonType;          // button type, null means no button
-  private Canvas           m_button;              // canvas to show button
+  private Pattern          m_allowed;              // pattern defining text allowed to be entered
+  private double           m_minWidth;             // minimum width for editor in pixels
+  private double           m_maxWidth;             // maximum width for editor in pixels
+  private ButtonType       m_buttonType;           // button type, null means no button
+  private Canvas           m_button;               // canvas to show button
+  private int              m_caretPos        = -1; // set to >= 0 to position caret after setting text
 
   private static final int BUTTONS_WIDTH_MAX = 16;
   private static final int BUTTONS_PADDING   = 2;
@@ -71,6 +73,18 @@ public class XTextField extends TextField
       }
     } );
 
+    // use TextFormatter to set desired caret position
+    setTextFormatter( new TextFormatter<>( change ->
+    {
+      // position caret
+      if ( m_caretPos >= 0 )
+      {
+        change.selectRange( m_caretPos, m_caretPos );
+        m_caretPos = -1;
+      }
+      return change;
+    } ) );
+
   }
 
   /***************************************** replaceText *****************************************/
@@ -83,6 +97,13 @@ public class XTextField extends TextField
 
     if ( isAllowed( newText ) )
       super.replaceText( start, end, text );
+  }
+
+  /***************************************** setCaretPos *****************************************/
+  public void setCaretPos( int pos )
+  {
+    // set caret position to be selected after next setting text
+    m_caretPos = pos;
   }
 
   /****************************************** setAllowed *****************************************/

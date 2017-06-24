@@ -144,7 +144,7 @@ public class Work extends ArrayList<Effort>
   /******************************************* getWork *******************************************/
   public TimeSpan getWork( Task task )
   {
-    JPlanner.trace( "REQUESTING WORK FOR " + task );
+    //JPlanner.trace( "REQUESTING WORK FOR " + task );
 
     // return work for specified task
     TimeSpan work = new TimeSpan();

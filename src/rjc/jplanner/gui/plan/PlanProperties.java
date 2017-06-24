@@ -297,14 +297,21 @@ public class PlanProperties extends ScrollPane
   /***************************************** getCalendar *****************************************/
   public Calendar getCalendar()
   {
-    // return calendar display, may differ from default calendar in plan
+    // return displayed calendar, may differ from default calendar in plan
     return m_defaultCalendar.getCalendar();
+  }
+
+  /**************************************** getDateFormat ****************************************/
+  public String getDateFormat()
+  {
+    // return date format, may differ from format in plan
+    return m_Dformat.getText();
   }
 
   /************************************** getDateTimeFormat **************************************/
   public String getDateTimeFormat()
   {
-    // return calendar display, may differ from default calendar in plan
+    // return date-time, may differ from format in plan
     return m_DTformat.getText();
   }
 

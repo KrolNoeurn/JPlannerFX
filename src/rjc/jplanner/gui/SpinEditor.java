@@ -21,7 +21,6 @@ package rjc.jplanner.gui;
 import java.text.DecimalFormat;
 import java.util.regex.Pattern;
 
-import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -36,7 +35,6 @@ public class SpinEditor extends XTextField
   private double        m_minValue;          // minimum number allowed
   private double        m_maxValue;          // maximum number allowed
   private int           m_maxFractionDigits; // number of digits after decimal point
-  private int           m_caretPos = -1;     // set to >= 0 to position caret *before* setting text
 
   private double        m_page;              // value increment or decrement on page-up or page-down
   private double        m_step;              // value increment or decrement on arrow-up or arrow-down
@@ -61,18 +59,6 @@ public class SpinEditor extends XTextField
     setOnKeyPressed( event -> keyPressed( event ) );
     getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
-    // use TextFormatter to correctly position caret
-    setTextFormatter( new TextFormatter<>( change ->
-    {
-      // position caret
-      if ( m_caretPos >= 0 )
-      {
-        change.selectRange( m_caretPos, m_caretPos );
-        m_caretPos = -1;
-      }
-      return change;
-    } ) );
-
     // add listener to set control error state and remove any excess leading zeros
     textProperty().addListener( ( observable, oldText, newText ) ->
     {
@@ -85,49 +71,11 @@ public class SpinEditor extends XTextField
 
   }
 
-  /***************************************** replaceText *****************************************
-  @Override
-  public void replaceText( int start, int end, String text )
-  {
-    // determine text before and after replace
-    String oldText = getText();
-    String newText = oldText.substring( 0, start ) + text + oldText.substring( end );
-  
-    // determine start of integer part of number
-    int intStart = m_prefix.length();
-    if ( newText.length() > intStart && newText.charAt( intStart ) == '-' )
-      intStart++;
-  
-    // determine end of integer part of number
-    int intEnd = newText.length() - m_suffix.length();
-    int pointPos = newText.indexOf( '.', intStart );
-    if ( pointPos >= 0 && pointPos < intEnd )
-      intEnd = pointPos;
-  
-    // check if integer part longer than minimum and starts with zero
-    if ( intEnd - intStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( intStart ) == '0' )
-    {
-      // determine new start of integer part skipping excess zeros
-      int newStart = intStart;
-      while ( intEnd - newStart > m_numberFormat.getMinimumIntegerDigits() && newText.charAt( newStart ) == '0' )
-        newStart++;
-  
-      // replace old text with new text with excess zeros removed
-      newText = newText.substring( 0, intStart ) + newText.substring( newStart, newText.length() );
-      m_caretPos = intStart;
-      super.replaceText( 0, oldText.length(), newText );
-      return;
-    }
-  
-    // proceed with normal replace (no excess zeros)
-    super.replaceText( start, end, text );
-  }
-  
   /****************************************** setValue *******************************************/
   public void setValue( String text )
   {
     // set editor text adding prefix and suffix
-    m_caretPos = m_prefix.length() + text.length();
+    setCaretPos( m_prefix.length() + text.length() );
     setText( m_prefix + text + m_suffix );
   }
 
@@ -266,7 +214,7 @@ public class SpinEditor extends XTextField
       changeNumber( -m_step );
 
     event.consume();
-    m_caretPos = getText().length() - m_suffix.length();
+    setCaretPos( getText().length() - m_suffix.length() );
     requestFocus();
   }
 

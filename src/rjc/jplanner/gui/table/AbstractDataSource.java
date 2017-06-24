@@ -29,6 +29,7 @@ import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Day;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /***************************** Abstract class for table data source ******************************/
@@ -103,8 +104,10 @@ abstract public class AbstractDataSource
   {
     // return cell display text for specified cell index
     Object value = getValue( columnIndex, row );
+    if ( value == null )
+      return null;
 
-    // convert date and date-times into strings using plan formats
+    // convert common data types into strings using plan formats
     if ( value instanceof Day )
       return ( (Day) value ).getName();
     if ( value instanceof Calendar )
@@ -113,9 +116,16 @@ abstract public class AbstractDataSource
       return ( (DateTime) value ).toString( JPlanner.plan.getDateTimeFormat() );
     if ( value instanceof Date )
       return ( (Date) value ).toString( JPlanner.plan.getDateFormat() );
+    if ( value instanceof Time )
+      return ( (Time) value ).toStringShort();
+
+    // convert doubles without unnecessary decimal 0
+    if ( value instanceof Double )
+      if ( (double) value == Math.rint( (double) value ) )
+        return String.format( "%d", (long) ( (double) value ) );
 
     // return cell display text
-    return ( value == null ? null : value.toString() );
+    return value.toString();
   }
 
   /***************************************** getCellFont *****************************************/

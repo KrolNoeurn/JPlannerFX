@@ -16,34 +16,37 @@
  *  along with this program.  If not, see http://www.gnu.org/licenses/    *
  **************************************************************************/
 
-package rjc.jplanner.gui.table;
+package rjc.jplanner.gui.resources;
 
-import rjc.jplanner.gui.DateTimeEditor;
-import rjc.jplanner.model.DateTime;
+import rjc.jplanner.gui.SpinEditor;
+import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
-/***************************** Table cell editor for DateTime fields *****************************/
+/************************** Table cell editor for resource availability **************************/
 /*************************************************************************************************/
 
-public class EditorDateTime extends AbstractCellEditor
+class EditorAvailable extends AbstractCellEditor
 {
-  DateTimeEditor m_editor; // date-time editor
+  SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorDateTime( int columnIndex, int row )
+  public EditorAvailable( int columnIndex, int row )
   {
-    // create date-time table cell editor
+    // use spin editor
     super( columnIndex, row );
-    m_editor = new DateTimeEditor();
-    setControl( m_editor );
+    m_spin = new SpinEditor();
+    m_spin.setFormat( "0" );
+    m_spin.setRange( 0.0, 99999.99, 2 );
+    m_spin.setStepPage( 1.0, 10.0 );
+    setControl( m_spin );
   }
 
   /******************************************* getValue ******************************************/
   @Override
   public Object getValue()
   {
-    // return value date-time
-    return m_editor.getDateTime();
+    // return work value as double
+    return m_spin.getDouble();
   }
 
   /******************************************* setValue ******************************************/
@@ -51,15 +54,33 @@ public class EditorDateTime extends AbstractCellEditor
   public void setValue( Object value )
   {
     // set value depending on type
-    if ( value instanceof DateTime )
-      m_editor.setDateTime( (DateTime) value );
-    else if ( value instanceof String )
-    {
-      m_editor.setCaretPos( ( (String) value ).length() );
-      m_editor.setText( (String) value );
-    }
+    if ( value instanceof Double )
+      m_spin.setDouble( (double) value );
     else
-      throw new IllegalArgumentException( "Don't know how to handle " + value.getClass() + " " + value );
+      m_spin.setValue( (String) value );
   }
 
+  /***************************************** isValueValid ****************************************/
+  @Override
+  public boolean isValueValid( Object value )
+  {
+    // value is valid if null or converts to a double or is decimal point
+    if ( value == null )
+      return true;
+
+    try
+    {
+      String str = (String) value;
+
+      if ( str.equals( "." ) )
+        return true; // is decimal point
+
+      Double.parseDouble( str );
+      return true; // converts to a double
+    }
+    catch ( Exception exception )
+    {
+      return false; // not valid double
+    }
+  }
 }

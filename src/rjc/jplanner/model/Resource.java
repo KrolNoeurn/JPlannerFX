@@ -213,7 +213,16 @@ public class Resource
     else if ( section == SECTION_CALENDAR )
       m_calendar = (Calendar) newValue;
 
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!! m_start + m_end + m_avail + m_cost
+    else if ( section == SECTION_START )
+      m_start = (Date) newValue;
+
+    else if ( section == SECTION_END )
+      m_end = (Date) newValue;
+
+    else if ( section == SECTION_AVAIL )
+      m_availability = (double) newValue;
+
+    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!! m_cost
 
     else
       throw new IllegalArgumentException( "Section=" + section );

@@ -18,23 +18,23 @@
 
 package rjc.jplanner.gui.table;
 
-import rjc.jplanner.gui.DateTimeEditor;
-import rjc.jplanner.model.DateTime;
+import rjc.jplanner.gui.DateEditor;
+import rjc.jplanner.model.Date;
 
 /*************************************************************************************************/
-/***************************** Table cell editor for DateTime fields *****************************/
+/******************************* Table cell editor for Date fields *******************************/
 /*************************************************************************************************/
 
-public class EditorDateTime extends AbstractCellEditor
+public class EditorDate extends AbstractCellEditor
 {
-  DateTimeEditor m_editor; // date-time editor
+  DateEditor m_editor; // date editor
 
   /**************************************** constructor ******************************************/
-  public EditorDateTime( int columnIndex, int row )
+  public EditorDate( int columnIndex, int row )
   {
-    // create date-time table cell editor
+    // create date table cell editor
     super( columnIndex, row );
-    m_editor = new DateTimeEditor();
+    m_editor = new DateEditor();
     setControl( m_editor );
   }
 
@@ -43,7 +43,7 @@ public class EditorDateTime extends AbstractCellEditor
   public Object getValue()
   {
     // return value date-time
-    return m_editor.getDateTime();
+    return m_editor.getDate();
   }
 
   /******************************************* setValue ******************************************/
@@ -51,13 +51,8 @@ public class EditorDateTime extends AbstractCellEditor
   public void setValue( Object value )
   {
     // set value depending on type
-    if ( value instanceof DateTime )
-      m_editor.setDateTime( (DateTime) value );
-    else if ( value instanceof String )
-    {
-      m_editor.setCaretPos( ( (String) value ).length() );
-      m_editor.setText( (String) value );
-    }
+    if ( value instanceof Date )
+      m_editor.setDate( (Date) value );
     else
       throw new IllegalArgumentException( "Don't know how to handle " + value.getClass() + " " + value );
   }
