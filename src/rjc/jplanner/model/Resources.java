@@ -138,29 +138,34 @@ public class Resources extends ArrayList<Resource>
     return list;
   }
 
-  /************************************** isInitialsUnique ***************************************/
-  public boolean isInitialsUnique( String initials, int index )
+  /**************************************** initialsClash ****************************************/
+  public String initialsClash( String initials, int index )
   {
-    // return true if initials are unique (excluding indexed resource's initials)
+    // if initials with existing field (except specified index initials) return error string
     for ( int i = 0; i < size(); i++ )
     {
       Resource res = get( i );
 
       if ( i != index && initials.equals( res.getInitials() ) )
-        return false;
-      if ( initials.equals( res.getValue( Resource.SECTION_NAME ) ) )
-        return false;
-      if ( initials.equals( res.getValue( Resource.SECTION_ORG ) ) )
-        return false;
-      if ( initials.equals( res.getValue( Resource.SECTION_GROUP ) ) )
-        return false;
-      if ( initials.equals( res.getValue( Resource.SECTION_ROLE ) ) )
-        return false;
-      if ( initials.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
-        return false;
+        return "Initials clash with resource " + i + " initials";
+
+      // if valid index also check against other fields
+      if ( index >= 0 )
+      {
+        if ( initials.equals( res.getValue( Resource.SECTION_NAME ) ) )
+          return "Initials clash with resource " + i + " name";
+        if ( initials.equals( res.getValue( Resource.SECTION_ORG ) ) )
+          return "Initials clash with resource " + i + " organisation";
+        if ( initials.equals( res.getValue( Resource.SECTION_GROUP ) ) )
+          return "Initials clash with resource " + i + " group";
+        if ( initials.equals( res.getValue( Resource.SECTION_ROLE ) ) )
+          return "Initials clash with resource " + i + " role";
+        if ( initials.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
+          return "Initials clash with resource " + i + " alias";
+      }
     }
 
-    return true;
+    return null;
   }
 
 }

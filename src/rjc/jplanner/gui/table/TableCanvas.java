@@ -269,7 +269,7 @@ class TableCanvas extends Canvas
     // draw body cell
     GraphicsContext gc = getGraphicsContext2D();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-    boolean selected = m_table.isSelected( columnPos, row );
+    boolean selected = m_table.getSelected().isSelected( columnPos, row );
     boolean editorCell = columnPos == m_table.getCanvas().getEditCellColumnPosition()
         && row == m_table.getCanvas().getEditCellRow();
 
@@ -352,7 +352,7 @@ class TableCanvas extends Canvas
     int y = m_table.getYStartByRow( row );
     int w = m_table.getVerticalHeaderWidth();
     String text = m_table.getData().getRowTitle( row );
-    boolean selected = m_table.doesRowHaveSelection( row );
+    boolean selected = m_table.getSelected().doesRowHaveSelection( row );
 
     drawRowHeaderCell( gc, y, w, h, text, selected );
   }
@@ -399,7 +399,7 @@ class TableCanvas extends Canvas
     int h = m_table.getHorizontalHeaderHeight();
     int columnIndex = m_table.getColumnIndexByPosition( columnPos );
     String text = m_table.getData().getColumnTitle( columnIndex );
-    boolean selected = m_table.doesColumnHaveSelection( columnPos );
+    boolean selected = m_table.getSelected().doesColumnHaveSelection( columnPos );
 
     drawColumnHeaderCell( gc, x, w, h, text, selected );
   }

@@ -47,12 +47,14 @@ public class TableEvents extends TableCanvas
   private int              m_offset;                  // x or y resize/reorder offset
   private Canvas           m_reorderSlider;           // visual slider for when reordering
   private Canvas           m_reorderMarker;           // visual marker for new position when reordering
+  private TableSelection   m_selected;                // shortcut to table selected cells
 
   /***************************************** constructor *****************************************/
   public TableEvents( Table table )
   {
     // setup table canvas
     super( table );
+    m_selected = table.getSelected();
 
     // when mouse moves
     setOnMouseMoved( event -> mouseMoved( event ) );
@@ -149,7 +151,7 @@ public class TableEvents extends TableCanvas
       }
 
       // if column is selected, set cursor to move
-      if ( m_table.isColumnSelected( m_mouseCPos ) )
+      if ( m_selected.isColumnSelected( m_mouseCPos ) )
       {
         setCursor( Cursors.H_MOVE );
         return;
@@ -176,7 +178,7 @@ public class TableEvents extends TableCanvas
       }
 
       // if row is selected, set cursor to move
-      if ( m_table.isRowSelected( m_mouseRow ) )
+      if ( m_selected.isRowSelected( m_mouseRow ) )
       {
         setCursor( Cursors.V_MOVE );
         return;
@@ -226,9 +228,9 @@ public class TableEvents extends TableCanvas
       if ( m_mouseX < 99 )
         JPlanner.trace();
 
-      m_table.selectColumns( m_editCPos, m_selectCPos, false );
+      m_selected.selectColumns( m_editCPos, m_selectCPos, false );
       m_selectCPos = m_table.getColumnPositionAtX( m_mouseX );
-      m_table.selectColumns( m_editCPos, m_selectCPos, true );
+      m_selected.selectColumns( m_editCPos, m_selectCPos, true );
       redrawTableCanvas();
       return;
     }
@@ -236,9 +238,9 @@ public class TableEvents extends TableCanvas
     // ######### handle row select
     if ( getCursor() == Cursors.RIGHTARROW )
     {
-      m_table.selectRows( m_editRow, m_selectRow, false );
+      m_selected.selectRows( m_editRow, m_selectRow, false );
       m_selectRow = m_table.getRowAtY( (int) event.getY() );
-      m_table.selectRows( m_editRow, m_selectRow, true );
+      m_selected.selectRows( m_editRow, m_selectRow, true );
       redrawTableCanvas();
       return;
     }
@@ -335,7 +337,7 @@ public class TableEvents extends TableCanvas
     {
       // if control not down, clear all previous selections
       if ( !event.isControlDown() )
-        m_table.clearAllSelection();
+        m_selected.clear();
 
       // if invalid or shift not down, position editor on row
       if ( m_editRow < 0 || !event.isShiftDown() )
@@ -345,7 +347,7 @@ public class TableEvents extends TableCanvas
       m_editCPos = m_table.getVisibleColumnPositionRight( -1 );
       m_selectRow = m_mouseRow;
       m_selectCPos = m_table.getVisibleColumnPositionLeft( m_table.getData().getColumnCount() );
-      m_table.selectRows( m_editRow, m_selectRow, true );
+      m_selected.selectRows( m_editRow, m_selectRow, true );
       redrawTableCanvas();
     }
 
@@ -354,7 +356,7 @@ public class TableEvents extends TableCanvas
     {
       // if control not down, clear all previous selections
       if ( !event.isControlDown() )
-        m_table.clearAllSelection();
+        m_selected.clear();
 
       // if invalid or shift not down, position editor on column
       if ( m_editCPos < 0 || !event.isShiftDown() )
@@ -364,7 +366,7 @@ public class TableEvents extends TableCanvas
       m_editRow = m_table.getVisibleRowBelow( -1 );
       m_selectRow = m_table.getVisibleRowAbove( m_table.getData().getRowCount() );
       m_selectCPos = m_mouseCPos;
-      m_table.selectColumns( m_editCPos, m_selectCPos, true );
+      m_selected.selectColumns( m_editCPos, m_selectCPos, true );
       redrawTableCanvas();
     }
 
@@ -379,7 +381,7 @@ public class TableEvents extends TableCanvas
     // ######### select whole table if headers corner
     if ( m_mouseX < m_table.getVerticalHeaderWidth() && m_mouseY < m_table.getHorizontalHeaderHeight() )
     {
-      m_table.selectColumns( 0, Integer.MAX_VALUE, true );
+      m_selected.selectColumns( 0, Integer.MAX_VALUE, true );
       redrawTableCanvas();
     }
   }
@@ -445,9 +447,9 @@ public class TableEvents extends TableCanvas
   {
     // clear selected region, move select, and redraw region 
     if ( clearAll )
-      m_table.clearAllSelection();
+      m_selected.clear();
     else
-      m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, false );
+      m_selected.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, false );
 
     // only scroll to new select cell if old select cell was at least partially visible
     int x = m_table.getXStartByColumnPosition( m_selectCPos );
@@ -460,7 +462,7 @@ public class TableEvents extends TableCanvas
     m_selectCPos = columnPos;
     m_selectRow = row;
 
-    m_table.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, true );
+    m_selected.select( m_editCPos, m_editRow, m_selectCPos, m_selectRow, true );
     if ( scroll )
       m_table.scrollTo( m_selectCPos, m_selectRow );
     redrawTableCanvas();
@@ -471,14 +473,14 @@ public class TableEvents extends TableCanvas
   {
     // clear all selections, move edit and select 
     if ( clearAll )
-      m_table.clearAllSelection();
+      m_selected.clear();
 
     m_editCPos = columnPos;
     m_editRow = row;
     m_selectCPos = columnPos;
     m_selectRow = row;
 
-    m_table.select( m_editCPos, m_editRow, true );
+    m_selected.select( m_editCPos, m_editRow, true );
     m_table.scrollTo( m_editCPos, m_editRow );
     redrawTableCanvas();
   }
@@ -612,16 +614,21 @@ public class TableEvents extends TableCanvas
         openCellEditor( null );
         break;
 
+      case DELETE:
+        // attempt to delete selected cells contents
+        m_selected.setValuesNull();
+        break;
+
       case PERIOD:
         // "Ctrl + <" to indent tasks 
         if ( control )
-          m_table.getData().indentRows( m_table.getSelectedRows() );
+          m_table.getData().indentRows( m_selected.getRowsWithSelection() );
         break;
 
       case COMMA:
         // "Ctrl + >" to outdent tasks
         if ( control )
-          m_table.getData().outdentRows( m_table.getSelectedRows() );
+          m_table.getData().outdentRows( m_selected.getRowsWithSelection() );
         break;
 
       default:
@@ -819,7 +826,7 @@ public class TableEvents extends TableCanvas
     {
       // start reorder
       m_offset = m_mouseY - m_table.getYStartByRow( m_mouseRow );
-      m_table.clearAllSelection();
+      m_selected.clear();
       redrawTableCanvas();
 
       // create reorder slider (translucent cell header)
@@ -857,7 +864,7 @@ public class TableEvents extends TableCanvas
       // start reorder
       int index = m_table.getColumnIndexByPosition( m_mouseCPos );
       m_offset = m_mouseX - m_table.getXStartByColumnPosition( m_mouseCPos );
-      m_table.clearAllSelection();
+      m_selected.clear();
       redrawTableCanvas();
 
       // create reorder slider (translucent cell header)

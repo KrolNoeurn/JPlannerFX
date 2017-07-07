@@ -48,8 +48,8 @@ class EditorResourceInitials extends EditorText
         error = "Initials length not between 1 and 20 characters";
 
       // initials should be unique
-      if ( !JPlanner.plan.resources.isInitialsUnique( newText, row ) )
-        error = "Initials not unique";
+      if ( error == null )
+        error = JPlanner.plan.resources.initialsClash( newText, row );
 
       // display error message and set editor error status
       JPlanner.gui.setError( getControl(), error );

@@ -120,7 +120,7 @@ public class CommandResourceSetValue implements IUndoCommand
   public String text()
   {
     // command description
-    String newValue = m_newValue.toString();
+    String newValue = m_newValue == null ? "" : m_newValue.toString();
     if ( m_newValue instanceof Calendar )
       newValue = ( (Calendar) m_newValue ).getName();
 

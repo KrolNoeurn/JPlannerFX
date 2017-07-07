@@ -29,6 +29,8 @@ import rjc.jplanner.model.Work.Effort;
 
 public class Work extends ArrayList<Effort>
 {
+  private static final long serialVersionUID = 1L;
+
   // structure that contains one work record
   class Effort
   {

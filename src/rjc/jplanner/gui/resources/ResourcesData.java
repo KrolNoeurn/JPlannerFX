@@ -128,9 +128,7 @@ class ResourcesData extends AbstractDataSource
         ( (XTextField) editor.getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
         {
           // must not be an initials duplicate
-          String error = null;
-          if ( !JPlanner.plan.resources.isInitialsUnique( newText, -1 ) )
-            error = "Must not match any resource initials";
+          String error = JPlanner.plan.resources.initialsClash( newText, -1 );
 
           // display error message and set editor error status
           JPlanner.gui.setError( editor.getControl(), error );
@@ -147,7 +145,9 @@ class ResourcesData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Resource res = JPlanner.plan.getResource( row );
     Object oldValue = res.getValue( columnIndex );
-    if ( newValue.equals( oldValue ) )
+    if ( newValue != null && newValue.equals( oldValue ) )
+      return;
+    if ( newValue == null && oldValue == null )
       return;
 
     JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
