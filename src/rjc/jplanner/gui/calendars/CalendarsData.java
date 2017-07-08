@@ -128,7 +128,7 @@ class CalendarsData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Calendar cal = JPlanner.plan.getCalendar( columnIndex );
     Object oldValue = cal.getValue( row );
-    if ( newValue.equals( oldValue ) )
+    if ( equal( newValue, oldValue ) )
       return;
 
     // special command for setting exceptions & cycle-length, otherwise generic

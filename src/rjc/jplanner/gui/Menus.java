@@ -28,6 +28,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyCombination.Modifier;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.UndoStack;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 
 /*************************************************************************************************/
@@ -119,35 +120,43 @@ class Menus extends MenuBar
   {
     // edit menu
     Menu menu = new Menu( "Edit" );
-    menu.setOnShowing( event -> onMenuShow() );
+    menu.setOnShowing( event ->
+    {
+      onMenuShow();
 
-    editUndo = new MenuItem( "Undo" );
+      // check if possible to undo
+      UndoStack stack = JPlanner.plan.getUndostack();
+      if ( stack.getIndex() > 0 )
+      {
+        editUndo.setText( "Undo " + stack.getUndoText() );
+        editUndo.setDisable( false );
+      }
+      else
+      {
+        editUndo.setText( "Undo" );
+        editUndo.setDisable( true );
+      }
+
+      // check if possible to redo
+      if ( stack.getIndex() < stack.size() )
+      {
+        editRedo.setText( "Redo " + stack.getRedoText() );
+        editRedo.setDisable( false );
+      }
+      else
+      {
+        editRedo.setText( "Redo" );
+        editRedo.setDisable( true );
+      }
+    } );
+
+    editUndo = new MenuItem();
     editUndo.setAccelerator( new KeyCodeCombination( KeyCode.Z, CONTROL ) );
-    editUndo.setDisable( true );
+    editUndo.setOnAction( event -> JPlanner.plan.getUndostack().undo() );
 
-    editRedo = new MenuItem( "Redo" );
+    editRedo = new MenuItem();
     editRedo.setAccelerator( new KeyCodeCombination( KeyCode.Y, CONTROL ) );
-    editRedo.setDisable( true );
-
-    MenuItem editInsert = new MenuItem( "Insert" );
-    editInsert.setAccelerator( new KeyCodeCombination( KeyCode.INSERT ) );
-    editInsert.setDisable( true );
-
-    MenuItem editDelete = new MenuItem( "Delete" );
-    editDelete.setAccelerator( new KeyCodeCombination( KeyCode.DELETE ) );
-    editDelete.setDisable( true );
-
-    MenuItem editCut = new MenuItem( "Cut" );
-    editCut.setAccelerator( new KeyCodeCombination( KeyCode.X, CONTROL ) );
-    editCut.setDisable( true );
-
-    MenuItem editCopy = new MenuItem( "Copy" );
-    editCopy.setAccelerator( new KeyCodeCombination( KeyCode.C, CONTROL ) );
-    editCopy.setDisable( true );
-
-    MenuItem editPaste = new MenuItem( "Paste" );
-    editPaste.setAccelerator( new KeyCodeCombination( KeyCode.V, CONTROL ) );
-    editPaste.setDisable( true );
+    editRedo.setOnAction( event -> JPlanner.plan.getUndostack().redo() );
 
     MenuItem editFind = new MenuItem( "Find/Replace..." );
     editFind.setAccelerator( new KeyCodeCombination( KeyCode.F, CONTROL ) );
@@ -156,9 +165,8 @@ class Menus extends MenuBar
     MenuItem editSchedule = new MenuItem( "Schedule" );
     editSchedule.setDisable( true );
 
-    menu.getItems().addAll( editUndo, editRedo, new SeparatorMenuItem(), editInsert, editDelete );
-    menu.getItems().addAll( new SeparatorMenuItem(), editCut, editCopy, editPaste );
-    menu.getItems().addAll( new SeparatorMenuItem(), editFind, editSchedule );
+    menu.getItems().addAll( editUndo, editRedo, new SeparatorMenuItem() );
+    menu.getItems().addAll( editFind, editSchedule );
     return menu;
   }
 

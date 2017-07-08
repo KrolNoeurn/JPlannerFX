@@ -42,9 +42,14 @@ public interface IUndoCommand
   // reverts the command
   public void undo();
 
-  // updates needs after command, bitwise or of above static constants
+  // updates needs after command, bitwise-or of above static constants
   public int update();
 
   // short text string describing what this command, e.g. "insert text"
   public String text();
+
+  // merge commands together if needed
+  default public void merge( IUndoCommand command )
+  {
+  };
 }

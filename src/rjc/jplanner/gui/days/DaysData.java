@@ -129,7 +129,7 @@ class DaysData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Day day = JPlanner.plan.getDay( row );
     Object oldValue = day.getValue( columnIndex );
-    if ( newValue.equals( oldValue ) )
+    if ( equal( newValue, oldValue ) )
       return;
 
     // special command for setting number of work periods, otherwise generic

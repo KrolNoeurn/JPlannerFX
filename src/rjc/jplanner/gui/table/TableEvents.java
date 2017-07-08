@@ -619,6 +619,35 @@ public class TableEvents extends TableCanvas
         m_selected.setValuesNull();
         break;
 
+      case INSERT:
+        // attempt to insert
+        JPlanner.trace( "NOT YET IMPLEMENTED - Insert" );
+        break;
+
+      case X:
+        // attempt to cut cells contents (Ctrl-X)
+        if ( control )
+          JPlanner.trace( "NOT YET IMPLEMENTED - Cut" );
+        break;
+
+      case C:
+        // attempt to copy cells contents (Ctrl-C)
+        if ( control )
+          JPlanner.trace( "NOT YET IMPLEMENTED - Copy" );
+        break;
+
+      case V:
+        // attempt to paste cells contents (Ctrl-V)
+        if ( control )
+          JPlanner.trace( "NOT YET IMPLEMENTED - Paste" );
+        break;
+
+      case D:
+        // attempt to fill-down cells contents (Ctrl-D)
+        if ( control )
+          m_selected.fillDown();
+        break;
+
       case PERIOD:
         // "Ctrl + <" to indent tasks 
         if ( control )

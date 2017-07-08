@@ -86,7 +86,7 @@ public class MainWindow
     STYLE_TOOLTIP += "-fx-background-color: lightyellow;";
     STYLE_TOOLTIP += "-fx-padding: 0.2em 1em 0.2em 0.5em;";
     STYLE_TOOLTIP += "-fx-background-radius: 3px;";
-    m_mainTabWidget = new MainTabWidget( true );
+    m_mainTabWidget = new MainTabWidget( true, false );
 
     // arrange main application window layout
     GridPane grid = new GridPane();
@@ -831,7 +831,7 @@ public class MainWindow
   {
     // create new window
     Stage stage = new Stage();
-    MainTabWidget newTabWidget = new MainTabWidget( false );
+    MainTabWidget newTabWidget = new MainTabWidget( false, true );
     stage.setScene( new Scene( newTabWidget ) );
     stage.setTitle( m_stage.getTitle() );
     stage.show();
@@ -890,34 +890,6 @@ public class MainWindow
       updateWindowTitles();
       stack.setPreviousCleanState( stack.isClean() );
     }
-
-    // update undo menu-item
-    /*
-    MenuItem undo = JPlanner.gui.actionUndo;
-    if ( m_index > 0 )
-    {
-      undo.setText( "Undo " + undoText() + "\tCtrl+Z" );
-      undo.setEnabled( true );
-    }
-    else
-    {
-      undo.setText( "Undo\tCtrl+Z" );
-      undo.setEnabled( false );
-    }
-    
-    // update redo menu-item
-    MenuItem redo = JPlanner.gui.actionRedo;
-    if ( m_index < size() )
-    {
-      redo.setText( "Redo " + redoText() + "\tCtrl+Y" );
-      redo.setEnabled( true );
-    }
-    else
-    {
-      redo.setText( "Redo\tCtrl+Y" );
-      redo.setEnabled( false );
-    }
-    */
   }
 
   /****************************************** setError *******************************************/
@@ -926,14 +898,20 @@ public class MainWindow
     // update control error state
     if ( errorMessage == null )
     {
-      control.setId( null );
-      control.setStyle( STYLE_NORMAL );
+      if ( control != null )
+      {
+        control.setId( null );
+        control.setStyle( STYLE_NORMAL );
+      }
       message();
     }
     else
     {
-      control.setId( JPlanner.ERROR );
-      control.setStyle( STYLE_ERROR );
+      if ( control != null )
+      {
+        control.setId( JPlanner.ERROR );
+        control.setStyle( STYLE_ERROR );
+      }
       m_statusBar.setText( errorMessage );
       m_statusBar.setStyle( STYLE_ERROR );
     }

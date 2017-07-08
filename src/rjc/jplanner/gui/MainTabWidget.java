@@ -42,7 +42,7 @@ public class MainTabWidget extends TabPane
   private DaysTab      m_tabDays;
 
   /**************************************** constructor ******************************************/
-  public MainTabWidget( boolean showPlanTab )
+  public MainTabWidget( boolean showPlanTab, boolean addMenu )
   {
     // construct main tab widget
     if ( showPlanTab )
@@ -57,8 +57,11 @@ public class MainTabWidget extends TabPane
     m_tabResources = new ResourcesTab( "Resources" );
     m_tabCalendars = new CalendarsTab( "Calendars" );
     m_tabDays = new DaysTab( "Days" );
-
     getTabs().addAll( m_tabTasks, m_tabResources, m_tabCalendars, m_tabDays );
+
+    // if requested add menus to get the action accelerators (e.g. Ctrl-Z for undo)
+    if ( addMenu )
+      getChildren().add( new Menus() );
   }
 
   /******************************************* select ********************************************/

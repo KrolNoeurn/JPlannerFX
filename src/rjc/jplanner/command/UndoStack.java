@@ -28,10 +28,11 @@ import rjc.jplanner.JPlanner;
 
 public class UndoStack
 {
-  private ArrayList<IUndoCommand> m_stack;             // stack of undo commands
-  private int                     m_index;             // current command
-  private int                     m_cleanIndex;        // index when declared clean
-  private boolean                 m_previousCleanState;
+  private ArrayList<IUndoCommand> m_stack;              // stack of undo commands
+  private int                     m_index;              // current command
+  private int                     m_cleanIndex;         // index when declared clean
+  private boolean                 m_previousCleanState; // previous so change of clean state can be checked
+  private IUndoCommand            m_parentCommand;      // set if want to merge commands
 
   /**************************************** constructor ******************************************/
   public UndoStack()
@@ -106,57 +107,86 @@ public class UndoStack
     }
   }
 
+  /***************************************** startMerge ******************************************/
+  public void startMerge( IUndoCommand command )
+  {
+    // specify command for starting to merge commands
+    m_parentCommand = command;
+  }
+
+  /****************************************** endMerge *******************************************/
+  public void endMerge()
+  {
+    // stop merging commands, and add merged command to stack
+    m_parentCommand = null;
+  }
+
   /******************************************** push *********************************************/
   public void push( IUndoCommand command )
   {
-    // remove any commands from stack that haven't been actioned (i.e. above index)
-    while ( m_stack.size() > m_index )
-      m_stack.remove( m_stack.size() - 1 );
+    // check if merging commands
+    if ( m_parentCommand == null )
+    {
+      // remove any commands from stack that haven't been actioned (i.e. above index)
+      while ( m_stack.size() > m_index )
+        m_stack.remove( m_stack.size() - 1 );
 
-    // add new command to stack, do it, and increment stack index
-    m_stack.add( command );
-    command.redo();
-    update( command.update() );
-    m_index++;
-    JPlanner.gui.updateUndoRedo();
+      // add new command to stack, do it, and increment stack index
+      m_stack.add( command );
+      command.redo();
+      update( command.update() );
+      m_index++;
+      JPlanner.gui.updateUndoRedo();
+    }
+    else
+    {
+      // merge command
+      m_parentCommand.merge( command );
+    }
   }
 
   /******************************************** undo *********************************************/
   public void undo()
   {
     // decrement index and revert command
-    m_index--;
-    m_stack.get( m_index ).undo();
-    update( m_stack.get( m_index ).update() );
-    JPlanner.gui.updateUndoRedo();
+    if ( m_index > 0 )
+    {
+      m_index--;
+      m_stack.get( m_index ).undo();
+      update( m_stack.get( m_index ).update() );
+      JPlanner.gui.updateUndoRedo();
+    }
   }
 
   /******************************************** redo *********************************************/
   public void redo()
   {
     // action command and increment index
-    m_stack.get( m_index ).redo();
-    update( m_stack.get( m_index ).update() );
-    m_index++;
-    JPlanner.gui.updateUndoRedo();
+    if ( m_index < m_stack.size() )
+    {
+      m_stack.get( m_index ).redo();
+      update( m_stack.get( m_index ).update() );
+      m_index++;
+      JPlanner.gui.updateUndoRedo();
+    }
   }
 
-  /****************************************** undoText *******************************************/
-  public String undoText()
+  /***************************************** getUndoText *****************************************/
+  public String getUndoText()
   {
     // return text associated with next potential undo
     return m_stack.get( m_index - 1 ).text();
   }
 
-  /****************************************** redoText *******************************************/
-  public String redoText()
+  /***************************************** getRedoText *****************************************/
+  public String getRedoText()
   {
     // return text associated with next potential redo
     return m_stack.get( m_index ).text();
   }
 
-  /******************************************** text *********************************************/
-  public String text( int index )
+  /******************************************* getText *******************************************/
+  public String getText( int index )
   {
     // return text associated with command at index
     return m_stack.get( index ).text();
@@ -180,8 +210,8 @@ public class UndoStack
     return m_stack.size();
   }
 
-  /******************************************* index *********************************************/
-  public int index()
+  /****************************************** getIndex *******************************************/
+  public int getIndex()
   {
     // return command index
     return m_index;

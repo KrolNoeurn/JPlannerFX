@@ -146,7 +146,7 @@ class TasksData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Task task = JPlanner.plan.getTask( row );
     Object oldValue = task.getValue( columnIndex );
-    if ( newValue.equals( oldValue ) )
+    if ( equal( newValue, oldValue ) )
       return;
 
     JPlanner.plan.getUndostack().push( new CommandTaskSetValue( task, columnIndex, newValue, oldValue ) );

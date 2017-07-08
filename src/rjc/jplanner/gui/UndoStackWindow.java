@@ -63,6 +63,11 @@ class UndoStackWindow extends Stage
     setScene( scene );
     grid.addRow( 0, m_canvas, m_scrollbar );
 
+    // add hidden menu to get the action accelerators (e.g. Ctrl-Z for undo)
+    Menus menus = new Menus();
+    menus.setVisible( false );
+    grid.getChildren().add( menus );
+
     // determine typical text bounds and step
     Bounds bounds = ( new Text( "Qwerty" ) ).getLayoutBounds();
     m_rowHeight = (int) Math.ceil( bounds.getHeight() );
@@ -95,21 +100,21 @@ class UndoStackWindow extends Stage
           makeCurrentIndexVisible();
           break;
         case PAGE_UP:
-          setIndex( index() - (int) ( m_canvas.getHeight() / m_rowHeight ) );
+          setIndex( getIndex() - (int) ( m_canvas.getHeight() / m_rowHeight ) );
           makeCurrentIndexVisible();
           break;
         case PAGE_DOWN:
-          setIndex( index() + (int) ( m_canvas.getHeight() / m_rowHeight ) );
+          setIndex( getIndex() + (int) ( m_canvas.getHeight() / m_rowHeight ) );
           makeCurrentIndexVisible();
           break;
         case UP:
         case KP_UP:
-          setIndex( index() - 1 );
+          setIndex( getIndex() - 1 );
           makeCurrentIndexVisible();
           break;
         case DOWN:
         case KP_DOWN:
-          setIndex( index() + 1 );
+          setIndex( getIndex() + 1 );
           makeCurrentIndexVisible();
           break;
 
@@ -127,11 +132,11 @@ class UndoStackWindow extends Stage
     return JPlanner.plan.getUndostack().size();
   }
 
-  /******************************************** index ********************************************/
-  private int index()
+  /****************************************** getIndex *******************************************/
+  private int getIndex()
   {
     // get undo stack current index
-    return JPlanner.plan.getUndostack().index();
+    return JPlanner.plan.getUndostack().getIndex();
   }
 
   /****************************************** setIndex *******************************************/
@@ -165,7 +170,7 @@ class UndoStackWindow extends Stage
   public void makeCurrentIndexVisible()
   {
     // scroll canvas to make current index visible
-    makeIndexVisible( index() );
+    makeIndexVisible( getIndex() );
   }
 
   /************************************** makeIndexVisible ***************************************/
@@ -238,11 +243,11 @@ class UndoStackWindow extends Stage
       if ( item < 0 )
         text = "<empty>";
       else
-        text = JPlanner.plan.getUndostack().text( item );
+        text = JPlanner.plan.getUndostack().getText( item );
 
       // colour current index item differently
       int y = getYStartByIndex( item );
-      if ( item == index() - 1 )
+      if ( item == getIndex() - 1 )
       {
         if ( m_canvas.isFocused() )
           gc.setFill( Colors.SELECTED_CELL );

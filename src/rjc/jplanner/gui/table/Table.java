@@ -929,4 +929,13 @@ public class Table extends TableDisplay
     return row;
   }
 
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    // convert to string
+    return getClass().getSimpleName() + "@" + Integer.toHexString( hashCode() ) + "[" + m_data + " w=" + getWidth()
+        + " h=" + getHeight() + "]";
+  }
+
 }

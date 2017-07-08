@@ -27,6 +27,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.XmlLabels;
+import rjc.jplanner.command.CommandDeleteContents;
 
 /*************************************************************************************************/
 /**************************** Handles table cell/row/column selection ****************************/
@@ -34,13 +35,13 @@ import rjc.jplanner.XmlLabels;
 
 public class TableSelection
 {
-  private Table            m_table;             // associated table
+  private Table           m_table;             // associated table
 
   // set of body cells that are currently selected, where Integer = columnPos * SELECT_HASH + row
-  private static final int SELECT_HASH = 9999;
-  private Set<Integer>     m_selectedCells;
-  private Set<Integer>     m_selectedRows;
-  private Set<Integer>     m_selectedColumnsPos;
+  public static final int SELECT_HASH = 9999;
+  private Set<Integer>    m_selectedCells;
+  private Set<Integer>    m_selectedRows;
+  private Set<Integer>    m_selectedColumnsPos;
 
   /**************************************** constructor ******************************************/
   public TableSelection( Table table )
@@ -249,31 +250,44 @@ public class TableSelection
   /**************************************** setValuesNull ****************************************/
   public void setValuesNull()
   {
-    // delete contents from selected rows
+    // attempt to set all editable selected table cell values to null by undo-command
+    Set<Integer> cells = new HashSet<Integer>();
     AbstractDataSource data = m_table.getData();
+
+    // add visible cells from selected rows
     for ( int row : m_selectedRows )
-    {
-      int columns = data.getColumnCount();
-      for ( int columnIndex = 0; columnIndex < columns; columnIndex++ )
-        data.setValue( columnIndex, row, null );
-    }
+      if ( m_table.getRowHeight( row ) > 0 )
+      {
+        int columns = data.getColumnCount();
+        for ( int columnIndex = 0; columnIndex < columns; columnIndex++ )
+          if ( m_table.getWidthByColumnIndex( columnIndex ) > 0 && data.getEditor( columnIndex, row ) != null )
+            cells.add( columnIndex * SELECT_HASH + row );
+      }
 
-    // delete contents from selected columns
+    // add visible cells from selected columns
     for ( int columnPos : m_selectedColumnsPos )
-    {
-      int columnIndex = m_table.getColumnIndexByPosition( columnPos );
-      int rows = data.getRowCount();
-      for ( int row = 0; row < rows; row++ )
-        data.setValue( columnIndex, row, null );
-    }
+      if ( m_table.getWidthByColumnPosition( columnPos ) > 0 )
+      {
+        int columnIndex = m_table.getColumnIndexByPosition( columnPos );
+        int rows = data.getRowCount();
+        for ( int row = 0; row < rows; row++ )
+          if ( m_table.getRowHeight( row ) > 0 && data.getEditor( columnIndex, row ) != null )
+            cells.add( columnIndex * SELECT_HASH + row );
+      }
 
-    // delete contents from other selected cells
+    // add visible other selected cells
     for ( int hash : m_selectedCells )
     {
       int row = hash % SELECT_HASH;
       int columnIndex = m_table.getColumnIndexByPosition( hash / SELECT_HASH );
-      data.setValue( columnIndex, row, null );
+      if ( m_table.getWidthByColumnIndex( columnIndex ) > 0 && m_table.getRowHeight( row ) > 0
+          && data.getEditor( columnIndex, row ) != null )
+        cells.add( columnIndex * SELECT_HASH + row );
     }
+
+    // create undo command to set these values to null (delete contents)
+    if ( !cells.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandDeleteContents( data, cells ) );
   }
 
   /****************************************** writeXML *******************************************/
@@ -310,6 +324,54 @@ public class TableSelection
 
     if ( columnPos >= 0 && row >= 0 )
       select( columnPos, row, true );
+  }
+
+  /****************************************** fillDown *******************************************/
+  public void fillDown()
+  {
+    // can only fill-down table cell contents if simple rectangular selection 
+
+    // check for just columns
+    if ( m_selectedColumnsPos.size() > 0 )
+      if ( m_selectedRows.isEmpty() && m_selectedCells.isEmpty() )
+      {
+        // TODO
+        JPlanner.trace( "NOT YET IMPLEMENTED - Fill down columns", this );
+      }
+      else
+        // cannot cope with other selection, so do nothing
+        return;
+
+    // check for just rows
+    if ( m_selectedRows.size() > 1 )
+      if ( m_selectedColumnsPos.isEmpty() && m_selectedCells.isEmpty() )
+      {
+        // TODO
+        JPlanner.trace( "NOT YET IMPLEMENTED - Fill down rows", this );
+      }
+      else
+        // cannot cope with other selection, so do nothing
+        return;
+
+    // check for just cells
+    if ( m_selectedCells.size() > 1 )
+      if ( m_selectedRows.isEmpty() && m_selectedColumnsPos.isEmpty() )
+      {
+        // TODO
+        JPlanner.trace( "NOT YET IMPLEMENTED - Fill down cells", this );
+      }
+      else
+        // cannot cope with other selection, so do nothing
+        return;
+  }
+
+  /****************************************** toString *******************************************/
+  @Override
+  public String toString()
+  {
+    // convert to string
+    return getClass().getSimpleName() + "@" + Integer.toHexString( hashCode() ) + "[cols=" + m_selectedColumnsPos.size()
+        + " rows=" + m_selectedRows.size() + " cells=" + m_selectedCells.size() + "]";
   }
 
 }

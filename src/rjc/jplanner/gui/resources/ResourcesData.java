@@ -145,9 +145,7 @@ class ResourcesData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Resource res = JPlanner.plan.getResource( row );
     Object oldValue = res.getValue( columnIndex );
-    if ( newValue != null && newValue.equals( oldValue ) )
-      return;
-    if ( newValue == null && oldValue == null )
+    if ( equal( newValue, oldValue ) )
       return;
 
     JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
