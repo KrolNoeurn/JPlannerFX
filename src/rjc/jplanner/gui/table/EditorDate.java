@@ -50,6 +50,10 @@ public class EditorDate extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
+    // if value is null, default to today
+    if ( value == null )
+      value = Date.now();
+
     // set value depending on type
     if ( value instanceof Date )
       m_editor.setDate( (Date) value );

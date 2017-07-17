@@ -58,7 +58,7 @@ import rjc.jplanner.model.Time;
 /********************* Pop-up window to display date-time selection widgets **********************/
 /*************************************************************************************************/
 
-class DateTimeSelector extends Popup
+class DateTimePopup extends Popup
 {
   private DateTimeEditor      m_parent;
   private boolean             m_ignoreUpdates;
@@ -95,7 +95,7 @@ class DateTimeSelector extends Popup
   private static final double SHADOW_RADIUS = 4.0;
 
   /**************************************** constructor ******************************************/
-  public DateTimeSelector( DateTimeEditor parent )
+  public DateTimePopup( DateTimeEditor parent )
   {
     // create pop-up window to display date-time selection widgets
     m_parent = parent;

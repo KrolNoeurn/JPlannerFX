@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
+import rjc.jplanner.model.Date;
 import rjc.jplanner.model.Resource;
 import rjc.jplanner.model.Task;
 import rjc.jplanner.model.TaskResources;
@@ -123,6 +124,8 @@ public class CommandResourceSetValue implements IUndoCommand
     String newValue = m_newValue == null ? "" : m_newValue.toString();
     if ( m_newValue instanceof Calendar )
       newValue = ( (Calendar) m_newValue ).getName();
+    if ( m_newValue instanceof Date )
+      newValue = ( (Date) m_newValue ).toString( JPlanner.plan.getDateFormat() );
 
     return "Resource " + m_res.getIndex() + " " + Resource.getSectionName( m_section ) + " = " + newValue;
   }

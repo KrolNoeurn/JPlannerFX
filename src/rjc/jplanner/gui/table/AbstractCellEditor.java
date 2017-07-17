@@ -81,17 +81,13 @@ abstract public class AbstractCellEditor
         endEditing();
     } );
 
-    // add listener to close if escape or enter pressed
-    EventHandler<? super KeyEvent> previousKeyPressedHandler = m_control.getOnKeyPressed();
-    m_control.setOnKeyPressed( event ->
+    // add key press event handler to close if escape or enter pressed
+    m_control.addEventHandler( KeyEvent.KEY_PRESSED, event ->
     {
       if ( event.getCode() == KeyCode.ESCAPE )
         close( false ); // abandon edit
       if ( event.getCode() == KeyCode.ENTER && !isError() )
         close( true ); // commit edit
-
-      if ( previousKeyPressedHandler != null )
-        previousKeyPressedHandler.handle( event );
     } );
   }
 

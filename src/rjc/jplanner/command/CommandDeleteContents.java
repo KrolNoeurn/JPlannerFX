@@ -81,7 +81,8 @@ public class CommandDeleteContents implements IUndoCommand
   public String text()
   {
     // command description
-    return "Delete " + m_commands.size();
+    int num = m_commands.size();
+    return "Cleared " + num + " cell" + ( num > 1 ? "s" : "" );
   }
 
   /******************************************** merge ********************************************/

@@ -161,6 +161,13 @@ public class MainWindow
       if ( isChildNode( m_mainTabWidget.getPlanTab().getPlanNotes(), oldNode ) )
         getNotesPane().updatePlan();
     } );
+
+    // check for plan updates when focus moves to different window
+    stage.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
+    {
+      getPropertiesPane().updatePlan();
+      getNotesPane().updatePlan();
+    } );
   }
 
   /**************************************** isChildNode ******************************************/
@@ -655,7 +662,7 @@ public class MainWindow
     getPropertiesPane().updateFromPlan();
     getNotesPane().updateFromPlan();
 
-    // reset set all tables
+    // reset set all tables, i.e. set to default column widths, row heights, etc
     m_tabWidgets.forEach( tabs -> tabs.getTasksTab().getTable().reset() );
     m_tabWidgets.forEach( tabs -> tabs.getResourcesTab().getTable().reset() );
     m_tabWidgets.forEach( tabs -> tabs.getCalendarsTab().getTable().reset() );
@@ -666,7 +673,7 @@ public class MainWindow
 
     // update undo-stack window if exists
     if ( m_undoWindow != null )
-      m_undoWindow.updateScrollBarAndCanvas();
+      m_undoWindow.updateScrollBarAndCanvas( true );
   }
 
   /************************************* relayoutTaskTables **************************************/
@@ -881,7 +888,7 @@ public class MainWindow
   {
     // update undo-stack window if visible
     if ( m_undoWindow != null )
-      m_undoWindow.updateScrollBarAndCanvas();
+      m_undoWindow.updateScrollBarAndCanvas( true );
 
     // if clean state changed, update window titles
     UndoStack stack = JPlanner.plan.getUndostack();

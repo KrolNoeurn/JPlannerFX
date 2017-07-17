@@ -64,7 +64,7 @@ public class DateEditor extends XTextField
         setText( m_validText );
     } );
 
-    new DateSelector( this );
+    new DatePopup( this );
   }
 
   /******************************************* format ********************************************/
@@ -90,6 +90,7 @@ public class DateEditor extends XTextField
     // set editor to specified date-time
     m_date = date;
     setText( date.toString( format() ) );
+    positionCaret( getText().length() );
   }
 
 }

@@ -140,6 +140,11 @@ public class PlanProperties extends ScrollPane
     m_DTformat.setOnKeyPressed( event -> keyPressed( event ) );
     m_Dformat.textProperty().addListener( ( observable, oldValue, newValue ) -> dateFormatChange() );
     m_Dformat.setOnKeyPressed( event -> keyPressed( event ) );
+
+    // if escape pressed, revert, if return, commit
+    m_title.addEventHandler( KeyEvent.KEY_PRESSED, event -> keyPressed( event ) );
+    m_defaultStart.addEventHandler( KeyEvent.KEY_PRESSED, event -> keyPressed( event ) );
+    m_defaultCalendar.addEventHandler( KeyEvent.KEY_PRESSED, event -> keyPressed( event ) );
   }
 
   /***************************************** keyPressed ******************************************/
@@ -156,11 +161,17 @@ public class PlanProperties extends ScrollPane
         source.setText( JPlanner.plan.getDateTimeFormat() );
       if ( source == m_Dformat )
         source.setText( JPlanner.plan.getDateFormat() );
+      if ( source == m_title )
+        source.setText( JPlanner.plan.getTitle() );
+      if ( source == m_defaultStart )
+        displayDateTime( m_defaultStart, JPlanner.plan.getStart() );
+      if ( source == m_defaultCalendar )
+        source.setText( JPlanner.plan.getDefaultcalendar().getName() );
       source.selectRange( pos, pos );
     }
 
-    // if enter pressed and not in error state, update plan with new format
-    if ( event.getCode() == KeyCode.ENTER && m_DTformat.getId() != JPlanner.ERROR )
+    // if enter pressed, update plan
+    if ( event.getCode() == KeyCode.ENTER )
     {
       int pos = source.getCaretPosition();
       updatePlan();
@@ -180,16 +191,13 @@ public class PlanProperties extends ScrollPane
       if ( m_DTformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
+      JPlanner.gui.setError( m_DTformat, null );
       JPlanner.gui.message( "Date-time format example: " + DateTime.now().toString( m_DTformat.getText() ) );
-      m_DTformat.setStyle( MainWindow.STYLE_NORMAL );
-      m_DTformat.setId( null );
     }
     catch ( Exception exception )
     {
       String err = exception.getMessage();
-      JPlanner.gui.message( "Date-time format error '" + err + "'" );
-      m_DTformat.setStyle( MainWindow.STYLE_ERROR );
-      m_DTformat.setId( JPlanner.ERROR );
+      JPlanner.gui.setError( m_DTformat, "Date-time format error '" + err + "'" );
     }
 
     displayDateTime( m_defaultStart, JPlanner.plan.getStart() );
@@ -210,16 +218,13 @@ public class PlanProperties extends ScrollPane
       if ( m_Dformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
+      JPlanner.gui.setError( m_Dformat, null );
       JPlanner.gui.message( "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
-      m_Dformat.setStyle( MainWindow.STYLE_NORMAL );
-      m_Dformat.setId( null );
     }
     catch ( Exception exception )
     {
       String err = exception.getMessage();
-      JPlanner.gui.message( "Date format error '" + err + "'" );
-      m_Dformat.setStyle( MainWindow.STYLE_ERROR );
-      m_Dformat.setId( JPlanner.ERROR );
+      JPlanner.gui.setError( m_Dformat, "Date format error '" + err + "'" );
     }
   }
 
