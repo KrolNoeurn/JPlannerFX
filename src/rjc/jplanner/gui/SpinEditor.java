@@ -251,7 +251,7 @@ public class SpinEditor extends XTextField
   }
 
   /***************************************** keyPressed ******************************************/
-  private void keyPressed( KeyEvent event )
+  protected void keyPressed( KeyEvent event )
   {
     // action key press to change value up or down
     switch ( event.getCode() )

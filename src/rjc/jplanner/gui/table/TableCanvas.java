@@ -206,7 +206,7 @@ class TableCanvas extends Canvas
 
     // draw dark box around cell edge
     GraphicsContext gc = getGraphicsContext2D();
-    gc.setStroke( Colors.SELECTED_CELL.darker() );
+    gc.setStroke( isFocused() ? Colors.SELECTED_CELL.darker() : Colors.SELECTED_CELL.desaturate() );
     gc.strokeRect( x - 0.5, y - 0.5, w, h );
     gc.strokeRect( x + 0.5, y + 0.5, w - 2, h - 2 );
   }

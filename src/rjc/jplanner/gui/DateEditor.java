@@ -22,7 +22,7 @@ import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Date;
 
 /*************************************************************************************************/
-/*********************************** Generic date-time editor ************************************/
+/********************************* Generic date editor control ***********************************/
 /*************************************************************************************************/
 
 public class DateEditor extends XTextField
@@ -43,15 +43,14 @@ public class DateEditor extends XTextField
       if ( JPlanner.gui == null || JPlanner.plan == null )
         return;
 
-      // parse editor text into date using format displayed in plan properties
+      // if text cannot be parsed set editor into error state
       m_date = Date.parse( newText, format() );
-
-      // if text is not valid date-time set editor into error state
       if ( m_date == null )
-        JPlanner.gui.setError( this, "Format not '" + format() + "'" );
+        JPlanner.gui.setError( this, "Date not in recognisable format" );
       else
       {
         JPlanner.gui.setError( this, null );
+        JPlanner.gui.message( "Date: " + m_date.toString( format() ) );
         m_validText = newText;
       }
     } );
@@ -77,17 +76,17 @@ public class DateEditor extends XTextField
       return JPlanner.gui.getPropertiesPane().getDateFormat();
   }
 
-  /**************************************** getDateTime ******************************************/
+  /****************************************** getDate ********************************************/
   public Date getDate()
   {
-    // return editor date-time (null if invalid)
+    // return editor date (null if invalid)
     return m_date;
   }
 
-  /**************************************** setDateTime ******************************************/
+  /****************************************** setDate ********************************************/
   public void setDate( Date date )
   {
-    // set editor to specified date-time
+    // set editor to specified date
     m_date = date;
     setText( date.toString( format() ) );
     positionCaret( getText().length() );

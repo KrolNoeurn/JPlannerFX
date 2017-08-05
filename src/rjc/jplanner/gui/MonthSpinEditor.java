@@ -21,7 +21,7 @@ package rjc.jplanner.gui;
 import java.text.DateFormatSymbols;
 import java.time.Month;
 
-import javafx.scene.control.TextFormatter;
+import javafx.application.Platform;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -32,9 +32,8 @@ import javafx.scene.input.ScrollEvent;
 
 class MonthSpinEditor extends XTextField
 {
-  private Month      m_month;        // month being displayed
-  private SpinEditor m_year;         // spin editor showing year
-  private boolean    m_justGotFocus; // flag to say if editor has just acquired focus
+  private Month      m_month; // month being displayed
+  private SpinEditor m_year;  // spin editor showing year
 
   /**************************************** constructor ******************************************/
   public MonthSpinEditor()
@@ -49,18 +48,8 @@ class MonthSpinEditor extends XTextField
     setOnKeyTyped( event -> keyTyped( event ) );
     getButton().setOnMousePressed( event -> buttonPressed( event ) );
 
-    // listener to record if just got focus
-    focusedProperty().addListener( ( property, oldFocus, newFocus ) -> m_justGotFocus = newFocus );
-
-    // use TextFormatter to prevent editor text being all selected on getting focus
-    setTextFormatter( new TextFormatter<>( change ->
-    {
-      if ( !m_justGotFocus || change.isContentChange() )
-        return change;
-      m_justGotFocus = false;
-      return null;
-    } ) );
-
+    // prevent text being selected when editor gets focus
+    focusedProperty().addListener( ( property, oldFocus, newFocus ) -> Platform.runLater( () -> deselect() ) );
   }
 
   /************************************** setYearSpinEditor **************************************/
@@ -131,6 +120,8 @@ class MonthSpinEditor extends XTextField
   private void buttonPressed( MouseEvent event )
   {
     // if user clicked top half of buttons, step up, else step down
+    event.consume();
+    requestFocus();
     if ( event.getY() < getButton().getHeight() / 2 )
       change( 1 );
     else

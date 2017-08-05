@@ -211,8 +211,8 @@ public class Plan
     return m_notes;
   }
 
-  /****************************************** getStart *******************************************/
-  public DateTime getStart()
+  /*************************************** getDefaultStart ***************************************/
+  public DateTime getDefaultStart()
   {
     return m_start;
   }

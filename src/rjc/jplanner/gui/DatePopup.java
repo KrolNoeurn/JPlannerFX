@@ -19,10 +19,14 @@
 package rjc.jplanner.gui;
 
 import javafx.geometry.Point2D;
+import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.stage.Popup;
+import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Date;
+import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
 /********************* Pop-up window to display date-time selection widgets **********************/
@@ -33,6 +37,11 @@ class DatePopup extends Popup
   private DateEditor          m_parent;
   private DateSelector        m_dateSelector;
 
+  private HBox                m_buttons;          // for today + start + end buttons
+  private Button              m_today;            // set date to today
+  private Button              m_start;            // set date to plan default start
+  private Button              m_end;              // set date to plan actual end
+
   private static final double SHADOW_RADIUS = 4.0;
 
   /**************************************** constructor ******************************************/
@@ -42,12 +51,9 @@ class DatePopup extends Popup
     m_parent = parent;
     setAutoHide( true );
     setConsumeAutoHidingEvents( false );
+    constructPopup();
 
-    // set popup contents to a date selector
-    m_dateSelector = new DateSelector();
-    getContent().add( m_dateSelector );
-
-    // add shadow to popup
+    // add shadow to pop-up
     DropShadow shadow = new DropShadow();
     shadow.setColor( Colors.FOCUSBLUE );
     shadow.setRadius( SHADOW_RADIUS );
@@ -65,21 +71,49 @@ class DatePopup extends Popup
     setOnHidden( event -> m_parent.setEditable( true ) );
 
     // keep parent editor and this selector synchronised
-    m_parent.textProperty().addListener( ( observable, oldText, newText ) -> setDate( m_parent.getDate() ) );
+    m_dateSelector.getEpochDaySpinEditor().textProperty().addListener(
+        ( observable, oldT, newT ) -> m_parent.setText( getDate().toString( JPlanner.plan.getDateFormat() ) ) );
   }
 
-  /***************************************** setDate *****************************************/
+  /*************************************** constructPopup ****************************************/
+  private void constructPopup()
+  {
+    // create buttons
+    m_today = new Button( "Today" );
+    m_start = new Button( "Start" );
+    m_end = new Button( "End" );
+    m_buttons = new HBox();
+    m_buttons.setSpacing( DateSelector.PADDING );
+    m_buttons.getChildren().addAll( m_today, m_start, m_end );
+
+    // button actions
+    m_today.setOnAction( event -> setDate( Date.now() ) );
+    m_start.setOnAction( event -> setDate( JPlanner.plan.getDefaultStart().getDate() ) );
+    m_end.setOnAction( event ->
+    {
+      DateTime end = JPlanner.plan.getLatestTaskEnd();
+      if ( end != null )
+        setDate( end.getDate() );
+    } );
+
+    // set pop-up contents to a date selector with buttons below
+    m_dateSelector = new DateSelector( m_buttons );
+    getContent().addAll( m_dateSelector );
+  }
+
+  /******************************************* setDate *******************************************/
   private void setDate( Date date )
   {
-    // set selector to specified date
-    m_dateSelector.getDateProperty().set( date );
+    // set selector to specified date (and request focus for calendar canvas)
+    if ( date != null )
+      m_dateSelector.getEpochDaySpinEditor().setInteger( date.getEpochday() );
   }
 
   /******************************************* getDate *******************************************/
   private Date getDate()
   {
     // return date shown by selector
-    return m_dateSelector.getDateProperty().get();
+    return new Date( m_dateSelector.getEpochDaySpinEditor().getInteger() );
   }
 
   /*************************************** toggleSelector ****************************************/
@@ -91,9 +125,12 @@ class DatePopup extends Popup
     else
     {
       m_parent.setEditable( false );
+      setDate( m_parent.getDate() );
       Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
       show( m_parent, point.getX() - SHADOW_RADIUS + 1.0, point.getY() - SHADOW_RADIUS + 1.0 );
-      m_dateSelector.arrangeSelector();
+      m_dateSelector.arrange();
+      m_today.setPrefWidth(
+          m_dateSelector.getPrefWidth() - m_start.getWidth() - m_end.getWidth() - 4 * DateSelector.PADDING );
     }
   }
 

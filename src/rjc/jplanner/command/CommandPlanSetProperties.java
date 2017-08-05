@@ -45,7 +45,7 @@ public class CommandPlanSetProperties implements IUndoCommand
   {
     // initialise private variables
     m_oldTitle = JPlanner.plan.getTitle();
-    m_oldStart = JPlanner.plan.getStart();
+    m_oldStart = JPlanner.plan.getDefaultStart();
     m_oldCal = JPlanner.plan.getDefaultcalendar();
     m_oldDTformat = JPlanner.plan.getDateTimeFormat();
     m_oldDformat = JPlanner.plan.getDateFormat();

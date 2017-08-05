@@ -24,13 +24,12 @@ import java.time.Year;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
-import javafx.application.Platform;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Border;
@@ -50,31 +49,53 @@ import rjc.jplanner.model.Date;
 
 public class DateSelector extends Pane
 {
-  private SimpleObjectProperty<Date> m_dateProperty;
+  private MonthSpinEditor m_month;       // for picking year
+  private SpinEditor      m_year;        // for picking month
+  private Canvas          m_calendar;    // for picking date
+  private SpinEditor      m_epochDay;    // hidden internal for wrapping
+  private Pane            m_extra;       // extra node to be shown on selector
 
-  private MonthSpinEditor            m_month;       // for picking year
-  private SpinEditor                 m_year;        // for picking month
-  private Canvas                     m_calendar;    // for picking date
-  private SpinEditor                 m_epochDay;    // hidden internal for wrapping
+  private GraphicsContext m_gc;
+  private double          m_columnWidth;
+  private double          m_rowHeight;
+  private double          m_x;
+  private double          m_y;
 
-  private GraphicsContext            m_gc;
-  private double                     m_columnWidth;
-  private double                     m_rowHeight;
-  private double                     m_x;
-  private double                     m_y;
-
-  private static final double        PADDING = 3.0;
-  private static final double        HEIGHT  = 23.0;
+  static final double     PADDING = 3.0;
+  static final double     HEIGHT  = 23.0;
 
   /**************************************** constructor ******************************************/
-  public DateSelector()
+  public DateSelector( Pane extra )
   {
     // create pane allowing user to select month/year/date
     super();
-    m_dateProperty = new SimpleObjectProperty<Date>();
+    m_extra = extra;
 
     // create year spin editor
-    m_year = new SpinEditor();
+    m_year = new SpinEditor()
+    {
+      @Override
+      protected void keyPressed( KeyEvent event )
+      {
+        // action key press to change value up or down
+        switch ( event.getCode() )
+        {
+          case HOME:
+            LocalDate ld = LocalDate.of( m_year.getInteger(), 1, 1 );
+            m_epochDay.setInteger( (int) ld.toEpochDay() );
+            event.consume();
+            break;
+          case END:
+            ld = LocalDate.of( m_year.getInteger(), 12, 31 );
+            m_epochDay.setInteger( (int) ld.toEpochDay() );
+            event.consume();
+            break;
+          default:
+            super.keyPressed( event );
+            break;
+        }
+      }
+    };
     m_year.setRange( -999999, 999999, 0 );
     m_year.setPrefWidth( 80 );
     m_year.setMinHeight( HEIGHT );
@@ -92,6 +113,11 @@ public class DateSelector extends Pane
     m_epochDay = new SpinEditor();
     m_epochDay.setRange( Integer.MIN_VALUE, Integer.MAX_VALUE, 0 );
 
+    // when spin editors change ensure date property is kept up to date
+    m_year.textProperty().addListener( ( observable, oldT, newT ) -> updateEpochDay() );
+    m_month.textProperty().addListener( ( observable, oldT, newT ) -> updateEpochDay() );
+    m_epochDay.textProperty().addListener( ( observable, oldT, newT ) -> update() );
+
     // create calendar canvas
     m_calendar = new Canvas();
     m_calendar.setHeight( 17.0 * 7.0 );
@@ -106,32 +132,65 @@ public class DateSelector extends Pane
       else
         m_calendar.setStyle( "" );
     } );
-    m_dateProperty.addListener( ( observable, oldDate, newDate ) -> updatePane() );
 
     // populate pane
-    getChildren().addAll( m_month, m_year, m_calendar );
+    getChildren().addAll( m_calendar, m_extra, m_month, m_year );
     Background BACKGROUND = new Background( new BackgroundFill( Colors.GENERAL_BACKGROUND, null, null ) );
     Border BORDER = new Border( new BorderStroke( Colors.FOCUSBLUE, BorderStrokeStyle.SOLID, null, null ) );
     setBackground( BACKGROUND );
     setBorder( BORDER );
+
+    // when scene is set add focus owner listener
+    sceneProperty().addListener( ( observable, oldScene, newScene ) ->
+    {
+      if ( newScene != null )
+        newScene.focusOwnerProperty().addListener( ( property, oldNode, newNode ) ->
+        {
+          setOnScroll( null );
+          if ( newNode instanceof SpinEditor )
+            setOnScroll( event -> ( (SpinEditor) newNode ).scrollEvent( event ) );
+          if ( newNode instanceof MonthSpinEditor )
+            setOnScroll( event -> ( (MonthSpinEditor) newNode ).scrollEvent( event ) );
+          if ( newNode == m_calendar )
+            setOnScroll( event -> calendarScrollEvent( event ) );
+        } );
+    } );
   }
 
-  /************************************* getDateProperty *****************************************/
-  public SimpleObjectProperty<Date> getDateProperty()
+  /*************************************** updateEpochDay ****************************************/
+  private void updateEpochDay()
   {
-    // return date property containing currently selected date 
-    return m_dateProperty;
+    // update epoch day spin editor from month & year spin editors
+    int month = m_month.getMonthNumber();
+    int year = m_year.getInteger();
+    int day = getLocalDate().getDayOfMonth();
+    LocalDate ld = LocalDate.of( year, month, day );
+    m_epochDay.setInteger( (int) ld.toEpochDay() );
   }
 
   /************************************ getEpochDaySpinEditor ************************************/
   public SpinEditor getEpochDaySpinEditor()
   {
-    // return hidden spin editor to be incremented/decremented when hours spin editor wraps
+    // return epoch day spin editor 
     return m_epochDay;
   }
 
-  /*************************************** arrangeSelector ***************************************/
-  public void arrangeSelector()
+  /**************************************** getLocalDate *****************************************/
+  public LocalDate getLocalDate()
+  {
+    // return local-date for date represented in epoch day spin editor 
+    return LocalDate.ofEpochDay( m_epochDay.getInteger() );
+  }
+
+  /****************************************** moveDate *******************************************/
+  public void moveDate( int num )
+  {
+    // change date represented in epoch day spin editor and update display
+    m_epochDay.setInteger( m_epochDay.getInteger() + num );
+  }
+
+  /******************************************* arrange *******************************************/
+  public void arrange()
   {
     // position month & year spin editors
     double y = PADDING;
@@ -143,42 +202,38 @@ public class DateSelector extends Pane
     y += m_month.getHeight() + PADDING + 1.0;
     m_calendar.setWidth( m_month.getWidth() + m_year.getWidth() + 1.0 );
     m_calendar.relocate( x + 1.0, y );
-    Platform.runLater( () -> m_calendar.requestFocus() );
-    updatePane();
+    update();
+
+    // position extra node below calendar
+    y += m_calendar.getHeight() + PADDING + 1.0;
+    m_extra.relocate( x, y );
 
     // size pane to contents
-    setMinWidth( m_calendar.getWidth() + 2 * PADDING + 2.0 );
-    setMaxWidth( getMinWidth() );
-    setMinHeight( y + m_calendar.getHeight() + PADDING + 1.0 );
-    setMaxHeight( getMinHeight() );
+    setPrefWidth( m_calendar.getWidth() + 2 * PADDING + 2.0 );
+    setPrefHeight( y + m_extra.getHeight() + PADDING + 1.0 );
   }
 
-  /***************************************** updatePane ******************************************/
-  private void updatePane()
+  /***************************************** update ******************************************/
+  private void update()
   {
-    // update month & year spin editors
-    Date date = m_dateProperty.get();
-    m_month.setMonth( date.getMonth() );
-    m_year.setInteger( date.getYear() );
+    // display the date from epoch-day-spin-editor on month, year & calendar
+    LocalDate selectedDate = getLocalDate();
+    m_month.setMonth( selectedDate.getMonthValue() );
+    m_year.setInteger( selectedDate.getYear() );
 
-    // draw calendar for month-year specified in the spin editors
-    int month = m_month.getMonthNumber();
-    int year = m_year.getInteger();
-    LocalDate localdate = LocalDate.of( year, month, 1 );
+    // draw calendar for month-year
+    Calendar calendar = JPlanner.plan.getDefaultcalendar();
+    LocalDate localdate = selectedDate.minusDays( selectedDate.getDayOfMonth() );
     localdate = localdate.minusDays( localdate.getDayOfWeek().getValue() - 1 );
-    LocalDate selecteddate = m_dateProperty.get().localDate();
-
-    // calculate calendar cell width & height
     double w = m_calendar.getWidth();
     double h = m_calendar.getHeight();
     m_columnWidth = Math.floor( w / 7.0 );
     m_rowHeight = Math.floor( h / 7.0 );
 
-    // clear the calendar
+    // clear the calendar canvas
     m_gc = m_calendar.getGraphicsContext2D();
     m_gc.clearRect( 0.0, 0.0, w, h );
     m_gc.setFontSmoothingType( FontSmoothingType.LCD );
-    Calendar calendar = JPlanner.gui.getPropertiesPane().getCalendar();
 
     // draw the calendar day labels and day-of-month numbers
     for ( int row = 0; row < 7; row++ )
@@ -200,9 +255,9 @@ public class DateSelector extends Pane
         {
           // numbers are black except gray for other months and red for today
           Color textColor = Color.BLACK;
-          if ( localdate.getMonthValue() != month )
+          if ( localdate.getMonthValue() != selectedDate.getMonthValue() )
             textColor = Color.GRAY;
-          if ( localdate.isEqual( selecteddate ) )
+          if ( localdate.isEqual( selectedDate ) )
             textColor = Color.WHITE;
           if ( localdate.isEqual( LocalDate.now() ) )
             textColor = Color.RED;
@@ -214,7 +269,7 @@ public class DateSelector extends Pane
           Color backColor = Color.gray( work / 10.0 + 0.9 );
 
           // select day is blue
-          if ( localdate.isEqual( selecteddate ) )
+          if ( localdate.isEqual( selectedDate ) )
             backColor = Colors.FOCUSBLUE;
 
           // draw number and move to next day
@@ -241,12 +296,11 @@ public class DateSelector extends Pane
     m_gc.fillText( text.toString(), x, y );
   }
 
-  /************************************** calendarMouseClicked **************************************/
+  /************************************ calendarMouseClicked *************************************/
   private void calendarMouseClicked( MouseEvent event )
   {
     // update editor date with calendar date clicked
     m_calendar.requestFocus();
-
     int column = (int) ( event.getX() / m_columnWidth );
     int row = (int) ( event.getY() / m_rowHeight );
 
@@ -256,7 +310,7 @@ public class DateSelector extends Pane
       ld = ld.minusDays( ld.getDayOfWeek().getValue() - 1 );
       ld = ld.plusDays( column + 7 * ( --row ) );
 
-      m_dateProperty.set( new Date( ld ) );
+      m_epochDay.setInteger( (int) ld.toEpochDay() );
     }
   }
 
@@ -268,43 +322,45 @@ public class DateSelector extends Pane
     switch ( event.getCode() )
     {
       case HOME:
-        int day = m_dateProperty.get().getDayOfMonth();
-        m_dateProperty.set( m_dateProperty.get().plusDays( 1 - day ) );
+        int day = getLocalDate().getDayOfMonth();
+        moveDate( 1 - day );
         break;
 
       case END:
         boolean leap = Year.isLeap( m_year.getInteger() );
         int len = m_month.getMonth().length( leap );
-        day = m_dateProperty.get().getDayOfMonth();
-        m_dateProperty.set( m_dateProperty.get().plusDays( len - day ) );
+        day = getLocalDate().getDayOfMonth();
+        moveDate( len - day );
         break;
 
       case PAGE_UP:
-        m_dateProperty.set( m_dateProperty.get().plusDays( -28 ) );
+        LocalDate ld = getLocalDate().plusMonths( -1 );
+        m_epochDay.setInteger( (int) ld.toEpochDay() );
         break;
 
       case PAGE_DOWN:
-        m_dateProperty.set( m_dateProperty.get().plusDays( 28 ) );
+        ld = getLocalDate().plusMonths( 1 );
+        m_epochDay.setInteger( (int) ld.toEpochDay() );
         break;
 
       case UP:
       case KP_UP:
-        m_dateProperty.set( m_dateProperty.get().plusDays( -7 ) );
+        moveDate( -7 );
         break;
 
       case DOWN:
       case KP_DOWN:
-        m_dateProperty.set( m_dateProperty.get().plusDays( 7 ) );
+        moveDate( 7 );
         break;
 
       case RIGHT:
       case KP_RIGHT:
-        m_dateProperty.set( m_dateProperty.get().plusDays( 1 ) );
+        moveDate( 1 );
         break;
 
       case LEFT:
       case KP_LEFT:
-        m_dateProperty.set( m_dateProperty.get().plusDays( -1 ) );
+        moveDate( -1 );
         break;
 
       default:
@@ -326,13 +382,23 @@ public class DateSelector extends Pane
     // if digit typed, move date forward until day-of-month contains typed digit
     if ( Character.isDigit( key ) )
     {
-      Date date = m_dateProperty.get();
+      LocalDate ld = getLocalDate();
       do
-        date.increment();
-      while ( Integer.toString( date.getDayOfMonth() ).indexOf( key ) < 0 );
-      m_dateProperty.set( date );
+        ld = ld.plusDays( 1 );
+      while ( Integer.toString( ld.getDayOfMonth() ).indexOf( key ) < 0 );
+      m_epochDay.setInteger( (int) ld.toEpochDay() );
     }
 
+  }
+
+  /************************************* calendarScrollEvent *************************************/
+  private void calendarScrollEvent( ScrollEvent event )
+  {
+    // increment or decrement value depending on mouse wheel scroll event
+    if ( event.getDeltaY() > 0 )
+      moveDate( 1 );
+    else
+      moveDate( -1 );
   }
 
 }

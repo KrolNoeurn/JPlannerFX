@@ -94,7 +94,7 @@ class GanttPlotMenu extends ContextMenu
     // determine plan start
     DateTime start = JPlanner.plan.getEarliestTaskStart();
     if ( start == null )
-      start = JPlanner.plan.getStart();
+      start = JPlanner.plan.getDefaultStart();
 
     // if possible buffer of 5% of width plus 10 pixels given at each end of gantt
     Gantt gantt = ( (GanttPlot) this.getOwnerNode() ).getGantt();

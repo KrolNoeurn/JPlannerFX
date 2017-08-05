@@ -57,6 +57,11 @@ public class EditorDate extends AbstractCellEditor
     // set value depending on type
     if ( value instanceof Date )
       m_editor.setDate( (Date) value );
+    else if ( value instanceof String )
+    {
+      m_editor.setText( (String) value );
+      m_editor.positionCaret( m_editor.getText().length() );
+    }
     else
       throw new IllegalArgumentException( "Don't know how to handle " + value.getClass() + " " + value );
   }

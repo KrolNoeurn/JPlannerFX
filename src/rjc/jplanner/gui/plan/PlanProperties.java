@@ -164,7 +164,7 @@ public class PlanProperties extends ScrollPane
       if ( source == m_title )
         source.setText( JPlanner.plan.getTitle() );
       if ( source == m_defaultStart )
-        displayDateTime( m_defaultStart, JPlanner.plan.getStart() );
+        displayDateTime( m_defaultStart, JPlanner.plan.getDefaultStart() );
       if ( source == m_defaultCalendar )
         source.setText( JPlanner.plan.getDefaultcalendar().getName() );
       source.selectRange( pos, pos );
@@ -200,7 +200,7 @@ public class PlanProperties extends ScrollPane
       JPlanner.gui.setError( m_DTformat, "Date-time format error '" + err + "'" );
     }
 
-    displayDateTime( m_defaultStart, JPlanner.plan.getStart() );
+    displayDateTime( m_defaultStart, JPlanner.plan.getDefaultStart() );
     displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
     displayDateTime( m_end, JPlanner.plan.getLatestTaskEnd() );
     displayDateTime( m_savedWhen, JPlanner.plan.getSavedWhen() );
@@ -268,7 +268,7 @@ public class PlanProperties extends ScrollPane
     m_fileLocation.setText( JPlanner.plan.getFileLocation() );
     m_savedBy.setText( JPlanner.plan.getSavedBy() );
 
-    m_defaultStart.setDateTime( JPlanner.plan.getStart() );
+    m_defaultStart.setDateTime( JPlanner.plan.getDefaultStart() );
     displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
     displayDateTime( m_end, JPlanner.plan.getLatestTaskEnd() );
     displayDateTime( m_savedWhen, JPlanner.plan.getSavedWhen() );
@@ -290,7 +290,7 @@ public class PlanProperties extends ScrollPane
     String Dformat = m_Dformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateFormat() : m_Dformat.getText();
 
     // if properties not changed, return doing nothing
-    if ( JPlanner.plan.getTitle().equals( title ) && JPlanner.plan.getStart().equals( start )
+    if ( JPlanner.plan.getTitle().equals( title ) && JPlanner.plan.getDefaultStart().equals( start )
         && JPlanner.plan.getDefaultcalendar() == cal && JPlanner.plan.getDateTimeFormat().equals( DTformat )
         && JPlanner.plan.getDateFormat().equals( Dformat ) )
       return;

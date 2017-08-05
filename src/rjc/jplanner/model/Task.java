@@ -129,8 +129,8 @@ public class Task implements Comparable<Task>
     // initialise private variables
     m_duration = new TimeSpan( "1d" );
     m_work = new TimeSpan( "0d" );
-    m_start = JPlanner.plan.getStart();
-    m_end = JPlanner.plan.getStart();
+    m_start = JPlanner.plan.getDefaultStart();
+    m_end = JPlanner.plan.getDefaultStart();
     m_predecessors = new Predecessors( "" );
     m_resources = new TaskResources();
     m_type = TaskType.ASAP_FDUR;
@@ -528,7 +528,7 @@ public class Task implements Comparable<Task>
       else if ( hasToFinish )
         m_start = planCal.getWorkDateTimeDown( endDueToPredecessors() );
       else
-        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getStart() );
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getDefaultStart() );
 
       m_end = m_start;
     }
@@ -547,7 +547,7 @@ public class Task implements Comparable<Task>
       }
       else
       {
-        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getStart() );
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getDefaultStart() );
         m_end = planCal.getWorkDateTimeDown( planCal.workTimeSpan( m_start, m_duration ) );
       }
     }

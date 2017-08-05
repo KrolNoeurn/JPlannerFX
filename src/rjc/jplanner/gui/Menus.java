@@ -107,7 +107,7 @@ class Menus extends MenuBar
 
     MenuItem fileExit = new MenuItem( "Exit" );
     fileExit.setAccelerator( new KeyCodeCombination( KeyCode.Q, CONTROL ) );
-    fileExit.setDisable( true );
+    fileExit.setOnAction( event -> JPlanner.gui.quit() );
 
     menu.getItems().addAll( fileNew, fileOpen, fileSave, fileSaveAs );
     menu.getItems().addAll( new SeparatorMenuItem(), filePrintPreview, filePrint );

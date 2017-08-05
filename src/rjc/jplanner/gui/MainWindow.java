@@ -129,19 +129,8 @@ public class MainWindow
     // on close request if undo-stack not clean check if user wants to save
     stage.setOnCloseRequest( event ->
     {
-      if ( okToProceed( "Do you want to save before closing?" ) )
-      {
-        // close other windows
-        for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
-          if ( tabs != m_mainTabWidget )
-            tabs.getScene().getWindow().hide();
-
-        if ( m_undoWindow != null )
-          m_undoWindow.close();
-      }
-      else
-        // not okay to proceed, therefore consume event to prevent closing
-        event.consume();
+      event.consume();
+      quit();
     } );
 
     // adjust menus on main-tab-widget selected tab change
@@ -196,6 +185,26 @@ public class MainWindow
     {
       m_statusBar.setStyle( STYLE_NORMAL );
       m_statusBar.setText( String.join( "", msg ) );
+    }
+  }
+
+  /******************************************** quit *********************************************/
+  public void quit()
+  {
+    // on close request if undo-stack not clean check if user wants to save
+    if ( okToProceed( "Do you want to save before closing?" ) )
+    {
+      // close other windows
+      for ( MainTabWidget tabs : new ArrayList<MainTabWidget>( m_tabWidgets ) )
+        if ( tabs != m_mainTabWidget )
+          tabs.getScene().getWindow().hide();
+
+      // close undo stack window
+      if ( m_undoWindow != null )
+        m_undoWindow.close();
+
+      // and finally close this window
+      m_stage.close();
     }
   }
 
@@ -376,6 +385,7 @@ public class MainWindow
   public boolean saveAs()
   {
     // use file-chooser defaulting if available to current directory and file-name
+    checkPlanUpToDate();
     FileChooser fc = new FileChooser();
     fc.setTitle( "Save plan" );
     File initialDirectory = new File( JPlanner.plan.getFileLocation() );
@@ -397,6 +407,7 @@ public class MainWindow
   public boolean save()
   {
     // if no existing filename set, use save-as
+    checkPlanUpToDate();
     if ( JPlanner.plan.getFilename() == null || JPlanner.plan.getFilename().length() < 1 )
       return saveAs();
 
