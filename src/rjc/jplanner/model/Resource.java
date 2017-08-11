@@ -187,7 +187,7 @@ public class Resource
     if ( section == SECTION_INITIALS )
     {
       if ( isNull() )
-        m_calendar = JPlanner.plan.getDefaultcalendar();
+        m_calendar = JPlanner.plan.getDefaultCalendar();
 
       m_initials = (String) newValue;
     }

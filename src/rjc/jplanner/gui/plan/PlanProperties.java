@@ -166,7 +166,7 @@ public class PlanProperties extends ScrollPane
       if ( source == m_defaultStart )
         displayDateTime( m_defaultStart, JPlanner.plan.getDefaultStart() );
       if ( source == m_defaultCalendar )
-        source.setText( JPlanner.plan.getDefaultcalendar().getName() );
+        source.setText( JPlanner.plan.getDefaultCalendar().getName() );
       source.selectRange( pos, pos );
     }
 
@@ -261,7 +261,7 @@ public class PlanProperties extends ScrollPane
   {
     // update the gui property widgets with values from plan
     m_title.setText( JPlanner.plan.getTitle() );
-    m_defaultCalendar.setCalendar( JPlanner.plan.getDefaultcalendar() );
+    m_defaultCalendar.setCalendar( JPlanner.plan.getDefaultCalendar() );
     m_DTformat.setText( JPlanner.plan.getDateTimeFormat() );
     m_Dformat.setText( JPlanner.plan.getDateFormat() );
     m_fileName.setText( JPlanner.plan.getFilename() );
@@ -282,8 +282,10 @@ public class PlanProperties extends ScrollPane
   {
     // get values from gui editors
     String title = m_title.getText();
-    DateTime start = m_defaultStart.getDateTime();
     Calendar cal = m_defaultCalendar.getCalendar();
+
+    DateTime start = m_defaultStart.getId() == JPlanner.ERROR ? JPlanner.plan.getDefaultStart()
+        : m_defaultStart.getDateTime();
 
     String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateTimeFormat() : m_DTformat.getText();
 
@@ -291,7 +293,7 @@ public class PlanProperties extends ScrollPane
 
     // if properties not changed, return doing nothing
     if ( JPlanner.plan.getTitle().equals( title ) && JPlanner.plan.getDefaultStart().equals( start )
-        && JPlanner.plan.getDefaultcalendar() == cal && JPlanner.plan.getDateTimeFormat().equals( DTformat )
+        && JPlanner.plan.getDefaultCalendar() == cal && JPlanner.plan.getDateTimeFormat().equals( DTformat )
         && JPlanner.plan.getDateFormat().equals( Dformat ) )
       return;
 

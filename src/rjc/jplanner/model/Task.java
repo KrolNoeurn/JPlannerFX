@@ -519,7 +519,7 @@ public class Task implements Comparable<Task>
       }
     }
 
-    Calendar planCal = JPlanner.plan.getDefaultcalendar();
+    Calendar planCal = JPlanner.plan.getDefaultCalendar();
     if ( m_duration.getNumber() == 0.0 )
     {
       // milestone
@@ -630,9 +630,9 @@ public class Task implements Comparable<Task>
   {
     // return task or summary duration time-span
     if ( isSummary() )
-      return JPlanner.plan.getDefaultcalendar().workBetween( getStart(), getEnd() );
+      return JPlanner.plan.getDefaultCalendar().workBetween( getStart(), getEnd() );
     if ( m_type == TaskType.FIXED_PERIOD )
-      return JPlanner.plan.getDefaultcalendar().workBetween( m_start, m_end );
+      return JPlanner.plan.getDefaultCalendar().workBetween( m_start, m_end );
 
     return m_duration;
   }

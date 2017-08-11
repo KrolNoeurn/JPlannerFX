@@ -22,6 +22,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Popup;
 import rjc.jplanner.JPlanner;
@@ -29,7 +30,7 @@ import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
 
 /*************************************************************************************************/
-/********************* Pop-up window to display date-time selection widgets **********************/
+/************************ Pop-up window to display date selection widgets ************************/
 /*************************************************************************************************/
 
 class DatePopup extends Popup
@@ -70,7 +71,7 @@ class DatePopup extends Popup
     // ensure parent editor is editable when selector is hidden
     setOnHidden( event -> m_parent.setEditable( true ) );
 
-    // keep parent editor and this selector synchronised
+    // keep parent editor and selector synchronised
     m_dateSelector.getEpochDaySpinEditor().textProperty().addListener(
         ( observable, oldT, newT ) -> m_parent.setText( getDate().toString( JPlanner.plan.getDateFormat() ) ) );
   }
@@ -99,12 +100,23 @@ class DatePopup extends Popup
     // set pop-up contents to a date selector with buttons below
     m_dateSelector = new DateSelector( m_buttons );
     getContent().addAll( m_dateSelector );
+
+    // intercept ESCAPE and ENTER events and pass to parent
+    addEventFilter( KeyEvent.KEY_PRESSED, event ->
+    {
+      if ( event.getCode() == KeyCode.ESCAPE || event.getCode() == KeyCode.ENTER )
+      {
+        hide();
+        m_parent.fireEvent( event.copyFor( m_parent, m_parent ) );
+        event.consume();
+      }
+    } );
   }
 
   /******************************************* setDate *******************************************/
   private void setDate( Date date )
   {
-    // set selector to specified date (and request focus for calendar canvas)
+    // set selector to specified date
     if ( date != null )
       m_dateSelector.getEpochDaySpinEditor().setInteger( date.getEpochday() );
   }

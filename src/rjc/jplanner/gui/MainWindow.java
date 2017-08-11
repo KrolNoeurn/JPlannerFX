@@ -754,7 +754,7 @@ public class MainWindow
   public void schedule()
   {
     // check plan default-calendar is working before starting re-schedule
-    Calendar cal = JPlanner.plan.getDefaultcalendar();
+    Calendar cal = JPlanner.plan.getDefaultCalendar();
     if ( !cal.isWorking() )
     {
       setError( m_statusBar, "Default calendar '" + cal.getName() + "' has no working periods." );

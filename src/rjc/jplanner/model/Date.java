@@ -21,6 +21,8 @@ package rjc.jplanner.model;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import rjc.jplanner.JPlanner;
+
 /*************************************************************************************************/
 /************************************ Date (with no timezone) ************************************/
 /*************************************************************************************************/
@@ -285,11 +287,11 @@ public class Date
   }
 
   /******************************************** parse ********************************************/
-  public static Date parse( String text, String format )
+  public static Date parse( String text )
   {
     // return date if text can be parsed, otherwise return null
-    Date date = null;
-    date = Date.tryFormat( text, format );
+    String format = JPlanner.plan.getDateFormat();
+    Date date = tryFormat( text, format );
     if ( date != null )
       return date;
 
@@ -299,48 +301,46 @@ public class Date
     for ( int ch = 1; ch < simple.length(); ch++ )
       while ( ch < simple.length() && simple.charAt( ch - 1 ) == simple.charAt( ch ) )
         simple.deleteCharAt( ch );
-    date = Date.tryFormat( text, simple.toString().replace( "y", "yy" ).replace( "u", "uu" ).replace( "Y", "YY" ) );
+    date = tryFormat( text, simple.toString().replace( "y", "yy" ).replace( "u", "uu" ).replace( "Y", "YY" ) );
     if ( date != null )
       return date;
 
     // try simplifying more
-    String simple2 = simple.toString().replace( "E", "" ).replace( "e", "" ).replace( "c", "" );
-    simple2 = simple2.replaceAll( "'.*'", "" );
-    date = Date.tryFormat( text, simple2 );
+    String simpler = simple.toString().replace( "E", "" ).replace( "e", "" ).replace( "c", "" );
+    simpler = simpler.replaceAll( "'.*'", "" );
+    date = tryFormat( text, simpler );
     if ( date != null )
       return date;
 
     // try some other standard formats
-    date = Date.tryFormat( text, "d/M/y" );
+    date = tryFormat( text, "d/M/yy" );
     if ( date != null )
       return date;
 
-    date = Date.tryFormat( text + "/" + Date.now().getYear(), "d/M/y" );
+    date = tryFormat( text, "d/M/y" );
     if ( date != null )
       return date;
 
-    date = Date.tryFormat( text + Date.now().getYear(), "d/M/y" );
+    date = tryFormat( text + "/" + Date.now().getYear(), "d/M/y" );
     if ( date != null )
       return date;
 
-    return date;
+    return tryFormat( text + Date.now().getYear(), "d/M/y" );
   }
 
   /****************************************** tryFormat ******************************************/
   private static Date tryFormat( String text, String format )
   {
     // return date if text can be parsed, otherwise return null
-    Date date = null;
     try
     {
       LocalDate ldate = LocalDate.parse( text, DateTimeFormatter.ofPattern( format ) );
-      date = new Date( ldate );
+      return new Date( ldate );
     }
     catch ( Exception exception )
     {
+      return null;
     }
-
-    return date;
   }
 
 }

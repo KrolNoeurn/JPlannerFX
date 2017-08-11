@@ -368,23 +368,83 @@ public class DateTime implements Comparable<DateTime>
   }
 
   /******************************************** parse ********************************************/
-  public static DateTime parse( String text, String format )
+  public static DateTime parse( String text )
   {
     // return date-time if text can be parsed, otherwise return null
-    DateTime datetime = null;
+    String format = JPlanner.plan.getDateTimeFormat();
+    DateTime datetime = tryFormat( text, format );
+    if ( datetime != null )
+      return datetime;
 
+    // try date format
+    Date date = Date.parse( text );
+    if ( date != null )
+    {
+      Day day = JPlanner.plan.getDefaultCalendar().getDay( date );
+      if ( day.getNumberOfPeriods() > 0 )
+        return new DateTime( date, day.getStart() );
+      return new DateTime( date, Time.MIN_VALUE );
+    }
+
+    // try "d/M/yy H:m:s.S" and "d/M/y H:m:s.S"
+    datetime = tryDefaultFormat( text );
+    if ( datetime != null )
+      return datetime;
+
+    // add milliseconds
+    datetime = tryDefaultFormat( text + "0" );
+    if ( datetime != null )
+      return datetime;
+    datetime = tryDefaultFormat( text + ".0" );
+    if ( datetime != null )
+      return datetime;
+
+    // add seconds + milliseconds
+    datetime = tryDefaultFormat( text + "0.0" );
+    if ( datetime != null )
+      return datetime;
+    datetime = tryDefaultFormat( text + ":0.0" );
+    if ( datetime != null )
+      return datetime;
+
+    // add minutes + seconds + milliseconds
+    datetime = tryDefaultFormat( text + "0:0.0" );
+    if ( datetime != null )
+      return datetime;
+    datetime = tryDefaultFormat( text + ":0:0.0" );
+    if ( datetime != null )
+      return datetime;
+
+    // add hours + minutes + seconds + milliseconds
+    datetime = tryDefaultFormat( text + "0:0:0.0" );
+    if ( datetime != null )
+      return datetime;
+    return tryDefaultFormat( text + " 0:0:0.0" );
+  }
+
+  /************************************** tryDefaultFormat ***************************************/
+  private static DateTime tryDefaultFormat( String text )
+  {
+    // try "d/M/yy H:m:s.S" and "d/M/y H:m:s.S"
+    DateTime dt = tryFormat( text, "d/M/yy H:m:s.S" );
+    if ( dt != null )
+      return dt;
+    return tryFormat( text, "d/M/y H:m:s.S" );
+  }
+
+  /****************************************** tryFormat ******************************************/
+  private static DateTime tryFormat( String text, String format )
+  {
+    // return date if text can be parsed, otherwise return null
     try
     {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern( format );
-      LocalDateTime ldt = LocalDateTime.parse( text, formatter );
-      datetime = new DateTime( ldt );
+      LocalDateTime ldt = LocalDateTime.parse( text, DateTimeFormatter.ofPattern( format ) );
+      return new DateTime( ldt );
     }
     catch ( Exception exception )
     {
-      JPlanner.trace( text, format, exception );
+      return null;
     }
-
-    return datetime;
   }
 
 }

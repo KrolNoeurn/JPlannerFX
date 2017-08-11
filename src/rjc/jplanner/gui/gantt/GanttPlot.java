@@ -120,7 +120,7 @@ class GanttPlot extends Canvas
   private void shadeNonWorking( int x, int y, int w, int h )
   {
     // shade non-working time on gantt-plot
-    Calendar calendar = JPlanner.plan.getDefaultcalendar();
+    Calendar calendar = JPlanner.plan.getDefaultCalendar();
     Date date = m_gantt.datetime( x - 1 ).getDate();
     int endEpoch = m_gantt.datetime( x + w ).getDate().getEpochday();
     int startShadeEpoch;

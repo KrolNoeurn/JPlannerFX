@@ -56,7 +56,7 @@ public class CalendarCombo extends AbstractComboEditor
   public void setCalendar( Calendar calendar )
   {
     // set editor to specified plan calendar
-    setText( JPlanner.plan.getDefaultcalendar().getName() );
+    setText( calendar.getName() );
   }
 
 }

@@ -222,7 +222,7 @@ public class DateSelector extends Pane
     m_year.setInteger( selectedDate.getYear() );
 
     // draw calendar for month-year
-    Calendar calendar = JPlanner.plan.getDefaultcalendar();
+    Calendar calendar = JPlanner.plan.getDefaultCalendar();
     LocalDate localdate = selectedDate.minusDays( selectedDate.getDayOfMonth() );
     localdate = localdate.minusDays( localdate.getDayOfWeek().getValue() - 1 );
     double w = m_calendar.getWidth();

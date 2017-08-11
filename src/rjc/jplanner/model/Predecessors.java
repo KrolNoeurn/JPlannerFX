@@ -304,7 +304,7 @@ public class Predecessors
   public DateTime getStart()
   {
     // return task start based on predecessors
-    Calendar cal = JPlanner.plan.getDefaultcalendar();
+    Calendar cal = JPlanner.plan.getDefaultCalendar();
     DateTime start = DateTime.MIN_VALUE;
     for ( Predecessor pred : m_preds )
     {
@@ -330,7 +330,7 @@ public class Predecessors
   public DateTime getEnd()
   {
     // return task end based on predecessors
-    Calendar cal = JPlanner.plan.getDefaultcalendar();
+    Calendar cal = JPlanner.plan.getDefaultCalendar();
     DateTime end = DateTime.MAX_VALUE;
     for ( Predecessor pred : m_preds )
     {

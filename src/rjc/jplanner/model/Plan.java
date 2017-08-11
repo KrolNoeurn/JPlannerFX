@@ -247,8 +247,8 @@ public class Plan
     return latest;
   }
 
-  /************************************** getDefaultcalendar *************************************/
-  public Calendar getDefaultcalendar()
+  /************************************** getDefaultCalendar *************************************/
+  public Calendar getDefaultCalendar()
   {
     return m_calendar;
   }
@@ -513,7 +513,7 @@ public class Plan
     if ( getCalendarsCount() == 0 )
       return "No calendars";
 
-    if ( getIndex( getDefaultcalendar() ) == -1 )
+    if ( getIndex( getDefaultCalendar() ) == -1 )
       return "Invalid default calendar";
 
     return null;

@@ -44,13 +44,13 @@ public class DateEditor extends XTextField
         return;
 
       // if text cannot be parsed set editor into error state
-      m_date = Date.parse( newText, format() );
+      m_date = Date.parse( newText );
       if ( m_date == null )
-        JPlanner.gui.setError( this, "Date not in recognisable format" );
+        JPlanner.gui.setError( this, "Date not in recognised format" );
       else
       {
         JPlanner.gui.setError( this, null );
-        JPlanner.gui.message( "Date: " + m_date.toString( format() ) );
+        JPlanner.gui.message( "Date: " + m_date.toString( JPlanner.plan.getDateFormat() ) );
         m_validText = newText;
       }
     } );
@@ -66,16 +66,6 @@ public class DateEditor extends XTextField
     new DatePopup( this );
   }
 
-  /******************************************* format ********************************************/
-  private String format()
-  {
-    // return format this editor uses for converting text to date
-    if ( JPlanner.gui == null )
-      return JPlanner.plan.getDateFormat();
-    else
-      return JPlanner.gui.getPropertiesPane().getDateFormat();
-  }
-
   /****************************************** getDate ********************************************/
   public Date getDate()
   {
@@ -88,7 +78,7 @@ public class DateEditor extends XTextField
   {
     // set editor to specified date
     m_date = date;
-    setText( date.toString( format() ) );
+    setText( date.toString( JPlanner.plan.getDateFormat() ) );
     positionCaret( getText().length() );
   }
 
