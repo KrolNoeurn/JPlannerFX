@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui;
 
+import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Date;
 
@@ -80,6 +81,16 @@ public class DateEditor extends XTextField
     m_date = date;
     setText( date.toString( JPlanner.plan.getDateFormat() ) );
     positionCaret( getText().length() );
+  }
+
+  /**************************************** scrollEvent ******************************************/
+  public void scrollEvent( ScrollEvent event )
+  {
+    // increment or decrement date depending on mouse wheel scroll event
+    if ( event.getDeltaY() > 0 )
+      setDate( getDate().plusDays( 1 ) );
+    else
+      setDate( getDate().plusDays( -1 ) );
   }
 
 }

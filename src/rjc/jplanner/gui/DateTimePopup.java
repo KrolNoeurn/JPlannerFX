@@ -134,29 +134,29 @@ class DateTimePopup extends Popup
     m_pane.getChildren().addAll( m_time, m_buttons );
 
     // add button actions
-    m_today.setOnAction( event -> m_parent.setDateTime( new DateTime( Date.now(), getTime() ) ) );
+    m_today.setOnAction( event -> setDateTime( new DateTime( Date.now(), getTime() ) ) );
 
-    m_back.setOnAction( event -> m_parent.setDateTime( back() ) );
+    m_back.setOnAction( event -> setDateTime( back() ) );
 
     m_start.setOnAction( event ->
     {
-      Day day = JPlanner.gui.getPropertiesPane().getCalendar().getDay( getDate() );
+      Day day = JPlanner.plan.getDefaultCalendar().getDay( getDate() );
       if ( day.getNumberOfPeriods() > 0 )
-        m_parent.setDateTime( new DateTime( getDate(), day.getStart() ) );
+        setDateTime( new DateTime( getDate(), day.getStart() ) );
       else
-        m_parent.setDateTime( new DateTime( getDate(), Time.MIN_VALUE ) );
+        setDateTime( new DateTime( getDate(), Time.MIN_VALUE ) );
     } );
 
     m_end.setOnAction( event ->
     {
-      Day day = JPlanner.gui.getPropertiesPane().getCalendar().getDay( getDate() );
+      Day day = JPlanner.plan.getDefaultCalendar().getDay( getDate() );
       if ( day.getNumberOfPeriods() > 0 )
-        m_parent.setDateTime( new DateTime( getDate(), day.getEnd() ) );
+        setDateTime( new DateTime( getDate(), day.getEnd() ) );
       else
-        m_parent.setDateTime( new DateTime( getDate(), Time.MAX_VALUE ) );
+        setDateTime( new DateTime( getDate(), Time.MAX_VALUE ) );
     } );
 
-    m_forward.setOnAction( event -> m_parent.setDateTime( forward() ) );
+    m_forward.setOnAction( event -> setDateTime( forward() ) );
 
     // set pop-up contents to a date selector with buttons below
     m_dateSelector = new DateSelector( m_pane );
@@ -179,7 +179,7 @@ class DateTimePopup extends Popup
   private DateTime forward()
   {
     // return date-time forward to next working period boundary
-    Calendar cal = JPlanner.gui.getPropertiesPane().getCalendar();
+    Calendar cal = JPlanner.plan.getDefaultCalendar();
     Date date = getDate();
     Day day = cal.getDay( date );
     int ms = getTime().getDayMilliseconds();
@@ -202,16 +202,14 @@ class DateTimePopup extends Popup
   private DateTime back()
   {
     // return date-time back to next working period boundary
-    Calendar cal = JPlanner.gui.getPropertiesPane().getCalendar();
-
-    // if at beginning of day, move back 1ms to go to previous day
+    Calendar cal = JPlanner.plan.getDefaultCalendar();
+    Date date = getDate();
     int ms = getTime().getDayMilliseconds();
     if ( ms == 0 )
     {
-      m_parent.setDateTime( getDateTime().plusMilliseconds( -1 ) );
-      ms = getTime().getDayMilliseconds();
+      date.decrement();
+      ms = Time.MILLISECONDS_IN_DAY;
     }
-    Date date = getDate();
     Day day = cal.getDay( date );
     int num = day.getNumberOfPeriods();
 
@@ -290,6 +288,7 @@ class DateTimePopup extends Popup
     else
     {
       m_parent.setEditable( false );
+      m_parent.requestFocus();
       setDateTime( m_parent.getDateTime() );
       Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
       show( m_parent, point.getX() - SHADOW_RADIUS + 1.0, point.getY() - SHADOW_RADIUS + 1.0 );

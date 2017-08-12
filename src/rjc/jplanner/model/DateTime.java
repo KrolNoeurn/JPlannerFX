@@ -218,7 +218,7 @@ public class DateTime implements Comparable<DateTime>
   public static DateTime now()
   {
     // return a new DateTime from current system clock
-    return new DateTime( System.currentTimeMillis() );
+    return new DateTime( System.currentTimeMillis() + Time.TZ_MS_OFFSET );
   }
 
   /************************************** plusMilliseconds ***************************************/

@@ -19,6 +19,7 @@
 package rjc.jplanner.model;
 
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 
 /*************************************************************************************************/
 /******************** Time of day from 00:00:00.000 to 24:00:00.000 inclusive ********************/
@@ -33,6 +34,7 @@ public class Time
   public static final int            MILLISECONDS_IN_DAY = 24 * 3600 * 1000;
   public static final Time           MIN_VALUE           = Time.fromMilliseconds( 0 );
   public static final Time           MAX_VALUE           = Time.fromMilliseconds( MILLISECONDS_IN_DAY );
+  public static final int            TZ_MS_OFFSET        = OffsetDateTime.now().getOffset().getTotalSeconds() * 1000;
 
   private static final StringBuilder BUFFER              = new StringBuilder();
 
@@ -193,7 +195,7 @@ public class Time
   public static Time now()
   {
     // return a new Time from current system clock
-    return new Time( (int) ( LocalTime.now().toNanoOfDay() / 1_000_000L ) );
+    return new Time( (int) ( System.currentTimeMillis() + TZ_MS_OFFSET ) % MILLISECONDS_IN_DAY );
   }
 
   /****************************************** getHours *******************************************/

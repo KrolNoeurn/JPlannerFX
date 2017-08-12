@@ -19,6 +19,7 @@
 package rjc.jplanner.gui;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /*************************************************************************************************/
 /************************* Holds the JavaFX colours used in JPlanner GUI *************************/
@@ -55,4 +56,5 @@ public class Colors
   public static final Color GANTT_SUMMARY      = Color.BLACK;
   public static final Color GANTT_MILESTONE    = Color.BLACK;
   public static final Color GANTT_DEPENDENCY   = Color.SLATEGRAY;
+  public static final Paint GANTT_DEADLINE     = Color.LIMEGREEN;
 }

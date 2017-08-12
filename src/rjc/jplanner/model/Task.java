@@ -704,6 +704,12 @@ public class Task implements Comparable<Task>
     return m_priority;
   }
 
+  /***************************************** getDeadline *****************************************/
+  public DateTime getDeadline()
+  {
+    return m_deadline;
+  }
+
   /****************************************** getIndent ******************************************/
   public int getIndent()
   {

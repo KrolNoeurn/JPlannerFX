@@ -200,7 +200,6 @@ public class PlanProperties extends ScrollPane
       JPlanner.gui.setError( m_DTformat, "Date-time format error '" + err + "'" );
     }
 
-    displayDateTime( m_defaultStart, JPlanner.plan.getDefaultStart() );
     displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
     displayDateTime( m_end, JPlanner.plan.getLatestTaskEnd() );
     displayDateTime( m_savedWhen, JPlanner.plan.getSavedWhen() );
@@ -299,27 +298,6 @@ public class PlanProperties extends ScrollPane
 
     // update plan via undo-stack
     JPlanner.plan.getUndostack().push( new CommandPlanSetProperties( title, start, cal, DTformat, Dformat ) );
-  }
-
-  /***************************************** getCalendar *****************************************/
-  public Calendar getCalendar()
-  {
-    // return displayed calendar, may differ from default calendar in plan
-    return m_defaultCalendar.getCalendar();
-  }
-
-  /**************************************** getDateFormat ****************************************/
-  public String getDateFormat()
-  {
-    // return date format, may differ from format in plan
-    return m_Dformat.getText();
-  }
-
-  /************************************** getDateTimeFormat **************************************/
-  public String getDateTimeFormat()
-  {
-    // return date-time, may differ from format in plan
-    return m_DTformat.getText();
   }
 
 }

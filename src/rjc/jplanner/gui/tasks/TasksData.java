@@ -125,6 +125,7 @@ class TasksData extends AbstractDataSource
         return new EditorTimeSpan( columnIndex, row );
       case Task.SECTION_START:
       case Task.SECTION_END:
+      case Task.SECTION_DEADLINE:
         return new EditorDateTime( columnIndex, row );
       case Task.SECTION_PRIORITY:
         return new EditorTaskPriority( columnIndex, row );

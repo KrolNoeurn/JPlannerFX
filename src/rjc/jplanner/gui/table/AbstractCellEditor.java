@@ -18,13 +18,13 @@
 
 package rjc.jplanner.gui.table;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.gui.DateEditor;
+import rjc.jplanner.gui.DateTimeEditor;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.gui.XTextField;
@@ -127,6 +127,7 @@ abstract public class AbstractCellEditor
     JPlanner.gui.setError( m_control, null );
     m_table.remove( m_control );
     m_table.requestFocus();
+    m_table.setOnScroll( event -> m_table.scrollEvent( event ) );
 
     // if commit requested, save new value to data source
     if ( commit )
@@ -171,17 +172,11 @@ abstract public class AbstractCellEditor
 
     // if control derived from SpinEditor add wheel scroll listener
     if ( m_control instanceof SpinEditor )
-    {
-      EventHandler<? super ScrollEvent> previousScrollHander = table.getOnScroll();
       table.setOnScroll( event -> ( (SpinEditor) m_control ).scrollEvent( event ) );
-
-      // when focus lost, remove buttons and reset table scroll handler
-      m_control.focusedProperty().addListener( ( observable, oldFocus, newFocus ) ->
-      {
-        if ( !newFocus )
-          table.setOnScroll( previousScrollHander );
-      } );
-    }
+    if ( m_control instanceof DateEditor )
+      table.setOnScroll( event -> ( (DateEditor) m_control ).scrollEvent( event ) );
+    if ( m_control instanceof DateTimeEditor )
+      table.setOnScroll( event -> ( (DateTimeEditor) m_control ).scrollEvent( event ) );
 
     // set editor value
     if ( value != null )

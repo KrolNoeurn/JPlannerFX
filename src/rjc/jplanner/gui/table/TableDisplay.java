@@ -22,6 +22,7 @@ import static java.lang.Math.min;
 
 import javafx.geometry.Orientation;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.input.ScrollEvent;
 
 /*************************************************************************************************/
 /*********************** JavaFX table display with canvas and scroll bars ************************/
@@ -56,6 +57,7 @@ class TableDisplay extends TableParent
     add( m_canvas );
     add( m_vScrollBar );
     add( m_hScrollBar );
+    setOnScroll( event -> scrollEvent( event ) );
 
     // listen to scroll bar values for table scrolling
     m_vScrollBar.valueProperty().addListener( ( observable, oldValue, newValue ) ->
@@ -266,6 +268,17 @@ class TableDisplay extends TableParent
     // create scroll left animation
     int value = getHOffset();
     animate( m_hScrollBar.valueProperty(), 0, 5 * value );
+  }
+
+  /**************************************** scrollEvent ******************************************/
+  public void scrollEvent( ScrollEvent event )
+  {
+    // scroll up or down depending on mouse wheel scroll event
+    if ( event.getDeltaY() > 0 )
+      m_vScrollBar.decrement();
+    else
+      m_vScrollBar.increment();
+    finishAnimation();
   }
 
 }

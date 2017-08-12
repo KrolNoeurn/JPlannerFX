@@ -173,22 +173,35 @@ class GanttPlot extends Canvas
       if ( data != null )
         drawTask( ry + rh / 2, data, "TBD" );
 
+      // draw deadline
+      drawDeadline( ry + rh / 2, JPlanner.plan.getTask( row ).getDeadline() );
+
       // if beyond area to be drawn, exit loop
       ry += rh;
       if ( ry + rh > y + h )
         break;
-
-      // TODO also draw deadline
-      /***
-      if ( task->deadline() == XDateTime::NULL_DATETIME ) continue;
-      int x = task->ganttData()->x( task->deadline(), m_start, m_minsPP );
-      p->setPen( pen );
-      p->drawLine( x, y-4, x, y+4 );
-      p->drawLine( x-4, y, x, y+4 );
-      p->drawLine( x+4, y, x, y+4 );
-      ***/
     }
 
+  }
+
+  /**************************************** drawDeadline *****************************************/
+  private void drawDeadline( int y, DateTime deadline )
+  {
+    // draw deadline green arrow
+    if ( deadline == null )
+      return;
+
+    // set pen and fill colours
+    GraphicsContext gc = getGraphicsContext2D();
+    gc.setStroke( Colors.GANTT_DEADLINE );
+    int dx = m_gantt.x( deadline );
+
+    // draw arrow
+    for ( int arrow = 0; arrow < 5; arrow++ )
+      gc.strokeLine( dx - arrow + .5, y + 4.5 - arrow, dx + arrow + .5, y + 4.5 - arrow );
+    gc.setLineWidth( 5.0 );
+    gc.strokeLine( dx + .5, y - 1.5, dx + .5, y - 1.5 );
+    gc.setLineWidth( 1.0 );
   }
 
   /****************************************** drawTask *******************************************/

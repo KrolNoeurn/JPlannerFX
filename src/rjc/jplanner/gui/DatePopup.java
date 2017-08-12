@@ -137,6 +137,7 @@ class DatePopup extends Popup
     else
     {
       m_parent.setEditable( false );
+      m_parent.requestFocus();
       setDate( m_parent.getDate() );
       Point2D point = m_parent.localToScreen( 0.0, m_parent.getHeight() );
       show( m_parent, point.getX() - SHADOW_RADIUS + 1.0, point.getY() - SHADOW_RADIUS + 1.0 );

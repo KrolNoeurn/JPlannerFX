@@ -50,6 +50,10 @@ public class EditorDateTime extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
+    // if value is null, default to now
+    if ( value == null )
+      value = DateTime.now();
+
     // set value depending on type
     if ( value instanceof DateTime )
       m_editor.setDateTime( (DateTime) value );
