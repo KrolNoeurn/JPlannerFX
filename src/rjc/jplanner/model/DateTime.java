@@ -435,7 +435,7 @@ public class DateTime implements Comparable<DateTime>
   /****************************************** tryFormat ******************************************/
   private static DateTime tryFormat( String text, String format )
   {
-    // return date if text can be parsed, otherwise return null
+    // return date-time if text can be parsed, otherwise return null
     try
     {
       LocalDateTime ldt = LocalDateTime.parse( text, DateTimeFormatter.ofPattern( format ) );
@@ -445,6 +445,13 @@ public class DateTime implements Comparable<DateTime>
     {
       return null;
     }
+  }
+
+  /****************************************** toFormat *******************************************/
+  public String toFormat()
+  {
+    // return date-time using plan format
+    return toString( JPlanner.plan.getDateTimeFormat() );
   }
 
 }

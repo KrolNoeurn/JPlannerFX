@@ -19,7 +19,6 @@
 package rjc.jplanner.gui.resources;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
@@ -39,7 +38,7 @@ class EditorResourceInitials extends EditorText
     setAllowed( "^[^\\s\\[\\],]*$" );
 
     // add listener to set error status
-    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    addListener( ( observable, oldText, newText ) ->
     {
       // length must be between 1 and 20 characters long
       String error = null;

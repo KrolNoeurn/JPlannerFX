@@ -72,8 +72,8 @@ class DatePopup extends Popup
     setOnHidden( event -> m_parent.setEditable( true ) );
 
     // keep parent editor and selector synchronised
-    m_dateSelector.getEpochDaySpinEditor().textProperty().addListener(
-        ( observable, oldT, newT ) -> m_parent.setText( getDate().toString( JPlanner.plan.getDateFormat() ) ) );
+    m_dateSelector.getEpochDaySpinEditor().textProperty()
+        .addListener( ( observable, oldT, newT ) -> m_parent.setText( getDate().toFormat() ) );
   }
 
   /*************************************** constructPopup ****************************************/

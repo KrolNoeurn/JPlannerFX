@@ -22,7 +22,6 @@ import javafx.scene.paint.Paint;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.CommandResourceSetValue;
 import rjc.jplanner.gui.Colors;
-import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.calendars.EditorSelectCalendar;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.AbstractDataSource;
@@ -30,6 +29,7 @@ import rjc.jplanner.gui.table.EditorDate;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.model.Date;
 import rjc.jplanner.model.Resource;
 
 /*************************************************************************************************/
@@ -117,25 +117,46 @@ class ResourcesData extends AbstractDataSource
         return new EditorText( columnIndex, row );
       case Resource.SECTION_AVAIL:
         return new EditorAvailable( columnIndex, row );
+
       case Resource.SECTION_START:
+        EditorDate dateEditor = new EditorDate( columnIndex, row );
+        dateEditor.addListener( ( property, oldText, newText ) ->
+        {
+          // add listener to ensure start <= end
+          Date start = (Date) dateEditor.getValue();
+          Date end = JPlanner.plan.getResource( row ).getEnd().getDate().plusDays( -1 );
+          if ( start != null && end.isLessThan( start ) )
+            JPlanner.gui.setError( dateEditor.getControl(),
+                "Resource start [" + start.toFormat() + "] after resource end [" + end.toFormat() + "]" );
+        } );
+        return dateEditor;
+
       case Resource.SECTION_END:
-        return new EditorDate( columnIndex, row );
+        dateEditor = new EditorDate( columnIndex, row );
+        dateEditor.addListener( ( property, oldText, newText ) ->
+        {
+          // add listener to ensure end >= start
+          Date end = (Date) dateEditor.getValue();
+          Date start = JPlanner.plan.getResource( row ).getStart().getDate();
+          if ( end != null && end.isLessThan( start ) )
+            JPlanner.gui.setError( dateEditor.getControl(),
+                "Resource end [" + end.toFormat() + "] before resource start [" + start.toFormat() + "]" );
+        } );
+        return dateEditor;
+
       default:
         // default text editor is fine for other columns except do not allow initials duplicates, square brackets or comma
-        EditorText editor = new EditorText( columnIndex, row );
-        editor.setAllowed( "^[^\\[\\],]*$" );
-
-        ( (XTextField) editor.getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+        EditorText textEditor = new EditorText( columnIndex, row );
+        textEditor.setAllowed( "^[^\\[\\],]*$" );
+        textEditor.addListener( ( observable, oldText, newText ) ->
         {
           // must not be an initials duplicate
           String error = JPlanner.plan.resources.initialsClash( newText, -1 );
-
-          // display error message and set editor error status
-          JPlanner.gui.setError( editor.getControl(), error );
+          JPlanner.gui.setError( textEditor.getControl(), error );
         } );
-
-        return editor;
+        return textEditor;
     }
+
   }
 
   /****************************************** setValue *******************************************/

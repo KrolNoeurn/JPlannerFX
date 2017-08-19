@@ -117,6 +117,7 @@ public class PlanProperties extends ScrollPane
             + " N\t\t nano-of-day\t\t\t\t number\t\t 1234000000\n\n" + " p\t\t pad next\t\t\t\t\t pad modifier\t 1\n"
             + " '\t\t escape for text\t\t\t delimiter\n" + " ''\t\t single quote\t\t\t\t literal\t\t '\n" );
     DTtip.setStyle( MainWindow.STYLE_TOOLTIP );
+    //TODO Java9 DTtip.setShowDuration( Duration.INDEFINITE );
     m_DTformat.setTooltip( DTtip );
 
     Tooltip Dtip = new Tooltip(
@@ -133,6 +134,7 @@ public class PlanProperties extends ScrollPane
             + " F\t\t week-of-month\t\t\t number\t\t 3\n\n" + " p\t\t pad next\t\t\t\t\t pad modifier\t 1\n"
             + " '\t\t escape for text\t\t\t delimiter\n" + " ''\t\t single quote\t\t\t\t literal\t\t '\n" );
     Dtip.setStyle( MainWindow.STYLE_TOOLTIP );
+    //TODO Java9 Dtip.setShowDuration( Duration.INDEFINITE );
     m_Dformat.setTooltip( Dtip );
 
     // show updated examples of formats
@@ -250,7 +252,7 @@ public class PlanProperties extends ScrollPane
     if ( dt == null )
       field.setText( null );
     else if ( m_DTformat.getId() == JPlanner.ERROR )
-      field.setText( dt.toString( JPlanner.plan.getDateTimeFormat() ) );
+      field.setText( dt.toFormat() );
     else
       field.setText( dt.toString( m_DTformat.getText() ) );
   }

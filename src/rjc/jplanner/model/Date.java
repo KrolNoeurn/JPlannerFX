@@ -260,6 +260,12 @@ public class Date
     return new Date( LocalDate.ofEpochDay( m_epochday ).plusYears( years ) );
   }
 
+  /****************************************** isLessThan *****************************************/
+  public boolean isLessThan( Date other )
+  {
+    return m_epochday < other.m_epochday;
+  }
+
   /******************************************* equals ********************************************/
   @Override
   public boolean equals( Object other )
@@ -341,6 +347,13 @@ public class Date
     {
       return null;
     }
+  }
+
+  /****************************************** toFormat *******************************************/
+  public String toFormat()
+  {
+    // return date-time using plan format
+    return toString( JPlanner.plan.getDateFormat() );
   }
 
 }

@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
 
@@ -84,7 +83,7 @@ public class CommandTaskSetValue implements IUndoCommand
     // command description
     String newValue = m_newValue == null ? "" : m_newValue.toString();
     if ( m_newValue instanceof DateTime )
-      newValue = ( (DateTime) m_newValue ).toString( JPlanner.plan.getDateTimeFormat() );
+      newValue = ( (DateTime) m_newValue ).toFormat();
 
     return "Task " + m_task.getIndex() + " " + Task.getSectionName( m_section ) + " = " + newValue;
   }

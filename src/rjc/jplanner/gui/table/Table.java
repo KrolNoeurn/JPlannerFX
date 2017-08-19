@@ -134,6 +134,9 @@ public class Table extends TableDisplay
     calculateBodyHeight();
     calculateBodyWidth();
     resizeCanvasScrollBars();
+
+    // ensure table is redrawn (in case redraw not triggered by no resize) 
+    redraw();
   }
 
   /************************************ calculateBodyHeight **************************************/

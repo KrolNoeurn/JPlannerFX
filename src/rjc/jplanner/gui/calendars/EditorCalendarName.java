@@ -19,7 +19,6 @@
 package rjc.jplanner.gui.calendars;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.EditorText;
 
 /*************************************************************************************************/
@@ -36,7 +35,7 @@ class EditorCalendarName extends EditorText
     super( columnIndex, row );
 
     // add listener to set error status
-    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    addListener( ( observable, oldText, newText ) ->
     {
       // length must be between 1 and 40 characters long
       String error = null;

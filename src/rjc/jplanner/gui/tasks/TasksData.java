@@ -36,6 +36,7 @@ import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
 
 /*************************************************************************************************/
@@ -123,8 +124,33 @@ class TasksData extends AbstractDataSource
       case Task.SECTION_DURATION:
       case Task.SECTION_WORK:
         return new EditorTimeSpan( columnIndex, row );
+
       case Task.SECTION_START:
+        EditorDateTime dtEditor = new EditorDateTime( columnIndex, row );
+        dtEditor.addListener( ( property, oldText, newText ) ->
+        {
+          // add listener to ensure start <= end
+          DateTime start = (DateTime) dtEditor.getValue();
+          DateTime end = JPlanner.plan.getTask( row ).getEnd();
+          if ( start != null && end.isLessThan( start ) )
+            JPlanner.gui.setError( dtEditor.getControl(),
+                "Task start [" + start.toFormat() + "] after task end [" + end.toFormat() + "]" );
+        } );
+        return dtEditor;
+
       case Task.SECTION_END:
+        dtEditor = new EditorDateTime( columnIndex, row );
+        dtEditor.addListener( ( property, oldText, newText ) ->
+        {
+          // add listener to ensure end >= start
+          DateTime end = (DateTime) dtEditor.getValue();
+          DateTime start = JPlanner.plan.getTask( row ).getStart();
+          if ( end != null && end.isLessThan( start ) )
+            JPlanner.gui.setError( dtEditor.getControl(),
+                "Task end [" + end.toFormat() + "] before task start [" + start.toFormat() + "]" );
+        } );
+        return dtEditor;
+
       case Task.SECTION_DEADLINE:
         return new EditorDateTime( columnIndex, row );
       case Task.SECTION_PRIORITY:

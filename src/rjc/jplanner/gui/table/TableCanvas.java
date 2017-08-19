@@ -121,11 +121,11 @@ class TableCanvas extends Canvas
       if ( getHeight() > m_table.getHorizontalHeaderHeight() )
         for ( int columnPos = column1; columnPos <= column2; columnPos++ )
           drawColumnCells( columnPos );
-      highlightEditorCell();
 
       // draw horizontal header
       for ( int columnPos = column1; columnPos <= column2; columnPos++ )
         drawColumnHeader( columnPos );
+      highlightEditorCell();
     }
 
     // check if any vertical header needs to be drawn
@@ -168,11 +168,11 @@ class TableCanvas extends Canvas
       if ( getWidth() > m_table.getVerticalHeaderWidth() )
         for ( int row = row1; row <= row2; row++ )
           drawRowCells( row );
-      highlightEditorCell();
 
       // draw vertical header
       for ( int row = row1; row <= row2; row++ )
         drawRowHeader( row );
+      highlightEditorCell();
     }
 
     // check if any horizontal header needs to be drawn

@@ -22,7 +22,6 @@ import java.util.Set;
 
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Calendar;
@@ -122,9 +121,9 @@ abstract public class AbstractDataSource
     if ( value instanceof Calendar )
       return ( (Calendar) value ).getName();
     if ( value instanceof DateTime )
-      return ( (DateTime) value ).toString( JPlanner.plan.getDateTimeFormat() );
+      return ( (DateTime) value ).toFormat();
     if ( value instanceof Date )
-      return ( (Date) value ).toString( JPlanner.plan.getDateFormat() );
+      return ( (Date) value ).toFormat();
     if ( value instanceof Time )
       return ( (Time) value ).toStringShort();
 

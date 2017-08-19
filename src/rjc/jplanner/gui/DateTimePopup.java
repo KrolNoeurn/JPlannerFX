@@ -99,7 +99,7 @@ class DateTimePopup extends Popup
   private void updateParent()
   {
     // update parent text to reflect selector date-time
-    m_parent.setText( getDateTime().toString( JPlanner.plan.getDateTimeFormat() ) );
+    m_parent.setText( getDateTime().toFormat() );
   }
 
   /*************************************** constructPopup ****************************************/

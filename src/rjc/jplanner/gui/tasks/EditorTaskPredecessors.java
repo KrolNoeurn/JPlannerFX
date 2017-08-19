@@ -19,7 +19,6 @@
 package rjc.jplanner.gui.tasks;
 
 import rjc.jplanner.JPlanner;
-import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.model.Predecessors;
 import rjc.jplanner.model.TimeSpan;
@@ -41,7 +40,7 @@ class EditorTaskPredecessors extends EditorText
     setAllowed( "[-+., fFsS0123456789" + TimeSpan.VALID_UNITS + "]*" );
 
     // add listener to set error status
-    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    addListener( ( observable, oldText, newText ) ->
     {
       // display error message and set editor error status
       String error = Predecessors.errors( newText, row );

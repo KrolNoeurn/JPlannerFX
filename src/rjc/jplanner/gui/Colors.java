@@ -56,5 +56,5 @@ public class Colors
   public static final Color GANTT_SUMMARY      = Color.BLACK;
   public static final Color GANTT_MILESTONE    = Color.BLACK;
   public static final Color GANTT_DEPENDENCY   = Color.SLATEGRAY;
-  public static final Paint GANTT_DEADLINE     = Color.LIMEGREEN;
+  public static final Paint GANTT_DEADLINE     = Color.GREEN;
 }

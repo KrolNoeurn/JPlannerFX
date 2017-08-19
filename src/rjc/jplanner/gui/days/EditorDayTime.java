@@ -20,7 +20,6 @@ package rjc.jplanner.gui.days;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.SpinEditor;
-import rjc.jplanner.gui.XTextField;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.model.Day;
 import rjc.jplanner.model.Time;
@@ -61,7 +60,7 @@ class EditorDayTime extends AbstractCellEditor
     }
 
     // add listener text changes to wrap hours and minutes, and set error status
-    ( (XTextField) getControl() ).textProperty().addListener( ( observable, oldText, newText ) ->
+    addListener( ( observable, oldText, newText ) ->
     {
       // as prefix hold hours, if not null means minutes are being edited
       if ( m_spin.getPrefix() != null )

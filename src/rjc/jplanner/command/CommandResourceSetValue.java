@@ -125,7 +125,7 @@ public class CommandResourceSetValue implements IUndoCommand
     if ( m_newValue instanceof Calendar )
       newValue = ( (Calendar) m_newValue ).getName();
     if ( m_newValue instanceof Date )
-      newValue = ( (Date) m_newValue ).toString( JPlanner.plan.getDateFormat() );
+      newValue = ( (Date) m_newValue ).toFormat();
 
     return "Resource " + m_res.getIndex() + " " + Resource.getSectionName( m_section ) + " = " + newValue;
   }

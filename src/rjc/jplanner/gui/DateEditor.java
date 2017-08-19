@@ -51,7 +51,7 @@ public class DateEditor extends XTextField
       else
       {
         JPlanner.gui.setError( this, null );
-        JPlanner.gui.message( "Date: " + m_date.toString( JPlanner.plan.getDateFormat() ) );
+        JPlanner.gui.message( "Date: " + m_date.toFormat() );
         m_validText = newText;
       }
     } );
@@ -79,7 +79,7 @@ public class DateEditor extends XTextField
   {
     // set editor to specified date
     m_date = date;
-    setText( date.toString( JPlanner.plan.getDateFormat() ) );
+    setText( date.toFormat() );
     positionCaret( getText().length() );
   }
 

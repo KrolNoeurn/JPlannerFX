@@ -18,7 +18,6 @@
 
 package rjc.jplanner.command;
 
-import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Calendar;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.Day;
@@ -80,7 +79,7 @@ public class CommandCalendarSetValue implements IUndoCommand
     if ( m_newValue instanceof Day )
       newValue = ( (Day) m_newValue ).getName();
     if ( m_newValue instanceof Date )
-      newValue = ( (Date) m_newValue ).toString( JPlanner.plan.getDateFormat() );
+      newValue = ( (Date) m_newValue ).toFormat();
 
     return "Calendar " + ( m_calendar.getIndex() + 1 ) + " " + Calendar.getSectionName( m_section ) + " = " + newValue;
   }

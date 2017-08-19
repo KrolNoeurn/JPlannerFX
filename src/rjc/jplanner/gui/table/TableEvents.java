@@ -491,6 +491,7 @@ public class TableEvents extends TableCanvas
     // react to cursor moving keyboard events 
     boolean shift = event.isShiftDown();
     boolean control = event.isControlDown();
+    boolean handled = true;
     int column, row;
 
     switch ( event.getCode() )
@@ -661,8 +662,12 @@ public class TableEvents extends TableCanvas
         break;
 
       default:
+        handled = false;
         break;
     }
+
+    if ( handled )
+      event.consume();
   }
 
   /*************************************** openCellEditor ****************************************/

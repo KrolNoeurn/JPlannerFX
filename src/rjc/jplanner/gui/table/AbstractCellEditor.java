@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.control.Control;
 import javafx.scene.input.KeyCode;
@@ -96,6 +97,13 @@ abstract public class AbstractCellEditor
   {
     // return focus control
     return m_control;
+  }
+
+  /***************************************** addListener *****************************************/
+  public void addListener( ChangeListener<? super java.lang.String> listener )
+  {
+    // add listener to text property
+    ( (XTextField) m_control ).textProperty().addListener( listener );
   }
 
   /*************************************** getColumnIndex ****************************************/
