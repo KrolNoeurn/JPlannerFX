@@ -49,7 +49,10 @@ class EditorCalendarName extends EditorText
         error = "Name not unique";
 
       // display error message and set editor error status
-      JPlanner.setError( getControl(), error );
+      if ( error == null )
+        JPlanner.setNoError( getControl(), "" );
+      else
+        JPlanner.setError( getControl(), error );
     } );
 
   }

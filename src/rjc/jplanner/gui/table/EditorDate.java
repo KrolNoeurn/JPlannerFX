@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.beans.value.ChangeListener;
 import rjc.jplanner.gui.DateEditor;
 import rjc.jplanner.model.Date;
 
@@ -36,6 +37,13 @@ public class EditorDate extends AbstractCellEditor
     super( columnIndex, row );
     m_editor = new DateEditor();
     setControl( m_editor );
+  }
+
+  /************************************* addEpochdayListener *************************************/
+  public void addEpochdayListener( ChangeListener<? super Number> listener )
+  {
+    // add listener to epoch-day integer property
+    m_editor.addListener( listener );
   }
 
   /******************************************* getValue ******************************************/

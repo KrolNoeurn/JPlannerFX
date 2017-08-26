@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
@@ -98,8 +99,8 @@ class DateTimePopup extends Popup
   /**************************************** updateParent *****************************************/
   private void updateParent()
   {
-    // update parent to reflect pop-up date-time
-    m_parent.setDateTime( getDateTime() );
+    // update parent to reflect pop-up date-time, use run-later to ensure all spin-editors wrapping has completed
+    Platform.runLater( () -> m_parent.setDateTime( getDateTime() ) );
   }
 
   /*************************************** constructPopup ****************************************/

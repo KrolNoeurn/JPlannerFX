@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui;
 
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Date;
@@ -28,12 +30,13 @@ import rjc.jplanner.model.Date;
 
 public class DateEditor extends XTextField
 {
-  private Date m_date; // editor date (or most recent valid)
+  private SimpleIntegerProperty m_epochday; // editor date epoch-day (or most recent valid)
 
   /**************************************** constructor ******************************************/
   public DateEditor()
   {
     // construct editor
+    m_epochday = new SimpleIntegerProperty();
     setButtonType( ButtonType.DOWN );
     new DatePopup( this );
 
@@ -46,28 +49,44 @@ public class DateEditor extends XTextField
         JPlanner.setError( this, "Date not in recognised format" );
       else
       {
-        m_date = date;
-        JPlanner.setError( this, null );
-        if ( JPlanner.gui != null )
-          JPlanner.gui.message( "Date: " + date.toFormat() );
+        // only set epoch-day if TextField is editable as only then is user typed
+        if ( isEditable() )
+        {
+          // set twice to ensure listeners are triggered even if no epoch-day change
+          m_epochday.set( Date.MIN_VALUE.getEpochday() );
+          m_epochday.set( date.getEpochday() );
+        }
       }
     } );
+
+    // react to epoch-day changes
+    m_epochday.addListener(
+        ( property, oldNumber, newNumber ) -> JPlanner.setNoError( this, "Date: " + getDate().toFormat() ) );
+  }
+
+  /***************************************** addListener *****************************************/
+  public void addListener( ChangeListener<? super Number> listener )
+  {
+    // add listener to epoch-day property
+    m_epochday.addListener( listener );
   }
 
   /****************************************** getDate ********************************************/
   public Date getDate()
   {
     // return editor date (null if invalid)
-    return m_date;
+    return new Date( m_epochday.get() );
   }
 
   /****************************************** setDate ********************************************/
   public void setDate( Date date )
   {
-    // set editor to specified date
-    m_date = date;
+    // set editor to specified date, this will trigger text listener if change
     setText( date.toFormat() );
     positionCaret( getText().length() );
+
+    // set epoch-day property after setting text, so listeners fired after
+    m_epochday.set( date.getEpochday() );
   }
 
   /**************************************** scrollEvent ******************************************/

@@ -141,26 +141,21 @@ public class JPlanner extends Application
   /****************************************** setError *******************************************/
   public static void setError( Control control, String errorMessage )
   {
-    // check control is not null
-    if ( control == null )
-      throw new NullPointerException( "control is null" );
+    // set error state, and display error message
+    control.setId( STYLE_ERROR );
+    control.setStyle( STYLE_ERROR );
+    if ( JPlanner.gui != null )
+      JPlanner.gui.messageError( errorMessage );
+  }
 
-    // if no error message, remove error state, otherwise set error state
-    if ( errorMessage == null )
-    {
-      control.setId( null );
-      control.setStyle( STYLE_NORMAL );
-      if ( JPlanner.gui != null )
-        JPlanner.gui.message();
-    }
-    else
-    {
-      control.setId( STYLE_ERROR );
-      control.setStyle( STYLE_ERROR );
-      if ( JPlanner.gui != null )
-        JPlanner.gui.messageError( errorMessage );
-    }
-
+  /***************************************** setNoError ******************************************/
+  public static void setNoError( Control control, String message )
+  {
+    // remove error state, and display message
+    control.setId( null );
+    control.setStyle( STYLE_NORMAL );
+    if ( JPlanner.gui != null )
+      JPlanner.gui.message( message );
   }
 
   /******************************************* isError *******************************************/

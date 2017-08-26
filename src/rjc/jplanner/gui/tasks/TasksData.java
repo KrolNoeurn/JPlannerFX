@@ -127,14 +127,14 @@ class TasksData extends AbstractDataSource
 
       case Task.SECTION_START:
         EditorDateTime dtEditor = new EditorDateTime( columnIndex, row );
-        dtEditor.addListener( ( property, oldText, newText ) ->
+        dtEditor.addMillisecondsListener( ( property, oldNumber, newNumber ) ->
         {
-          // only check start <= end if not already in error state
+          // if not already in error state, check start <= end 
           if ( !JPlanner.isError( dtEditor.getControl() ) )
           {
-            DateTime start = (DateTime) dtEditor.getValue();
+            long start = newNumber.longValue();
             DateTime end = JPlanner.plan.getTask( row ).getEnd();
-            if ( start != null && end.isLessThan( start ) )
+            if ( start > end.getMilliseconds() )
               JPlanner.setError( dtEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
           }
         } );
@@ -142,14 +142,14 @@ class TasksData extends AbstractDataSource
 
       case Task.SECTION_END:
         dtEditor = new EditorDateTime( columnIndex, row );
-        dtEditor.addListener( ( property, oldText, newText ) ->
+        dtEditor.addMillisecondsListener( ( property, oldNumber, newNumber ) ->
         {
-          // only check end >= start if not already in error state
+          // if not already in error state, check end >= start 
           if ( !JPlanner.isError( dtEditor.getControl() ) )
           {
-            DateTime end = (DateTime) dtEditor.getValue();
+            long end = newNumber.longValue();
             DateTime start = JPlanner.plan.getTask( row ).getStart();
-            if ( end != null && end.isLessThan( start ) )
+            if ( end < start.getMilliseconds() )
               JPlanner.setError( dtEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
           }
         } );

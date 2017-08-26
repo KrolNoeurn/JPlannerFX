@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui;
 
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.DateTime;
@@ -28,12 +30,13 @@ import rjc.jplanner.model.DateTime;
 
 public class DateTimeEditor extends XTextField
 {
-  private DateTime m_datetime; // editor date-time (or most recent valid)
+  private SimpleLongProperty m_milliseconds; // editor date-time milliseconds (or most recent valid)
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
   {
     // construct editor
+    m_milliseconds = new SimpleLongProperty();
     setButtonType( ButtonType.DOWN );
     new DateTimePopup( this );
 
@@ -46,28 +49,44 @@ public class DateTimeEditor extends XTextField
         JPlanner.setError( this, "Date-time not in recognised format" );
       else
       {
-        m_datetime = dt;
-        JPlanner.setError( this, null );
-        if ( JPlanner.gui != null )
-          JPlanner.gui.message( "Date-time: " + dt.toFormat() );
+        // only set milliseconds if TextField is editable as only then is user typed
+        if ( isEditable() )
+        {
+          // set twice to ensure listeners are triggered even if no ms change
+          m_milliseconds.set( DateTime.MIN_VALUE.getMilliseconds() );
+          m_milliseconds.set( dt.getMilliseconds() );
+        }
       }
     } );
+
+    // react to milliseconds changes
+    m_milliseconds.addListener(
+        ( property, oldNumber, newNumber ) -> JPlanner.setNoError( this, "Date-time: " + getDateTime().toFormat() ) );
+  }
+
+  /***************************************** addListener *****************************************/
+  public void addListener( ChangeListener<? super Number> listener )
+  {
+    // add listener to milliseconds property
+    m_milliseconds.addListener( listener );
   }
 
   /**************************************** getDateTime ******************************************/
   public DateTime getDateTime()
   {
     // return editor date-time
-    return m_datetime;
+    return new DateTime( m_milliseconds.get() );
   }
 
   /**************************************** setDateTime ******************************************/
   public void setDateTime( DateTime dt )
   {
-    // set editor to specified date-time
-    m_datetime = dt;
+    // set editor to specified date-time, this will trigger text listener if change
     setText( dt.toFormat() );
     positionCaret( getText().length() );
+
+    // set milliseconds property after setting text, so listeners fired after
+    m_milliseconds.set( dt.getMilliseconds() );
   }
 
   /**************************************** scrollEvent ******************************************/

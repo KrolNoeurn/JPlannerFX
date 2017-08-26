@@ -193,8 +193,7 @@ public class PlanProperties extends ScrollPane
       if ( m_DTformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
-      JPlanner.setError( m_DTformat, null );
-      JPlanner.gui.message( "Date-time format example: " + DateTime.now().toString( m_DTformat.getText() ) );
+      JPlanner.setNoError( m_DTformat, "Date-time format example: " + DateTime.now().toString( m_DTformat.getText() ) );
     }
     catch ( Exception exception )
     {
@@ -219,8 +218,7 @@ public class PlanProperties extends ScrollPane
       if ( m_Dformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
-      JPlanner.setError( m_Dformat, null );
-      JPlanner.gui.message( "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
+      JPlanner.setNoError( m_Dformat, "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
     }
     catch ( Exception exception )
     {

@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.beans.value.ChangeListener;
 import rjc.jplanner.gui.DateTimeEditor;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
@@ -29,7 +30,7 @@ import rjc.jplanner.model.Time;
 
 public class EditorDateTime extends AbstractCellEditor
 {
-  DateTimeEditor m_editor; // date-time editor
+  private DateTimeEditor m_editor; // date-time editor
 
   /**************************************** constructor ******************************************/
   public EditorDateTime( int columnIndex, int row )
@@ -38,6 +39,13 @@ public class EditorDateTime extends AbstractCellEditor
     super( columnIndex, row );
     m_editor = new DateTimeEditor();
     setControl( m_editor );
+  }
+
+  /*********************************** addMillisecondsListener ***********************************/
+  public void addMillisecondsListener( ChangeListener<? super Number> listener )
+  {
+    // add listener to milliseconds long property
+    m_editor.addListener( listener );
   }
 
   /******************************************* getValue ******************************************/

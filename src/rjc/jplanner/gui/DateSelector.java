@@ -24,6 +24,7 @@ import java.time.Year;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
+import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -160,12 +161,16 @@ public class DateSelector extends Pane
   /*************************************** updateEpochDay ****************************************/
   private void updateEpochDay()
   {
-    // update epoch day spin editor from month & year spin editors
-    int month = m_month.getMonthNumber();
-    int year = m_year.getInteger();
-    int day = getLocalDate().getDayOfMonth();
-    LocalDate ld = LocalDate.of( year, month, day );
-    m_epochDay.setInteger( (int) ld.toEpochDay() );
+    // use run-later to ensure all spin-editors wrapping has completed first
+    Platform.runLater( () ->
+    {
+      // update epoch day spin editor from month & year spin editors
+      int month = m_month.getMonthNumber();
+      int year = m_year.getInteger();
+      int day = getLocalDate().getDayOfMonth();
+      LocalDate ld = LocalDate.of( year, month, day );
+      m_epochDay.setInteger( (int) ld.toEpochDay() );
+    } );
   }
 
   /************************************ getEpochDaySpinEditor ************************************/

@@ -131,7 +131,7 @@ abstract public class AbstractCellEditor
   {
     // clear any error message, remove control from table, and give focus back to table
     m_cellEditorInProgress = null;
-    JPlanner.setError( m_control, null );
+    JPlanner.setNoError( m_control, "" );
     m_table.remove( m_control );
     m_table.requestFocus();
     m_table.setOnScroll( event -> m_table.scrollEvent( event ) );

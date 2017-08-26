@@ -120,14 +120,14 @@ class ResourcesData extends AbstractDataSource
 
       case Resource.SECTION_START:
         EditorDate dateEditor = new EditorDate( columnIndex, row );
-        dateEditor.addListener( ( property, oldText, newText ) ->
+        dateEditor.addEpochdayListener( ( property, oldNumber, newNumber ) ->
         {
           // only check start <= end if not already in error state
           if ( !JPlanner.isError( dateEditor.getControl() ) )
           {
-            Date start = (Date) dateEditor.getValue();
+            int start = newNumber.intValue();
             Date end = JPlanner.plan.getResource( row ).getEnd().getDate().plusDays( -1 );
-            if ( start != null && end.isLessThan( start ) )
+            if ( start > end.getEpochday() )
               JPlanner.setError( dateEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
           }
         } );
@@ -135,14 +135,14 @@ class ResourcesData extends AbstractDataSource
 
       case Resource.SECTION_END:
         dateEditor = new EditorDate( columnIndex, row );
-        dateEditor.addListener( ( property, oldText, newText ) ->
+        dateEditor.addEpochdayListener( ( property, oldNumber, newNumber ) ->
         {
           // only check end >= start if not already in error state
           if ( !JPlanner.isError( dateEditor.getControl() ) )
           {
-            Date end = (Date) dateEditor.getValue();
+            int end = newNumber.intValue();
             Date start = JPlanner.plan.getResource( row ).getStart().getDate();
-            if ( end != null && end.isLessThan( start ) )
+            if ( end < start.getEpochday() )
               JPlanner.setError( dateEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
           }
         } );
@@ -156,7 +156,10 @@ class ResourcesData extends AbstractDataSource
         {
           // must not be an initials duplicate
           String error = JPlanner.plan.resources.initialsClash( newText, -1 );
-          JPlanner.setError( textEditor.getControl(), error );
+          if ( error == null )
+            JPlanner.setNoError( textEditor.getControl(), "" );
+          else
+            JPlanner.setError( textEditor.getControl(), error );
         } );
         return textEditor;
     }

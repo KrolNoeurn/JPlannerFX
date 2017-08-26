@@ -51,7 +51,11 @@ class EditorResourceInitials extends EditorText
         error = JPlanner.plan.resources.initialsClash( newText, row );
 
       // display error message and set editor error status
-      JPlanner.setError( getControl(), error );
+      if ( error == null )
+        JPlanner.setNoError( getControl(), "" );
+      else
+        JPlanner.setError( getControl(), error );
+
     } );
 
     // set initial value to ensure text property listener is triggered is start value is zero length 
