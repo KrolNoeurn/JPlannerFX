@@ -64,9 +64,7 @@ public class SpinEditor extends XTextField
     {
       // if spinner value not in range, set control into error state
       double num = getDouble();
-      if ( JPlanner.gui != null )
-        JPlanner.gui.setError( this,
-            num < m_minValue || num > m_maxValue || getText().length() < 1 ? m_rangeError : null );
+      JPlanner.setError( this, num < m_minValue || num > m_maxValue || getText().length() < 1 ? m_rangeError : null );
     } );
 
   }

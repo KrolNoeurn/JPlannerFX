@@ -260,7 +260,8 @@ public class TableSelection
       {
         int columns = data.getColumnCount();
         for ( int columnIndex = 0; columnIndex < columns; columnIndex++ )
-          if ( m_table.getWidthByColumnIndex( columnIndex ) > 0 && data.getEditor( columnIndex, row ) != null )
+          if ( m_table.getWidthByColumnIndex( columnIndex ) > 0 && data.getEditor( columnIndex, row ) != null
+              && data.getValue( columnIndex, row ) != null )
             cells.add( columnIndex * SELECT_HASH + row );
       }
 
@@ -271,7 +272,8 @@ public class TableSelection
         int columnIndex = m_table.getColumnIndexByPosition( columnPos );
         int rows = data.getRowCount();
         for ( int row = 0; row < rows; row++ )
-          if ( m_table.getRowHeight( row ) > 0 && data.getEditor( columnIndex, row ) != null )
+          if ( m_table.getRowHeight( row ) > 0 && data.getEditor( columnIndex, row ) != null
+              && data.getValue( columnIndex, row ) != null )
             cells.add( columnIndex * SELECT_HASH + row );
       }
 
@@ -281,7 +283,7 @@ public class TableSelection
       int row = hash % SELECT_HASH;
       int columnIndex = m_table.getColumnIndexByPosition( hash / SELECT_HASH );
       if ( m_table.getWidthByColumnIndex( columnIndex ) > 0 && m_table.getRowHeight( row ) > 0
-          && data.getEditor( columnIndex, row ) != null )
+          && data.getEditor( columnIndex, row ) != null && data.getValue( columnIndex, row ) != null )
         cells.add( columnIndex * SELECT_HASH + row );
     }
 

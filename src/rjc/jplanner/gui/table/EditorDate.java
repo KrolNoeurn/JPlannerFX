@@ -42,7 +42,7 @@ public class EditorDate extends AbstractCellEditor
   @Override
   public Object getValue()
   {
-    // return value date-time
+    // return value date
     return m_editor.getDate();
   }
 
@@ -50,17 +50,17 @@ public class EditorDate extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
-    // if value is null, default to today
-    if ( value == null )
-      value = Date.now();
-
     // set value depending on type
-    if ( value instanceof Date )
+    if ( value == null )
+      m_editor.setDate( Date.now() );
+    else if ( value instanceof Date )
       m_editor.setDate( (Date) value );
     else if ( value instanceof String )
     {
+      // seed editor with suitable date before setting with input string
+      setValue( (Date) getDataSourceValue() );
+      m_editor.setCaretPos( ( (String) value ).length() );
       m_editor.setText( (String) value );
-      m_editor.positionCaret( m_editor.getText().length() );
     }
     else
       throw new IllegalArgumentException( "Don't know how to handle " + value.getClass() + " " + value );

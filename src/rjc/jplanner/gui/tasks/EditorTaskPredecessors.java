@@ -44,7 +44,7 @@ class EditorTaskPredecessors extends EditorText
     {
       // display error message and set editor error status
       String error = Predecessors.errors( newText, row );
-      JPlanner.gui.setError( getControl(), error );
+      JPlanner.setError( getControl(), error );
     } );
 
   }

@@ -193,13 +193,13 @@ public class PlanProperties extends ScrollPane
       if ( m_DTformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
-      JPlanner.gui.setError( m_DTformat, null );
+      JPlanner.setError( m_DTformat, null );
       JPlanner.gui.message( "Date-time format example: " + DateTime.now().toString( m_DTformat.getText() ) );
     }
     catch ( Exception exception )
     {
       String err = exception.getMessage();
-      JPlanner.gui.setError( m_DTformat, "Date-time format error '" + err + "'" );
+      JPlanner.setError( m_DTformat, "Date-time format error '" + err + "'" );
     }
 
     displayDateTime( m_actualStart, JPlanner.plan.getEarliestTaskStart() );
@@ -219,13 +219,13 @@ public class PlanProperties extends ScrollPane
       if ( m_Dformat.getText().length() < 1 )
         throw new NumberFormatException( "Invalid format" );
 
-      JPlanner.gui.setError( m_Dformat, null );
+      JPlanner.setError( m_Dformat, null );
       JPlanner.gui.message( "Date format example: " + Date.now().toString( m_Dformat.getText() ) );
     }
     catch ( Exception exception )
     {
       String err = exception.getMessage();
-      JPlanner.gui.setError( m_Dformat, "Date format error '" + err + "'" );
+      JPlanner.setError( m_Dformat, "Date format error '" + err + "'" );
     }
   }
 
@@ -251,7 +251,7 @@ public class PlanProperties extends ScrollPane
     // display date-time in user specified format, or if that fails in plan format
     if ( dt == null )
       field.setText( null );
-    else if ( m_DTformat.getId() == JPlanner.ERROR )
+    else if ( JPlanner.isError( m_DTformat ) )
       field.setText( dt.toFormat() );
     else
       field.setText( dt.toString( m_DTformat.getText() ) );
@@ -285,12 +285,15 @@ public class PlanProperties extends ScrollPane
     String title = m_title.getText();
     Calendar cal = m_defaultCalendar.getCalendar();
 
-    DateTime start = m_defaultStart.getId() == JPlanner.ERROR ? JPlanner.plan.getDefaultStart()
+    DateTime start = JPlanner.isError( m_defaultStart ) ? JPlanner.plan.getDefaultStart()
         : m_defaultStart.getDateTime();
+    m_defaultStart.setDateTime( start );
 
-    String DTformat = m_DTformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateTimeFormat() : m_DTformat.getText();
+    String DTformat = JPlanner.isError( m_DTformat ) ? JPlanner.plan.getDateTimeFormat() : m_DTformat.getText();
+    m_DTformat.setText( DTformat );
 
-    String Dformat = m_Dformat.getId() == JPlanner.ERROR ? JPlanner.plan.getDateFormat() : m_Dformat.getText();
+    String Dformat = JPlanner.isError( m_Dformat ) ? JPlanner.plan.getDateFormat() : m_Dformat.getText();
+    m_Dformat.setText( Dformat );
 
     // if properties not changed, return doing nothing
     if ( JPlanner.plan.getTitle().equals( title ) && JPlanner.plan.getDefaultStart().equals( start )

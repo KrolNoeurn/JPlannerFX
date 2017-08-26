@@ -84,10 +84,10 @@ class DateTimePopup extends Popup
         toggleSelector();
     } );
 
-    // ensure parent editor is editable when selector is hidden
+    // ensure parent editor is editable when pop-up is hidden
     setOnHidden( event -> m_parent.setEditable( true ) );
 
-    // keep parent editor and selector synchronised
+    // keep parent editor and pop-up synchronised
     m_dateSelector.getEpochDaySpinEditor().textProperty().addListener( ( observable, oldT, newT ) -> updateParent() );
     m_hours.textProperty().addListener( ( observable, oldT, newT ) -> updateParent() );
     m_mins.textProperty().addListener( ( observable, oldT, newT ) -> updateParent() );
@@ -98,8 +98,8 @@ class DateTimePopup extends Popup
   /**************************************** updateParent *****************************************/
   private void updateParent()
   {
-    // update parent text to reflect selector date-time
-    m_parent.setText( getDateTime().toFormat() );
+    // update parent to reflect pop-up date-time
+    m_parent.setDateTime( getDateTime() );
   }
 
   /*************************************** constructPopup ****************************************/
@@ -158,7 +158,7 @@ class DateTimePopup extends Popup
 
     m_forward.setOnAction( event -> setDateTime( forward() ) );
 
-    // set pop-up contents to a date selector with buttons below
+    // set pop-up contents to a date selector with time & buttons pane below
     m_dateSelector = new DateSelector( m_pane );
     getContent().addAll( m_dateSelector );
     m_hours.setWrapSpinEditor( m_dateSelector.getEpochDaySpinEditor() );

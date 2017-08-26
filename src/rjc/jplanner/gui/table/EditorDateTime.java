@@ -19,7 +19,9 @@
 package rjc.jplanner.gui.table;
 
 import rjc.jplanner.gui.DateTimeEditor;
+import rjc.jplanner.model.Date;
 import rjc.jplanner.model.DateTime;
+import rjc.jplanner.model.Time;
 
 /*************************************************************************************************/
 /***************************** Table cell editor for DateTime fields *****************************/
@@ -50,15 +52,15 @@ public class EditorDateTime extends AbstractCellEditor
   @Override
   public void setValue( Object value )
   {
-    // if value is null, default to now
-    if ( value == null )
-      value = DateTime.now();
-
     // set value depending on type
-    if ( value instanceof DateTime )
+    if ( value == null )
+      m_editor.setDateTime( new DateTime( Date.now(), Time.MAX_VALUE ) );
+    else if ( value instanceof DateTime )
       m_editor.setDateTime( (DateTime) value );
     else if ( value instanceof String )
     {
+      // seed editor with suitable date before setting with input string
+      setValue( (DateTime) getDataSourceValue() );
       m_editor.setCaretPos( ( (String) value ).length() );
       m_editor.setText( (String) value );
     }

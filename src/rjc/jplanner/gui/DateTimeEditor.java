@@ -28,49 +28,36 @@ import rjc.jplanner.model.DateTime;
 
 public class DateTimeEditor extends XTextField
 {
-  private DateTime m_datetime;  // editor date-time, or null if editor date-time invalid
-  private String   m_validText; // last valid editor text used if focus lost when in error
+  private DateTime m_datetime; // editor date-time (or most recent valid)
 
   /**************************************** constructor ******************************************/
   public DateTimeEditor()
   {
     // construct editor
     setButtonType( ButtonType.DOWN );
+    new DateTimePopup( this );
 
     // react to editor text changes
     textProperty().addListener( ( property, oldText, newText ) ->
     {
-      // only check if gui and plan created
-      if ( JPlanner.gui == null || JPlanner.plan == null )
-        return;
-
-      // if text is not valid date-time set editor into error state
-      m_datetime = DateTime.parse( newText );
-      if ( m_datetime == null )
-        JPlanner.gui.setError( this, "Date-time not in recognised format" );
+      // if text cannot be parsed set editor into error state
+      DateTime dt = DateTime.parse( newText );
+      if ( dt == null )
+        JPlanner.setError( this, "Date-time not in recognised format" );
       else
       {
-        JPlanner.gui.setError( this, null );
-        JPlanner.gui.message( "Date-time: " + m_datetime.toFormat() );
-        m_validText = newText;
+        m_datetime = dt;
+        JPlanner.setError( this, null );
+        if ( JPlanner.gui != null )
+          JPlanner.gui.message( "Date-time: " + dt.toFormat() );
       }
     } );
-
-    // react to changes in editor focus state
-    focusedProperty().addListener( ( property, oldFocus, newFocus ) ->
-    {
-      // if editor loses focus and is in error, return text to a valid value
-      if ( newFocus == false && MainWindow.isError( this ) )
-        setText( m_validText );
-    } );
-
-    new DateTimePopup( this );
   }
 
   /**************************************** getDateTime ******************************************/
   public DateTime getDateTime()
   {
-    // return editor date-time (null if invalid)
+    // return editor date-time
     return m_datetime;
   }
 

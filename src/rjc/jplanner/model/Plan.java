@@ -307,8 +307,8 @@ public class Plan
     m_title = title;
   }
 
-  /******************************************* setStart ******************************************/
-  public void setStart( DateTime start )
+  /*************************************** setDefaultStart ***************************************/
+  public void setDefaultStart( DateTime start )
   {
     m_start = start;
   }

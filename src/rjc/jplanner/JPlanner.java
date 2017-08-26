@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.TreeSet;
 
 import javafx.application.Application;
+import javafx.scene.control.Control;
 import javafx.stage.Stage;
 import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.model.DateTime;
@@ -38,11 +39,13 @@ import rjc.jplanner.model.Plan;
 
 public class JPlanner extends Application
 {
-  public static Plan         plan;             // globally accessible plan
-  public static MainWindow   gui;              // globally accessible main-window
+  public static Plan         plan;                                  // globally accessible plan
+  public static MainWindow   gui;                                   // globally accessible main-window
 
-  public static final String ERROR   = "error";
-  public static final String VERSION = "";
+  public static final String VERSION      = "";
+
+  public static final String STYLE_ERROR  = "-fx-text-fill: red;";
+  public static final String STYLE_NORMAL = "-fx-text-fill: black;";
 
   /******************************************** main *********************************************/
   public static void main( String[] args )
@@ -133,6 +136,38 @@ public class JPlanner extends Application
   {
     // returns a clean string
     return txt.trim().replaceAll( "(\\s+)", " " );
+  }
+
+  /****************************************** setError *******************************************/
+  public static void setError( Control control, String errorMessage )
+  {
+    // check control is not null
+    if ( control == null )
+      throw new NullPointerException( "control is null" );
+
+    // if no error message, remove error state, otherwise set error state
+    if ( errorMessage == null )
+    {
+      control.setId( null );
+      control.setStyle( STYLE_NORMAL );
+      if ( JPlanner.gui != null )
+        JPlanner.gui.message();
+    }
+    else
+    {
+      control.setId( STYLE_ERROR );
+      control.setStyle( STYLE_ERROR );
+      if ( JPlanner.gui != null )
+        JPlanner.gui.messageError( errorMessage );
+    }
+
+  }
+
+  /******************************************* isError *******************************************/
+  public static Boolean isError( Control control )
+  {
+    // return if control in error state
+    return control == null || control.getId() == STYLE_ERROR;
   }
 
 }

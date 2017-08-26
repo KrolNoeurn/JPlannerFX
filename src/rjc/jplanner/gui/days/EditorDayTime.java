@@ -88,7 +88,7 @@ class EditorDayTime extends AbstractCellEditor
       }
 
       // check editor value and if error
-      JPlanner.gui.setError( getControl(), check( newText ) );
+      JPlanner.setError( getControl(), check( newText ) );
     } );
 
   }

@@ -41,7 +41,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Control;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
@@ -66,17 +65,15 @@ import rjc.jplanner.model.Plan;
 
 public class MainWindow
 {
-  public static final String       STYLE_ERROR  = "-fx-text-fill: red;";
-  public static final String       STYLE_NORMAL = "-fx-text-fill: black;";
   public static String             STYLE_TOOLTIP;
-  public static Image              JPLANNER_ICON;                         // icon for all JPlanner Windows
+  public static Image              JPLANNER_ICON;                 // icon for all JPlanner Windows
 
-  private Stage                    m_stage;                               // operating system window holding MainWindow
-  private MainTabWidget            m_mainTabWidget;                       // MainTabWidget associated with MainWindow
-  private Menus                    m_menus      = new Menus();            // menus at top of MainWindow
-  private TextField                m_statusBar  = new TextField();        // status bar at bottom of MainWindow
-  private UndoStackWindow          m_undoWindow;                          // window to show plan undo-stack
-  private ArrayList<MainTabWidget> m_tabWidgets;                          // list of MainTabWidgets including one in MainWindow
+  private Stage                    m_stage;                       // operating system window holding MainWindow
+  private MainTabWidget            m_mainTabWidget;               // MainTabWidget associated with MainWindow
+  private Menus                    m_menus     = new Menus();     // menus at top of MainWindow
+  private TextField                m_statusBar = new TextField(); // status bar at bottom of MainWindow
+  private UndoStackWindow          m_undoWindow;                  // window to show plan undo-stack
+  private ArrayList<MainTabWidget> m_tabWidgets;                  // list of MainTabWidgets including one in MainWindow
 
   /**************************************** constructor ******************************************/
   public MainWindow( Stage stage )
@@ -179,13 +176,16 @@ public class MainWindow
   public void message( String... msg )
   {
     // display message on status-bar in normal style
-    if ( m_statusBar == null )
-      JPlanner.trace( "MESSAGE BUT NO STATUS-BAR: ", msg );
-    else
-    {
-      m_statusBar.setStyle( STYLE_NORMAL );
-      m_statusBar.setText( String.join( "", msg ) );
-    }
+    m_statusBar.setStyle( JPlanner.STYLE_NORMAL );
+    m_statusBar.setText( String.join( "", msg ) );
+  }
+
+  /**************************************** messageError *****************************************/
+  public void messageError( String... msg )
+  {
+    // display message on status-bar in error style
+    m_statusBar.setStyle( JPlanner.STYLE_ERROR );
+    m_statusBar.setText( String.join( "", msg ) );
   }
 
   /******************************************** quit *********************************************/
@@ -757,7 +757,7 @@ public class MainWindow
     Calendar cal = JPlanner.plan.getDefaultCalendar();
     if ( !cal.isWorking() )
     {
-      setError( m_statusBar, "Default calendar '" + cal.getName() + "' has no working periods." );
+      JPlanner.setError( m_statusBar, "Default calendar '" + cal.getName() + "' has no working periods." );
       return;
     }
 
@@ -908,39 +908,6 @@ public class MainWindow
       updateWindowTitles();
       stack.setPreviousCleanState( stack.isClean() );
     }
-  }
-
-  /****************************************** setError *******************************************/
-  public void setError( Control control, String errorMessage )
-  {
-    // update control error state
-    if ( errorMessage == null )
-    {
-      if ( control != null )
-      {
-        control.setId( null );
-        control.setStyle( STYLE_NORMAL );
-      }
-      message();
-    }
-    else
-    {
-      if ( control != null )
-      {
-        control.setId( JPlanner.ERROR );
-        control.setStyle( STYLE_ERROR );
-      }
-      m_statusBar.setText( errorMessage );
-      m_statusBar.setStyle( STYLE_ERROR );
-    }
-
-  }
-
-  /******************************************* isError *******************************************/
-  public static Boolean isError( Control control )
-  {
-    // return if control in error state
-    return control == null || control.getId() == JPlanner.ERROR;
   }
 
   /******************************************* getTabs *******************************************/

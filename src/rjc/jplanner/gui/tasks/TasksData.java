@@ -129,12 +129,14 @@ class TasksData extends AbstractDataSource
         EditorDateTime dtEditor = new EditorDateTime( columnIndex, row );
         dtEditor.addListener( ( property, oldText, newText ) ->
         {
-          // add listener to ensure start <= end
-          DateTime start = (DateTime) dtEditor.getValue();
-          DateTime end = JPlanner.plan.getTask( row ).getEnd();
-          if ( start != null && end.isLessThan( start ) )
-            JPlanner.gui.setError( dtEditor.getControl(),
-                "Task start [" + start.toFormat() + "] after task end [" + end.toFormat() + "]" );
+          // only check start <= end if not already in error state
+          if ( !JPlanner.isError( dtEditor.getControl() ) )
+          {
+            DateTime start = (DateTime) dtEditor.getValue();
+            DateTime end = JPlanner.plan.getTask( row ).getEnd();
+            if ( start != null && end.isLessThan( start ) )
+              JPlanner.setError( dtEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
+          }
         } );
         return dtEditor;
 
@@ -142,12 +144,14 @@ class TasksData extends AbstractDataSource
         dtEditor = new EditorDateTime( columnIndex, row );
         dtEditor.addListener( ( property, oldText, newText ) ->
         {
-          // add listener to ensure end >= start
-          DateTime end = (DateTime) dtEditor.getValue();
-          DateTime start = JPlanner.plan.getTask( row ).getStart();
-          if ( end != null && end.isLessThan( start ) )
-            JPlanner.gui.setError( dtEditor.getControl(),
-                "Task end [" + end.toFormat() + "] before task start [" + start.toFormat() + "]" );
+          // only check end >= start if not already in error state
+          if ( !JPlanner.isError( dtEditor.getControl() ) )
+          {
+            DateTime end = (DateTime) dtEditor.getValue();
+            DateTime start = JPlanner.plan.getTask( row ).getStart();
+            if ( end != null && end.isLessThan( start ) )
+              JPlanner.setError( dtEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
+          }
         } );
         return dtEditor;
 

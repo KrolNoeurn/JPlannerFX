@@ -74,53 +74,58 @@ public class Task implements Comparable<Task>
   public Task( XMLStreamReader xsr ) throws XMLStreamException
   {
     this();
-    initialise();
-    // read XML task attributes
-    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
-      switch ( xsr.getAttributeLocalName( i ) )
-      {
-        case XmlLabels.XML_ID:
-          break;
-        case XmlLabels.XML_TITLE:
-          m_title = xsr.getAttributeValue( i );
-          break;
-        case XmlLabels.XML_DURATION:
-          m_duration = new TimeSpan( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_START:
-          m_start = new DateTime( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_END:
-          m_end = new DateTime( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_WORK:
-          m_work = new TimeSpan( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_RESOURCES:
-          m_resources = new TaskResources( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_TYPE:
-          m_type = TaskType.from( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_PRIORITY:
-          m_priority = Integer.parseInt( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_DEADLINE:
-          m_deadline = new DateTime( xsr.getAttributeValue( i ) );
-          break;
-        case XmlLabels.XML_COST:
-          m_cost = xsr.getAttributeValue( i );
-          break;
-        case XmlLabels.XML_COMMENT:
-          m_comment = xsr.getAttributeValue( i );
-          break;
-        case XmlLabels.XML_INDENT:
-          m_indent = Integer.parseInt( xsr.getAttributeValue( i ) );
-          break;
-        default:
-          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
-          break;
-      }
+
+    // if task has more than one attribute (all have at least 'id' attribute) then initialise
+    if ( xsr.getAttributeCount() > 1 )
+    {
+      // read XML task attributes
+      initialise();
+      for ( int i = 0; i < xsr.getAttributeCount(); i++ )
+        switch ( xsr.getAttributeLocalName( i ) )
+        {
+          case XmlLabels.XML_ID:
+            break;
+          case XmlLabels.XML_TITLE:
+            m_title = xsr.getAttributeValue( i );
+            break;
+          case XmlLabels.XML_DURATION:
+            m_duration = new TimeSpan( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_START:
+            m_start = new DateTime( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_END:
+            m_end = new DateTime( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_WORK:
+            m_work = new TimeSpan( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_RESOURCES:
+            m_resources = new TaskResources( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_TYPE:
+            m_type = TaskType.from( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_PRIORITY:
+            m_priority = Integer.parseInt( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_DEADLINE:
+            m_deadline = new DateTime( xsr.getAttributeValue( i ) );
+            break;
+          case XmlLabels.XML_COST:
+            m_cost = xsr.getAttributeValue( i );
+            break;
+          case XmlLabels.XML_COMMENT:
+            m_comment = xsr.getAttributeValue( i );
+            break;
+          case XmlLabels.XML_INDENT:
+            m_indent = Integer.parseInt( xsr.getAttributeValue( i ) );
+            break;
+          default:
+            JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+            break;
+        }
+    }
   }
 
   /***************************************** initialise ******************************************/
@@ -301,8 +306,8 @@ public class Task implements Comparable<Task>
 
     if ( !isNull() )
     {
-      xsw.writeAttribute( XmlLabels.XML_INDENT, Integer.toString( m_indent ) );
       xsw.writeAttribute( XmlLabels.XML_TITLE, m_title );
+      xsw.writeAttribute( XmlLabels.XML_INDENT, Integer.toString( m_indent ) );
       xsw.writeAttribute( XmlLabels.XML_DURATION, m_duration.toString() );
       xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
       xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
@@ -577,6 +582,8 @@ public class Task implements Comparable<Task>
       {
         // if task isn't summary, check if its end is after current latest
         Task task = JPlanner.plan.getTask( id );
+        if ( task.isNull() )
+          break;
         if ( !task.isSummary() && end.isLessThan( task.m_end ) )
           end = task.m_end;
       }
@@ -599,6 +606,8 @@ public class Task implements Comparable<Task>
       {
         // if task isn't summary, check if its start is before current earliest
         Task task = JPlanner.plan.getTask( id );
+        if ( task.isNull() )
+          break;
         if ( !task.isSummary() && task.m_start.isLessThan( start ) )
           start = task.m_start;
       }

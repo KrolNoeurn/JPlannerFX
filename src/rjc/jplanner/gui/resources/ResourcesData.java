@@ -122,12 +122,14 @@ class ResourcesData extends AbstractDataSource
         EditorDate dateEditor = new EditorDate( columnIndex, row );
         dateEditor.addListener( ( property, oldText, newText ) ->
         {
-          // add listener to ensure start <= end
-          Date start = (Date) dateEditor.getValue();
-          Date end = JPlanner.plan.getResource( row ).getEnd().getDate().plusDays( -1 );
-          if ( start != null && end.isLessThan( start ) )
-            JPlanner.gui.setError( dateEditor.getControl(),
-                "Resource start [" + start.toFormat() + "] after resource end [" + end.toFormat() + "]" );
+          // only check start <= end if not already in error state
+          if ( !JPlanner.isError( dateEditor.getControl() ) )
+          {
+            Date start = (Date) dateEditor.getValue();
+            Date end = JPlanner.plan.getResource( row ).getEnd().getDate().plusDays( -1 );
+            if ( start != null && end.isLessThan( start ) )
+              JPlanner.setError( dateEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
+          }
         } );
         return dateEditor;
 
@@ -135,12 +137,14 @@ class ResourcesData extends AbstractDataSource
         dateEditor = new EditorDate( columnIndex, row );
         dateEditor.addListener( ( property, oldText, newText ) ->
         {
-          // add listener to ensure end >= start
-          Date end = (Date) dateEditor.getValue();
-          Date start = JPlanner.plan.getResource( row ).getStart().getDate();
-          if ( end != null && end.isLessThan( start ) )
-            JPlanner.gui.setError( dateEditor.getControl(),
-                "Resource end [" + end.toFormat() + "] before resource start [" + start.toFormat() + "]" );
+          // only check end >= start if not already in error state
+          if ( !JPlanner.isError( dateEditor.getControl() ) )
+          {
+            Date end = (Date) dateEditor.getValue();
+            Date start = JPlanner.plan.getResource( row ).getStart().getDate();
+            if ( end != null && end.isLessThan( start ) )
+              JPlanner.setError( dateEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
+          }
         } );
         return dateEditor;
 
@@ -152,7 +156,7 @@ class ResourcesData extends AbstractDataSource
         {
           // must not be an initials duplicate
           String error = JPlanner.plan.resources.initialsClash( newText, -1 );
-          JPlanner.gui.setError( textEditor.getControl(), error );
+          JPlanner.setError( textEditor.getControl(), error );
         } );
         return textEditor;
     }

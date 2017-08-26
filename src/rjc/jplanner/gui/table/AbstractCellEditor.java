@@ -26,7 +26,6 @@ import javafx.scene.input.KeyEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.DateEditor;
 import rjc.jplanner.gui.DateTimeEditor;
-import rjc.jplanner.gui.MainWindow;
 import rjc.jplanner.gui.SpinEditor;
 import rjc.jplanner.gui.XTextField;
 
@@ -124,7 +123,7 @@ abstract public class AbstractCellEditor
   public Boolean isError()
   {
     // return if editor in error state
-    return MainWindow.isError( m_control );
+    return JPlanner.isError( m_control );
   }
 
   /******************************************** close ********************************************/
@@ -132,7 +131,7 @@ abstract public class AbstractCellEditor
   {
     // clear any error message, remove control from table, and give focus back to table
     m_cellEditorInProgress = null;
-    JPlanner.gui.setError( m_control, null );
+    JPlanner.setError( m_control, null );
     m_table.remove( m_control );
     m_table.requestFocus();
     m_table.setOnScroll( event -> m_table.scrollEvent( event ) );

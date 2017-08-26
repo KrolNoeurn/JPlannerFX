@@ -73,7 +73,7 @@ class DatePopup extends Popup
 
     // keep parent editor and selector synchronised
     m_dateSelector.getEpochDaySpinEditor().textProperty()
-        .addListener( ( observable, oldT, newT ) -> m_parent.setText( getDate().toFormat() ) );
+        .addListener( ( observable, oldT, newT ) -> m_parent.setDate( getDate() ) );
   }
 
   /*************************************** constructPopup ****************************************/

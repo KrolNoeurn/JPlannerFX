@@ -63,7 +63,7 @@ public class CommandPlanSetProperties implements IUndoCommand
   {
     // action command
     JPlanner.plan.setTitle( m_newTitle );
-    JPlanner.plan.setStart( m_newStart );
+    JPlanner.plan.setDefaultStart( m_newStart );
     JPlanner.plan.setDefaultCalendar( m_newCal );
     JPlanner.plan.setDateTimeFormat( m_newDTformat );
     JPlanner.plan.setDateFormat( m_newDformat );
@@ -75,7 +75,7 @@ public class CommandPlanSetProperties implements IUndoCommand
   {
     // revert command
     JPlanner.plan.setTitle( m_oldTitle );
-    JPlanner.plan.setStart( m_oldStart );
+    JPlanner.plan.setDefaultStart( m_oldStart );
     JPlanner.plan.setDefaultCalendar( m_oldCal );
     JPlanner.plan.setDateTimeFormat( m_oldDTformat );
     JPlanner.plan.setDateFormat( m_oldDformat );

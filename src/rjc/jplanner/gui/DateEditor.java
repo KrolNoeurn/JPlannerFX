@@ -28,43 +28,30 @@ import rjc.jplanner.model.Date;
 
 public class DateEditor extends XTextField
 {
-  private Date   m_date;      // editor date, or null if editor date invalid
-  private String m_validText; // last valid editor text used if focus lost when in error
+  private Date m_date; // editor date (or most recent valid)
 
   /**************************************** constructor ******************************************/
   public DateEditor()
   {
     // construct editor
     setButtonType( ButtonType.DOWN );
+    new DatePopup( this );
 
     // react to editor text changes
     textProperty().addListener( ( property, oldText, newText ) ->
     {
-      // only check if gui and plan created
-      if ( JPlanner.gui == null || JPlanner.plan == null )
-        return;
-
       // if text cannot be parsed set editor into error state
-      m_date = Date.parse( newText );
-      if ( m_date == null )
-        JPlanner.gui.setError( this, "Date not in recognised format" );
+      Date date = Date.parse( newText );
+      if ( date == null )
+        JPlanner.setError( this, "Date not in recognised format" );
       else
       {
-        JPlanner.gui.setError( this, null );
-        JPlanner.gui.message( "Date: " + m_date.toFormat() );
-        m_validText = newText;
+        m_date = date;
+        JPlanner.setError( this, null );
+        if ( JPlanner.gui != null )
+          JPlanner.gui.message( "Date: " + date.toFormat() );
       }
     } );
-
-    // react to changes in editor focus state
-    focusedProperty().addListener( ( property, oldFocus, newFocus ) ->
-    {
-      // if editor loses focus and is in error, return text to a valid value
-      if ( newFocus == false && MainWindow.isError( this ) )
-        setText( m_validText );
-    } );
-
-    new DatePopup( this );
   }
 
   /****************************************** getDate ********************************************/
