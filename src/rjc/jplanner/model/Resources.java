@@ -116,14 +116,23 @@ public class Resources extends ArrayList<Resource>
     int count = 0;
     for ( Resource res : this )
     {
-      if ( res.isNull() )
-        continue;
       count += res.getTagCount( tag );
       if ( count > 1 )
         return false;
     }
 
     return true;
+  }
+
+  /****************************************** tagCount *******************************************/
+  public int tagCount( String tag )
+  {
+    // return count of tag defines
+    int count = 0;
+    for ( Resource res : this )
+      count += res.getTagCount( tag );
+
+    return count;
   }
 
   /*************************************** getResourceList ***************************************/
@@ -139,29 +148,29 @@ public class Resources extends ArrayList<Resource>
   }
 
   /**************************************** initialsClash ****************************************/
-  public String initialsClash( String initials, int index )
+  public String initialsClash( String tag, int exceptIndex )
   {
     // if initials with existing field (except specified index initials) return error string
-    for ( int i = 0; i < size(); i++ )
+    for ( int index = 0; index < size(); index++ )
     {
-      Resource res = get( i );
+      Resource res = get( index );
 
-      if ( i != index && initials.equals( res.getInitials() ) )
-        return "Initials clash with resource " + i + " initials";
+      if ( index != exceptIndex && tag.equals( res.getInitials() ) )
+        return "Clash with resource " + index + " initials";
 
-      // if valid index also check against other fields
-      if ( index >= 0 )
+      // if exceptIndex provided means tag is initials to be check against other fields
+      if ( exceptIndex >= 0 )
       {
-        if ( initials.equals( res.getValue( Resource.SECTION_NAME ) ) )
-          return "Initials clash with resource " + i + " name";
-        if ( initials.equals( res.getValue( Resource.SECTION_ORG ) ) )
-          return "Initials clash with resource " + i + " organisation";
-        if ( initials.equals( res.getValue( Resource.SECTION_GROUP ) ) )
-          return "Initials clash with resource " + i + " group";
-        if ( initials.equals( res.getValue( Resource.SECTION_ROLE ) ) )
-          return "Initials clash with resource " + i + " role";
-        if ( initials.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
-          return "Initials clash with resource " + i + " alias";
+        if ( tag.equals( res.getValue( Resource.SECTION_NAME ) ) )
+          return "Clash with resource " + index + " name";
+        if ( tag.equals( res.getValue( Resource.SECTION_ORG ) ) )
+          return "Clash with resource " + index + " organisation";
+        if ( tag.equals( res.getValue( Resource.SECTION_GROUP ) ) )
+          return "Clash with resource " + index + " group";
+        if ( tag.equals( res.getValue( Resource.SECTION_ROLE ) ) )
+          return "Clash with resource " + index + " role";
+        if ( tag.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
+          return "Clash with resource " + index + " alias";
       }
     }
 

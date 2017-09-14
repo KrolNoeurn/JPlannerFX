@@ -20,6 +20,7 @@ package rjc.jplanner.model;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import rjc.jplanner.JPlanner;
 
@@ -36,7 +37,7 @@ public class TaskResources
     public float  max; // 0 (zero) means unlimited
   }
 
-  ArrayList<Assignment> m_assignments; // list of resource assignments in original string format
+  ArrayList<Assignment> m_assignments; // list of resource assignments
 
   /**************************************** constructor ******************************************/
   public TaskResources()
@@ -85,9 +86,11 @@ public class TaskResources
       Assignment newAssignment = new Assignment();
       newAssignment.tag = oldAssignment.tag.equals( oldTag ) ? newTag : oldAssignment.tag;
       newAssignment.max = oldAssignment.max;
-      m_assignments.add( newAssignment );
-    } );
 
+      // only add new assignment if tag not null, can happen if newTag is null
+      if ( newAssignment.tag != null )
+        m_assignments.add( newAssignment );
+    } );
   }
 
   /***************************************** toString ********************************************/

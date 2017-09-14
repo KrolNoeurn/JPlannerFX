@@ -118,7 +118,15 @@ public class JPlanner extends Application
     // prints stack
     StackTraceElement[] stack = new Throwable().getStackTrace();
     for ( int i = 1; i < stack.length; i++ )
-      System.out.println( "\t" + stack[i] );
+    {
+      // cannot simply use stack[i].toString() because need extra space before bracket for Eclipse hyperlink to work
+      String txt = stack[i].getClassName() + "." + stack[i].getMethodName()
+          + ( stack[i].isNativeMethod() ? " (Native Method)"
+              : ( stack[i].getFileName() != null && stack[i].getLineNumber() >= 0
+                  ? " (" + stack[i].getFileName() + ":" + stack[i].getLineNumber() + ")"
+                  : ( stack[i].getFileName() != null ? " (" + stack[i].getFileName() + ")" : " (Unknown Source)" ) ) );
+      System.out.println( "\t" + txt );
+    }
   }
 
   /******************************************* caller *******************************************/

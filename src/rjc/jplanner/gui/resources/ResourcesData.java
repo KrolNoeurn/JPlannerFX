@@ -18,8 +18,21 @@
 
 package rjc.jplanner.gui.resources;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.paint.Paint;
+import javafx.stage.Window;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandDeleteMultipleValues;
 import rjc.jplanner.command.CommandResourceSetValue;
 import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.calendars.EditorSelectCalendar;
@@ -29,8 +42,11 @@ import rjc.jplanner.gui.table.EditorDate;
 import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.gui.table.TableSelection;
 import rjc.jplanner.model.Date;
 import rjc.jplanner.model.Resource;
+import rjc.jplanner.model.Task;
+import rjc.jplanner.model.TaskResources;
 
 /*************************************************************************************************/
 /**************************** Table data source for showing resources ****************************/
@@ -177,6 +193,117 @@ class ResourcesData extends AbstractDataSource
       return;
 
     JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
+  }
+
+  /******************************************* setNull *******************************************/
+  @Override
+  public Set<Integer> setNull( Set<Integer> cells )
+  {
+    // if initials being deleted, also delete name, org, group, role and alias
+    for ( int hash : cells )
+      if ( hash / TableSelection.SELECT_HASH == Resource.SECTION_INITIALS )
+      {
+        int base = hash - Resource.SECTION_INITIALS * TableSelection.SELECT_HASH;
+        cells.add( base + Resource.SECTION_NAME * TableSelection.SELECT_HASH );
+        cells.add( base + Resource.SECTION_ORG * TableSelection.SELECT_HASH );
+        cells.add( base + Resource.SECTION_GROUP * TableSelection.SELECT_HASH );
+        cells.add( base + Resource.SECTION_ROLE * TableSelection.SELECT_HASH );
+        cells.add( base + Resource.SECTION_ALIAS * TableSelection.SELECT_HASH );
+      }
+
+    // create undo command to set permitted values to null (delete contents)
+    HashSet<Integer> allowed = new HashSet<Integer>();
+    HashMap<String, ArrayList<Integer>> tags = new HashMap<String, ArrayList<Integer>>();
+
+    // go through set of cells to determine which allowed 
+    for ( int hash : cells )
+    {
+      int row = hash % TableSelection.SELECT_HASH;
+      int columnIndex = hash / TableSelection.SELECT_HASH;
+
+      switch ( columnIndex )
+      {
+        case Resource.SECTION_INITIALS:
+        case Resource.SECTION_NAME:
+        case Resource.SECTION_ORG:
+        case Resource.SECTION_GROUP:
+        case Resource.SECTION_ROLE:
+        case Resource.SECTION_ALIAS:
+          // add to list of tags to check later
+          String tag = (String) JPlanner.plan.getResource( row ).getValue( columnIndex );
+          ArrayList<Integer> list = tags.get( tag );
+          if ( list == null )
+          {
+            list = new ArrayList<Integer>();
+            tags.put( tag, list );
+          }
+          list.add( hash );
+          break;
+
+        case Resource.SECTION_START:
+        case Resource.SECTION_END:
+        case Resource.SECTION_COMMENT:
+          // always allow
+          allowed.add( hash );
+          break;
+
+        default:
+          // do now allow
+      }
+    }
+
+    // check tags
+    Window focusedWindow = JPlanner.gui.getFocusWindow();
+    for ( String tag : tags.keySet() )
+    {
+      // if not all occurrences of tag are being deleted, then deletion allowed without further checks
+      ArrayList<Integer> list = tags.get( tag );
+      if ( list.size() < JPlanner.plan.resources.tagCount( tag ) )
+        allowed.addAll( list );
+      else
+      {
+        // if tag not used in task resources, then deletion allowed without further checks
+        HashMap<Task, TaskResources> use = JPlanner.plan.tasks.getTaskResources( tag );
+        if ( use.isEmpty() )
+          allowed.addAll( list );
+        else
+        {
+          // build sorted list of task indexes
+          TreeSet<Integer> tasks = new TreeSet<Integer>();
+          for ( Task task : use.keySet() )
+            tasks.add( task.getIndex() );
+
+          // build string showing task indexes
+          StringBuilder useString = new StringBuilder( "Task" );
+          useString.append( tasks.size() > 1 ? "s " : " " );
+          for ( int index : tasks )
+            useString.append( index + ", " );
+          useString.setLength( useString.length() - 2 );
+
+          // ask user if deleting permitted or skip or cancel whole
+          Alert dialog = new Alert( AlertType.CONFIRMATION );
+          dialog.initOwner( focusedWindow );
+          dialog.setHeaderText( "Do you want to delete used resource name '" + tag + "' ?" );
+          dialog.setContentText( "'" + tag + "' will be removed from " + useString + " resourcing." );
+          ButtonType delete = new ButtonType( "_Delete", ButtonData.YES );
+          ButtonType skip = new ButtonType( "_Skip", ButtonData.NO );
+          dialog.getButtonTypes().setAll( delete, skip, ButtonType.CANCEL );
+          Optional<ButtonType> result = dialog.showAndWait();
+          focusedWindow.requestFocus();
+
+          if ( result.get() == delete ) // deleting tag is permitted
+            allowed.addAll( list );
+          if ( result.get() == ButtonType.CANCEL ) // cancel so abandon all deleting
+            return null;
+        }
+      }
+    }
+
+    // if one or more cells are allowed to be set to null, create undo command
+    if ( !allowed.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandDeleteMultipleValues( this, allowed ) );
+
+    return cells;
   }
 
   /****************************************** getValue *******************************************/

@@ -208,6 +208,21 @@ public class MainWindow
     }
   }
 
+  /*************************************** getFocusWindow ****************************************/
+  public Window getFocusWindow()
+  {
+    // Java9 can use Window.getWindows()
+    // return window that currently has focus
+    for ( MainTabWidget tabs : m_tabWidgets )
+      if ( tabs.getScene().getWindow().isFocused() )
+        return tabs.getScene().getWindow();
+
+    if ( m_undoWindow.getScene().getWindow().isFocused() )
+      return m_undoWindow.getScene().getWindow();
+
+    return null;
+  }
+
   /***************************************** okToProceed *****************************************/
   public boolean okToProceed( String msg )
   {
@@ -218,12 +233,11 @@ public class MainWindow
       ButtonType save = new ButtonType( "Save", ButtonData.YES );
       ButtonType saveAs = new ButtonType( "Save As", ButtonData.NO );
       ButtonType discard = new ButtonType( "Discard", ButtonData.NO );
-      ButtonType cancel = new ButtonType( "Cancel", ButtonData.CANCEL_CLOSE );
 
       Alert dialog = new Alert( AlertType.CONFIRMATION );
       dialog.initOwner( m_stage );
       dialog.setHeaderText( msg );
-      dialog.getButtonTypes().setAll( save, saveAs, discard, cancel );
+      dialog.getButtonTypes().setAll( save, saveAs, discard, ButtonType.CANCEL );
 
       while ( true )
       {
@@ -238,7 +252,7 @@ public class MainWindow
         if ( result.get() == discard && discard() ) // discard
           return true;
 
-        if ( result.get() == cancel ) // cancel
+        if ( result.get() == ButtonType.CANCEL ) // cancel
           return false;
       }
     }
@@ -757,13 +771,15 @@ public class MainWindow
     Calendar cal = JPlanner.plan.getDefaultCalendar();
     if ( !cal.isWorking() )
     {
-      JPlanner.setError( m_statusBar, "Default calendar '" + cal.getName() + "' has no working periods." );
+      JPlanner.gui.messageError( "Default calendar '" + cal.getName() + "' has no working periods" );
       return;
     }
 
     // schedule the plan, then redraw task tables (which also triggers gantt redraws) to show result
+    JPlanner.gui.message( "Rescheduling plan" );
     JPlanner.plan.schedule();
     redrawTaskTables();
+    JPlanner.gui.message( "Rescheduled plan" );
   }
 
   /************************************** checkPlanUpToDate **************************************/

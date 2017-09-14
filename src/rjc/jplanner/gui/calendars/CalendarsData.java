@@ -27,7 +27,7 @@ import rjc.jplanner.gui.Colors;
 import rjc.jplanner.gui.days.EditorSelectDay;
 import rjc.jplanner.gui.table.AbstractCellEditor;
 import rjc.jplanner.gui.table.AbstractDataSource;
-import rjc.jplanner.gui.table.EditorDateTime;
+import rjc.jplanner.gui.table.EditorDate;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
 import rjc.jplanner.model.Calendar;
@@ -111,7 +111,7 @@ class CalendarsData extends AbstractDataSource
       case Calendar.SECTION_NAME:
         return new EditorCalendarName( columnIndex, row );
       case Calendar.SECTION_ANCHOR:
-        return new EditorDateTime( columnIndex, row );
+        return new EditorDate( columnIndex, row );
       case Calendar.SECTION_EXCEPTIONS:
         return new EditorCalendarExceptions( columnIndex, row );
       case Calendar.SECTION_CYCLE_LEN:

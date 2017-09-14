@@ -46,7 +46,7 @@ class EditorResourceInitials extends EditorText
       if ( len < 1 || len > 20 )
         error = "Initials length not between 1 and 20 characters";
 
-      // initials should be unique
+      // initials must be unique, so check for any clash
       if ( error == null )
         error = JPlanner.plan.resources.initialsClash( newText, row );
 

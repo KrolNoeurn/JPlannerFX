@@ -694,6 +694,12 @@ public class Task implements Comparable<Task>
     return m_predecessors;
   }
 
+  /**************************************** getResources *****************************************/
+  public TaskResources getResources()
+  {
+    return m_resources;
+  }
+
   /**************************************** getGanttData *****************************************/
   public GanttData getGanttData()
   {

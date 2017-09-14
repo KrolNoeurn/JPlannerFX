@@ -24,6 +24,7 @@ import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.command.CommandDeleteMultipleValues;
 import rjc.jplanner.command.CommandTaskIndent;
 import rjc.jplanner.command.CommandTaskOutdent;
 import rjc.jplanner.command.CommandTaskSetValue;
@@ -181,6 +182,17 @@ class TasksData extends AbstractDataSource
       return;
 
     JPlanner.plan.getUndostack().push( new CommandTaskSetValue( task, columnIndex, newValue, oldValue ) );
+  }
+
+  /******************************************* setNull *******************************************/
+  @Override
+  public Set<Integer> setNull( Set<Integer> cells )
+  {
+    // create undo command to set these values to null (delete contents)
+    if ( !cells.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandDeleteMultipleValues( this, cells ) );
+
+    return cells;
   }
 
   /****************************************** getValue *******************************************/

@@ -110,14 +110,15 @@ public class UndoStack
   /***************************************** startMerge ******************************************/
   public void startMerge( IUndoCommand command )
   {
-    // specify command for starting to merge commands
+    // specify parent to start command merging
     m_parentCommand = command;
   }
 
   /****************************************** endMerge *******************************************/
   public void endMerge()
   {
-    // stop merging commands, and add merged command to stack
+    // undo parent command as will be redone when parent is added to undo stack
+    m_parentCommand.undo();
     m_parentCommand = null;
   }
 
@@ -140,8 +141,9 @@ public class UndoStack
     }
     else
     {
-      // merge command
+      // merge command and do it
       m_parentCommand.merge( command );
+      command.redo();
     }
   }
 

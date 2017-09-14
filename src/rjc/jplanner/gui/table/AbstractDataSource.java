@@ -187,8 +187,15 @@ abstract public class AbstractDataSource
   /**************************************** getMoveEndRow ****************************************/
   public int getMoveEndRow( int startRow )
   {
-    // return move end row (for example bottom of summary) for given start row, or -1 if moving rows not allowed 
+    // return move end row (for example bottom of summary) for given start row, or -1 if moving not allowed 
     return -1;
+  }
+
+  /******************************************* setNull *******************************************/
+  public Set<Integer> setNull( Set<Integer> cells )
+  {
+    // return set of cell hashes ( columnIndex * SELECT_HASH + row ) set to null
+    return null;
   }
 
 }

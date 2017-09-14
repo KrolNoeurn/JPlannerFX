@@ -26,15 +26,15 @@ import rjc.jplanner.gui.table.AbstractDataSource;
 import rjc.jplanner.gui.table.TableSelection;
 
 /*************************************************************************************************/
-/************************* UndoCommand for deleting table cell contents **************************/
+/********************* UndoCommand for deleting multiple table cell contents *********************/
 /*************************************************************************************************/
 
-public class CommandDeleteContents implements IUndoCommand
+public class CommandDeleteMultipleValues implements IUndoCommand
 {
   private ArrayList<IUndoCommand> m_commands; // merged commands
 
   /**************************************** constructor ******************************************/
-  public CommandDeleteContents( AbstractDataSource data, Set<Integer> cells )
+  public CommandDeleteMultipleValues( AbstractDataSource data, Set<Integer> cells )
   {
     // create list of merged commands that set value to null to delete contents
     m_commands = new ArrayList<IUndoCommand>();

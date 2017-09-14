@@ -381,6 +381,9 @@ public class Resource
   public int getTagCount( String tag )
   {
     // return count of number of times specified tag is used
+    if ( m_initials == null )
+      return 0;
+
     int count = 0;
     if ( tag.equals( m_initials ) )
       count++;
