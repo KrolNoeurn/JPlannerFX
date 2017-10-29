@@ -20,7 +20,6 @@ package rjc.jplanner.model;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import rjc.jplanner.JPlanner;
 
@@ -35,6 +34,29 @@ public class TaskResources
   {
     public String tag; // initials or name or org or group or alias or role etc
     public float  max; // 0 (zero) means unlimited
+
+    @Override
+    public boolean equals( Object obj )
+    {
+      if ( this == obj )
+        return true;
+      if ( obj == null )
+        return false;
+      if ( !( obj instanceof Assignment ) )
+        return false;
+      Assignment other = (Assignment) obj;
+      if ( Float.floatToIntBits( max ) != Float.floatToIntBits( other.max ) )
+        return false;
+      if ( !tag.equals( other.tag ) )
+        return false;
+      return true;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "'" + tag + "' " + max;
+    }
   }
 
   ArrayList<Assignment> m_assignments; // list of resource assignments
@@ -57,6 +79,8 @@ public class TaskResources
     {
       // split part into tag and max assignment
       part = JPlanner.clean( part );
+      if ( part.isEmpty() )
+        continue;
       int bracket = part.indexOf( '[' );
       if ( bracket >= 0 )
       {
@@ -179,6 +203,31 @@ public class TaskResources
         return true;
 
     return false;
+  }
+
+  /******************************************** equals *******************************************/
+  @Override
+  public boolean equals( Object obj )
+  {
+    if ( this == obj )
+      return true;
+    if ( obj == null && m_assignments.isEmpty() )
+      return true;
+    if ( obj == null )
+      return false;
+    if ( !( obj instanceof TaskResources ) )
+      return false;
+    TaskResources other = (TaskResources) obj;
+    if ( !m_assignments.equals( other.m_assignments ) )
+      return false;
+    return true;
+  }
+
+  /******************************************* isEmpty *******************************************/
+  public boolean isEmpty()
+  {
+    // returns true if no resource assignments
+    return m_assignments.isEmpty();
   }
 
   /******************************************** assign *******************************************/

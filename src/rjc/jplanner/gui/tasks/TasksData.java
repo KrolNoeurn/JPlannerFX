@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.tasks;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javafx.scene.paint.Paint;
@@ -37,6 +38,7 @@ import rjc.jplanner.gui.table.EditorText;
 import rjc.jplanner.gui.table.EditorTimeSpan;
 import rjc.jplanner.gui.table.Table;
 import rjc.jplanner.gui.table.Table.Alignment;
+import rjc.jplanner.gui.table.TableSelection;
 import rjc.jplanner.model.DateTime;
 import rjc.jplanner.model.Task;
 
@@ -178,7 +180,7 @@ class TasksData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Task task = JPlanner.plan.getTask( row );
     Object oldValue = task.getValue( columnIndex );
-    if ( equal( newValue, oldValue ) )
+    if ( JPlanner.equal( newValue, oldValue ) )
       return;
 
     JPlanner.plan.getUndostack().push( new CommandTaskSetValue( task, columnIndex, newValue, oldValue ) );
@@ -188,9 +190,32 @@ class TasksData extends AbstractDataSource
   @Override
   public Set<Integer> setNull( Set<Integer> cells )
   {
+    // create undo command to set permitted values to null (delete contents)
+    HashSet<Integer> allowed = new HashSet<Integer>();
+
+    // go through set of cells to determine which allowed 
+    for ( int hash : cells )
+    {
+      int columnIndex = hash / TableSelection.SELECT_HASH;
+      switch ( columnIndex )
+      {
+        case Task.SECTION_TITLE:
+        case Task.SECTION_PRED:
+        case Task.SECTION_RES:
+        case Task.SECTION_DEADLINE:
+        case Task.SECTION_COMMENT:
+          // always allow
+          allowed.add( hash );
+          break;
+
+        default:
+          // do now allow
+      }
+    }
+
     // create undo command to set these values to null (delete contents)
-    if ( !cells.isEmpty() )
-      JPlanner.plan.getUndostack().push( new CommandDeleteMultipleValues( this, cells ) );
+    if ( !allowed.isEmpty() )
+      JPlanner.plan.getUndostack().push( new CommandDeleteMultipleValues( this, allowed ) );
 
     return cells;
   }

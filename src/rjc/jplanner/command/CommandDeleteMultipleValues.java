@@ -20,6 +20,7 @@ package rjc.jplanner.command;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.TreeSet;
 
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.gui.table.AbstractDataSource;
@@ -39,8 +40,9 @@ public class CommandDeleteMultipleValues implements IUndoCommand
     // create list of merged commands that set value to null to delete contents
     m_commands = new ArrayList<IUndoCommand>();
 
+    // work through descending list of hash values so work right to left across table
     JPlanner.plan.getUndostack().startMerge( this );
-    for ( int hash : cells )
+    for ( int hash : ( new TreeSet<Integer>( cells ) ).descendingSet() )
     {
       int row = hash % TableSelection.SELECT_HASH;
       int columnIndex = hash / TableSelection.SELECT_HASH;

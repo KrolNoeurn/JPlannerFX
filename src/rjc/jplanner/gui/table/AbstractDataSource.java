@@ -77,15 +77,6 @@ abstract public class AbstractDataSource
     // set cell value for specified cell index
   }
 
-  protected boolean equal( Object newValue, Object oldValue )
-  {
-    if ( newValue != null && newValue.equals( oldValue ) )
-      return true;
-    if ( newValue == null && oldValue == null )
-      return true;
-    return false;
-  }
-
   /****************************************** getEditor ******************************************/
   public AbstractCellEditor getEditor( int columnIndex, int row )
   {

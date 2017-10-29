@@ -218,10 +218,20 @@ public class Task implements Comparable<Task>
       m_work = (TimeSpan) newValue;
 
     else if ( section == SECTION_PRED )
-      m_predecessors = (Predecessors) newValue;
+    {
+      if ( newValue == null )
+        m_predecessors = new Predecessors();
+      else
+        m_predecessors = (Predecessors) newValue;
+    }
 
     else if ( section == SECTION_RES )
-      m_resources = (TaskResources) newValue;
+    {
+      if ( newValue == null )
+        m_resources = new TaskResources();
+      else
+        m_resources = (TaskResources) newValue;
+    }
 
     else if ( section == SECTION_TYPE )
       m_type = (TaskType) newValue;
@@ -235,7 +245,8 @@ public class Task implements Comparable<Task>
     else if ( section == SECTION_COMMENT )
       m_comment = (String) newValue;
 
-    // TODO !!!!!!!!!!!!!!!!!!!!!!!!!!
+    else if ( section == SECTION_COST )
+      JPlanner.trace( "NOT IMPLEMENTED YET" );
 
     else
       throw new IllegalArgumentException( "Section=" + section );
@@ -312,7 +323,8 @@ public class Task implements Comparable<Task>
       xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
       xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
       xsw.writeAttribute( XmlLabels.XML_WORK, m_work.toString() );
-      xsw.writeAttribute( XmlLabels.XML_RESOURCES, m_resources.toString() );
+      if ( !m_resources.isEmpty() )
+        xsw.writeAttribute( XmlLabels.XML_RESOURCES, m_resources.toString() );
       xsw.writeAttribute( XmlLabels.XML_TYPE, m_type.toString() );
       xsw.writeAttribute( XmlLabels.XML_PRIORITY, Integer.toString( m_priority ) );
       if ( m_deadline != null )
@@ -328,16 +340,12 @@ public class Task implements Comparable<Task>
   public void savePredecessorToXML( XMLStreamWriter xsw ) throws XMLStreamException
   {
     // write task predecessor data to XML stream
-    if ( m_predecessors == null )
+    if ( m_predecessors == null || m_predecessors.getCount() == 0 )
       return;
-    String preds = m_predecessors.toString();
 
-    if ( preds.length() > 0 )
-    {
-      xsw.writeEmptyElement( XmlLabels.XML_PREDECESSORS );
-      xsw.writeAttribute( XmlLabels.XML_TASK, Integer.toString( this.getIndex() ) );
-      xsw.writeAttribute( XmlLabels.XML_PREDS, preds );
-    }
+    xsw.writeEmptyElement( XmlLabels.XML_PREDECESSORS );
+    xsw.writeAttribute( XmlLabels.XML_TASK, Integer.toString( this.getIndex() ) );
+    xsw.writeAttribute( XmlLabels.XML_PREDS, m_predecessors.toString() );
   }
 
   /****************************************** compareTo ******************************************/

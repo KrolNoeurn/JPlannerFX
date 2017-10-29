@@ -164,7 +164,7 @@ public class TimeSpan
     if ( other instanceof TimeSpan )
     {
       TimeSpan ts = (TimeSpan) other;
-      return m_units == ts.m_units && Math.abs( m_num - ts.m_num ) < 0.01;
+      return m_units == ts.m_units && Math.abs( m_num - ts.m_num ) < 0.001;
     }
 
     return false;

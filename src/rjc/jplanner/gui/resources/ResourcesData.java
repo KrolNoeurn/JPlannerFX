@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javafx.scene.control.Alert;
@@ -54,7 +55,6 @@ import rjc.jplanner.model.TaskResources;
 
 class ResourcesData extends AbstractDataSource
 {
-
   /************************************** getColumnCount *****************************************/
   @Override
   public int getColumnCount()
@@ -189,7 +189,7 @@ class ResourcesData extends AbstractDataSource
     // if new value equals old value, exit with no command
     Resource res = JPlanner.plan.getResource( row );
     Object oldValue = res.getValue( columnIndex );
-    if ( equal( newValue, oldValue ) )
+    if ( JPlanner.equal( newValue, oldValue ) )
       return;
 
     JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
@@ -200,7 +200,7 @@ class ResourcesData extends AbstractDataSource
   public Set<Integer> setNull( Set<Integer> cells )
   {
     // if initials being deleted, also delete name, org, group, role and alias
-    for ( int hash : cells )
+    for ( int hash : new HashSet<>( cells ) )
       if ( hash / TableSelection.SELECT_HASH == Resource.SECTION_INITIALS )
       {
         int base = hash - Resource.SECTION_INITIALS * TableSelection.SELECT_HASH;
@@ -211,11 +211,10 @@ class ResourcesData extends AbstractDataSource
         cells.add( base + Resource.SECTION_ALIAS * TableSelection.SELECT_HASH );
       }
 
-    // create undo command to set permitted values to null (delete contents)
+    // go through set of cells to determine which can be deleted (allowed) 
     HashSet<Integer> allowed = new HashSet<Integer>();
-    HashMap<String, ArrayList<Integer>> tags = new HashMap<String, ArrayList<Integer>>();
+    TreeMap<String, ArrayList<Integer>> tags = new TreeMap<String, ArrayList<Integer>>();
 
-    // go through set of cells to determine which allowed 
     for ( int hash : cells )
     {
       int row = hash % TableSelection.SELECT_HASH;
@@ -229,16 +228,17 @@ class ResourcesData extends AbstractDataSource
         case Resource.SECTION_GROUP:
         case Resource.SECTION_ROLE:
         case Resource.SECTION_ALIAS:
-          // add to list of tags to check later
+          // add to list of tags
           String tag = (String) JPlanner.plan.getResource( row ).getValue( columnIndex );
-          ArrayList<Integer> list = tags.get( tag );
-          if ( list == null )
+          if ( tag == null )
+            continue;
+          ArrayList<Integer> tagCells = tags.get( tag );
+          if ( tagCells == null )
           {
-            list = new ArrayList<Integer>();
-            tags.put( tag, list );
+            tagCells = new ArrayList<Integer>();
+            tags.put( tag, tagCells );
           }
-          list.add( hash );
-          break;
+          tagCells.add( hash );
 
         case Resource.SECTION_START:
         case Resource.SECTION_END:
@@ -252,51 +252,71 @@ class ResourcesData extends AbstractDataSource
       }
     }
 
-    // check tags
-    Window focusedWindow = JPlanner.gui.getFocusWindow();
-    for ( String tag : tags.keySet() )
+    // check if any tags deletion need further user confirmation
+    for ( String tag : new HashSet<>( tags.keySet() ) )
     {
-      // if not all occurrences of tag are being deleted, then deletion allowed without further checks
-      ArrayList<Integer> list = tags.get( tag );
-      if ( list.size() < JPlanner.plan.resources.tagCount( tag ) )
-        allowed.addAll( list );
+      // if not all occurrences of tag are being deleted, then user does not need to be asked
+      ArrayList<Integer> tagCells = tags.get( tag );
+      if ( tagCells.size() < JPlanner.plan.resources.tagCount( tag ) )
+        tags.remove( tag );
       else
       {
         // if tag not used in task resources, then deletion allowed without further checks
         HashMap<Task, TaskResources> use = JPlanner.plan.tasks.getTaskResources( tag );
         if ( use.isEmpty() )
-          allowed.addAll( list );
-        else
-        {
-          // build sorted list of task indexes
-          TreeSet<Integer> tasks = new TreeSet<Integer>();
-          for ( Task task : use.keySet() )
-            tasks.add( task.getIndex() );
-
-          // build string showing task indexes
-          StringBuilder useString = new StringBuilder( "Task" );
-          useString.append( tasks.size() > 1 ? "s " : " " );
-          for ( int index : tasks )
-            useString.append( index + ", " );
-          useString.setLength( useString.length() - 2 );
-
-          // ask user if deleting permitted or skip or cancel whole
-          Alert dialog = new Alert( AlertType.CONFIRMATION );
-          dialog.initOwner( focusedWindow );
-          dialog.setHeaderText( "Do you want to delete used resource name '" + tag + "' ?" );
-          dialog.setContentText( "'" + tag + "' will be removed from " + useString + " resourcing." );
-          ButtonType delete = new ButtonType( "_Delete", ButtonData.YES );
-          ButtonType skip = new ButtonType( "_Skip", ButtonData.NO );
-          dialog.getButtonTypes().setAll( delete, skip, ButtonType.CANCEL );
-          Optional<ButtonType> result = dialog.showAndWait();
-          focusedWindow.requestFocus();
-
-          if ( result.get() == delete ) // deleting tag is permitted
-            allowed.addAll( list );
-          if ( result.get() == ButtonType.CANCEL ) // cancel so abandon all deleting
-            return null;
-        }
+          tags.remove( tag );
       }
+    }
+
+    // if some tags remain that need user to confirm deletion
+    if ( !tags.isEmpty() )
+    {
+      StringBuilder header = new StringBuilder( "Do you want to delete used resource name" );
+      StringBuilder content = new StringBuilder( "This resource will be deleted from task" );
+      TreeSet<Integer> tasks = new TreeSet<Integer>();
+
+      if ( tags.size() > 1 )
+      {
+        header.append( 's' );
+        content.replace( 0, 13, "These resources" );
+      }
+      header.append( ' ' );
+
+      int len = header.length();
+      for ( String tag : tags.keySet() )
+      {
+        // ensure header doesn't get too long
+        if ( len + tag.length() > 60 )
+        {
+          header.append( '\r' );
+          len = 0;
+        }
+        len += tag.length() + 4;
+
+        header.append( "'" + tag + "', " );
+        HashMap<Task, TaskResources> use = JPlanner.plan.tasks.getTaskResources( tag );
+        for ( Task task : use.keySet() )
+          tasks.add( task.getIndex() );
+      }
+
+      content.append( tasks.size() > 1 ? "s " : " " );
+      for ( int index : tasks )
+        content.append( index + ", " );
+
+      Window focusedWindow = JPlanner.gui.getFocusWindow();
+      Alert dialog = new Alert( AlertType.CONFIRMATION );
+      ButtonType delete = new ButtonType( "_Delete", ButtonData.YES );
+      ButtonType cancel = ButtonType.CANCEL;
+
+      dialog.getButtonTypes().setAll( delete, cancel );
+      dialog.initOwner( focusedWindow );
+      dialog.setHeaderText( header.substring( 0, header.length() - 2 ) );
+      dialog.setContentText( content.substring( 0, content.length() - 2 ) );
+      Optional<ButtonType> result = dialog.showAndWait();
+      focusedWindow.requestFocus();
+
+      if ( result.get() == cancel ) // cancel so abandon all deleting
+        return null;
     }
 
     // if one or more cells are allowed to be set to null, create undo command

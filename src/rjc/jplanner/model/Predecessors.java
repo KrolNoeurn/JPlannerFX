@@ -55,6 +55,25 @@ public class Predecessors
       }
       return str;
     }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+      if ( this == obj )
+        return true;
+      if ( obj == null )
+        return false;
+      if ( !( obj instanceof Predecessor ) )
+        return false;
+      Predecessor other = (Predecessor) obj;
+      if ( task != other.task )
+        return false;
+      if ( type != other.type )
+        return false;
+      if ( !lag.equals( other.lag ) )
+        return false;
+      return true;
+    }
   }
 
   private ArrayList<Predecessor> m_preds = new ArrayList<Predecessor>();
@@ -362,6 +381,22 @@ public class Predecessors
   public Predecessor get( int index )
   {
     return m_preds.get( index );
+  }
+
+  /******************************************* equals ********************************************/
+  @Override
+  public boolean equals( Object obj )
+  {
+    if ( this == obj )
+      return true;
+    if ( obj == null )
+      return false;
+    if ( !( obj instanceof Predecessors ) )
+      return false;
+    Predecessors other = (Predecessors) obj;
+    if ( !m_preds.equals( other.m_preds ) )
+      return false;
+    return true;
   }
 
 }
