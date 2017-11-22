@@ -25,12 +25,12 @@ import rjc.jplanner.gui.table.AbstractCellEditor;
 /************************** Table cell editor for resource availability **************************/
 /*************************************************************************************************/
 
-class EditorAvailable extends AbstractCellEditor
+class EditorResourceAvailable extends AbstractCellEditor
 {
   SpinEditor m_spin; // spin editor
 
   /**************************************** constructor ******************************************/
-  public EditorAvailable( int columnIndex, int row )
+  public EditorResourceAvailable( int columnIndex, int row )
   {
     // use spin editor
     super( columnIndex, row );

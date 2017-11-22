@@ -132,7 +132,7 @@ class ResourcesData extends AbstractDataSource
       case Resource.SECTION_COMMENT:
         return new EditorText( columnIndex, row );
       case Resource.SECTION_AVAIL:
-        return new EditorAvailable( columnIndex, row );
+        return new EditorResourceAvailable( columnIndex, row );
 
       case Resource.SECTION_START:
         EditorDate dateEditor = new EditorDate( columnIndex, row );
@@ -165,19 +165,7 @@ class ResourcesData extends AbstractDataSource
         return dateEditor;
 
       default:
-        // default text editor is fine for other columns except do not allow initials duplicates, square brackets or comma
-        EditorText textEditor = new EditorText( columnIndex, row );
-        textEditor.setAllowed( "^[^\\[\\],]*$" );
-        textEditor.addListener( ( observable, oldText, newText ) ->
-        {
-          // must not be an initials duplicate
-          String error = JPlanner.plan.resources.initialsClash( newText, -1 );
-          if ( error == null )
-            JPlanner.setNoError( textEditor.getControl(), "" );
-          else
-            JPlanner.setError( textEditor.getControl(), error );
-        } );
-        return textEditor;
+        return new EditorResourceTag( columnIndex, row );
     }
 
   }

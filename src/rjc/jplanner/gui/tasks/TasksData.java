@@ -196,12 +196,24 @@ class TasksData extends AbstractDataSource
     // go through set of cells to determine which allowed 
     for ( int hash : cells )
     {
+      int row = hash % TableSelection.SELECT_HASH;
       int columnIndex = hash / TableSelection.SELECT_HASH;
+
       switch ( columnIndex )
       {
-        case Task.SECTION_TITLE:
         case Task.SECTION_PRED:
+          // allow if not empty
+          if ( JPlanner.plan.getTask( row ).getPredecessors().getCount() > 0 )
+            allowed.add( hash );
+          break;
+
         case Task.SECTION_RES:
+          // allow if not empty
+          if ( !JPlanner.plan.getTask( row ).getResources().isEmpty() )
+            allowed.add( hash );
+          break;
+
+        //case Task.SECTION_TITLE:
         case Task.SECTION_DEADLINE:
         case Task.SECTION_COMMENT:
           // always allow

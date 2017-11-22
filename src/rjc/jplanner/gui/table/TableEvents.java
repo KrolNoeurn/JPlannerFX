@@ -177,8 +177,8 @@ public class TableEvents extends TableCanvas
         return;
       }
 
-      // if row is selected, set cursor to move
-      if ( m_selected.isRowSelected( m_mouseRow ) )
+      // if row is selected, set cursor to move if moving is allowed
+      if ( m_selected.isRowSelected( m_mouseRow ) && m_table.getData().getMoveEndRow( m_mouseRow ) >= 0 )
       {
         setCursor( Cursors.V_MOVE );
         return;
@@ -850,11 +850,6 @@ public class TableEvents extends TableCanvas
   /************************************** rowReorderDragged **************************************/
   private void rowReorderDragged()
   {
-    // if row reordering is not wanted, return without doing anything
-    int endRow = m_table.getData().getMoveEndRow( m_mouseRow );
-    if ( endRow < 0 )
-      return;
-
     // is a reorder already in progress
     if ( m_reorderSlider == null )
     {
