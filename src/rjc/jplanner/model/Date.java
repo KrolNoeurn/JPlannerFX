@@ -271,10 +271,15 @@ public class Date
   public boolean equals( Object other )
   {
     // return true if other object represents same date
-    if ( other != null && other instanceof Date )
+    try
+    {
       return m_epochday == ( (Date) other ).m_epochday;
-
-    return false;
+    }
+    catch ( Exception exception )
+    {
+      // in unlikely case that other is null or not a Date
+      return false;
+    }
   }
 
   /****************************************** hashCode ******************************************/

@@ -233,13 +233,20 @@ public class TaskResources
   /******************************************** assign *******************************************/
   public void assign( Task task )
   {
-    // TODO Auto-generated method stub !!!!!!!!!!!!!!!!!!!!!
+    // if task is milestone (i.e. with zero duration) then don't assign
+    if ( task.isMilestone() )
+      return;
+
+    // add assigned resources to work for this task
     for ( Assignment assignment : m_assignments )
     {
-      ArrayList<Resource> res = JPlanner.plan.resources.getResourceList( assignment.tag );
-
+      ArrayList<Resource> resourceList = JPlanner.plan.resources.getResourceList( assignment.tag );
+      for ( Resource resource : resourceList )
+      {
+        float num = assignment.max == 0.0f ? Float.MAX_VALUE : assignment.max;
+        JPlanner.plan.work.add( task, resource, num, task.getStart(), task.getEnd() );
+      }
     }
-
   }
 
 }

@@ -48,11 +48,11 @@ public class Resources extends ArrayList<Resource>
   public void loadXML( XMLStreamReader xsr ) throws XMLStreamException
   {
     // read any attributes
-    for ( int i = 0; i < xsr.getAttributeCount(); i++ )
-      switch ( xsr.getAttributeLocalName( i ) )
+    for ( int index = 0; index < xsr.getAttributeCount(); index++ )
+      switch ( xsr.getAttributeLocalName( index ) )
       {
         default:
-          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( i ) + "'" );
+          JPlanner.trace( "Unhandled attribute '" + xsr.getAttributeLocalName( index ) + "'" );
           break;
       }
 
@@ -85,8 +85,8 @@ public class Resources extends ArrayList<Resource>
   {
     // write resources data to XML stream
     xsw.writeStartElement( XmlLabels.XML_RES_DATA );
-    for ( Resource res : this )
-      res.saveToXML( xsw );
+    for ( Resource resource : this )
+      resource.saveToXML( xsw );
     xsw.writeEndElement(); // XML_RES_DATA
   }
 
@@ -98,8 +98,8 @@ public class Resources extends ArrayList<Resource>
       throw new NullPointerException( "Tag is null!" );
 
     // return true only if any tag is used by a resource
-    for ( Resource res : this )
-      if ( res.hasTag( tag ) )
+    for ( Resource resource : this )
+      if ( resource.hasTag( tag ) )
         return true;
 
     return false;
@@ -114,9 +114,9 @@ public class Resources extends ArrayList<Resource>
 
     // return true if tag used only once or less
     int count = 0;
-    for ( Resource res : this )
+    for ( Resource resource : this )
     {
-      count += res.getTagCount( tag );
+      count += resource.getTagCount( tag );
       if ( count > 1 )
         return false;
     }
@@ -129,8 +129,8 @@ public class Resources extends ArrayList<Resource>
   {
     // return count of tag defines
     int count = 0;
-    for ( Resource res : this )
-      count += res.getTagCount( tag );
+    for ( Resource resource : this )
+      count += resource.getTagCount( tag );
 
     return count;
   }
@@ -140,9 +140,9 @@ public class Resources extends ArrayList<Resource>
   {
     // return list of resources that have this tag
     ArrayList<Resource> list = new ArrayList<Resource>();
-    for ( Resource res : this )
-      if ( res.hasTag( tag ) )
-        list.add( res );
+    for ( Resource resource : this )
+      if ( resource.hasTag( tag ) )
+        list.add( resource );
 
     return list;
   }
@@ -153,23 +153,23 @@ public class Resources extends ArrayList<Resource>
     // if initials with existing field (except specified index initials) return error string
     for ( int index = 0; index < size(); index++ )
     {
-      Resource res = get( index );
+      Resource resource = get( index );
 
-      if ( index != exceptIndex && tag.equals( res.getInitials() ) )
+      if ( index != exceptIndex && tag.equals( resource.getInitials() ) )
         return "Clash with resource " + index + " initials";
 
       // if exceptIndex provided means tag is initials to be check against other fields
       if ( exceptIndex >= 0 )
       {
-        if ( tag.equals( res.getValue( Resource.SECTION_NAME ) ) )
+        if ( tag.equals( resource.getValue( Resource.SECTION_NAME ) ) )
           return "Clash with resource " + index + " name";
-        if ( tag.equals( res.getValue( Resource.SECTION_ORG ) ) )
+        if ( tag.equals( resource.getValue( Resource.SECTION_ORG ) ) )
           return "Clash with resource " + index + " organisation";
-        if ( tag.equals( res.getValue( Resource.SECTION_GROUP ) ) )
+        if ( tag.equals( resource.getValue( Resource.SECTION_GROUP ) ) )
           return "Clash with resource " + index + " group";
-        if ( tag.equals( res.getValue( Resource.SECTION_ROLE ) ) )
+        if ( tag.equals( resource.getValue( Resource.SECTION_ROLE ) ) )
           return "Clash with resource " + index + " role";
-        if ( tag.equals( res.getValue( Resource.SECTION_ALIAS ) ) )
+        if ( tag.equals( resource.getValue( Resource.SECTION_ALIAS ) ) )
           return "Clash with resource " + index + " alias";
       }
     }

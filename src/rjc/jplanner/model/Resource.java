@@ -334,6 +334,13 @@ public class Resource
     return new DateTime( m_end, Time.MAX_VALUE );
   }
 
+  /***************************************** getCalendar *****************************************/
+  public Calendar getCalendar()
+  {
+    // return resource calendar
+    return m_calendar;
+  }
+
   /**************************************** getAvailable *****************************************/
   public double getAvailable()
   {

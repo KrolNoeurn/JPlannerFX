@@ -73,6 +73,19 @@ public class Work extends ArrayList<Effort>
     }
   }
 
+  /******************************************** clear ********************************************/
+  @Override
+  public void clear()
+  {
+    // clear all stored effort
+    super.clear();
+
+    // clear cached work values on tasks
+    for ( Task task : JPlanner.plan.tasks )
+      if ( !task.isNull() && !task.isSectionEditable( Task.SECTION_WORK ) )
+        task.setValue( Task.SECTION_WORK, null );
+  }
+
   /********************************************* add *********************************************/
   public Effort add( Task task, Resource resource, double num, DateTime start, DateTime end )
   {
@@ -91,18 +104,18 @@ public class Work extends ArrayList<Effort>
       throw new IllegalArgumentException( "Start must be before End" );
 
     // ensure start is not before resource start
-    DateTime rs = resource.getStart();
-    if ( end.isLessThan( rs ) )
+    DateTime resourceStart = resource.getStart();
+    if ( end.isLessThan( resourceStart ) )
       return null;
-    if ( start.isLessThan( rs ) )
-      start = new DateTime( rs );
+    if ( start.isLessThan( resourceStart ) )
+      start = new DateTime( resourceStart );
 
     // ensure end is not after resource end
-    DateTime re = resource.getEnd();
-    if ( re.isLessThan( start ) )
+    DateTime resourceEnd = resource.getEnd();
+    if ( resourceEnd.isLessThan( start ) )
       return null;
-    if ( re.isLessThan( end ) )
-      end = new DateTime( re );
+    if ( resourceEnd.isLessThan( end ) )
+      end = new DateTime( resourceEnd );
 
     // ensure effort is not greater than resource availability
     Double avail = resource.getAvailable();
@@ -114,7 +127,6 @@ public class Work extends ArrayList<Effort>
     Effort effort = new Effort( task, resource, num, start, end );
 
     // do checks to ensure resource is not over allocated and reduce effort appropriately !!!
-
     add( effort );
 
     // return effort actually accepted, or null if no effort accepted
@@ -124,8 +136,6 @@ public class Work extends ArrayList<Effort>
   /************************************** getResourceUsage ***************************************/
   public DateTimeNumber getResourceUsage( Resource resource, DateTime datetime )
   {
-    JPlanner.trace( "REQUESTING RESOURCE USAGE FOR " + resource, datetime );
-
     // return resource usage at specified date-time and when usage next changes
     long ms = datetime.getMilliseconds();
     double use = 0.0;
@@ -146,16 +156,19 @@ public class Work extends ArrayList<Effort>
   /******************************************* getWork *******************************************/
   public TimeSpan getWork( Task task )
   {
-    //JPlanner.trace( "REQUESTING WORK FOR " + task );
-
     // return work for specified task
-    TimeSpan work = new TimeSpan();
-    forEach( effort ->
-    {
-      JPlanner.trace( effort );
-    } );
+    double workDays = 0.0;
 
-    return work;
+    for ( Effort effort : this )
+      if ( effort.task == task ) // only consider effort assigned to specified task
+      {
+        DateTime start = new DateTime( effort.startMS );
+        DateTime end = new DateTime( effort.endMS );
+        TimeSpan work = effort.resource.getCalendar().workBetween( start, end );
+        workDays += work.getNumber() * effort.num;
+      }
+
+    return new TimeSpan( workDays, TimeSpan.UNIT_DAYS );
   }
 
 }

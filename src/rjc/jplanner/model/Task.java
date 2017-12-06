@@ -133,9 +133,6 @@ public class Task implements Comparable<Task>
   {
     // initialise private variables
     m_duration = new TimeSpan( "1d" );
-    m_work = new TimeSpan( "0d" );
-    m_start = JPlanner.plan.getDefaultStart();
-    m_end = JPlanner.plan.getDefaultStart();
     m_predecessors = new Predecessors( "" );
     m_resources = new TaskResources();
     m_type = TaskType.ASAP_FDUR;
@@ -322,7 +319,8 @@ public class Task implements Comparable<Task>
       xsw.writeAttribute( XmlLabels.XML_DURATION, m_duration.toString() );
       xsw.writeAttribute( XmlLabels.XML_START, m_start.toString() );
       xsw.writeAttribute( XmlLabels.XML_END, m_end.toString() );
-      xsw.writeAttribute( XmlLabels.XML_WORK, m_work.toString() );
+      if ( m_work != null )
+        xsw.writeAttribute( XmlLabels.XML_WORK, m_work.toString() );
       if ( !m_resources.isEmpty() )
         xsw.writeAttribute( XmlLabels.XML_RESOURCES, m_resources.toString() );
       xsw.writeAttribute( XmlLabels.XML_TYPE, m_type.toString() );
@@ -402,6 +400,13 @@ public class Task implements Comparable<Task>
   {
     // return true if task is a summary
     return m_summaryEnd > 0;
+  }
+
+  /**************************************** isMilestone ******************************************/
+  public boolean isMilestone()
+  {
+    // return true if task start equals task end
+    return getStart().getMilliseconds() == getEnd().getMilliseconds();
   }
 
   /**************************************** getSummaryEnd ****************************************/
@@ -629,17 +634,29 @@ public class Task implements Comparable<Task>
   /******************************************* getWork *******************************************/
   public TimeSpan getWork()
   {
-    // return work done on task or summary including sub-tasks
-    if ( isSummary() )
-      // TODO somehow!
-      return new TimeSpan();
+    // if no work value stored, calculate and cache
+    if ( m_work == null )
+      m_work = JPlanner.plan.work.getWork( this );
 
-    // if a fixed work type task, return task specified work
-    if ( m_type == TaskType.ASAP_FWORK || m_type == TaskType.SON_FWORK )
+    // if not summary, return stored work value
+    if ( !isSummary() )
       return m_work;
 
-    // otherwise return calculated work
-    return JPlanner.plan.work.getWork( this );
+    // work of summary is sum of work in this task and sub-tasks
+    double work = m_work.getNumber();
+    for ( int index = getIndex() + 1; index <= getSummaryEnd(); index++ )
+    {
+      Task subtask = JPlanner.plan.getTask( index );
+      if ( !subtask.isNull() )
+      {
+        if ( subtask.m_work == null )
+          subtask.m_work = JPlanner.plan.work.getWork( subtask );
+
+        work += subtask.m_work.getNumber();
+      }
+    }
+
+    return new TimeSpan( work, TimeSpan.UNIT_DAYS );
   }
 
   /***************************************** getDuration *****************************************/
