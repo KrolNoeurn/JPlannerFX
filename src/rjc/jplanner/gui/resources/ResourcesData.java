@@ -136,32 +136,10 @@ class ResourcesData extends AbstractDataSource
 
       case Resource.SECTION_START:
         EditorDate dateEditor = new EditorDate( columnIndex, row );
-        dateEditor.addEpochdayListener( ( property, oldNumber, newNumber ) ->
-        {
-          // only check start <= end if not already in error state
-          if ( !JPlanner.isError( dateEditor.getControl() ) )
-          {
-            int start = newNumber.intValue();
-            Date end = JPlanner.plan.getResource( row ).getEnd().getDate().plusDays( -1 );
-            if ( start > end.getEpochday() )
-              JPlanner.setError( dateEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
-          }
-        } );
         return dateEditor;
 
       case Resource.SECTION_END:
         dateEditor = new EditorDate( columnIndex, row );
-        dateEditor.addEpochdayListener( ( property, oldNumber, newNumber ) ->
-        {
-          // only check end >= start if not already in error state
-          if ( !JPlanner.isError( dateEditor.getControl() ) )
-          {
-            int end = newNumber.intValue();
-            Date start = JPlanner.plan.getResource( row ).getStart().getDate();
-            if ( end < start.getEpochday() )
-              JPlanner.setError( dateEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
-          }
-        } );
         return dateEditor;
 
       default:
@@ -180,7 +158,35 @@ class ResourcesData extends AbstractDataSource
     if ( JPlanner.equal( newValue, oldValue ) )
       return;
 
-    JPlanner.plan.getUndostack().push( new CommandResourceSetValue( res, columnIndex, newValue, oldValue ) );
+    // create undo-stack command
+    CommandResourceSetValue command = new CommandResourceSetValue( res, columnIndex, newValue, oldValue );
+
+    // ensure task start <= end
+    if ( columnIndex == Resource.SECTION_START && newValue != null )
+    {
+      Date start = (Date) newValue;
+      Date end = res.getEnd().getDate().plusDays( -1 );
+      if ( start.getEpochday() > end.getEpochday() )
+      {
+        JPlanner.plan.getUndostack().push( command,
+            new CommandResourceSetValue( res, Resource.SECTION_END, start, end ) );
+        return;
+      }
+    }
+
+    if ( columnIndex == Resource.SECTION_END && newValue != null )
+    {
+      Date start = res.getStart().getDate();
+      Date end = (Date) newValue;
+      if ( start.getEpochday() > end.getEpochday() )
+      {
+        JPlanner.plan.getUndostack().push( command,
+            new CommandResourceSetValue( res, Resource.SECTION_START, end, start ) );
+        return;
+      }
+    }
+
+    JPlanner.plan.getUndostack().push( command );
   }
 
   /******************************************* setNull *******************************************/

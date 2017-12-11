@@ -18,6 +18,7 @@
 
 package rjc.jplanner.gui.table;
 
+import javafx.scene.input.KeyCode;
 import rjc.jplanner.gui.XTextField;
 
 /*************************************************************************************************/
@@ -33,6 +34,22 @@ public class EditorText extends AbstractCellEditor
     // create text table cell editor
     super( columnIndex, row );
     setControl( new XTextField() );
+
+    // close the editor and move editor focus on table if up or down arrows pressed
+    getControl().setOnKeyPressed( event ->
+    {
+      if ( event.getCode() == KeyCode.UP )
+      {
+        event.consume();
+        move( MoveDirection.UP );
+      }
+
+      if ( event.getCode() == KeyCode.DOWN )
+      {
+        event.consume();
+        move( MoveDirection.DOWN );
+      }
+    } );
   }
 
   /******************************************* getValue ******************************************/

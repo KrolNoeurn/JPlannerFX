@@ -49,6 +49,9 @@ public class CommandTaskIndent implements IUndoCommand
       if ( row < m_min )
         m_min = row;
 
+      if ( row > m_max )
+        m_max = row;
+
       int summaryEnd = JPlanner.plan.getTask( row ).getSummaryEnd();
       if ( summaryEnd > 0 && summaryEnd > m_max )
         m_max = summaryEnd;

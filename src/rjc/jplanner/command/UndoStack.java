@@ -79,6 +79,9 @@ public class UndoStack
     // perform requested gui updates
     if ( JPlanner.gui != null )
     {
+      if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
+        JPlanner.gui.schedule();
+
       if ( ( updates & IUndoCommand.UPDATE_TASKS ) > 0 )
         JPlanner.gui.redrawTaskTables();
       if ( ( updates & IUndoCommand.UPDATE_RESOURCES ) > 0 )
@@ -101,9 +104,6 @@ public class UndoStack
         JPlanner.gui.getPropertiesPane().updateFromPlan();
       if ( ( updates & IUndoCommand.UPDATE_NOTES ) > 0 )
         JPlanner.gui.getNotesPane().updateFromPlan();
-
-      if ( ( updates & IUndoCommand.RESCHEDULE ) > 0 )
-        JPlanner.gui.schedule();
     }
   }
 
@@ -145,6 +145,24 @@ public class UndoStack
       m_parentCommand.merge( command );
       command.redo();
     }
+  }
+
+  /******************************************** push *********************************************/
+  public void push( IUndoCommand... commands )
+  {
+    // remove any commands from stack that haven't been actioned (i.e. above index)
+    while ( m_stack.size() > m_index )
+      m_stack.remove( m_stack.size() - 1 );
+
+    // create merged command
+    MergedCommand command = new MergedCommand( commands );
+
+    // add new command to stack, do it, and increment stack index
+    m_stack.add( command );
+    command.redo();
+    update( command.update() );
+    m_index++;
+    JPlanner.gui.updateUndoRedo();
   }
 
   /******************************************** undo *********************************************/

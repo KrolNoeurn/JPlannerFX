@@ -19,11 +19,11 @@
 package rjc.jplanner.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -175,14 +175,11 @@ public class Tasks extends ArrayList<Task>
   /****************************************** schedule *******************************************/
   public void schedule()
   {
-    // first construct list of tasks in correct order
-    ArrayList<Task> scheduleList = new ArrayList<Task>();
-    forEach( task ->
-    {
+    // first construct set of tasks in correct order
+    TreeSet<Task> scheduleList = new TreeSet<Task>();
+    for ( Task task : this )
       if ( !task.isNull() )
         scheduleList.add( task );
-    } );
-    Collections.sort( scheduleList );
 
     // schedule tasks in this order
     scheduleList.forEach( task -> task.schedule() );
@@ -192,51 +189,55 @@ public class Tasks extends ArrayList<Task>
   public Set<Integer> canIndent( Set<Integer> rows )
   {
     // return the subset of rows that can be indented
-    Set<Integer> temp = new HashSet<Integer>();
-    rows.remove( 0 ); // hidden task 0
-    rows.remove( 1 ); // can't indent task 1
+    Set<Integer> can = new HashSet<Integer>();
     for ( int row : rows )
     {
-      Task task = get( row );
-      if ( task.isNull() ) // exclude null tasks
-      {
-        temp.add( row );
+      // cannot indent hidden task 0 or task 1
+      if ( row <= 1 )
         continue;
-      }
 
+      // cannot indent null tasks
+      Task task = get( row );
+      if ( task.isNull() )
+        continue;
+
+      // cannot indent tasks already indented compared to task above
       int above = row - 1;
       while ( get( above ).isNull() )
         above--;
-      if ( task.getIndent() > get( above ).getIndent() ) // excluded tasks already indented compared with task above
-        temp.add( row );
-    }
-    rows.removeAll( temp );
+      if ( task.getIndent() > get( above ).getIndent() )
+        continue;
 
-    return rows;
+      can.add( row );
+    }
+
+    return can;
   }
 
   /***************************************** canOutdent ******************************************/
   public Set<Integer> canOutdent( Set<Integer> rows )
   {
     // return the subset of rows that can be outdented
-    Set<Integer> temp = new HashSet<Integer>();
-    rows.remove( 0 ); // hidden task 0
-    rows.remove( 1 ); // can't outdent task 1
+    Set<Integer> can = new HashSet<Integer>();
     for ( int row : rows )
     {
-      Task task = get( row );
-      if ( task.isNull() ) // exclude null tasks
-      {
-        temp.add( row );
+      // cannot outdent hidden task 0 or task 1
+      if ( row <= 1 )
         continue;
-      }
 
-      if ( task.getIndent() == 0 ) // excluded tasks with no indent
-        temp.add( row );
+      // cannot outdent null tasks
+      Task task = get( row );
+      if ( task.isNull() )
+        continue;
+
+      // cannot outdent tasks with no indent
+      if ( task.getIndent() == 0 )
+        continue;
+
+      can.add( row );
     }
-    rows.removeAll( temp );
 
-    return rows;
+    return can;
   }
 
   /************************************ updateSummaryMarkers *************************************/
@@ -315,7 +316,7 @@ public class Tasks extends ArrayList<Task>
   {
     // restore cleaned predecessors
     for ( HashMap.Entry<Integer, String> entry : list.entrySet() )
-      get( entry.getKey() ).setValue( Task.SECTION_PRED, entry.getValue() );
+      get( entry.getKey() ).setValue( Task.SECTION_PRED, new Predecessors( entry.getValue() ) );
   }
 
   /************************************** getTaskResources ***************************************/

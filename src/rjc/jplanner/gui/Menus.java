@@ -18,6 +18,8 @@
 
 package rjc.jplanner.gui;
 
+import java.util.Set;
+
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -30,6 +32,7 @@ import javafx.scene.input.KeyCombination.Modifier;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.command.UndoStack;
 import rjc.jplanner.gui.table.AbstractCellEditor;
+import rjc.jplanner.gui.table.Table;
 
 /*************************************************************************************************/
 /****************************** Main JPlanner application menu bar *******************************/
@@ -75,6 +78,19 @@ class Menus extends MenuBar
 
     // ensure plan is up-to-date
     JPlanner.gui.checkPlanUpToDate();
+  }
+
+  /*************************************** onTaskMenuShow ****************************************/
+  private void onTaskMenuShow()
+  {
+    // perform normal onMenuShow functionality
+    onMenuShow();
+
+    // enable or disable tasks indent + outdent menu items
+    Table table = JPlanner.gui.getTabs().get( 0 ).getTasksTab().getTable();
+    Set<Integer> rows = table.getSelected().getRowsWithSelection();
+    tasksIndent.setDisable( JPlanner.plan.tasks.canIndent( rows ).isEmpty() );
+    tasksOutdent.setDisable( JPlanner.plan.tasks.canOutdent( rows ).isEmpty() );
   }
 
   /****************************************** fileMenu *******************************************/
@@ -189,15 +205,27 @@ class Menus extends MenuBar
   {
     // tasks menu (only enabled when Tasks tab selected)
     Menu menu = new Menu( "Tasks" );
-    menu.setOnShowing( event -> onMenuShow() );
+    menu.setOnShowing( event -> onTaskMenuShow() );
 
     tasksIndent = new MenuItem( "Indent" );
-    tasksIndent.setAccelerator( new KeyCodeCombination( KeyCode.LESS, CONTROL ) );
+    tasksIndent.setAccelerator( new KeyCodeCombination( KeyCode.GREATER, CONTROL ) );
     tasksIndent.setDisable( true );
+    tasksIndent.setOnAction( event ->
+    {
+      Table table = JPlanner.gui.getTabs().get( 0 ).getTasksTab().getTable();
+      Set<Integer> rows = table.getSelected().getRowsWithSelection();
+      table.getData().indentRows( rows );
+    } );
 
     tasksOutdent = new MenuItem( "Outdent" );
-    tasksOutdent.setAccelerator( new KeyCodeCombination( KeyCode.GREATER, CONTROL ) );
+    tasksOutdent.setAccelerator( new KeyCodeCombination( KeyCode.LESS, CONTROL ) );
     tasksOutdent.setDisable( true );
+    tasksOutdent.setOnAction( event ->
+    {
+      Table table = JPlanner.gui.getTabs().get( 0 ).getTasksTab().getTable();
+      Set<Integer> rows = table.getSelected().getRowsWithSelection();
+      table.getData().outdentRows( rows );
+    } );
 
     menu.getItems().addAll( tasksIndent, tasksOutdent );
     return menu;

@@ -20,6 +20,8 @@ package rjc.jplanner.gui;
 
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.DateTime;
@@ -62,6 +64,55 @@ public class DateTimeEditor extends XTextField
     // react to milliseconds changes
     m_milliseconds.addListener(
         ( property, oldNumber, newNumber ) -> JPlanner.setNoError( this, "Date-time: " + getDateTime().toFormat() ) );
+
+    // modify date if up or down arrows pressed
+    addEventFilter( KeyEvent.KEY_PRESSED, event ->
+    {
+      if ( event.getCode() == KeyCode.UP )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusDays( 1 ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMonths( 1 ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDateTime( getDateTime().plusYears( 1 ) );
+      }
+
+      if ( event.getCode() == KeyCode.DOWN )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusDays( -1 ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMonths( -1 ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDateTime( getDateTime().plusYears( -1 ) );
+      }
+
+      if ( event.getCode() == KeyCode.PAGE_UP )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( 3600000L ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( 60000L ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( 1000L ) );
+      }
+
+      if ( event.getCode() == KeyCode.PAGE_DOWN )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( -3600000L ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( -60000L ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDateTime( getDateTime().plusMilliseconds( -1000L ) );
+      }
+
+    } );
   }
 
   /***************************************** addListener *****************************************/

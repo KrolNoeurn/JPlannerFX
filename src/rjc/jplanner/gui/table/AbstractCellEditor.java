@@ -68,6 +68,14 @@ abstract public class AbstractCellEditor
       m_cellEditorInProgress.close( !m_cellEditorInProgress.isError() );
   }
 
+  /******************************************** move *********************************************/
+  public void move( MoveDirection direction )
+  {
+    // move editor focus on table
+    endEditing();
+    m_table.getCanvas().moveEdit( direction );
+  }
+
   /***************************************** setControl ******************************************/
   public void setControl( Control control )
   {

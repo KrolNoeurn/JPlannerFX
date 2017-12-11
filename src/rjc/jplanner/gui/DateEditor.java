@@ -20,6 +20,8 @@ package rjc.jplanner.gui;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.ScrollEvent;
 import rjc.jplanner.JPlanner;
 import rjc.jplanner.model.Date;
@@ -62,6 +64,32 @@ public class DateEditor extends XTextField
     // react to epoch-day changes
     m_epochday.addListener(
         ( property, oldNumber, newNumber ) -> JPlanner.setNoError( this, "Date: " + getDate().toFormat() ) );
+
+    // modify date if up or down arrows pressed
+    addEventFilter( KeyEvent.KEY_PRESSED, event ->
+    {
+      if ( event.getCode() == KeyCode.UP )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDate( getDate().plusDays( 1 ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDate( getDate().plusMonths( 1 ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDate( getDate().plusYears( 1 ) );
+      }
+
+      if ( event.getCode() == KeyCode.DOWN )
+      {
+        event.consume();
+        if ( !event.isShiftDown() && !event.isControlDown() )
+          setDate( getDate().plusDays( -1 ) );
+        if ( event.isShiftDown() && !event.isControlDown() )
+          setDate( getDate().plusMonths( -1 ) );
+        if ( !event.isShiftDown() && event.isControlDown() )
+          setDate( getDate().plusYears( -1 ) );
+      }
+    } );
   }
 
   /***************************************** addListener *****************************************/

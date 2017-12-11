@@ -130,32 +130,10 @@ class TasksData extends AbstractDataSource
 
       case Task.SECTION_START:
         EditorDateTime dtEditor = new EditorDateTime( columnIndex, row );
-        dtEditor.addMillisecondsListener( ( property, oldNumber, newNumber ) ->
-        {
-          // if not already in error state, check start <= end 
-          if ( !JPlanner.isError( dtEditor.getControl() ) )
-          {
-            long start = newNumber.longValue();
-            DateTime end = JPlanner.plan.getTask( row ).getEnd();
-            if ( start > end.getMilliseconds() )
-              JPlanner.setError( dtEditor.getControl(), "Start is after end '" + end.toFormat() + "'" );
-          }
-        } );
         return dtEditor;
 
       case Task.SECTION_END:
         dtEditor = new EditorDateTime( columnIndex, row );
-        dtEditor.addMillisecondsListener( ( property, oldNumber, newNumber ) ->
-        {
-          // if not already in error state, check end >= start 
-          if ( !JPlanner.isError( dtEditor.getControl() ) )
-          {
-            long end = newNumber.longValue();
-            DateTime start = JPlanner.plan.getTask( row ).getStart();
-            if ( end < start.getMilliseconds() )
-              JPlanner.setError( dtEditor.getControl(), "End is before start '" + start.toFormat() + "'" );
-          }
-        } );
         return dtEditor;
 
       case Task.SECTION_DEADLINE:
@@ -183,7 +161,33 @@ class TasksData extends AbstractDataSource
     if ( JPlanner.equal( newValue, oldValue ) )
       return;
 
-    JPlanner.plan.getUndostack().push( new CommandTaskSetValue( task, columnIndex, newValue, oldValue ) );
+    // create undo-stack command
+    CommandTaskSetValue command = new CommandTaskSetValue( task, columnIndex, newValue, oldValue );
+
+    // ensure task start <= end
+    if ( columnIndex == Task.SECTION_START && task.isSectionEditable( Task.SECTION_END ) )
+    {
+      DateTime start = (DateTime) newValue;
+      DateTime end = task.getEnd();
+      if ( start.getMilliseconds() > end.getMilliseconds() )
+      {
+        JPlanner.plan.getUndostack().push( command, new CommandTaskSetValue( task, Task.SECTION_END, start, end ) );
+        return;
+      }
+    }
+
+    if ( columnIndex == Task.SECTION_END && task.isSectionEditable( Task.SECTION_START ) )
+    {
+      DateTime start = task.getStart();
+      DateTime end = (DateTime) newValue;
+      if ( start.getMilliseconds() > end.getMilliseconds() )
+      {
+        JPlanner.plan.getUndostack().push( command, new CommandTaskSetValue( task, Task.SECTION_START, end, start ) );
+        return;
+      }
+    }
+
+    JPlanner.plan.getUndostack().push( command );
   }
 
   /******************************************* setNull *******************************************/

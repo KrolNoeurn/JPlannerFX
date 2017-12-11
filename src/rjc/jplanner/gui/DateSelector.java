@@ -21,6 +21,7 @@ package rjc.jplanner.gui;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Year;
+import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Locale;
 
@@ -168,6 +169,11 @@ public class DateSelector extends Pane
       int month = m_month.getMonthNumber();
       int year = m_year.getInteger();
       int day = getLocalDate().getDayOfMonth();
+
+      // ensure day is valid for month-year
+      if ( day > YearMonth.of( year, month ).lengthOfMonth() )
+        day = YearMonth.of( year, month ).lengthOfMonth();
+
       LocalDate ld = LocalDate.of( year, month, day );
       m_epochDay.setInteger( (int) ld.toEpochDay() );
     } );

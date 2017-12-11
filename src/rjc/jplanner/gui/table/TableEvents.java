@@ -650,13 +650,13 @@ public class TableEvents extends TableCanvas
         break;
 
       case PERIOD:
-        // "Ctrl + <" to indent tasks 
+        // "Ctrl + >" to indent tasks 
         if ( control )
           m_table.getData().indentRows( m_selected.getRowsWithSelection() );
         break;
 
       case COMMA:
-        // "Ctrl + >" to outdent tasks
+        // "Ctrl + <" to outdent tasks
         if ( control )
           m_table.getData().outdentRows( m_selected.getRowsWithSelection() );
         break;

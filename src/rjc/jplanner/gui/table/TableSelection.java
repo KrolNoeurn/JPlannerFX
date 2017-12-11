@@ -237,11 +237,17 @@ public class TableSelection
     // return set of row indexes with at least one table cell selected
     Set<Integer> rows = new HashSet<Integer>();
 
-    for ( int hash : m_selectedCells )
-      rows.add( hash % SELECT_HASH );
+    if ( m_selectedColumnsPos.isEmpty() )
+    {
+      for ( int hash : m_selectedCells )
+        rows.add( hash % SELECT_HASH );
 
-    for ( int row : m_selectedRows )
-      rows.add( row );
+      for ( int row : m_selectedRows )
+        rows.add( row );
+    }
+    else
+      for ( int index = 0; index < m_table.getData().getRowCount(); index++ )
+        rows.add( index );
 
     return rows;
   }
