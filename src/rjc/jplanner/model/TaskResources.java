@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import rjc.jplanner.JPlanner;
+import rjc.jplanner.model.Work.DateTimeNumber;
 
 /*************************************************************************************************/
 /************************* Resources assigned to single task within plan *************************/
@@ -247,6 +248,31 @@ public class TaskResources
         JPlanner.plan.work.add( task, resource, num, task.getStart(), task.getEnd() );
       }
     }
+  }
+
+  /************************************* getPotentialWorkDone ************************************/
+  public double getPotentialWorkDone( DateTime start, DateTime end )
+  {
+    // TODO Auto-generated method stub
+    JPlanner.trace( "### getPotentialWorkDone ", start, end );
+
+    // for each assignment to task
+    for ( Assignment assignment : m_assignments )
+    {
+      // for each resource
+      ArrayList<Resource> resourceList = JPlanner.plan.resources.getResourceList( assignment.tag );
+      for ( Resource resource : resourceList )
+      {
+        float num = assignment.max == 0.0f ? Float.MAX_VALUE : assignment.max;
+
+        // DO SOMETHING !!!!
+        JPlanner.trace( resource, num, this );
+        DateTimeNumber usage = JPlanner.plan.work.getResourceUsage( resource, start );
+
+      }
+    }
+
+    return 0.0;
   }
 
 }

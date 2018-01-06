@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -42,7 +42,7 @@ public class JPlanner extends Application
   public static Plan         plan;                                  // globally accessible plan
   public static MainWindow   gui;                                   // globally accessible main-window
 
-  public static final String VERSION      = "";
+  public static final String VERSION      = "v0.0.3-alpha";
 
   public static final String STYLE_ERROR  = "-fx-text-fill: red;";
   public static final String STYLE_NORMAL = "-fx-text-fill: black;";

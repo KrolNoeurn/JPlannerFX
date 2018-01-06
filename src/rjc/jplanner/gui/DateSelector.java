@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -318,6 +318,8 @@ public class DateSelector extends Pane
     if ( row > 0 )
     {
       LocalDate ld = LocalDate.of( m_year.getInteger(), m_month.getMonthNumber(), 1 );
+      if ( ld.getDayOfWeek() == DayOfWeek.MONDAY )
+        ld = ld.minusDays( 7 );
       ld = ld.minusDays( ld.getDayOfWeek().getValue() - 1 );
       ld = ld.plusDays( column + 7 * ( --row ) );
 

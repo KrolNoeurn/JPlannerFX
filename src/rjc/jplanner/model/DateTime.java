@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -452,6 +452,22 @@ public class DateTime implements Comparable<DateTime>
   {
     // return date-time using plan format
     return toString( JPlanner.plan.getDateTimeFormat() );
+  }
+
+  /************************************** endOfDayMidnight ***************************************/
+  public DateTime endOfDayMidnight()
+  {
+    // return new date-time with new time advanced to next midnight
+    long day;
+
+    if ( m_milliseconds < 0 )
+      day = m_milliseconds / MILLISECONDS_IN_DAY;
+    else
+      day = m_milliseconds / MILLISECONDS_IN_DAY + 1;
+
+    JPlanner.trace( ">>>>>>>>>>>>>>>>>>>>> ", m_milliseconds, day );
+
+    return new DateTime( day * MILLISECONDS_IN_DAY );
   }
 
 }

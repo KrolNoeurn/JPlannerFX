@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -143,7 +143,7 @@ public class Work extends ArrayList<Effort>
 
     // loop around each effort record checking for resource and date-time range
     for ( Effort effort : this )
-      if ( effort.resource == resource && effort.startMS <= ms && effort.endMS >= ms )
+      if ( effort.resource == resource && effort.startMS <= ms && effort.endMS > ms )
       {
         use += effort.num;
         if ( effort.endMS < change )

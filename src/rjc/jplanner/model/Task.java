@@ -1,5 +1,5 @@
 /**************************************************************************
- *  Copyright (C) 2017 by Richard Crook                                   *
+ *  Copyright (C) 2018 by Richard Crook                                   *
  *  https://github.com/dazzle50/JPlannerFX                                *
  *                                                                        *
  *  This program is free software: you can redistribute it and/or modify  *
@@ -508,8 +508,66 @@ public class Task implements Comparable<Task>
   /************************************* schedule_ASAP_FWORK *************************************/
   private void schedule_ASAP_FWORK()
   {
-    // TODO Auto-generated method stub
-    JPlanner.trace( "NOT IMPLEMENTED YET !!!" );
+    // depending on predecessors determine task start & end
+    boolean hasToStart = m_predecessors.hasToStart();
+    boolean hasToFinish = m_predecessors.hasToFinish();
+
+    // if this task doesn't have predecessors, does a summary?
+    if ( !hasToStart && !hasToFinish )
+    {
+      Task task = this;
+      for ( int indent = m_indent; indent > 0; indent-- )
+      {
+        task = JPlanner.plan.getTask( task.m_summaryStart );
+
+        hasToStart = task.m_predecessors.hasToStart();
+        if ( hasToStart )
+          break;
+
+        hasToFinish = task.m_predecessors.hasToFinish();
+        if ( hasToFinish )
+          break;
+      }
+    }
+
+    Calendar planCal = JPlanner.plan.getDefaultCalendar();
+
+    if ( m_work.getNumber() == 0.0 )
+    {
+      // milestone
+      if ( hasToStart )
+        m_start = planCal.getWorkDateTimeDown( startDueToPredecessors() );
+      else if ( hasToFinish )
+        m_start = planCal.getWorkDateTimeDown( endDueToPredecessors() );
+      else
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getDefaultStart() );
+
+      m_end = m_start;
+    }
+    else
+    {
+      // not milestone
+      if ( hasToStart )
+      {
+        JPlanner.trace( "HAS TO START - NOT IMPLEMENTED YET !!!" );
+      }
+      else if ( hasToFinish )
+      {
+        JPlanner.trace( "HAS TO FINISH - NOT IMPLEMENTED YET !!!" );
+      }
+      else
+      {
+        JPlanner.trace( "NEITHER - NOT IMPLEMENTED YET !!!" );
+
+        if ( m_work.getUnits() != TimeSpan.UNIT_DAYS )
+          JPlanner.trace( "DON'T KNOW HOW TO HANDLE UNITS !!! " + m_work );
+
+        m_start = planCal.getWorkDateTimeUp( JPlanner.plan.getDefaultStart() );
+        double work = m_resources.getPotentialWorkDone( m_start, m_start.endOfDayMidnight() );
+
+      }
+    }
+
   }
 
   /************************************* schedule_ASAP_FDUR **************************************/
